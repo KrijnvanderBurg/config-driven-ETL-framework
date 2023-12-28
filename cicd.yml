@@ -1,0 +1,16 @@
+resources:
+  repositories:
+  - repository: cicd
+    type: git
+    name: CompliancyCarnivalCacophony/python.wheel.cicd
+    ref: refs/heads/main
+
+trigger:
+  branches:
+    include:
+    - main
+
+extends:
+  template: cicd.yml@cicd
+  parameters:
+    unitTestDirectory: /datastore/
