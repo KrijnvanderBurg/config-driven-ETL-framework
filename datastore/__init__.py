@@ -1,4 +1,8 @@
-"""Module for reading and writing to datastore"""
+"""
+Datastore I/O Module.
+
+Module for reading from and writing to a datastore.
+"""
 
 __author__ = "Krijn van der Burg"
 __copyright__ = "Krijn van der Burg"

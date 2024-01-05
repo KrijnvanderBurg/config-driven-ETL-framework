@@ -1,5 +1,5 @@
 """
-Module for writing to a datastore.
+Module for reading from a datastore.
 
 Copyright (c) Krijn van der Burg.
 

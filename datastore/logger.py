@@ -1,5 +1,7 @@
 """
-Logger implementation.
+Logger Implementation.
+
+This module provides functionality for configuring and obtaining logger instances.
 
 Copyright (c) Krijn van der Burg.
 
@@ -9,11 +11,11 @@ See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
-
 import logging
 from logging.handlers import RotatingFileHandler
 from sys import stdout
 
+# Log format
 FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
 
 
@@ -23,11 +25,11 @@ def set_logger(
     level=logging.INFO,
 ) -> logging.Logger:
     """
-    Set logging configuration.
+    Configure the logging settings.
 
     Args:
         name (str): Logger name.
-        log_filename (str): name of logfile, defaults to ingestion.log (optional).
+        log_filename (str): Name of the log file, defaults to "ingestion.log" (optional).
         level (enum): Logging level (default is INFO).
 
     Returns:
@@ -35,17 +37,17 @@ def set_logger(
     """
     logger = logging.getLogger(name)
 
-    # add rotating log handler
+    # Add rotating log handler
     rotating_handler = RotatingFileHandler(
         filename=log_filename,
         maxBytes=5 * 1024 * 1024,  # 5MB
-        backupCount=10,  # max 10 log files before replacing the oldest
+        backupCount=10,  # Max 10 log files before replacing the oldest
     )
     rotating_handler.setLevel(level)
     rotating_handler.setFormatter(FORMATTER)
     logger.addHandler(rotating_handler)
 
-    # add console stream handler
+    # Add console stream handler
     console_handler = logging.StreamHandler(stream=stdout)
     console_handler.setLevel(level)
     console_handler.setFormatter(FORMATTER)
@@ -54,6 +56,11 @@ def set_logger(
     return logger
 
 
-def get_logger(name):
-    """Get logger instance."""
+def get_logger(name) -> logging.Logger:
+    """
+    Get logger instance by name.
+
+    Returns:
+        logging.Logger: logger instance.
+    """
     return logging.getLogger(name)

@@ -1,5 +1,8 @@
 """
-IO reader interface and factory, reader implementations are in module store.io.reader.
+IO Reader Interface and Factory.
+
+This module provides an abstract factory class `ReaderFactory` for creating instances of data readers.
+Reader implementations are located in the `datastore.readers` module.
 
 Copyright (c) Krijn van der Burg.
 
@@ -11,25 +14,28 @@ or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 
 from abc import ABC
 
-from datastore.reader import Reader, ReaderFormat, ReaderSpec
-from datastore.readers.parquet_reader import ParquetReader
+from datastore.reader import READER_FORMAT_FILES, Reader, ReaderSpec
+from datastore.readers.reader_file import ReaderFile
 
 
 class ReaderFactory(ABC):
-    """Class for reader factory."""
+    """Abstract class representing a factory for creating data readers."""
 
     @classmethod
     def get(cls, spec: ReaderSpec) -> Reader:
         """
-        Get data by reader specification using factory pattern.
+        Get a data reader instance based on the reader specification using the factory pattern.
 
         Args:
-            spec (ReaderSpec): reader specification to read data.
+            spec (ReaderSpec): Reader specification to read data.
 
         Returns:
-            A dataframe containing the data.
-        """
-        if spec.reader_format == ReaderFormat.PARQUET.value:
-            return ParquetReader(spec=spec)
+            Reader: An instance of a data reader.
 
-        raise NotImplementedError(f"The requested reader spec format {spec.reader_format} is not supported.")
+        Raises:
+            NotImplementedError: If the specified reader format is not supported.
+        """
+        if spec.reader_format in READER_FORMAT_FILES:
+            return ReaderFile(spec=spec)
+
+        raise NotImplementedError(f"The requested reader spec format {spec.reader_format.value} is not supported.")

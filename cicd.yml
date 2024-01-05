@@ -3,7 +3,7 @@ resources:
   - repository: cicd
     type: git
     name: CompliancyCarnivalCacophony/python.wheel.cicd
-    ref: refs/heads/feature/add_pylint_configs
+    ref: refs/heads/main
 
 trigger:
   branches:
@@ -12,3 +12,4 @@ trigger:
 
 extends:
   template: cicd.yml@cicd
+  

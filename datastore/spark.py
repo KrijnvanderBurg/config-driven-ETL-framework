@@ -30,6 +30,9 @@ class Spark:
 
         Args:
             session: spark session.
+
+        Returns:
+            SparSession: Spark session.
         """
 
         app_name = "datastore"

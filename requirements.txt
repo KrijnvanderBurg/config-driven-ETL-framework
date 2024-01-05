@@ -1,4 +1,5 @@
 pyspark==3.5.0
+pytest-mock==3.12.0
 
 # required in pyspark.testing for unit tests
 pandas==2.1.4

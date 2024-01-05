@@ -1,5 +1,5 @@
 """
-IO reader interface and factory, reader implementations are in module store.io.reader.
+IO reader interface and factory, reader implementations are in module datastore.writers.
 
 Copyright (c) Krijn van der Burg.
 
@@ -10,10 +10,11 @@ or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
 from abc import ABC, abstractmethod
-from collections.abc import Generator
 from enum import Enum
 
+from datastore.schema import Schema
 from pyspark.sql import DataFrame
+from pyspark.sql.types import StructType
 
 
 class ReaderFormat(Enum):
@@ -23,28 +24,13 @@ class ReaderFormat(Enum):
     JSON = "json"
     CSV = "csv"
 
-    @classmethod
-    def values(cls) -> Generator:
-        """
-        Generate a list of all enum values.
 
-        Return:
-            Generator with all enum values.
-        """
-        return (c.value for c in cls)
-
-    @classmethod
-    def exists(cls, reader_format: str) -> bool:
-        """
-        Checks if the input format exists in the enum values.
-
-        Args:
-            reader_format (ReaderFormat): format to check if exists.
-
-        Return:
-            If the input format exists in enum.
-        """
-        return reader_format in cls.values()
+# Formats of reader that are considered files.
+READER_FORMAT_FILES = [
+    ReaderFormat.PARQUET,
+    ReaderFormat.JSON,
+    ReaderFormat.CSV,
+]
 
 
 class ReaderType(Enum):
@@ -55,29 +41,6 @@ class ReaderType(Enum):
     BATCH = "batch"
     STREAMING = "streaming"
 
-    @classmethod
-    def values(cls) -> Generator:
-        """
-        Generate a list of all enum values.
-
-        Return:
-            Generator with all enum values.
-        """
-        return (c.value for c in cls)
-
-    @classmethod
-    def exists(cls, reader_format: str) -> bool:
-        """
-        Checks if the input format exists in the enum values.
-
-        Args:
-            reader_format (ReaderFormat): format to check if exists.
-
-        Return:
-            If the input format exists in enum.
-        """
-        return reader_format in cls.values()
-
 
 class ReaderSpec:
     """
@@ -87,17 +50,27 @@ class ReaderSpec:
     reader_type (ReaderType): ReadType type of source operation.
     reader_format (ReaderFormat): format of the source input.
     location (str): uri that identifies from where to read data in the specified format.
+    options (dict): Execution options.
+    schema (str): schema to be parsed to StructType.
+    schema_filepath (str): filepath to schema file.
     """
 
-    def __init__(self, spec_id: str, reader_type: str, reader_format: str, location: str):
+    def __init__(
+        self,
+        spec_id: str,
+        reader_type: str,
+        reader_format: str,
+        location: str,
+        options: dict | None = None,
+        schema: str | None = None,
+        schema_filepath: str | None = None,
+    ):
         self.spec_id = spec_id
-
-        if ReaderType.exists(reader_type):
-            self.reader_type = reader_type
-        else:
-            raise ValueError(f"Invalid reader_type value {reader_type}.")
-        self.reader_format = reader_format
+        self.reader_type = ReaderType(reader_type)
+        self.reader_format = ReaderFormat(reader_format)
         self.location = location
+        self.options: dict = options or {}
+        self.schema: StructType | None = Schema.from_spec(schema=schema, schema_filepath=schema_filepath)
 
 
 class Reader(ABC):
@@ -110,7 +83,7 @@ class Reader(ABC):
         Args:
             spec (ReaderSpec): reader specification for reading data.
         """
-        self._spec: ReaderSpec = spec
+        self.spec: ReaderSpec = spec
 
     @abstractmethod
     def read(self) -> DataFrame:
