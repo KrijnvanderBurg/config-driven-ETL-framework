@@ -1,5 +1,5 @@
 """
-This module provides a `WriterFile` class for writing data to File files.
+This module provides a `LoadFile` class for writing data to File files.
 
 Copyright (c) Krijn van der Burg.
 
@@ -9,22 +9,22 @@ See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
-from datastore.writer import Writer, WriterSpec, WriterType
+from datastore.load.base import Load, LoadMethod, LoadSpec
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming.query import StreamingQuery
 
 
-class WriterFile(Writer):
+class LoadFile(Load):
     """
-    `Writer` implementation for File files.
+    `Load` implementation for File files.
     """
 
-    def __init__(self, spec: WriterSpec, dataframe: DataFrame):
+    def __init__(self, spec: LoadSpec, dataframe: DataFrame):
         """
-        Construct WriterFile instance.
+        Construct LoadFile instance.
 
         Args:
-            spec (WriterSpec): Writer specification.
+            spec (LoadSpec): Load specification.
             dataframe (DataFrame): DataFrame to be written.
         """
         super().__init__(spec, dataframe)
@@ -34,24 +34,24 @@ class WriterFile(Writer):
         Write data to File.
 
         Returns:
-        - For streaming mode (WriterType.STREAMING):
+        - For streaming mode (LoadMethod.STREAMING):
             StreamingQuery: Represents the ongoing query.
-        - For batch mode (WriterType.BATCH):
+        - For batch mode (LoadMethod.BATCH):
             None: Indicates successful completion.
 
         Raises:
-            NotImplementedError: If the specified writer format and type combination is not supported.
+            NotImplementedError: If the specified load format and type combination is not supported.
         """
-        if self.spec.writer_type == WriterType.BATCH:
+        if self.spec.method == LoadMethod.BATCH:
             self._write_batch()
             return None
 
-        if self.spec.writer_type == WriterType.STREAMING:
+        if self.spec.method == LoadMethod.STREAMING:
             return self._write_streaming()
 
         raise NotImplementedError(
-            f"The writer format {self.spec.writer_format.value} "
-            f"and type {self.spec.writer_type.value} combination is not supported."
+            f"The load format {self.spec.data_format.value} "
+            f"and type {self.spec.method.value} combination is not supported."
         )
 
     def _write_batch(self) -> None:
@@ -59,7 +59,7 @@ class WriterFile(Writer):
         Write to file in batch mode.
         """
         return self.dataframe.write.save(
-            path=self.spec.location, format=self.spec.writer_format.value, **self.spec.options
+            path=self.spec.location, format=self.spec.data_format.value, **self.spec.options
         )
 
     def _write_streaming(self) -> StreamingQuery:
@@ -72,7 +72,7 @@ class WriterFile(Writer):
 
         return self.dataframe.writeStream.start(
             path=self.spec.location,
-            format=self.spec.writer_format.value,
-            outputMode=self.spec.writer_operation.value,
+            format=self.spec.data_format.value,
+            outputMode=self.spec.operation.value,
             **self.spec.options,
         )

@@ -16,12 +16,12 @@ from pyspark.sql import DataFrame
 pytest_plugins = [
     "tests.file_test",
     "tests.logger_test",
-    "tests.reader_factory_test",
-    "tests.reader_test",
     "tests.schema_test",
     "tests.spark_test",
-    "tests.writer_factory_test",
-    "tests.writer_test",
+    "tests.extract.base_test",
+    "tests.extract.factory_test",
+    "tests.load.base_test",
+    "tests.load.factory_test",
 ]
 
 

@@ -22,13 +22,13 @@ class Schema:
     """
 
     @staticmethod
-    def from_spec(schema: str | None, schema_filepath: str | None) -> StructType | None:
+    def from_spec(schema: str | None, filepath: str | None) -> StructType | None:
         """
         Spark schema from schema json string or else from schema json file.
 
         Args:
             schema (str): json string to parse to StructType.
-            schema_filepath (str): json file to parse to schema.
+            filepath (str): json file to parse to schema.
 
         Returns:
             StructType | None: schema or none.
@@ -36,8 +36,8 @@ class Schema:
         if schema:
             return Schema.from_json(schema=schema)
 
-        if schema_filepath:
-            return Schema.from_file(filepath=schema_filepath)
+        if filepath:
+            return Schema.from_file(filepath=filepath)
 
         return None
 

@@ -14,7 +14,7 @@ from pathlib import Path
 
 
 class File:
-    """A utility class for reading files."""
+    """A utility class for extracting files."""
 
     @staticmethod
     def from_json(filepath: Path, encoding="utf-8") -> str:

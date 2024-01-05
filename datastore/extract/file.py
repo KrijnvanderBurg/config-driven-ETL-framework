@@ -1,5 +1,5 @@
 """
-This module provides a `ReaderFile` class for reading data from File files.
+This module provides a `ExtractFile` class for extracting data from File files.
 
 Copyright (c) Krijn van der Burg.
 
@@ -9,65 +9,65 @@ See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
-from datastore.reader import Reader, ReaderSpec, ReaderType
+from datastore.extract.base import Extract, ExtractMethod, ExtractSpec
 from datastore.spark import Spark
 from pyspark.sql import DataFrame
 
 
-class ReaderFile(Reader):
-    """Reader implementation for File files."""
+class ExtractFile(Extract):
+    """Extract implementation for File files."""
 
-    def __init__(self, spec: ReaderSpec):
+    def __init__(self, spec: ExtractSpec):
         """
-        Construct ReaderFile instance.
+        Construct ExtractFile instance.
 
         Args:
-            spec (ReaderSpec): Input specification.
+            spec (ExtractSpec): Input specification.
         """
         super().__init__(spec)
 
-    def read(self) -> DataFrame:
+    def extract(self) -> DataFrame:
         """
         Read File data.
 
         Returns:
             DataFrame: A dataframe containing the data from the files.
         """
-        if self.spec.reader_type == ReaderType.BATCH:
-            return self._read_batch()
+        if self.spec.method == ExtractMethod.BATCH:
+            return self._extract_batch()
 
-        if self.spec.reader_type == ReaderType.STREAMING:
-            return self._read_streaming()
+        if self.spec.method == ExtractMethod.STREAMING:
+            return self._extract_streaming()
 
         raise NotImplementedError(
-            f"The read format {self.spec.reader_format.value} "
-            f"and type {self.spec.reader_type.value} combination is not supported."
+            f"The extract format {self.spec.data_format.value} "
+            f"and type {self.spec.method.value} combination is not supported."
         )
 
-    def _read_batch(self) -> DataFrame:
+    def _extract_batch(self) -> DataFrame:
         """
         Read from file in batch mode.
 
         Returns:
-            DataFrame: A dataframe containing the data from batch reading files.
+            DataFrame: A dataframe containing the data from batch extracting files.
         """
         return Spark.session.read.load(
             path=self.spec.location,
-            format=self.spec.reader_format.value,
+            format=self.spec.data_format.value,
             schema=self.spec.schema,
             **self.spec.options,
         )
 
-    def _read_streaming(self) -> DataFrame:
+    def _extract_streaming(self) -> DataFrame:
         """
         Read from file in streaming mode.
 
         Returns:
-            DataFrame: A dataframe containing the data from streaming reading files.
+            DataFrame: A dataframe containing the data from streaming extracting files.
         """
         return Spark.session.readStream.load(
             path=self.spec.location,
-            format=self.spec.reader_format.value,
+            format=self.spec.data_format.value,
             schema=self.spec.schema,
             **self.spec.options,
         )

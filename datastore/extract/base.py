@@ -1,5 +1,5 @@
 """
-IO reader interface and factory, reader implementations are in module datastore.writers.
+IO extract interface and factory, extract implementations are in module datastore.loads.
 
 Copyright (c) Krijn van der Burg.
 
@@ -17,39 +17,39 @@ from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 
 
-class ReaderFormat(Enum):
-    """Types of input and structures for reader."""
+class ExtractFormat(Enum):
+    """Types of input and structures for extract."""
 
     PARQUET = "parquet"
     JSON = "json"
     CSV = "csv"
 
 
-# Formats of reader that are considered files.
+# Formats of extract that are considered files.
 READER_FORMAT_FILES = [
-    ReaderFormat.PARQUET,
-    ReaderFormat.JSON,
-    ReaderFormat.CSV,
+    ExtractFormat.PARQUET,
+    ExtractFormat.JSON,
+    ExtractFormat.CSV,
 ]
 
 
-class ReaderType(Enum):
+class ExtractMethod(Enum):
     """
-    Types of read operations.
+    Types of extract operations.
     """
 
     BATCH = "batch"
     STREAMING = "streaming"
 
 
-class ReaderSpec:
+class ExtractSpec:
     """
     Specification of source input.
 
     spec_id (str): ID of the source specification.
-    reader_type (ReaderType): ReadType type of source operation.
-    reader_format (ReaderFormat): format of the source input.
-    location (str): uri that identifies from where to read data in the specified format.
+    method (ExtractMethod): ReadType method of source operation.
+    data_format (ExtractFormat): format of the source input.
+    location (str): uri that identifies from where to extract data in the specified format.
     options (dict): Execution options.
     schema (str): schema to be parsed to StructType.
     schema_filepath (str): filepath to schema file.
@@ -58,39 +58,39 @@ class ReaderSpec:
     def __init__(
         self,
         spec_id: str,
-        reader_type: str,
-        reader_format: str,
+        method: str,
+        data_format: str,
         location: str,
         options: dict | None = None,
         schema: str | None = None,
         schema_filepath: str | None = None,
     ):
         self.spec_id = spec_id
-        self.reader_type = ReaderType(reader_type)
-        self.reader_format = ReaderFormat(reader_format)
+        self.method = ExtractMethod(method)
+        self.data_format = ExtractFormat(data_format)
         self.location = location
         self.options: dict = options or {}
-        self.schema: StructType | None = Schema.from_spec(schema=schema, schema_filepath=schema_filepath)
+        self.schema: StructType | None = Schema.from_spec(schema=schema, filepath=schema_filepath)
 
 
-class Reader(ABC):
-    """Reader abstract class."""
+class Extract(ABC):
+    """Extract abstract class."""
 
-    def __init__(self, spec: ReaderSpec):
+    def __init__(self, spec: ExtractSpec):
         """
-        Construct reader instance.
+        Construct extract instance.
 
         Args:
-            spec (ReaderSpec): reader specification for reading data.
+            spec (ExtractSpec): extract specification for extracting data.
         """
-        self.spec: ReaderSpec = spec
+        self.spec: ExtractSpec = spec
 
     @abstractmethod
-    def read(self) -> DataFrame:
+    def extract(self) -> DataFrame:
         """
-        Abstract read method.
+        Abstract extract method.
 
         Returns:
-            A dataframe read according to the input specification.
+            A dataframe extract according to the input specification.
         """
         raise NotImplementedError

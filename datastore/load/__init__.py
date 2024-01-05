@@ -1,5 +1,5 @@
 """
-Module for reading from a datastore.
+Module for extracting from a datastore.
 
 Copyright (c) Krijn van der Burg.
 

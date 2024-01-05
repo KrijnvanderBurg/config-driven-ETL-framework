@@ -89,7 +89,7 @@ def test_schema_from_spec_return_type(schema: StructType, schema_file: str) -> N
         schema_file (str): Filepath to schema file fixture.
     """
     # Act
-    test_schema = Schema.from_spec(schema=schema.json(), schema_filepath=schema_file)
+    test_schema = Schema.from_spec(schema=schema.json(), filepath=schema_file)
 
     # Assert
     if schema:
@@ -115,7 +115,7 @@ def test_schema_from_spec_called(schema: StructType, schema_file: str) -> None:
         Schema, "from_file"
     ) as from_file_mock:
         # Act
-        Schema.from_spec(schema=schema.json(), schema_filepath=schema_file)
+        Schema.from_spec(schema=schema.json(), filepath=schema_file)
 
     # Assert
     if schema:
@@ -130,7 +130,7 @@ def test_schema_from_spec_called(schema: StructType, schema_file: str) -> None:
 
 def test_schema_from_file_json(schema: StructType, schema_file: str) -> None:
     """
-    Assert that schema fixture equals schema read from file.
+    Assert that schema fixture equals schema extract from file.
 
     Args:
         schema (StructType): Schema fixture.

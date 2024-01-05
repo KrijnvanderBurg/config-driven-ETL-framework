@@ -21,7 +21,7 @@ FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(
 
 def set_logger(
     name: str,
-    log_filename: str = "ingestion.log",
+    filename: str = "ingestion.log",
     level=logging.INFO,
 ) -> logging.Logger:
     """
@@ -29,7 +29,7 @@ def set_logger(
 
     Args:
         name (str): Logger name.
-        log_filename (str): Name of the log file, defaults to "ingestion.log" (optional).
+        filename (str): Name of the log file, defaults to "ingestion.log" (optional).
         level (enum): Logging level (default is INFO).
 
     Returns:
@@ -39,7 +39,7 @@ def set_logger(
 
     # Add rotating log handler
     rotating_handler = RotatingFileHandler(
-        filename=log_filename,
+        filename=filename,
         maxBytes=5 * 1024 * 1024,  # 5MB
         backupCount=10,  # Max 10 log files before replacing the oldest
     )

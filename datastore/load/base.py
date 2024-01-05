@@ -1,8 +1,8 @@
 """
-Data Writer Module.
+Data Load Module.
 
-This module defines an abstract class `Writer` along with supporting enumerations for configuring data write operations.
-It provides data writing, allowing customization through implementing `Writer` abstract methods.
+This module defines an abstract class `Load` along with supporting enumerations for configuring data write operations.
+It provides data writing, allowing customization through implementing `Load` abstract methods.
 
 Copyright (c) Krijn van der Burg.
 
@@ -19,46 +19,46 @@ from pyspark.sql import DataFrame
 from pyspark.sql.streaming import StreamingQuery
 
 
-class WriterFormat(Enum):
-    """Enumeration for types of input and structures for the writer."""
+class LoadFormat(Enum):
+    """Enumeration for methods of input and structures for the load."""
 
     PARQUET = "parquet"
     JSON = "json"
     CSV = "csv"
 
 
-# Formats of writer that are considered files.
+# Formats of load that are considered files.
 WRITER_FORMAT_FILES = [
-    WriterFormat.PARQUET,
-    WriterFormat.JSON,
-    WriterFormat.CSV,
+    LoadFormat.PARQUET,
+    LoadFormat.JSON,
+    LoadFormat.CSV,
 ]
 
 
-class WriterType(Enum):
-    """Enumeration for types of write modes."""
+class LoadMethod(Enum):
+    """Enumeration for methods of write modes."""
 
     BATCH = "batch"
     STREAMING = "streaming"
 
 
-class WriterOperation(Enum):
-    """Enumeration for types of write operations."""
+class LoadOperation(Enum):
+    """Enumeration for methods of write operations."""
 
-    COMPELTE = "complete"
+    COMPLETE = "complete"
     APPEND = "append"
     UPDATE = "update"
 
 
-class WriterSpec:
+class LoadSpec:
     """
     Specification of the sink input.
 
     Args:
         spec_id (str): ID of the sink specification.
-        writer_type (str): Type of sink write mode.
-        writer_operation (str): Type of sink operation.
-        writer_format (str): Format of the sink input.
+        method (str): Type of sink write mode.
+        operation (str): Type of sink operation.
+        data_format (str): Format of the sink input.
         location (str): URI that identifies where to write data in the specified format.
         options (dict): Execution options.
     """
@@ -66,30 +66,30 @@ class WriterSpec:
     def __init__(
         self,
         spec_id: str,
-        writer_type: str,
-        writer_operation: str,
-        writer_format: str,
+        method: str,
+        operation: str,
+        data_format: str,
         location: str,
         options: dict | None = None,
     ):
         self.spec_id = spec_id
-        self.writer_type = WriterType(writer_type)
-        self.writer_operation = WriterOperation(writer_operation)
-        self.writer_format = WriterFormat(writer_format)
+        self.method = LoadMethod(method)
+        self.operation = LoadOperation(operation)
+        self.data_format = LoadFormat(data_format)
         self.location = location
         self.options: dict = options or {}
 
 
-class Writer(ABC):
-    """Abstract Writer class."""
+class Load(ABC):
+    """Abstract Load class."""
 
-    def __init__(self, spec: WriterSpec, dataframe: DataFrame):
+    def __init__(self, spec: LoadSpec, dataframe: DataFrame):
         """
-        Construct Writer instance.
+        Construct Load instance.
 
         Args:
-            spec (WriterSpec): Writer specification for writing data.
-            df (DataFrame): DataFrame to write.
+            spec (LoadSpec): Load specification for writing data.
+            dataframe (DataFrame): DataFrame to write.
         """
         self.spec = spec
         self.dataframe = dataframe

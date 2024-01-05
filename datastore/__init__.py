@@ -1,7 +1,7 @@
 """
 Datastore I/O Module.
 
-Module for reading from and writing to a datastore.
+Module for extracting from and writing to a datastore.
 """
 
 __author__ = "Krijn van der Burg"
