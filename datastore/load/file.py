@@ -16,7 +16,7 @@ from pyspark.sql.streaming.query import StreamingQuery
 
 class LoadFile(Load):
     """
-    `Load` implementation for File files.
+    `Load` implementation for files.
     """
 
     def __init__(self, spec: LoadSpec, dataframe: DataFrame):
@@ -29,7 +29,7 @@ class LoadFile(Load):
         """
         super().__init__(spec, dataframe)
 
-    def write(self) -> StreamingQuery | None:
+    def load(self) -> StreamingQuery | None:
         """
         Write data to File.
 
@@ -43,18 +43,18 @@ class LoadFile(Load):
             NotImplementedError: If the specified load format and type combination is not supported.
         """
         if self.spec.method == LoadMethod.BATCH:
-            self._write_batch()
+            self._load_batch()
             return None
 
         if self.spec.method == LoadMethod.STREAMING:
-            return self._write_streaming()
+            return self._load_streaming()
 
         raise NotImplementedError(
             f"The load format {self.spec.data_format.value} "
             f"and type {self.spec.method.value} combination is not supported."
         )
 
-    def _write_batch(self) -> None:
+    def _load_batch(self) -> None:
         """
         Write to file in batch mode.
         """
@@ -62,7 +62,7 @@ class LoadFile(Load):
             path=self.spec.location, format=self.spec.data_format.value, **self.spec.options
         )
 
-    def _write_streaming(self) -> StreamingQuery:
+    def _load_streaming(self) -> StreamingQuery:
         """
         Write to file in streaming mode.
 

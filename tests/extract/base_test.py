@@ -149,6 +149,26 @@ def fixture_extract_options(request) -> Generator[dict, None, None]:
     yield request.param
 
 
+@pytest.fixture(name="extract_spec_confeti")
+def fixture_extract_spec_confeti() -> dict:
+    """
+    Fixture for extract spec confeti file.
+
+    Returns:
+        (dict): a valid confeti dictionary of extract spec.
+    """
+    # Arrange
+    return {
+        "spec_id": "extract_spec_id",
+        "method": "batch",
+        "data_format": "parquet",
+        "location": "/test.parquet",
+        "options": {},
+        "schema": "",
+        "schema_filepath": "",
+    }
+
+
 @pytest.fixture(name="extract_spec")
 def fixture_extract_spec(
     tmpdir,
@@ -170,10 +190,10 @@ def fixture_extract_spec(
         schema_file (str): Filepath to schema file fixture.
 
     Yields:
-        (ExtractSpec): An instance of LoadSpec for testing.
+        (ExtractSpec): An instance of ExtractSpec for testing.
     """
     yield ExtractSpec(
-        spec_id="test_spec_id",
+        spec_id="extract_spec_id",
         method=extract_method.value,
         data_format=extract_data_format.value,
         location=f"{tmpdir}/test.{extract_data_format.value}",
@@ -200,6 +220,22 @@ def test_extract_spec(extract_spec) -> None:
     assert isinstance(extract_spec.location, str)
     assert isinstance(extract_spec.options, dict)
     assert isinstance(extract_spec.schema, StructType)
+
+
+def test_extract_spec_from_confeti(extract_spec_confeti) -> None:
+    """
+    Assert that confeti configuration file instantiates extract spec object.
+    """
+    # Act
+    extract_spec = ExtractSpec.from_confeti(confeti=extract_spec_confeti)
+
+    # Assert
+    assert extract_spec.spec_id == "extract_spec_id"
+    assert extract_spec.method == ExtractMethod.BATCH
+    assert extract_spec.data_format == ExtractFormat.PARQUET
+    assert extract_spec.location == "/test.parquet"
+    assert extract_spec.options == {}
+    assert extract_spec.schema is None
 
 
 # ==================================

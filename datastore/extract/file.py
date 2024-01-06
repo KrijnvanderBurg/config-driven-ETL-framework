@@ -15,7 +15,7 @@ from pyspark.sql import DataFrame
 
 
 class ExtractFile(Extract):
-    """Extract implementation for File files."""
+    """Extract implementation for files."""
 
     def __init__(self, spec: ExtractSpec):
         """

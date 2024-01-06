@@ -72,6 +72,15 @@ class ExtractSpec:
         self.options: dict = options or {}
         self.schema: StructType | None = Schema.from_spec(schema=schema, filepath=schema_filepath)
 
+    @classmethod
+    def from_confeti(cls, confeti: dict):
+        """Get the extract specifications from confeti.
+
+        Returns:
+            List of extract specifications.
+        """
+        return cls(**confeti)
+
 
 class Extract(ABC):
     """Extract abstract class."""

@@ -1,7 +1,7 @@
 """
 Data Load Module.
 
-This module defines an abstract class `Load` along with supporting enumerations for configuring data write operations.
+This module defines an abstract class `Load` along with supporting enumerations for configuring data load operations.
 It provides data writing, allowing customization through implementing `Load` abstract methods.
 
 Copyright (c) Krijn van der Burg.
@@ -36,14 +36,14 @@ WRITER_FORMAT_FILES = [
 
 
 class LoadMethod(Enum):
-    """Enumeration for methods of write modes."""
+    """Enumeration for methods of load modes."""
 
     BATCH = "batch"
     STREAMING = "streaming"
 
 
 class LoadOperation(Enum):
-    """Enumeration for methods of write operations."""
+    """Enumeration for methods of load operations."""
 
     COMPLETE = "complete"
     APPEND = "append"
@@ -56,10 +56,10 @@ class LoadSpec:
 
     Args:
         spec_id (str): ID of the sink specification.
-        method (str): Type of sink write mode.
+        method (str): Type of sink load mode.
         operation (str): Type of sink operation.
         data_format (str): Format of the sink input.
-        location (str): URI that identifies where to write data in the specified format.
+        location (str): URI that identifies where to load data in the specified format.
         options (dict): Execution options.
     """
 
@@ -79,6 +79,15 @@ class LoadSpec:
         self.location = location
         self.options: dict = options or {}
 
+    @classmethod
+    def from_confeti(cls, confeti: dict):
+        """Get the load specifications from confeti.
+
+        Returns:
+            List of load specifications.
+        """
+        return cls(**confeti)
+
 
 class Load(ABC):
     """Abstract Load class."""
@@ -89,15 +98,15 @@ class Load(ABC):
 
         Args:
             spec (LoadSpec): Load specification for writing data.
-            dataframe (DataFrame): DataFrame to write.
+            dataframe (DataFrame): DataFrame to load.
         """
         self.spec = spec
         self.dataframe = dataframe
 
     @abstractmethod
-    def write(self) -> StreamingQuery | None:
+    def load(self) -> StreamingQuery | None:
         """
-        Abstract write method.
+        Abstract load method.
 
         Raises:
             NotImplementedError: This method must be implemented by the subclass.

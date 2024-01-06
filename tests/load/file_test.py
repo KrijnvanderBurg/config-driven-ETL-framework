@@ -28,7 +28,7 @@ from pyspark.sql.streaming import StreamingQuery
 from pyspark.sql.types import StructType
 
 # ==================================
-# ======= LoadFile class =========
+# ======== LoadFile class ==========
 # ==================================
 
 # ============ Fixtures ============
@@ -70,21 +70,21 @@ def fixture_load_file(
 # ============== Tests =================
 
 
-def test_load_file_write_called(load_file: LoadFile):
+def test_load_file_load_called(load_file: LoadFile):
     """
-    Assert that _write_batch() and _write_streaming() functions are called inside .write() method
+    Assert that _load_batch() and _load_streaming() functions are called inside .write() method
     for batch and streaming respectively.
 
     Args:
         load_file (LoadFile): LoadFile fixture.
     """
     # Arrange
-    with mock.patch.object(load_file, "_write_batch") as write_batch_mock, mock.patch.object(
-        load_file, "_write_streaming"
+    with mock.patch.object(load_file, "_load_batch") as write_batch_mock, mock.patch.object(
+        load_file, "_load_streaming"
     ) as write_streaming_mock:
         # Act
         try:
-            load_file.write()
+            load_file.load()
         except AnalysisException:
             pytest.skip("Streaming witer format and type combination is unsupported.")
 
@@ -97,7 +97,7 @@ def test_load_file_write_called(load_file: LoadFile):
         write_streaming_mock.assert_called_once()
 
 
-def test_load_file_write(spark: SparkSession, df: DataFrame, schema: StructType, load_file: LoadFile) -> None:
+def test_load_file_load(spark: SparkSession, df: DataFrame, schema: StructType, load_file: LoadFile) -> None:
     """
     Assert that the write method of LoadFile writes the input DataFrame without any modifications.
 
@@ -109,7 +109,7 @@ def test_load_file_write(spark: SparkSession, df: DataFrame, schema: StructType,
     """
     # Act
     try:
-        load = load_file.write()
+        load = load_file.load()
     except AnalysisException:
         pytest.skip("Streaming witer format and type combination is unsupported.")
 
@@ -133,7 +133,7 @@ def test_load_file_write(spark: SparkSession, df: DataFrame, schema: StructType,
             testing.assertDataFrameEqual(actual=extract_df, expected=df, checkRowOrder=False)
 
 
-def test_load_file_write_return_type(load_file: LoadFile) -> None:
+def test_load_file_load_return_type(load_file: LoadFile) -> None:
     """
     Assert that the return type of the write method in LoadFile.
 
@@ -142,7 +142,7 @@ def test_load_file_write_return_type(load_file: LoadFile) -> None:
     """
     # Act
     try:
-        return_type = load_file.write()
+        return_type = load_file.load()
     except AnalysisException:
         pytest.skip("Streaming witer format and type combination is unsupported.")
 

@@ -197,6 +197,25 @@ def fixture_load_options(request) -> Generator[dict, None, None]:
     yield request.param
 
 
+@pytest.fixture(name="load_spec_confeti")
+def fixture_load_spec_confeti() -> dict:
+    """
+    Fixture for load spec confeti file.
+
+    Returns:
+        (dict): a valid confeti dictionary of load spec.
+    """
+    # Arrange
+    return {
+        "spec_id": "load_spec_id",
+        "method": "batch",
+        "data_format": "parquet",
+        "operation": "complete",
+        "location": "/test.parquet",
+        "options": {},
+    }
+
+
 @pytest.fixture(name="load_spec")
 def fixture_load_spec(
     tmpdir,
@@ -224,7 +243,7 @@ def fixture_load_spec(
         load_options["checkpointLocation"] = f"{tmpdir}/test/checkpoint"
 
     yield LoadSpec(
-        spec_id="test_spec_id",
+        spec_id="load_spec_id",
         method=load_method.value,
         operation=load_operation.value,
         data_format=load_data_format.value,
@@ -252,6 +271,21 @@ def test_load_spec(load_spec) -> None:
     assert isinstance(load_spec.options, dict)
 
 
+def test_load_spec_from_confeti(load_spec_confeti: dict) -> None:
+    """
+    Assert that confeti configuration file instantiates load spec object.
+    """
+    # Act
+    load_spec = LoadSpec.from_confeti(confeti=load_spec_confeti)
+
+    # Assert
+    assert load_spec.spec_id == "load_spec_id"
+    assert load_spec.method == LoadMethod.BATCH
+    assert load_spec.data_format == LoadFormat.PARQUET
+    assert load_spec.location == "/test.parquet"
+    assert load_spec.options == {}
+
+
 # ==================================
 # ========= Load class ===========
 # ==================================
@@ -274,7 +308,7 @@ def test_load_abc_implementation(load_spec, df_empty) -> None:
     class MockLoad(Load):
         """Mock implementation of Load class for testing purposes."""
 
-        def write(self):
+        def load(self):
             """Mock implementation of Load class for testing purposes."""
 
     # Assert

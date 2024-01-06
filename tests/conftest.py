@@ -9,6 +9,8 @@ See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
+from collections.abc import Generator
+
 import pytest
 from datastore.schema import Schema
 from pyspark.sql import DataFrame
@@ -60,3 +62,22 @@ def fixture_test_dataframe_empty(spark, schema: Schema) -> DataFrame:
         DataFrame: Empty test DataFrame.
     """
     return spark.createDataFrame(data=[], schema=schema)
+
+
+@pytest.fixture(name="confeti")
+def fixture_confeti(extract_spec_confeti: dict, load_spec_confeti: dict) -> Generator[dict, None, None]:
+    """
+    Fixture for valid confeti file.
+
+    Args:
+        extract_spec_confeti (dict): ExtractSpec confeti fixture.
+        load_spec_confeti (dict): LoadSpec confeti fixture.
+
+    Yields:
+        (dict): valid confeti.
+    """
+    confeti = {}
+    confeti["extract"] = extract_spec_confeti
+    confeti["load"] = load_spec_confeti
+
+    yield confeti
