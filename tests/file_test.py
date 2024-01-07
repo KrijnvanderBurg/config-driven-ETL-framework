@@ -1,11 +1,11 @@
 """
 Test file handler static class.
 
-# | ✓ | Tests
-# |---|-----------------------------------------------
-# | ✓ | Test creating a File instance from JSON content.
-# | ✓ | Test raising FileNotFoundError for a nonexistent file.
-# | ✓ | Test raising JSONDecodeError for an invalid JSON file.
+| ✓ | Tests
+|---|-----------------------------------------------
+| ✓ | Test creating a File instance from JSON content.
+| ✓ | Test raising FileNotFoundError for a nonexistent file.
+| ✓ | Test raising JSONDecodeError for an invalid JSON file.
 
 Copyright (c) Krijn van der Burg.
 

@@ -1,11 +1,11 @@
 """
 File extract class tests.
 
-# | ✓ | Tests
-# |---|----------------------------------------------------------------
-# | ✓ | Correct functions are called in .extract() for batch and streaming.
-# | ✓ | Writing to and extracting from file results in equal dataframe.
-# | ✓ | Read returns the correct object instance.
+| ✓ | Tests
+|---|----------------------------------------------------------------
+| ✓ | Correct functions are called in .extract() for batch and streaming.
+| ✓ | Writing to and extracting from file results in equal dataframe.
+| ✓ | Read returns the correct object instance.
 
 Copyright (c) Krijn van der Burg.
 
@@ -25,7 +25,7 @@ from pyspark import testing
 from pyspark.sql import DataFrame, SparkSession
 
 # ==================================
-# ======== ExtractFile class ========
+# ======= ExtractFile class ========
 # ==================================
 
 # ============ Fixtures ============

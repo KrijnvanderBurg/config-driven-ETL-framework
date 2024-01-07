@@ -1,12 +1,12 @@
 """
 Test schema handler class.
 
-# | ✓ | Tests
-# |---|----------------------------------------------------------------
-# | ✓ | Create schema from a JSON file.
-# | ✓ | Create schema from a JSON string.
-# | ✓ | Raise JSONDecodeError when creating a schema from invalid JSON.
-# | ✓ | Raise TypeError when creating a schema from an invalid type.
+| ✓ | Tests
+|---|----------------------------------------------------------------
+| ✓ | Create schema from a JSON file.
+| ✓ | Create schema from a JSON string.
+| ✓ | Raise JSONDecodeError when creating a schema from invalid JSON.
+| ✓ | Raise TypeError when creating a schema from an invalid type.
 
 Copyright (c) Krijn van der Burg.
 

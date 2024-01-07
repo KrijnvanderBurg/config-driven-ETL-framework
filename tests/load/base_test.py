@@ -2,52 +2,52 @@
 Load classes tests.
 
 
-# ==================================
-# ======= LoadFormat class =======
-# ==================================
+==================================
+======== LoadFormat class ========
+==================================
 
-# | ✓ | Tests
-# |---|---------------------------------------------
-# | ✓ | Enum creation in Fixture from valid strings.
-# | ✓ | Raise ValueError for invalid enum creation.
-
-
-# ==================================
-# ======= LoadMethod class =========
-# ==================================
-
-# | ✓ | Tests
-# |---|---------------------------------------------
-# | ✓ | Enum creation in Fixture from valid strings.
-# | ✓ | Raise ValueError for invalid enum creation.
+| ✓ | Tests
+|---|---------------------------------------------
+| ✓ | Enum creation in Fixture from valid strings.
+| ✓ | Raise ValueError for invalid enum creation.
 
 
-# ==================================
-# ===== LoadOperation class ======
-# ==================================
+==================================
+======= LoadMethod class =========
+==================================
 
-# | ✓ | Tests
-# |---|---------------------------------------------
-# | ✓ | Enum creation in Fixture from valid strings.
-# | ✓ | Raise ValueError for invalid enum creation.
-
-
-# ==================================
-# ======= LoadSpec class =========
-# ==================================
-
-# | ✓ | Tests
-# |---|-----------------------------------------
-# | ✓ | Test all attributes are of correct type.
+| ✓ | Tests
+|---|---------------------------------------------
+| ✓ | Enum creation in Fixture from valid strings.
+| ✓ | Raise ValueError for invalid enum creation.
 
 
-# ==================================
-# ========= Load class ===========
-# ==================================
+==================================
+====== LoadOperation class =======
+==================================
 
-# | ✓ | Tests
-# |---|-----------------------------------
-# | ✓ | Implement load ABC in new class.
+| ✓ | Tests
+|---|---------------------------------------------
+| ✓ | Enum creation in Fixture from valid strings.
+| ✓ | Raise ValueError for invalid enum creation.
+
+
+==================================
+======== LoadSpec class ==========
+==================================
+
+| ✓ | Tests
+|---|-----------------------------------------
+| ✓ | Test all attributes are of correct type.
+
+
+==================================
+========== Load class ============
+==================================
+
+| ✓ | Tests
+|---|-----------------------------------
+| ✓ | Implement load ABC in new class.
 
 
 Copyright (c) Krijn van der Burg.
@@ -198,15 +198,15 @@ def fixture_load_options(request) -> Generator[dict, None, None]:
 
 
 @pytest.fixture(name="load_spec_confeti")
-def fixture_load_spec_confeti() -> dict:
+def fixture_load_spec_confeti() -> Generator[dict, None, None]:
     """
     Fixture for load spec confeti file.
 
-    Returns:
+    Yields:
         (dict): a valid confeti dictionary of load spec.
     """
     # Arrange
-    return {
+    yield {
         "spec_id": "load_spec_id",
         "method": "batch",
         "data_format": "parquet",

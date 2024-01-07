@@ -1,10 +1,10 @@
 """
 ExtractFactory class tests.
 
-# | ✓ | Tests
-# |---|-----------------------------------------------------------
-# | ✓ | Create Extract class from Factory by spec format.
-# | ✓ | Raise NotImplementedError in Factory if spec combination is not implemented.
+| ✓ | Tests
+|---|-----------------------------------------------------------
+| ✓ | Create Extract class from Factory by spec format.
+| ✓ | Raise NotImplementedError in Factory if spec combination is not implemented.
 
 Copyright (c) Krijn van der Burg.
 

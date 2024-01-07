@@ -1,11 +1,11 @@
 """
 File load class tests.
 
-# | ✓ | Tests
-# |---|----------------------------------------------------------------
-# | ✓ | Correct functions are called in .write() for batch and streaming.
-# | ✓ | Writing to and extracting from file results in equal dataframe.
-# | ✓ | Write returns the correct object instance.
+| ✓ | Tests
+|---|----------------------------------------------------------------
+| ✓ | Correct functions are called in .write() for batch and streaming.
+| ✓ | Writing to and extracting from file results in equal dataframe.
+| ✓ | Write returns the correct object instance.
 
 Copyright (c) Krijn van der Burg.
 

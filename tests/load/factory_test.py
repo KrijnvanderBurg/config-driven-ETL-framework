@@ -1,10 +1,10 @@
 """
 LoadFactory class tests.
 
-# | ✓ | Tests
-# |---|-----------------------------------------------------------
-# | ✓ | Create Load class from Factory by spec format.
-# | ✓ | Raise NotImplementedError in Factory if spec combination is not implemented.
+| ✓ | Tests
+|---|-----------------------------------------------------------
+| ✓ | Create Load class from Factory by spec format.
+| ✓ | Raise NotImplementedError in Factory if spec combination is not implemented.
 
 Copyright (c) Krijn van der Burg.
 

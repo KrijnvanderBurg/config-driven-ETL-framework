@@ -2,42 +2,42 @@
 Extract classes tests.
 
 
-# ==================================
-# ======= ExtractFormat class =======
-# ==================================
+==================================
+====== ExtractFormat class =======
+==================================
 
-# | ✓ | Tests
-# |---|---------------------------------------------
-# | ✓ | Enum creation in Fixture from valid strings.
-# | ✓ | Raise ValueError for invalid enum creation.
-
-
-# ==================================
-# ======= ExtractMethod class =========
-# ==================================
-
-# | ✓ | Tests
-# |---|---------------------------------------------
-# | ✓ | Enum creation in Fixture from valid strings.
-# | ✓ | Raise ValueError for invalid enum creation.
+| ✓ | Tests
+|---|---------------------------------------------
+| ✓ | Enum creation in Fixture from valid strings.
+| ✓ | Raise ValueError for invalid enum creation.
 
 
-# ==================================
-# ======= ExtractSpec class =========
-# ==================================
+==================================
+===== ExtractMethod class ========
+==================================
 
-# | ✓ | Tests
-# |---|-----------------------------------------
-# | ✓ | Test all attributes are of correct type.
+| ✓ | Tests
+|---|---------------------------------------------
+| ✓ | Enum creation in Fixture from valid strings.
+| ✓ | Raise ValueError for invalid enum creation.
 
 
-# ==================================
-# ========= Extract class ===========
-# ==================================
+==================================
+======= ExtractSpec class ========
+==================================
 
-# | ✓ | Tests
-# |---|-----------------------------------
-# | ✓ | Implement extract ABC in new class.
+| ✓ | Tests
+|---|-----------------------------------------
+| ✓ | Test all attributes are of correct type.
+
+
+==================================
+========= Extract class ==========
+==================================
+
+| ✓ | Tests
+|---|-----------------------------------
+| ✓ | Implement extract ABC in new class.
 
 
 Copyright (c) Krijn van der Burg.

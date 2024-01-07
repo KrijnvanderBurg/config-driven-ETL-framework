@@ -64,6 +64,25 @@ def fixture_test_dataframe_empty(spark, schema: Schema) -> DataFrame:
     return spark.createDataFrame(data=[], schema=schema)
 
 
+@pytest.fixture(name="confeti_return")
+def fixture_confeti_return(extract_spec_confeti: dict, load_spec_confeti: dict) -> dict:
+    """
+    Fixture for valid confeti file.
+
+    Args:
+        extract_spec_confeti (dict): ExtractSpec confeti fixture.
+        load_spec_confeti (dict): LoadSpec confeti fixture.
+
+    Returns:
+        (dict): valid confeti.
+    """
+    confeti = {}
+    confeti["extract"] = extract_spec_confeti
+    confeti["load"] = load_spec_confeti
+
+    return confeti
+
+
 @pytest.fixture(name="confeti")
 def fixture_confeti(extract_spec_confeti: dict, load_spec_confeti: dict) -> Generator[dict, None, None]:
     """

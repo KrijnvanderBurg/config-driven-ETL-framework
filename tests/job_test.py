@@ -1,10 +1,10 @@
 """
 Job class tests.
 
-# | ✓ | Tests
-# |---|-----------------------------------
-# | ✓ | Test all attributes are of correct type.
-# | ✓ | Test execute sub methods are called.
+| ✓ | Tests
+|---|-----------------------------------
+| ✓ | Test all attributes are of correct type.
+| ✓ | Test execute sub methods are called.
 
 Copyright (c) Krijn van der Burg.
 
@@ -35,7 +35,7 @@ def fixture_job(confeti: dict) -> Generator[Job, None, None]:
     Fixture for creating job instance from confeti dict.
 
     Args:
-        confeti (dict): valid confeti.
+        confeti (dict): valid confeti fixture.
 
     Yields:
         (Job): Job instance fixture.
@@ -47,25 +47,31 @@ def fixture_job(confeti: dict) -> Generator[Job, None, None]:
 # ============ Tests ===============
 
 
-def test_job_types(job: Job) -> None:
+def test_job_types(confeti_return: dict) -> None:
     """
     Assert that all Job attributes are of correct type.
 
     Args:
-        job (Job): Job fixture.
+        confeti_return (Dict): A single confeti fixture.
     """
+    # Act
+    job = Job(confeti=confeti_return)
+
     # Assert
     assert isinstance(job.extract_spec, ExtractSpec)
     assert isinstance(job.load_spec, LoadSpec)
 
 
-def test_job_execute(job: Job) -> None:
+def test_job_execute(confeti_return: dict) -> None:
     """
     Assert that extract and load methods are called.
 
     Args:
-        job (Job): Job fixture.
+        confeti_return (Dict): A single confeti fixture.
     """
+    # Act
+    job = Job(confeti=confeti_return)
+
     with mock.patch.object(job, "_extract") as extract_batch_mock, mock.patch.object(
         job, "_load"
     ) as extract_streaming_mock:

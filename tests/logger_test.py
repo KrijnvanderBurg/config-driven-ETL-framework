@@ -1,11 +1,11 @@
 """
 Logger class tests.
 
-# | ✓ | Tests
-# |---|-----------------------------------
-# | ✓ | Set logger object is logging type.
-# | ✓ | Get logger object is logging type.
-# | ✓ | Logger rotateFileHandler filename.
+| ✓ | Tests
+|---|-----------------------------------
+| ✓ | Set logger object is logging type.
+| ✓ | Get logger object is logging type.
+| ✓ | Logger rotateFileHandler filename.
 
 Copyright (c) Krijn van der Burg.
 
