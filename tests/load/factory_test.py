@@ -3,8 +3,7 @@ LoadFactory class tests.
 
 | ✓ | Tests
 |---|-----------------------------------------------------------
-| ✓ | Create Load class from Factory by spec format.
-| ✓ | Raise NotImplementedError in Factory if spec combination is not implemented.
+| ✓ | Matrix test all LoadSpecs in LoadFactory return Load derived class.
 
 Copyright (c) Krijn van der Burg.
 
@@ -14,50 +13,36 @@ See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
-from collections.abc import Generator
-
 import pytest
 from datastore.load.base import Load, LoadSpec
 from datastore.load.factory import LoadFactory
 from pyspark.sql import DataFrame
 
 # =========================================
-# ====== LoadFactory class ==============
+# ====== LoadFactory class =============
 # =========================================
 
 # =============== Fixtures ================
 
+# ================= Tests =================
 
-@pytest.fixture(name="load_factory")
-def fixture_load_factory(load_spec: LoadSpec, df: DataFrame) -> Generator[Load, None, None]:
+
+def test_load_factory_get(df: DataFrame, load_spec_matrix: LoadSpec) -> None:
     """
-    Fixture for creating a Load instance from LoadFactory.
+    Assert that LoadFactory returns a LoadSpec instance from valid input.
 
     Args:
-        load_spec (LoadSpec): Specification for the desired Load instance.
-        df (pyspark.sql.DataFrame): Test DataFrame.
-
-    Yields:
-        Load: A Load instance created using the specified LoadSpec.
+        df (DataFrame): DataFrame fixture.
+        load_spec_matrix (LoadSpec): LoadSpec fixture.
 
     Raises:
-        pytest.fail: If the combination of format and method is not handled by LoadFactory.
+        pytest.fail: If the combination of format and method is unsupported by LoadFactory.
     """
     try:
-        yield LoadFactory.get(spec=load_spec, dataframe=df)
-    except NotImplementedError as e:
-        pytest.fail(f"Unsupported combination {load_spec.data_format}-{load_spec.method}-{load_spec.operation}: {e}")
-
-
-# ================ Tests ==================
-
-
-def test_load_factory_create_load(load_factory: Load) -> None:
-    """
-    Test creating a Load instance from the LoadFactory.
-
-    Args:
-        load_factory (Load): The Load instance created by the LoadFactory.
-    """
+        # Act
+        load = LoadFactory.get(spec=load_spec_matrix, dataframe=df)
+        # Assert
+        assert isinstance(load, Load)
     # Assert
-    assert isinstance(load_factory, Load)
+    except NotImplementedError:
+        pytest.fail(f"Combination {load_spec_matrix.data_format}-{load_spec_matrix.method} is unsupported.")

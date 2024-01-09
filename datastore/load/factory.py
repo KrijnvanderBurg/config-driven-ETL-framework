@@ -33,6 +33,7 @@ class LoadFactory(ABC):
 
         Returns:
             Load: An instance of a data load.
+
         Raises:
             NotImplementedError: If the specified load format is not implemented.
         """

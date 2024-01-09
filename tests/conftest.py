@@ -1,6 +1,7 @@
 """
 Fixtures to reuse.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED
@@ -8,8 +9,6 @@ Attribution-NonCommercial-NoDerivs 4.0 International License.
 See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
-
-from collections.abc import Generator
 
 import pytest
 from datastore.schema import Schema
@@ -20,12 +19,24 @@ pytest_plugins = [
     "tests.logger_test",
     "tests.schema_test",
     "tests.spark_test",
-    "tests.extract.base_test",
+    "tests.extract.base_extract_test",
+    "tests.extract.base_format_test",
+    "tests.extract.base_method_test",
+    "tests.extract.base_spec_test",
     "tests.extract.factory_test",
-    "tests.load.base_test",
+    "tests.extract.file_test",
+    "tests.transform.base_spec_test",
+    "tests.transform.base_transform_test",
+    "tests.transform.factory_test",
+    "tests.transform.column_cast_test",
+    "tests.load.base_format_test",
+    "tests.load.base_load_test",
+    "tests.load.base_method_test",
+    "tests.load.base_operation_test",
+    "tests.load.base_spec_test",
     "tests.load.factory_test",
+    "tests.load.file_test",
 ]
-
 
 # ============ Fixtures ================
 
@@ -62,41 +73,3 @@ def fixture_test_dataframe_empty(spark, schema: Schema) -> DataFrame:
         DataFrame: Empty test DataFrame.
     """
     return spark.createDataFrame(data=[], schema=schema)
-
-
-@pytest.fixture(name="confeti_return")
-def fixture_confeti_return(extract_spec_confeti: dict, load_spec_confeti: dict) -> dict:
-    """
-    Fixture for valid confeti file.
-
-    Args:
-        extract_spec_confeti (dict): ExtractSpec confeti fixture.
-        load_spec_confeti (dict): LoadSpec confeti fixture.
-
-    Returns:
-        (dict): valid confeti.
-    """
-    confeti = {}
-    confeti["extract"] = extract_spec_confeti
-    confeti["load"] = load_spec_confeti
-
-    return confeti
-
-
-@pytest.fixture(name="confeti")
-def fixture_confeti(extract_spec_confeti: dict, load_spec_confeti: dict) -> Generator[dict, None, None]:
-    """
-    Fixture for valid confeti file.
-
-    Args:
-        extract_spec_confeti (dict): ExtractSpec confeti fixture.
-        load_spec_confeti (dict): LoadSpec confeti fixture.
-
-    Yields:
-        (dict): valid confeti.
-    """
-    confeti = {}
-    confeti["extract"] = extract_spec_confeti
-    confeti["load"] = load_spec_confeti
-
-    yield confeti

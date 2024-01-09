@@ -2,10 +2,11 @@
 File extract class tests.
 
 | ✓ | Tests
-|---|----------------------------------------------------------------
-| ✓ | Correct functions are called in .extract() for batch and streaming.
-| ✓ | Writing to and extracting from file results in equal dataframe.
-| ✓ | Read returns the correct object instance.
+|---|------------------------------------------------------------------
+| ✓ | Test extract method returns correct type.
+| ✓ | Test writing a dataframe and extract it results in equal dataframe.
+| ✓ | Test that protected methods call the respective extract method.
+
 
 Copyright (c) Krijn van der Burg.
 
@@ -24,92 +25,37 @@ from datastore.extract.file import ExtractFile
 from pyspark import testing
 from pyspark.sql import DataFrame, SparkSession
 
-# ==================================
-# ======= ExtractFile class ========
-# ==================================
-
 # ============ Fixtures ============
 
 
-@pytest.fixture(name="extract_file")
-def fixture_extract_file(extract_spec: ExtractSpec) -> Generator[ExtractFile, None, None]:
+@pytest.fixture(name="extract_file_matrix")
+def fixture_extract_file(extract_spec_matrix: ExtractSpec) -> Generator[ExtractFile, None, None]:
     """
-    Fixture function to create a ExtractFile instance for testing.
+    Matrix fixture function to create ExtractFile instance.
 
     Args:
-        extract_spec (ExtractSpec): The ExtractSpec for testing.
+        extract_spec_matrix (ExtractSpec): Matrix ExtractSpec fixture.
 
     Yields:
         ExtractFile: A ExtractFile instance with the provided ExtractSpec.
     """
-    yield ExtractFile(spec=extract_spec)
+    yield ExtractFile(spec=extract_spec_matrix)
 
 
-# ============== Tests =================
+# ============== Tests =============
 
 
-def test_extract_file_extract_called(extract_file: ExtractFile) -> None:
+def test_extract_file_extract_type(df: DataFrame, extract_spec: ExtractSpec) -> None:
     """
-    Assert that _extract_batch() and _extract_streaming() functions are called inside .extract() method
-    for batch and streaming respectively.
+    Assert that the return type of the extract method is a DataFrame.
 
     Args:
-        extract_file (ExtractFile): ExtractFile fixture.
-
-    Returns: None
+        df (Dataframe): DataFrame fixture.
+        extract_spec (ExtractSpec): The ExtractSpec for testing.
     """
     # Arrange
-    with mock.patch.object(extract_file, "_extract_batch") as extract_batch_mock, mock.patch.object(
-        extract_file, "_extract_streaming"
-    ) as extract_streaming_mock:
-        # Act
-        extract_file.extract()
+    extract_file = ExtractFile(spec=extract_spec)
 
-    if extract_file.spec.method == ExtractMethod.BATCH:
-        # Assert
-        extract_batch_mock.assert_called_once()
-
-    if extract_file.spec.method == ExtractMethod.STREAMING:
-        # Assert
-        extract_streaming_mock.assert_called_once()
-
-
-def test_extract_file_extract(spark: SparkSession, df: DataFrame, extract_file: ExtractFile) -> None:
-    """
-    Assert that the write method of LoadFile writes the input DataFrame without any modifications.
-
-    Args:
-        extract_file (ExtractFile): ExtractFile fixture.
-        spark (SparkSession): SparkSession fixture.
-        df (DataFrame): Test DataFrame fixture.
-
-    Returns: None
-    """
-    # Arrange
-    df.write.format(extract_file.spec.data_format.value).save(extract_file.spec.location)
-
-    # Act
-    extract_df = extract_file.extract()
-
-    if extract_file.spec.method == ExtractMethod.STREAMING:
-        query = extract_df.writeStream.outputMode("append").format("memory").queryName("memory_table").start()
-        query.awaitTermination(timeout=3)
-        query.stop()
-        extract_df = spark.sql("SELECT * FROM memory_table")
-
-    # Assert
-    testing.assertDataFrameEqual(actual=extract_df, expected=df)
-
-
-def test_extract_file_extract_return_type(extract_file: ExtractFile, df: DataFrame) -> None:
-    """
-    Assert that the return type of the extract method in ExtractFile.
-
-    Args:
-        extract_file (ExtractFile): ExtractFile fixture.
-        df (Dataframe): DataFrame ifxture.
-    """
-    # Arrange
     df.write.format(extract_file.spec.data_format.value).save(extract_file.spec.location)
 
     # Act
@@ -117,3 +63,56 @@ def test_extract_file_extract_return_type(extract_file: ExtractFile, df: DataFra
 
     # Assert
     assert isinstance(return_type, DataFrame)
+
+
+def test_extract_file_extract_called(extract_file_matrix: ExtractFile) -> None:
+    """
+    Assert that protected methods are called for the respective method.
+
+    Args:
+        extract_file_matrix (ExtractFile): Matrix ExtractFile fixture.
+    """
+    # Arrange
+    with (
+        mock.patch.object(extract_file_matrix, "_extract_batch") as extract_batch_mock,
+        mock.patch.object(extract_file_matrix, "_extract_streaming") as extract_streaming_mock,
+    ):
+        # Act
+        extract_file_matrix.extract()
+
+    if extract_file_matrix.spec.method == ExtractMethod.BATCH:
+        # Assert
+        extract_batch_mock.assert_called_once()
+        extract_streaming_mock.assert_not_called()
+
+    if extract_file_matrix.spec.method == ExtractMethod.STREAMING:
+        # Assert
+        extract_streaming_mock.assert_called_once()
+        extract_batch_mock.assert_not_called()
+
+
+def test_extract_file_extract_df_equals(spark: SparkSession, df: DataFrame, extract_file_matrix: ExtractFile) -> None:
+    """
+    Assert that extract method writes the DataFrame without any modifications.
+
+    Args:
+        spark (SparkSession): SparkSession fixture.
+        df (DataFrame): Test DataFrame fixture.
+        extract_file_matrix (ExtractFile): Matrix ExtractFile fixture.
+
+    Returns: None
+    """
+    # Arrange
+    df.write.format(extract_file_matrix.spec.data_format.value).save(extract_file_matrix.spec.location)
+
+    # Act
+    extract_df = extract_file_matrix.extract()
+
+    if extract_file_matrix.spec.method == ExtractMethod.STREAMING:
+        query = extract_df.writeStream.outputMode("append").format("memory").queryName("memory_table").start()
+        query.awaitTermination(timeout=3)
+        query.stop()
+        extract_df = spark.sql("SELECT * FROM memory_table")
+
+    # Assert
+    testing.assertDataFrameEqual(actual=extract_df, expected=df)

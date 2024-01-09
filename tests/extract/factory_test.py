@@ -3,8 +3,7 @@ ExtractFactory class tests.
 
 | ✓ | Tests
 |---|-----------------------------------------------------------
-| ✓ | Create Extract class from Factory by spec format.
-| ✓ | Raise NotImplementedError in Factory if spec combination is not implemented.
+| ✓ | Matrix test all ExtractSpecs in ExtractFactory return Extract derived class.
 
 Copyright (c) Krijn van der Burg.
 
@@ -14,50 +13,34 @@ See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
-from collections.abc import Generator
-
 import pytest
 from datastore.extract.base import Extract, ExtractSpec
 from datastore.extract.factory import ExtractFactory
 
 # =========================================
-# ====== ExtractFactory class ==============
+# ====== ExtractFactory class =============
 # =========================================
 
 # =============== Fixtures ================
 
+# ================= Tests =================
 
-@pytest.fixture(name="extract_factory")
-def fixture_extract_factory(extract_spec: ExtractSpec) -> Generator[Extract, None, None]:
+
+def test_extract_factory_get(extract_spec_matrix: ExtractSpec) -> None:
     """
-    Fixture for creating a Extract instance from ExtractFactory.
+    Assert that ExtractFactory returns a ExtractSpec instance from valid input.
 
     Args:
-        extract_spec (ExtractSpec): Specification for the desired Extract instance.
-
-    Yields:
-        Extract: A Extract instance created using the specified ExtractSpec.
+        extract_spec_matrix (ExtractSpec): ExtractSpec fixture.
 
     Raises:
-        pytest.fail: If the combination of format and method is not handled by ExtractFactory.
+        pytest.fail: If the combination of format and method is unsupported by ExtractFactory.
     """
     try:
-        yield ExtractFactory.get(spec=extract_spec)
-    except NotImplementedError as e:
-        pytest.fail(
-            f"A combination of {extract_spec.data_format}-{extract_spec.method} is not handled by ExtractFactory: {e}"
-        )
-
-
-# ============== Tests =================
-
-
-def test_extract_factory_create_extract(extract_factory: Extract) -> None:
-    """
-    Test creating a Extract instance from the ExtractFactory.
-
-    Args:
-        extract_factory (Extract): Extract intance fixture from ExtractFactory.
-    """
+        # Act
+        extract = ExtractFactory.get(spec=extract_spec_matrix)
+        # Assert
+        assert isinstance(extract, Extract)
     # Assert
-    assert isinstance(extract_factory, Extract)
+    except NotImplementedError:
+        pytest.fail(f"Combination {extract_spec_matrix.data_format}-{extract_spec_matrix.method} is unsupported.")

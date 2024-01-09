@@ -44,11 +44,11 @@ class ExtractMethod(Enum):
 
 class ExtractSpec:
     """
-    Specification of source input.
+    Specification of extract.
 
-    spec_id (str): ID of the source specification.
-    method (ExtractMethod): ReadType method of source operation.
-    data_format (ExtractFormat): format of the source input.
+    spec_id (str): ID of the extract specification.
+    method (ExtractMethod): ReadType method of extract operation.
+    data_format (ExtractFormat): format of the extract.
     location (str): uri that identifies from where to extract data in the specified format.
     options (dict): Execution options.
     schema (str): schema to be parsed to StructType.
@@ -100,6 +100,6 @@ class Extract(ABC):
         Abstract extract method.
 
         Returns:
-            A dataframe extract according to the input specification.
+            A dataframe extract according to the extract specification.
         """
         raise NotImplementedError

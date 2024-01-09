@@ -21,17 +21,13 @@ from pathlib import Path
 import pytest
 from datastore.file import File
 
-# ===================================
-# =========== File class ============
-# ===================================
-
 # ============ Fixtures =============
 
 
 @pytest.fixture(name="json_content")
 def fixture_json_content() -> str:
     """
-    Fixture providing sample JSON content.
+    Fixture of sample JSON content.
 
     Returns:
         str: valid json key:value pair content for file testing.
@@ -42,7 +38,7 @@ def fixture_json_content() -> str:
 @pytest.fixture(name="json_file")
 def fixture_json_file(tmpdir, json_content: str) -> str:
     """
-    Fixture providing a temporary JSON file with sample content.
+    Fixture of a JSON file with sample content.
 
     Args:
         tmpdir (str): Temporary directory fixture.
@@ -59,7 +55,7 @@ def fixture_json_file(tmpdir, json_content: str) -> str:
 
 def test_file_from_json(json_content: str, json_file: str) -> None:
     """
-    Test creating a File instance from JSON content.
+    Assert that from_json returns same json as written.
 
     Args:
         json_content (str): json content fixture.
@@ -74,7 +70,7 @@ def test_file_from_json(json_content: str, json_file: str) -> None:
 
 def test_file_from_json_nonexistent_file(tmpdir) -> None:
     """
-    Test raising FileNotFoundError for a nonexistent file.
+    Assert that from_json raises FileNotFoundError for a nonexistent file.
 
     Args:
         tmpdir (str): Temporary directory fixture.
@@ -90,7 +86,7 @@ def test_file_from_json_nonexistent_file(tmpdir) -> None:
 
 def test_from_json_invalid_file(tmpdir) -> None:
     """
-    Test raising JSONDecodeError for an invalid JSON file.
+    Assert that from_json raises JSONDecodeError for an invalid JSON file.
 
     Args:
         tmpdir (str): Temporary directory fixture.
