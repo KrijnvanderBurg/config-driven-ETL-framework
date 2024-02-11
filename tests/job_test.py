@@ -23,6 +23,7 @@ from datastore.extract.base import ExtractSpec
 from datastore.job import Job
 from datastore.load.base import LoadSpec
 from datastore.transform.base import TransformSpec
+from pyspark.sql import DataFrame
 
 # ========== Fixtures ==============
 
@@ -61,9 +62,6 @@ def fixture_job_matrix(
     yield Job(extract_spec=extract_spec_matrix, transform_spec=transform_spec_matrix, load_spec=load_spec_matrix)
 
 
-# ==========
-
-
 @pytest.fixture(name="job_confeti")
 def fixture_job_confeti(extract_spec_confeti: dict, transform_spec_confeti: dict, load_spec_confeti: dict) -> dict:
     """
@@ -85,7 +83,7 @@ def fixture_job_confeti(extract_spec_confeti: dict, transform_spec_confeti: dict
     return confeti
 
 
-# # ============ Tests ===============
+# ============ Tests ===============
 
 
 def test_job_attrb_types(job: Job) -> None:
@@ -95,7 +93,6 @@ def test_job_attrb_types(job: Job) -> None:
     Args:
         job (Job): Job fixture.
     """
-
     # Assert
     assert isinstance(job.extract_spec, ExtractSpec)
     assert isinstance(job.transform_spec, TransformSpec)
@@ -128,12 +125,9 @@ def test_job_from_confeti(job_confeti: dict) -> None:
     """
     Assert that Job from_confeti method returns valid Job.
 
-
     Args:
         job_confeti (dict): Job confeti fixture.
-
     """
-
     # Act
     job = Job.from_confeti(confeti=job_confeti)
 
@@ -142,3 +136,48 @@ def test_job_from_confeti(job_confeti: dict) -> None:
     assert isinstance(job.extract_spec, ExtractSpec)
     assert isinstance(job.transform_spec, TransformSpec)
     assert isinstance(job.load_spec, LoadSpec)
+
+
+def test_job(job: Job, df: DataFrame) -> None:
+    """
+    Assert that job calls all extract, transform, and load factory methods.
+
+    Args:
+        job (Job): Job matrix fixture.
+        df (DataFrame): Test DataFrame fixture.
+    """
+    # Arrange
+    df.write.format(job.extract_spec.data_format.value).save(job.extract_spec.location)
+
+    with (
+        mock.patch("datastore.extract.file.ExtractFile.extract") as extract_mock,
+        # mock.patch.object(DataFrame, "transform") as transform_mock, # TODO doesnt work
+        mock.patch("datastore.load.file.LoadFile.load") as load_mock,
+    ):
+        # Act
+        job.execute()
+
+        # Assert
+        extract_mock.assert_called_once()
+        # transform_mock.assert_called() # TODO doesnt work
+        load_mock.assert_called_once()
+
+
+def test_job_without_transform(job: Job, df: DataFrame) -> None:
+    """
+    Assert that job with no transform functions does not call transform, returning the dataframe.
+
+    Args:
+        job (Job): Job matrix fixture.
+        df (DataFrame): Test DataFrame fixture.
+    """
+    # Arrange
+    job.transform_spec = None
+    df.write.format(job.extract_spec.data_format.value).save(job.extract_spec.location)
+
+    with (mock.patch("pyspark.sql.DataFrame.transform") as transform_mock,):
+        # Act
+        job.execute()
+
+        # Assert
+        transform_mock.assert_not_called()

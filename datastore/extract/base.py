@@ -26,7 +26,7 @@ class ExtractFormat(Enum):
 
 
 # Formats of extract that are considered files.
-READER_FORMAT_FILES = [
+EXTRACT_FILES_FORMAT = [
     ExtractFormat.PARQUET,
     ExtractFormat.JSON,
     ExtractFormat.CSV,
@@ -43,17 +43,7 @@ class ExtractMethod(Enum):
 
 
 class ExtractSpec:
-    """
-    Specification of extract.
-
-    spec_id (str): ID of the extract specification.
-    method (ExtractMethod): ReadType method of extract operation.
-    data_format (ExtractFormat): format of the extract.
-    location (str): uri that identifies from where to extract data in the specified format.
-    options (dict): Execution options.
-    schema (str): schema to be parsed to StructType.
-    schema_filepath (str): filepath to schema file.
-    """
+    """Specification of extract."""
 
     def __init__(
         self,
@@ -65,6 +55,18 @@ class ExtractSpec:
         schema: str | None = None,
         schema_filepath: str | None = None,
     ):
+        """
+        Specification of extract.
+
+        Args:
+            spec_id (str): ID of the extract specification.
+            method (ExtractMethod): ReadType method of extract operation.
+            data_format (ExtractFormat): format of the extract.
+            location (str): uri that identifies from where to extract data in the specified format.
+            options (dict): Execution options.
+            schema (str): schema to be parsed to StructType.
+            schema_filepath (str): filepath to schema file.
+        """
         self.spec_id = spec_id
         self.method = ExtractMethod(method)
         self.data_format = ExtractFormat(data_format)
@@ -74,7 +76,8 @@ class ExtractSpec:
 
     @classmethod
     def from_confeti(cls, confeti: dict):
-        """Get the extract specifications from confeti.
+        """
+        Get the extract specifications from confeti.
 
         Returns:
             List of extract specifications.

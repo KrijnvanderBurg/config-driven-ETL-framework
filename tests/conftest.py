@@ -15,10 +15,10 @@ from datastore.schema import Schema
 from pyspark.sql import DataFrame
 
 pytest_plugins = [
-    "tests.file_test",
+    "tests.file_handler_test",
     "tests.logger_test",
     "tests.schema_test",
-    "tests.spark_test",
+    "tests.spark_handler_test",
     "tests.extract.base_extract_test",
     "tests.extract.base_format_test",
     "tests.extract.base_method_test",

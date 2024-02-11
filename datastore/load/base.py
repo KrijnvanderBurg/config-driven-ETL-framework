@@ -28,7 +28,7 @@ class LoadFormat(Enum):
 
 
 # Formats of load that are considered files.
-WRITER_FORMAT_FILES = [
+LOAD_FILES_FORMAT = [
     LoadFormat.PARQUET,
     LoadFormat.JSON,
     LoadFormat.CSV,

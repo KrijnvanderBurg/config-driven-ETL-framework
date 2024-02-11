@@ -10,7 +10,7 @@ or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
 from datastore.extract.base import Extract, ExtractMethod, ExtractSpec
-from datastore.spark import Spark
+from datastore.spark_handler import SparkHandler
 from pyspark.sql import DataFrame
 
 
@@ -51,7 +51,7 @@ class ExtractFile(Extract):
         Returns:
             DataFrame: A dataframe containing the data from batch extracting files.
         """
-        return Spark.session.read.load(
+        return SparkHandler.session.read.load(
             path=self.spec.location,
             format=self.spec.data_format.value,
             schema=self.spec.schema,
@@ -65,7 +65,7 @@ class ExtractFile(Extract):
         Returns:
             DataFrame: A dataframe containing the data from streaming extracting files.
         """
-        return Spark.session.readStream.load(
+        return SparkHandler.session.readStream.load(
             path=self.spec.location,
             format=self.spec.data_format.value,
             schema=self.spec.schema,

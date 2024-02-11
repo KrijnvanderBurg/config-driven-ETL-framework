@@ -14,7 +14,7 @@ or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 
 from abc import ABC
 
-from datastore.load.base import WRITER_FORMAT_FILES, Load, LoadSpec
+from datastore.load.base import LOAD_FILES_FORMAT, Load, LoadSpec
 from datastore.load.file import LoadFile
 from pyspark.sql import DataFrame
 
@@ -37,7 +37,7 @@ class LoadFactory(ABC):
         Raises:
             NotImplementedError: If the specified load format is not implemented.
         """
-        if spec.data_format in WRITER_FORMAT_FILES:
+        if spec.data_format in LOAD_FILES_FORMAT:
             return LoadFile(spec=spec, dataframe=dataframe)
 
         raise NotImplementedError(f"The load spec format {spec.data_format} is not implemented.")

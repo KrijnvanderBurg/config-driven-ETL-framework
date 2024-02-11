@@ -1,5 +1,5 @@
 """
-Module for loading from a datastore.
+Module for transforming data.
 
 Copyright (c) Krijn van der Burg.
 

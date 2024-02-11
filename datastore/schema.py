@@ -12,7 +12,7 @@ or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 import json
 from pathlib import Path
 
-from datastore.file import File
+from datastore.file_handler import FileHandler
 from pyspark.sql.types import StructType
 
 
@@ -69,7 +69,7 @@ class Schema:
         p = Path(filepath)
 
         if p.suffix == ".json":
-            j = File.from_json(filepath=p)
+            j = FileHandler.from_json(filepath=p)
             return Schema.from_json(schema=j)
 
         raise NotImplementedError(f"file extension '{p.suffix}' is not supported.")

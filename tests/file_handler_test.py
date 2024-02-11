@@ -19,7 +19,7 @@ import json
 from pathlib import Path
 
 import pytest
-from datastore.file import File
+from datastore.file_handler import FileHandler
 
 # ============ Fixtures =============
 
@@ -50,7 +50,7 @@ def fixture_json_file(tmpdir, json_content: str) -> str:
     return filepath
 
 
-# ============ Fixtures =============
+# ============ Tests =============
 
 
 def test_file_from_json(json_content: str, json_file: str) -> None:
@@ -65,7 +65,7 @@ def test_file_from_json(json_content: str, json_file: str) -> None:
     filepath = Path(json_file)
 
     # Assert
-    assert json_content == File.from_json(filepath=filepath)
+    assert json_content == FileHandler.from_json(filepath=filepath)
 
 
 def test_file_from_json_nonexistent_file(tmpdir) -> None:
@@ -81,7 +81,7 @@ def test_file_from_json_nonexistent_file(tmpdir) -> None:
     # Act
     with pytest.raises(FileNotFoundError):
         # Assert
-        File.from_json(filepath=Path(nonexistent_filepath))
+        FileHandler.from_json(filepath=Path(nonexistent_filepath))
 
 
 def test_from_json_invalid_file(tmpdir) -> None:
@@ -99,4 +99,4 @@ def test_from_json_invalid_file(tmpdir) -> None:
     # Act
     with pytest.raises(json.JSONDecodeError):
         # Assert
-        File.from_json(filepath=filepath)
+        FileHandler.from_json(filepath=filepath)

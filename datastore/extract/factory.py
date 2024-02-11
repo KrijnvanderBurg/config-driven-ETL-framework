@@ -14,7 +14,7 @@ or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 
 from abc import ABC
 
-from datastore.extract.base import READER_FORMAT_FILES, Extract, ExtractSpec
+from datastore.extract.base import EXTRACT_FILES_FORMAT, Extract, ExtractSpec
 from datastore.extract.file import ExtractFile
 
 
@@ -35,7 +35,7 @@ class ExtractFactory(ABC):
         Raises:
             NotImplementedError: If the specified extract format is not supported.
         """
-        if spec.data_format in READER_FORMAT_FILES:
+        if spec.data_format in EXTRACT_FILES_FORMAT:
             return ExtractFile(spec=spec)
 
         raise NotImplementedError(f"The requested extract spec format {spec.data_format.value} is not supported.")

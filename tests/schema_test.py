@@ -23,10 +23,6 @@ import pytest
 from datastore.schema import Schema
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-# =====================================
-# ========= Schema class ==============
-# =====================================
-
 # ============ Fixtures ================
 
 

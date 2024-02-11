@@ -47,7 +47,7 @@ def fixture_load_spec(
         method=load_method.value,
         operation=load_operation.value,
         data_format=load_format.value,
-        location=f"{tmpdir}/test.{load_format.value}",
+        location=f"{tmpdir}/load.{load_format.value}",
         options={},
     )
 
@@ -76,7 +76,7 @@ def fixture_load_spec_matrix(
         method=load_method_matrix.value,
         operation=load_operation_matrix.value,
         data_format=load_format_matrix.value,
-        location=f"{tmpdir}/test.{load_format_matrix.value}",
+        location=f"{tmpdir}/load.{load_format_matrix.value}",
         options={},
     )
 
@@ -101,7 +101,7 @@ def fixture_load_spec_confeti(
         "method": load_method.value,
         "operation": load_operation.value,
         "data_format": load_format.value,
-        "location": f"/test.{load_format.value}",
+        "location": f"/load.{load_format.value}",
         "options": {},
     }
 
@@ -140,5 +140,5 @@ def test_load_spec_from_confeti(load_spec_confeti: dict) -> None:
     assert isinstance(spec.method, LoadMethod)
     assert isinstance(spec.operation, LoadOperation)
     assert isinstance(spec.data_format, LoadFormat)
-    assert spec.location == f"/test.{spec.data_format.value}"
+    assert spec.location == f"/load.{spec.data_format.value}"
     assert spec.options == {}

@@ -19,9 +19,7 @@ from logging import Logger
 
 from datastore.logger import get_logger, set_logger
 
-# ==================================
-# ====== Logger Class Tests ========
-# ==================================
+# ============ Tests ===============
 
 
 def test_set_logger_creation() -> None:

@@ -80,13 +80,12 @@ def test_extract_file_extract_called(extract_file_matrix: ExtractFile) -> None:
         # Act
         extract_file_matrix.extract()
 
+    # Assert
     if extract_file_matrix.spec.method == ExtractMethod.BATCH:
-        # Assert
         extract_batch_mock.assert_called_once()
         extract_streaming_mock.assert_not_called()
 
     if extract_file_matrix.spec.method == ExtractMethod.STREAMING:
-        # Assert
         extract_streaming_mock.assert_called_once()
         extract_batch_mock.assert_not_called()
 

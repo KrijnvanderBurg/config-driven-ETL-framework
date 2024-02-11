@@ -1,5 +1,6 @@
 """
-Job
+Job class.
+
 
 Copyright (c) Krijn van der Burg.
 
@@ -13,6 +14,7 @@ from datastore.extract.base import ExtractSpec
 from datastore.extract.factory import ExtractFactory
 from datastore.load.base import LoadSpec
 from datastore.load.factory import LoadFactory
+from datastore.spark_handler import SparkHandler
 from datastore.transform.base import TransformSpec
 from datastore.transform.factory import TransformFactory
 from pyspark.sql import DataFrame
@@ -56,11 +58,13 @@ class Job:
         Returns:
             DataFrame: Extracted data.
         """
-        extract_df = self._extract()
-        transform_df = self._transform(dataframe=extract_df)
-        load = self._load(dataframe=transform_df)
+        SparkHandler.get_or_create()
 
-        return load
+        df = self._extract()
+        df = self._transform(dataframe=df)
+        sq = self._load(dataframe=df)
+
+        return sq
 
     def _extract(self) -> DataFrame:
         """
@@ -69,7 +73,9 @@ class Job:
         Returns:
             DataFrame: Extracted data.
         """
-        return ExtractFactory.get(self.extract_spec).extract()
+        factory = ExtractFactory.get(self.extract_spec)
+        df = factory.extract()
+        return df
 
     def _transform(self, dataframe: DataFrame) -> DataFrame:
         """
@@ -101,4 +107,6 @@ class Job:
         Returns:
             DataFrame: The loaded data.
         """
-        return LoadFactory.get(self.load_spec, dataframe).load()
+        factory = LoadFactory.get(self.load_spec, dataframe)
+        sq = factory.load()
+        return sq

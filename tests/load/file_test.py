@@ -52,7 +52,7 @@ def fixture_load_file(
         yield LoadFile(spec=load_spec_matrix, dataframe=df)
 
     if load_spec_matrix.method == LoadMethod.STREAMING:
-        filepath = f"{tmpdir}/test.{load_spec_matrix.data_format}"
+        filepath = f"{tmpdir}/load.{load_spec_matrix.data_format}"
 
         df.write.format(load_spec_matrix.data_format.value).save(filepath)
         df_loadstream = spark.readStream.load(

@@ -9,7 +9,6 @@ Attribution-NonCommercial-NoDerivs 4.0 International License.
 See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
-
 from dataclasses import dataclass
 
 from datastore.transform.column_cast import ColumnCast

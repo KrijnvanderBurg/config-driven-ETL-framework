@@ -13,7 +13,7 @@ import json
 from pathlib import Path
 
 
-class File:
+class FileHandler:
     """A utility class for extracting files."""
 
     @staticmethod

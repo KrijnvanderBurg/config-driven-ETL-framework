@@ -1,0 +1,22 @@
+[project]
+name = "datastore"
+version = "0.0.1"
+authors = [{ name = "Krijn van der Burg", email = "krijnvdburg@protonmail.com" }]
+description = "Config driven Data Ingestion Framework"
+readme = "README.md"
+
+dependencies = [
+    "pyspark==3.5.0",
+    "pytest-mock<3.12.0", # TODO move to tests dependencies
+    "pandas<2.1.4", # TODO move to tests dependencies
+    "pyarrow<14.0.2", # TODO move to tests dependencies
+]
+
+requires-python = ">=3.11"
+
+[build-system]
+requires = ["setuptools", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["datastore"]

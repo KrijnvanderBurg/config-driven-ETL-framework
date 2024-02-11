@@ -15,7 +15,7 @@ from pyspark.sql import SparkSession
 logger = set_logger(__name__)
 
 
-class Spark:
+class SparkHandler:
     """Spark session logic."""
 
     session: SparkSession

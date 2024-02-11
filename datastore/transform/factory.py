@@ -24,8 +24,7 @@ class TransformFactory(ABC):
         Get a transform function instace based on transform function specification via factory pattern.
 
         Args:
-            spec (TransformFunction): ...
-            dataframe (DataFrame): ...
+            transform (TransformFunction): executable transform function on a dataframe.
 
         Returns:
             Transform function to execute.

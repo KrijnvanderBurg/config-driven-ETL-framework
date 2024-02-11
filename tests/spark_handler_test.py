@@ -9,10 +9,10 @@ See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
-from unittest.mock import patch
+from unittest import mock
 
 import pytest
-from datastore.spark import Spark
+from datastore.spark_handler import SparkHandler
 from pyspark.sql import SparkSession
 
 # ============ Fixtures ================
@@ -50,10 +50,10 @@ def test_get_or_create_with_session(spark) -> None:
         spark (SparkSession): SparkSession fixture.
     """
     # Act
-    Spark.get_or_create(session=spark)
+    SparkHandler.get_or_create(session=spark)
 
     # Assert
-    assert Spark.session == spark
+    assert SparkHandler.session == spark
 
 
 def test_get_or_create_without_session() -> None:
@@ -61,10 +61,10 @@ def test_get_or_create_without_session() -> None:
     Assert that Spark session is created when none is provided.
     """
     # Act
-    Spark.get_or_create()
+    SparkHandler.get_or_create()
 
     # Assert
-    assert Spark.session is not None
+    assert SparkHandler.session is not None
 
 
 def test_get_or_create_without_session_default_app_name() -> None:
@@ -72,13 +72,13 @@ def test_get_or_create_without_session_default_app_name() -> None:
     Assert that Spark session app name is set to the default when no session is given and none exists.
     """
     # Arrange
-    with patch("pyspark.sql.SparkSession.getActiveSession", return_value=None):
+    with mock.patch("pyspark.sql.SparkSession.getActiveSession", return_value=None):
         # Act
-        Spark.get_or_create()
+        SparkHandler.get_or_create()
 
     # Assert
-    assert Spark.session is not None
-    assert Spark.session.sparkContext.appName == "datastore"
+    assert SparkHandler.session is not None
+    assert SparkHandler.session.sparkContext.appName == "datastore"
 
 
 def test_get_or_create_with_active_session() -> None:
@@ -88,12 +88,12 @@ def test_get_or_create_with_active_session() -> None:
     # Arrange
     mock_session = SparkSession.builder.master("local").appName("mock").getOrCreate()
 
-    with patch("pyspark.sql.SparkSession.getActiveSession", return_value=mock_session):
+    with mock.patch("pyspark.sql.SparkSession.getActiveSession", return_value=mock_session):
         # Act
-        Spark.get_or_create()
+        SparkHandler.get_or_create()
 
     # Assert
-    assert Spark.session == mock_session
+    assert SparkHandler.session == mock_session
 
 
 def test_get_or_create_with_active_session_no_app_name() -> None:
@@ -103,10 +103,10 @@ def test_get_or_create_with_active_session_no_app_name() -> None:
     # Arrange
     mock_session = SparkSession.builder.master("local").getOrCreate()
 
-    with patch("pyspark.sql.SparkSession.getActiveSession", return_value=mock_session):
+    with mock.patch("pyspark.sql.SparkSession.getActiveSession", return_value=mock_session):
         # Act
-        Spark.get_or_create()
+        SparkHandler.get_or_create()
 
     # Assert
-    assert Spark.session == mock_session
-    assert Spark.session.sparkContext.appName == "datastore"
+    assert SparkHandler.session == mock_session
+    assert SparkHandler.session.sparkContext.appName == "datastore"

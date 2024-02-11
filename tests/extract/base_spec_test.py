@@ -49,7 +49,7 @@ def fixture_extract_spec(
         spec_id="bronze-test-extract-dev",
         method=extract_method.value,
         data_format=extract_data_format.value,
-        location=f"{tmpdir}/test.{extract_data_format.value}",
+        location=f"{tmpdir}/extract.{extract_data_format.value}",
         options={},
         schema=schema.json(),
         schema_filepath=schema_file,
@@ -81,7 +81,7 @@ def fixture_extract_spec_matrix(
         spec_id="bronze-test-extract-dev",
         method=extract_method_matrix.value,
         data_format=extract_data_format_matrix.value,
-        location=f"{tmpdir}/test.{extract_data_format_matrix.value}",
+        location=f"{tmpdir}/extract.{extract_data_format_matrix.value}",
         options={},
         schema=schema.json(),
         schema_filepath=schema_file,
@@ -109,7 +109,7 @@ def fixture_extract_spec_confeti(
         "spec_id": "bronze-test-extract-dev",
         "method": extract_method.value,
         "data_format": extract_data_format.value,
-        "location": f"/test.{extract_data_format.value}",
+        "location": f"/extract.{extract_data_format.value}",
         "options": {},
         "schema": schema.json(),
         "schema_filepath": schema_file,
@@ -149,6 +149,6 @@ def test_extract_spec_from_confeti(extract_spec_confeti: dict) -> None:
     assert spec.spec_id == "bronze-test-extract-dev"
     assert isinstance(spec.method, ExtractMethod)
     assert isinstance(spec.data_format, ExtractFormat)
-    assert spec.location == f"/test.{spec.data_format.value}"
+    assert spec.location == f"/extract.{spec.data_format.value}"
     assert spec.options == {}
     assert isinstance(spec.schema, StructType)
