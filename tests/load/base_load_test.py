@@ -14,7 +14,7 @@ See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
-from datastore.load.base import Load, LoadSpec
+from datastore.load.base import LoadSpec, LoadStrategy
 from pyspark.sql import DataFrame
 
 # =========== Fixtures =============
@@ -31,14 +31,14 @@ def test_load_abc_implementation(df: DataFrame, load_spec: LoadSpec) -> None:
         df (DataFrame): Test dataframe with schema but without rows fixture.
     """
     # Arrange
-    Load.__abstractmethods__ = frozenset()
+    LoadStrategy.__abstractmethods__ = frozenset()
 
     # Act
-    class MockLoad(Load):
+    class MockLoad(LoadStrategy):
         """Mock implementation of Load class for testing purposes."""
 
         def load(self):
             """Mock implementation of Load class for testing purposes."""
 
     # Assert
-    assert isinstance(MockLoad(spec=load_spec, dataframe=df), Load)
+    assert isinstance(MockLoad(spec=load_spec, dataframe=df), LoadStrategy)

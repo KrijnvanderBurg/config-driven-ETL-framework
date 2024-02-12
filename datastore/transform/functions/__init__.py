@@ -1,5 +1,5 @@
 """
-Module for transforming data.
+Module for transforming functions.
 
 
 Copyright (c) Krijn van der Burg.

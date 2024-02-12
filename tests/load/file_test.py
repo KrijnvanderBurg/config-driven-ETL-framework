@@ -7,6 +7,7 @@ File load class tests.
 | ✓ | Test writing a dataframe and load it results in equal dataframe.
 | ✓ | Test that protected methods call the respective load method.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED

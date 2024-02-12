@@ -11,12 +11,12 @@ or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
 from datastore.extract.base import ExtractSpec
-from datastore.extract.factory import ExtractFactory
+from datastore.extract.strategy import ExtractContext
 from datastore.load.base import LoadSpec
-from datastore.load.factory import LoadFactory
+from datastore.load.strategy import LoadContext
 from datastore.spark_handler import SparkHandler
 from datastore.transform.base import TransformSpec
-from datastore.transform.factory import TransformFactory
+from datastore.transform.strategy import TransformContext
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming import StreamingQuery
 
@@ -73,7 +73,7 @@ class Job:
         Returns:
             DataFrame: Extracted data.
         """
-        factory = ExtractFactory.get(self.extract_spec)
+        factory = ExtractContext.factory(spec=self.extract_spec)
         df = factory.extract()
         return df
 
@@ -87,15 +87,9 @@ class Job:
         Returns:
             DataFrame: transformed data.
         """
-
-        if not self.transform_spec:
-            return dataframe
-
-        for transform in self.transform_spec.transforms:
-            f = TransformFactory.get(transform=transform)
-            dataframe = dataframe.transform(f)
-
-        return dataframe
+        factory = TransformContext.factory(spec=self.transform_spec, dataframe=dataframe)
+        df = factory.transform()
+        return df
 
     def _load(self, dataframe: DataFrame) -> StreamingQuery | None:
         """
@@ -107,6 +101,6 @@ class Job:
         Returns:
             DataFrame: The loaded data.
         """
-        factory = LoadFactory.get(self.load_spec, dataframe)
+        factory = LoadContext.factory(spec=self.load_spec, dataframe=dataframe)
         sq = factory.load()
         return sq

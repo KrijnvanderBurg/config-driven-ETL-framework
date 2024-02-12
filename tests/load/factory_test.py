@@ -5,6 +5,7 @@ LoadFactory class tests.
 |---|-----------------------------------------------------------
 | ✓ | Matrix test all LoadSpecs in LoadFactory return Load derived class.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED
@@ -14,8 +15,8 @@ or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
 import pytest
-from datastore.load.base import Load, LoadSpec
-from datastore.load.factory import LoadFactory
+from datastore.load.base import LoadSpec, LoadStrategy
+from datastore.load.strategy import LoadContext
 from pyspark.sql import DataFrame
 
 # =========================================
@@ -27,7 +28,7 @@ from pyspark.sql import DataFrame
 # ================= Tests =================
 
 
-def test_load_factory_get(df: DataFrame, load_spec_matrix: LoadSpec) -> None:
+def test_load_factory(df: DataFrame, load_spec_matrix: LoadSpec) -> None:
     """
     Assert that LoadFactory returns a LoadSpec instance from valid input.
 
@@ -40,9 +41,9 @@ def test_load_factory_get(df: DataFrame, load_spec_matrix: LoadSpec) -> None:
     """
     try:
         # Act
-        load = LoadFactory.get(spec=load_spec_matrix, dataframe=df)
+        load = LoadContext.factory(spec=load_spec_matrix, dataframe=df)
         # Assert
-        assert isinstance(load, Load)
+        assert isinstance(load, LoadStrategy)
     # Assert
     except NotImplementedError:
-        pytest.fail(f"Combination {load_spec_matrix.data_format}-{load_spec_matrix.method} is unsupported.")
+        pytest.fail(f"Combination {load_spec_matrix.data_format}-{load_spec_matrix.method} is not supported.")

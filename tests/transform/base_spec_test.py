@@ -17,7 +17,7 @@ or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
 import pytest
-from datastore.transform.base import Transform, TransformSpec
+from datastore.transform.base import TransformFunction, TransformSpec
 
 # ============ Fixtures ============
 
@@ -30,8 +30,7 @@ def fixture_transform_spec() -> TransformSpec:
     Returns:
         (TransformSpec): TransformSpec fixture.
     """
-
-    transform = Transform(function="cast", arguments={"cols": {"age": "LongType"}})
+    transform = TransformFunction(function="cast", arguments={"cols": {"age": "LongType"}})
     spec = TransformSpec(spec_id="bronze-test-transform-dev", transforms=[transform])
     return spec
 
@@ -40,15 +39,14 @@ def fixture_transform_spec() -> TransformSpec:
     name="transform_spec_matrix",
     params=["transform_cast"],
 )
-def fixture_transform_spec_matrix(fixture_transform_name, request) -> TransformSpec:
+def fixture_transform_spec_matrix(request) -> TransformSpec:
     """
     Matrix fixture for creating a LoadSpec instance.
 
     Returns:
         (TransformSpec): TransformSpec fixture.
     """
-
-    transform = request.getfixturevalue(fixture_transform_name)
+    transform = request.getfixturevalue(request.param)
 
     spec = TransformSpec(spec_id="bronze-test-transform-dev", transforms=[transform])
     return spec
@@ -83,7 +81,7 @@ def test_transform_spec_attrb_types(transform_spec: TransformSpec) -> None:
     assert transform_spec.spec_id == "bronze-test-transform-dev"
 
     for transform in transform_spec.transforms:
-        assert isinstance(transform, Transform)
+        assert isinstance(transform, TransformFunction)
 
 
 def test_transform_spec_from_confeti(transform_spec_confeti: dict) -> None:
@@ -93,7 +91,6 @@ def test_transform_spec_from_confeti(transform_spec_confeti: dict) -> None:
     Args:
         transform_spec_confeti (dict): Transform confeti fixture.
     """
-
     # Act
     spec = TransformSpec.from_confeti(confeti=transform_spec_confeti)
 

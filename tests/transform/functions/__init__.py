@@ -1,7 +1,4 @@
 """
-Module for transforming data.
-
-
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED

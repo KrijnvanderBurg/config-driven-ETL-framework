@@ -1,6 +1,7 @@
 """
 IO extract interface and factory, extract implementations are in module datastore.loads.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED
@@ -25,14 +26,6 @@ class ExtractFormat(Enum):
     CSV = "csv"
 
 
-# Formats of extract that are considered files.
-EXTRACT_FILES_FORMAT = [
-    ExtractFormat.PARQUET,
-    ExtractFormat.JSON,
-    ExtractFormat.CSV,
-]
-
-
 class ExtractMethod(Enum):
     """
     Types of extract operations.
@@ -43,7 +36,18 @@ class ExtractMethod(Enum):
 
 
 class ExtractSpec:
-    """Specification of extract."""
+    """
+    Specification of extract.
+
+    Args:
+        spec_id (str): ID of the extract specification.
+        method (ExtractMethod): ReadType method of extract operation.
+        data_format (ExtractFormat): format of the extract.
+        location (str): uri that identifies from where to extract data in the specified format.
+        options (dict): Execution options.
+        schema (str): schema to be parsed to StructType.
+        schema_filepath (str): filepath to schema file.
+    """
 
     def __init__(
         self,
@@ -55,18 +59,6 @@ class ExtractSpec:
         schema: str | None = None,
         schema_filepath: str | None = None,
     ):
-        """
-        Specification of extract.
-
-        Args:
-            spec_id (str): ID of the extract specification.
-            method (ExtractMethod): ReadType method of extract operation.
-            data_format (ExtractFormat): format of the extract.
-            location (str): uri that identifies from where to extract data in the specified format.
-            options (dict): Execution options.
-            schema (str): schema to be parsed to StructType.
-            schema_filepath (str): filepath to schema file.
-        """
         self.spec_id = spec_id
         self.method = ExtractMethod(method)
         self.data_format = ExtractFormat(data_format)
@@ -85,7 +77,7 @@ class ExtractSpec:
         return cls(**confeti)
 
 
-class Extract(ABC):
+class ExtractStrategy(ABC):
     """Extract abstract class."""
 
     def __init__(self, spec: ExtractSpec):

@@ -7,6 +7,7 @@ Logger class tests.
 | ✓ | Get logger object is logging type.
 | ✓ | Logger rotateFileHandler filename.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED

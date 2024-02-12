@@ -14,7 +14,7 @@ See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
-from datastore.extract.base import Extract
+from datastore.extract.base import ExtractStrategy
 
 # =========== Fixtures =============
 
@@ -29,14 +29,14 @@ def test_extract_abc_implementation(extract_spec) -> None:
         extract_spec (ExtractSpec): ExtractSpec fixture.
     """
     # Arrange
-    Extract.__abstractmethods__ = frozenset()
+    ExtractStrategy.__abstractmethods__ = frozenset()
 
     # Act
-    class MockExtract(Extract):
+    class MockExtract(ExtractStrategy):
         """Mock implementation of Extract class for testing purposes."""
 
         def extract(self):
             """Mock implementation of Extract class for testing purposes."""
 
     # Assert
-    assert isinstance(MockExtract(spec=extract_spec), Extract)
+    assert isinstance(MockExtract(spec=extract_spec), ExtractStrategy)

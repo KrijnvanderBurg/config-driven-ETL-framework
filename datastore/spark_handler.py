@@ -1,6 +1,7 @@
 """
 Module to take care of creating a singleton of the execution environment class.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED

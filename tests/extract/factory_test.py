@@ -5,6 +5,7 @@ ExtractFactory class tests.
 |---|-----------------------------------------------------------
 | ✓ | Matrix test all ExtractSpecs in ExtractFactory return Extract derived class.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED
@@ -14,8 +15,8 @@ or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
 import pytest
-from datastore.extract.base import Extract, ExtractSpec
-from datastore.extract.factory import ExtractFactory
+from datastore.extract.base import ExtractSpec, ExtractStrategy
+from datastore.extract.strategy import ExtractContext
 
 # =========================================
 # ====== ExtractFactory class =============
@@ -26,7 +27,7 @@ from datastore.extract.factory import ExtractFactory
 # ================= Tests =================
 
 
-def test_extract_factory_get(extract_spec_matrix: ExtractSpec) -> None:
+def test_extract_factory(extract_spec_matrix: ExtractSpec) -> None:
     """
     Assert that ExtractFactory returns a ExtractSpec instance from valid input.
 
@@ -38,9 +39,9 @@ def test_extract_factory_get(extract_spec_matrix: ExtractSpec) -> None:
     """
     try:
         # Act
-        extract = ExtractFactory.get(spec=extract_spec_matrix)
+        extract = ExtractContext.factory(spec=extract_spec_matrix)
         # Assert
-        assert isinstance(extract, Extract)
+        assert isinstance(extract, ExtractStrategy)
     # Assert
     except NotImplementedError:
-        pytest.fail(f"Combination {extract_spec_matrix.data_format}-{extract_spec_matrix.method} is unsupported.")
+        pytest.fail(f"Combination {extract_spec_matrix.data_format}-{extract_spec_matrix.method} is not supported.")

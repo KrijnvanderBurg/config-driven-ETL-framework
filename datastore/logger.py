@@ -3,6 +3,7 @@ Logger Implementation.
 
 This module provides functionality for configuring and obtaining logger instances.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED

@@ -9,13 +9,21 @@ Attribution-NonCommercial-NoDerivs 4.0 International License.
 See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
+
+from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
 
-from datastore.transform.column_cast import ColumnCast
+from datastore.transform.functions.column_cast import ColumnCast
+from pyspark.sql import DataFrame
+
+TRANSFORM_FUNCTIONS = {
+    "cast": ColumnCast.cast,
+}
 
 
 @dataclass
-class Transform:
+class TransformFunction:
     """
     Specification for Transform.
 
@@ -25,8 +33,10 @@ class Transform:
     """
 
     def __init__(self, function: str, arguments: dict):
-        self.function: str = function
-        self.arguments: dict = arguments
+        # if function not in TRANSFORM_FUNCTIONS:
+        #     raise error
+        # TODO custom error
+        self.function: Callable = TRANSFORM_FUNCTIONS[function](**arguments)
 
     @classmethod
     def from_confeti(cls, confeti: dict):
@@ -38,37 +48,56 @@ class Transform:
         return cls(**confeti)
 
 
-TRANSFORM_FUNCTIONS = {
-    "cast": ColumnCast.cast,
-}
-
-
 @dataclass
 class TransformSpec:
-    """Transform specification."""
+    """
+    Transform specification.
 
-    def __init__(self, spec_id: str, transforms: list[Transform]):
-        """
-        TransformSpec
+    Args:
+        spec_id (str): ID of the terminate specification
+        transforms: list of `Callable` to execute.
+    """
 
-        Args:
-            spec_id (str): ID of the terminate specification
-            transforms: list of `TransformFunction` to execute.
-        """
+    def __init__(self, spec_id: str, transforms: list[TransformFunction]):
         self.spec_id: str = spec_id
-        self.transforms: list[Transform] = transforms
+        self.transforms: list[TransformFunction] = transforms
 
     @classmethod
     def from_confeti(cls, confeti: dict):
-        """`
+        """
         Get the transform specifications from confeti.
 
         Returns:
             TransformSpec: transform instance.
         """
-
-        transforms: list[Transform] = []
+        transforms: list[TransformFunction] = []
         for transform in confeti.get("transforms", []):
-            transforms.append(Transform.from_confeti(confeti=transform))
+            t: TransformFunction = TransformFunction.from_confeti(confeti=transform)
+            transforms.append(t)
 
         return cls(spec_id=confeti["spec_id"], transforms=transforms)
+
+
+class TransformStrategy(ABC):
+    """Abstract Transform class."""
+
+    def __init__(self, spec: TransformSpec, dataframe: DataFrame):
+        """
+        Construct Transform instance.
+
+        Args:
+            spec (TransformSpec): specification for transforming data.
+            dataframe (DataFrame): DataFrame to Transform.
+        """
+        self.spec: TransformSpec = spec
+        self.dataframe: DataFrame = dataframe
+
+    @abstractmethod
+    def transform(self) -> DataFrame:
+        """
+        Abstract Transform method.
+
+        Raises:
+            NotImplementedError: This method must be implemented by the subclass.
+        """
+        raise NotImplementedError

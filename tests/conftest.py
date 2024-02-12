@@ -28,7 +28,7 @@ pytest_plugins = [
     "tests.transform.base_spec_test",
     "tests.transform.base_transform_test",
     "tests.transform.factory_test",
-    "tests.transform.column_cast_test",
+    "tests.transform.functions.column_cast_test",
     "tests.load.base_format_test",
     "tests.load.base_load_test",
     "tests.load.base_method_test",

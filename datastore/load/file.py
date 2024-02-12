@@ -1,6 +1,7 @@
 """
 This module provides a `LoadFile` class for writing data to File files.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED
@@ -9,24 +10,21 @@ See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
-from datastore.load.base import Load, LoadMethod, LoadSpec
+from datastore.load.base import LoadMethod, LoadSpec, LoadStrategy
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming.query import StreamingQuery
 
 
-class LoadFile(Load):
+class LoadFile(LoadStrategy):
     """
     `Load` implementation for files.
+
+    Args:
+        spec (LoadSpec): Load specification.
+        dataframe (DataFrame): DataFrame to be written.
     """
 
     def __init__(self, spec: LoadSpec, dataframe: DataFrame):
-        """
-        Construct LoadFile instance.
-
-        Args:
-            spec (LoadSpec): Load specification.
-            dataframe (DataFrame): DataFrame to be written.
-        """
         super().__init__(spec, dataframe)
 
     def load(self) -> StreamingQuery | None:

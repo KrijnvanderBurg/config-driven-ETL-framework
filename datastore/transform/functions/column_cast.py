@@ -1,4 +1,6 @@
-"""Cast
+"""
+Cast transform function.
+
 
 Copyright (c) Krijn van der Burg.
 

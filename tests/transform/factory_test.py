@@ -16,40 +16,32 @@ or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
 import pytest
-from datastore.transform.factory import TransformFactory
+from datastore.transform.strategy import TransformContext, TransformStrategy
+from pyspark.sql import DataFrame
 
 # =============== Fixtures ================
 
 # ================ Tests ==================
 
 
-@pytest.mark.parametrize(
-    "fixture_transform_name",
-    [
-        "transform_cast",
-    ],
-)
-def test_load_factory_get(fixture_transform_name, request) -> None:
+def test_transform_factory(transform_spec_matrix, df: DataFrame) -> None:
     """
     Assert that TransformFactory returns a TransformSpec instance from valid input.
 
     Args:
-        request (str): pytest request.
-        fixture_transform_name (str): Fixture name of transform function.
+        transform_spec_matrix (TransformSpec): TransformSpec fixture.
+        df (DataFrame): DataFrame fixture.
 
     Raises:
         pytest.fail: If the combination of format and method is unsupported by TransformFactory.
     """
-    # Arrange
-    transform = request.getfixturevalue(fixture_transform_name)
-
     try:
         # Act
-        function = TransformFactory.get(transform=transform)
+        transform = TransformContext.factory(spec=transform_spec_matrix, dataframe=df)
 
         # Assert
-        assert callable(function)
+        assert isinstance(transform, TransformStrategy)
 
     # Assert
     except NotImplementedError:
-        pytest.fail(f"Combination {transform.function}-{transform.arguments} is unsupported.")
+        pytest.fail(f"Combination {transform.spec} is not supported.")

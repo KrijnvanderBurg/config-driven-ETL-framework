@@ -16,9 +16,10 @@ See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
+from collections.abc import Callable
+
 import pytest
-from datastore.transform.base import Transform
-from datastore.transform.factory import TransformFactory
+from datastore.transform.base import TransformFunction
 from pyspark.sql import DataFrame
 from pyspark.sql.types import LongType, StringType, StructField, StructType
 
@@ -26,20 +27,20 @@ from pyspark.sql.types import LongType, StringType, StructField, StructType
 
 
 @pytest.fixture(name="transform_cast")
-def fixture_transform_cast_confeti() -> Transform:
+def fixture_transform_cast_confeti() -> TransformFunction:
     """
     Fixture for Transform instance.
 
     Returns:
         (Transform): Transform with cast function fixture.
     """
-    return Transform(function="cast", arguments={"cols": {"age": "LongType"}})
+    return TransformFunction(function="cast", arguments={"cols": {"age": "LongType"}})
 
 
 # ============== Tests =================
 
 
-def test_transform_column_cast_type(transform_cast: Transform):
+def test_transform_column_cast_type(transform_cast: TransformFunction):
     """
     Assert that all Transform cast attributes are of correct type.
 
@@ -47,8 +48,7 @@ def test_transform_column_cast_type(transform_cast: Transform):
         transform_cast (Transform): Transform with cast function fixture.
     """
     # Assert
-    assert isinstance(transform_cast.function, str)
-    assert isinstance(transform_cast.arguments, dict)
+    assert isinstance(transform_cast.function, Callable)
 
 
 def test_transform_column_cast_from_confeti() -> None:
@@ -59,16 +59,19 @@ def test_transform_column_cast_from_confeti() -> None:
     confeti = {"function": "cast", "arguments": {"cols": {"age": "LongType"}}}
 
     # Act
-    transform = Transform.from_confeti(confeti=confeti)
+    transform = TransformFunction.from_confeti(confeti=confeti)
 
     # Assert
-    assert isinstance(transform.function, str)
-    assert isinstance(transform.arguments, dict)
+    assert isinstance(transform.function, Callable)
 
 
-def test_transform_column_cast(df: DataFrame, transform_cast: Transform):
+def test_transform_column_cast(df: DataFrame, transform_cast: TransformFunction):
     """
     Column type was changed to new type.
+
+    Args:
+        df (Dataframe): DataFrame fixture.
+        transform_cast (TransformFunction): TransformFunction column cast fixture.
     """
     # Arrange
     transformed_schema = StructType(
@@ -79,10 +82,8 @@ def test_transform_column_cast(df: DataFrame, transform_cast: Transform):
         ]
     )
 
-    transform = TransformFactory.get(transform_cast)
-
     # Act
-    transformed_df = df.transform(transform)
+    transformed_df = df.transform(transform_cast.function)
 
     # Arrange
     assert transformed_df.schema == transformed_schema

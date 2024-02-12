@@ -4,6 +4,7 @@ Data Load Module.
 This module defines an abstract class `Load` along with supporting enumerations for configuring data load operations.
 It provides data writing, allowing customization through implementing `Load` abstract methods.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED
@@ -25,14 +26,6 @@ class LoadFormat(Enum):
     PARQUET = "parquet"
     JSON = "json"
     CSV = "csv"
-
-
-# Formats of load that are considered files.
-LOAD_FILES_FORMAT = [
-    LoadFormat.PARQUET,
-    LoadFormat.JSON,
-    LoadFormat.CSV,
-]
 
 
 class LoadMethod(Enum):
@@ -89,7 +82,7 @@ class LoadSpec:
         return cls(**confeti)
 
 
-class Load(ABC):
+class LoadStrategy(ABC):
     """Abstract Load class."""
 
     def __init__(self, spec: LoadSpec, dataframe: DataFrame):
@@ -100,8 +93,8 @@ class Load(ABC):
             spec (LoadSpec): Load specification for writing data.
             dataframe (DataFrame): DataFrame to load.
         """
-        self.spec = spec
-        self.dataframe = dataframe
+        self.spec: LoadSpec = spec
+        self.dataframe: DataFrame = dataframe
 
     @abstractmethod
     def load(self) -> StreamingQuery | None:

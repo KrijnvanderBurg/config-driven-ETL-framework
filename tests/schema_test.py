@@ -8,6 +8,7 @@ Test schema handler class.
 | ✓ | Raise JSONDecodeError when creating a schema from invalid JSON.
 | ✓ | Raise TypeError when creating a schema from an invalid type.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED
@@ -105,7 +106,6 @@ def test_schema_from_spec_called(schema: StructType, schema_file: str) -> None:
         schema (StructType): Schema fixture.
         schema_file (str): Filepath to schema file fixture.
     """
-
     # Arrange
     with mock.patch.object(Schema, "from_json") as from_json_mock, mock.patch.object(
         Schema, "from_file"

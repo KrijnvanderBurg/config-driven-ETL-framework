@@ -1,6 +1,7 @@
 """
 This module provides a `ExtractFile` class for extracting data from File files.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED
@@ -9,21 +10,20 @@ See the accompanying LICENSE file for details,
 or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 """
 
-from datastore.extract.base import Extract, ExtractMethod, ExtractSpec
+from datastore.extract.base import ExtractMethod, ExtractSpec, ExtractStrategy
 from datastore.spark_handler import SparkHandler
 from pyspark.sql import DataFrame
 
 
-class ExtractFile(Extract):
-    """Extract implementation for files."""
+class ExtractFile(ExtractStrategy):
+    """
+    Extract implementation for files.
+
+    Args:
+        spec (ExtractSpec): Input specification.
+    """
 
     def __init__(self, spec: ExtractSpec):
-        """
-        Construct ExtractFile instance.
-
-        Args:
-            spec (ExtractSpec): Input specification.
-        """
         super().__init__(spec)
 
     def extract(self) -> DataFrame:

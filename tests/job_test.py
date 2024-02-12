@@ -5,6 +5,9 @@ Job class tests.
 |---|-----------------------------------
 | ✓ | Test all attributes are of correct type.
 | ✓ | Test execute sub methods are called.
+| ✓ | Create instance from confeti.
+| ✓ | Test all protected methods _extract, _transform, _load are called
+| ✓ | Test if TransformSpec of none does not call job.transform
 
 
 Copyright (c) Krijn van der Burg.

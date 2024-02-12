@@ -7,6 +7,7 @@ Test file handler static class.
 | ✓ | Test raising FileNotFoundError for a nonexistent file.
 | ✓ | Test raising JSONDecodeError for an invalid JSON file.
 
+
 Copyright (c) Krijn van der Burg.
 
 This work is licensed under the Creative Commons BY-NC-ND 4.0 DEED
