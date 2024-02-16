@@ -61,8 +61,8 @@ class Job:
         SparkHandler.get_or_create()
 
         df = self._extract()
-        df = self._transform(dataframe=df)
-        sq = self._load(dataframe=df)
+        df = self._transform(df=df)
+        sq = self._load(df=df)
 
         return sq
 
@@ -77,30 +77,30 @@ class Job:
         df = factory.extract()
         return df
 
-    def _transform(self, dataframe: DataFrame) -> DataFrame:
+    def _transform(self, df: DataFrame) -> DataFrame:
         """
         Transform data from specifiction.
 
         Args:
-            dataframe (DataFrame): Dataframe to be transformed.
+            df (DataFrame): Dataframe to be transformed.
 
         Returns:
             DataFrame: transformed data.
         """
-        factory = TransformContext.factory(spec=self.transform_spec, dataframe=dataframe)
+        factory = TransformContext.factory(spec=self.transform_spec, df=df)
         df = factory.transform()
         return df
 
-    def _load(self, dataframe: DataFrame) -> StreamingQuery | None:
+    def _load(self, df: DataFrame) -> StreamingQuery | None:
         """
         Load data to the specification.
 
         Args:
-            dataframe (DataFrame): DataFrame to be loaded.
+            df (DataFrame): DataFrame to be loaded.
 
         Returns:
             DataFrame: The loaded data.
         """
-        factory = LoadContext.factory(spec=self.load_spec, dataframe=dataframe)
+        factory = LoadContext.factory(spec=self.load_spec, df=df)
         sq = factory.load()
         return sq

@@ -24,13 +24,13 @@ class TransformContext(ABC):
     """Abstract class representing a factory for creating data extracts."""
 
     @classmethod
-    def factory(cls, spec: TransformSpec, dataframe: DataFrame) -> TransformStrategy:
+    def factory(cls, spec: TransformSpec, df: DataFrame) -> TransformStrategy:
         """
         Get a Transform instance based on the Transform specification using the factory pattern.
 
         Args:
             spec (TransformSpec): Transform specification to transform data.
-            dataframe (DataFrame): DataFrame to Transform.
+            df (DataFrame): DataFrame to Transform.
 
         Returns:
             Transform: An instance of a data Transform.
@@ -39,6 +39,6 @@ class TransformContext(ABC):
             NotImplementedError: If the specified transform provider is not supported.
         """
         if True:  # pylint: disable=using-constant-test
-            return TransformBasic(spec=spec, dataframe=dataframe)
+            return TransformBasic(spec=spec, df=df)
 
         raise NotImplementedError("The transform strategy is not supported.")

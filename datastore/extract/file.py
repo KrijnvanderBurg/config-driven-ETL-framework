@@ -31,7 +31,7 @@ class ExtractFile(ExtractStrategy):
         Read File data.
 
         Returns:
-            DataFrame: A dataframe containing the data from the files.
+            DataFrame: A df containing the data from the files.
         """
         if self.spec.method == ExtractMethod.BATCH:
             return self._extract_batch()
@@ -49,7 +49,7 @@ class ExtractFile(ExtractStrategy):
         Read from file in batch mode.
 
         Returns:
-            DataFrame: A dataframe containing the data from batch extracting files.
+            DataFrame: A df containing the data from batch extracting files.
         """
         return SparkHandler.session.read.load(
             path=self.spec.location,
@@ -63,7 +63,7 @@ class ExtractFile(ExtractStrategy):
         Read from file in streaming mode.
 
         Returns:
-            DataFrame: A dataframe containing the data from streaming extracting files.
+            DataFrame: A df containing the data from streaming extracting files.
         """
         return SparkHandler.session.readStream.load(
             path=self.spec.location,

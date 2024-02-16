@@ -12,7 +12,7 @@ or visit https://creativecommons.org/licenses/by-nc-nd/4.0/ to view a copy.
 
 import pytest
 from datastore.schema import Schema
-from pyspark.sql import DataFrame
+from pyspark.sql import DataFrame, SparkSession
 
 pytest_plugins = [
     "tests.file_handler_test",
@@ -28,7 +28,7 @@ pytest_plugins = [
     "tests.transform.base_spec_test",
     "tests.transform.base_transform_test",
     "tests.transform.factory_test",
-    "tests.transform.functions.column_cast_test",
+    "tests.transform.functions.column_test",
     "tests.load.base_format_test",
     "tests.load.base_load_test",
     "tests.load.base_method_test",
@@ -42,13 +42,13 @@ pytest_plugins = [
 
 
 @pytest.fixture(name="df")
-def fixture_test_dataframe(spark, schema) -> DataFrame:
+def fixture_test_df(spark: SparkSession, schema: Schema) -> DataFrame:
     """
     Fixture for a Spark DataFrame with three columns: name, age, job_title.
 
     Args:
         spark (SparkSession): The Spark session object.
-        schema (StructType): Test dataframe schema fixture.
+        schema (StructType): Test df schema fixture.
 
     Returns:
         DataFrame: The test DataFrame.
@@ -61,13 +61,13 @@ def fixture_test_dataframe(spark, schema) -> DataFrame:
 
 
 @pytest.fixture(name="df_empty")
-def fixture_test_dataframe_empty(spark, schema: Schema) -> DataFrame:
+def fixture_test_df_empty(spark: SparkSession, schema: Schema) -> DataFrame:
     """
     Fixture for an empty Spark DataFrame
 
     Args:
         spark (SparkSession): The Spark session object.
-        schema (Schema): Test dataframe schema fixture.
+        schema (Schema): Test df schema fixture.
 
     Returns:
         DataFrame: Empty test DataFrame.

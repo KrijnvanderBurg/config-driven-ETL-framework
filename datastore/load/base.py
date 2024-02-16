@@ -85,16 +85,16 @@ class LoadSpec:
 class LoadStrategy(ABC):
     """Abstract Load class."""
 
-    def __init__(self, spec: LoadSpec, dataframe: DataFrame):
+    def __init__(self, spec: LoadSpec, df: DataFrame):
         """
         Construct Load instance.
 
         Args:
             spec (LoadSpec): Load specification for writing data.
-            dataframe (DataFrame): DataFrame to load.
+            df (DataFrame): DataFrame to load.
         """
         self.spec: LoadSpec = spec
-        self.dataframe: DataFrame = dataframe
+        self.df: DataFrame = df
 
     @abstractmethod
     def load(self) -> StreamingQuery | None:

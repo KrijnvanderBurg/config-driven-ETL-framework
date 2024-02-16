@@ -28,7 +28,7 @@ def test_load_abc_implementation(df: DataFrame, load_spec: LoadSpec) -> None:
 
     Args:
         load_spec (LoadSpec): LoadSpec fixture.
-        df (DataFrame): Test dataframe with schema but without rows fixture.
+        df (DataFrame): Test df with schema but without rows fixture.
     """
     # Arrange
     LoadStrategy.__abstractmethods__ = frozenset()
@@ -41,4 +41,4 @@ def test_load_abc_implementation(df: DataFrame, load_spec: LoadSpec) -> None:
             """Mock implementation of Load class for testing purposes."""
 
     # Assert
-    assert isinstance(MockLoad(spec=load_spec, dataframe=df), LoadStrategy)
+    assert isinstance(MockLoad(spec=load_spec, df=df), LoadStrategy)

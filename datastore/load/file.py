@@ -21,11 +21,11 @@ class LoadFile(LoadStrategy):
 
     Args:
         spec (LoadSpec): Load specification.
-        dataframe (DataFrame): DataFrame to be written.
+        df (DataFrame): DataFrame to be written.
     """
 
-    def __init__(self, spec: LoadSpec, dataframe: DataFrame):
-        super().__init__(spec, dataframe)
+    def __init__(self, spec: LoadSpec, df: DataFrame):
+        super().__init__(spec, df)
 
     def load(self) -> StreamingQuery | None:
         """
@@ -56,9 +56,7 @@ class LoadFile(LoadStrategy):
         """
         Write to file in batch mode.
         """
-        return self.dataframe.write.save(
-            path=self.spec.location, format=self.spec.data_format.value, **self.spec.options
-        )
+        return self.df.write.save(path=self.spec.location, format=self.spec.data_format.value, **self.spec.options)
 
     def _load_streaming(self) -> StreamingQuery:
         """
@@ -68,7 +66,7 @@ class LoadFile(LoadStrategy):
             StreamingQuery: Represents the ongoing streaming query.
         """
 
-        return self.dataframe.writeStream.start(
+        return self.df.writeStream.start(
             path=self.spec.location,
             format=self.spec.data_format.value,
             outputMode=self.spec.operation.value,

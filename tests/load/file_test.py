@@ -4,7 +4,7 @@ File load class tests.
 | ✓ | Tests
 |---|------------------------------------------------------------------
 | ✓ | Test load method returns correct type.
-| ✓ | Test writing a dataframe and load it results in equal dataframe.
+| ✓ | Test writing a df and load it results in equal df.
 | ✓ | Test that protected methods call the respective load method.
 
 
@@ -50,7 +50,7 @@ def fixture_load_file(
     """
 
     if load_spec_matrix.method == LoadMethod.BATCH:
-        yield LoadFile(spec=load_spec_matrix, dataframe=df)
+        yield LoadFile(spec=load_spec_matrix, df=df)
 
     if load_spec_matrix.method == LoadMethod.STREAMING:
         filepath = f"{tmpdir}/load.{load_spec_matrix.data_format}"
@@ -62,7 +62,7 @@ def fixture_load_file(
             schema=schema,
         )
 
-        yield LoadFile(spec=load_spec_matrix, dataframe=df_loadstream)
+        yield LoadFile(spec=load_spec_matrix, df=df_loadstream)
 
 
 # ============== Tests =============
@@ -77,7 +77,7 @@ def test_load_file_load_return_type(df: DataFrame, load_spec: LoadSpec) -> None:
         load_spec (LoadSpec): LoadFile fixture.
     """
     # Arrange
-    load_file = LoadFile(spec=load_spec, dataframe=df)
+    load_file = LoadFile(spec=load_spec, df=df)
 
     # Act
     try:
@@ -101,7 +101,7 @@ def test_load_file_load_called(df: DataFrame, load_spec: LoadSpec):
         load_spec (LoadSpec): LoadFile fixture.
     """
     # Arrange
-    load_file = LoadFile(spec=load_spec, dataframe=df)
+    load_file = LoadFile(spec=load_spec, df=df)
 
     # Arrange
     with (

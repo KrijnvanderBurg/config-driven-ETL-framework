@@ -20,20 +20,20 @@ class TransformBasic(TransformStrategy):
 
     Args:
         spec (TransformSpec): Transform specification.
-        dataframe (DataFrame): DataFrame to be transformed.
+        df (DataFrame): DataFrame to be transformed.
     """
 
-    def __init__(self, spec: TransformSpec, dataframe: DataFrame):
-        super().__init__(spec=spec, dataframe=dataframe)
+    def __init__(self, spec: TransformSpec, df: DataFrame):
+        super().__init__(spec=spec, df=df)
 
     def transform(self) -> DataFrame:
         """
-        Apply all transform functions on dataframe.
+        Apply all transform functions on df.
         """
         if not self.spec:
-            return self.dataframe
+            return self.df
 
         for transform in self.spec.transforms:
-            self.dataframe = self.dataframe.transform(func=transform.function)
+            self.df = self.df.transform(func=transform.function)
 
-        return self.dataframe
+        return self.df

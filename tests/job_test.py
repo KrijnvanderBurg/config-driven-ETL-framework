@@ -168,7 +168,7 @@ def test_job(job: Job, df: DataFrame) -> None:
 
 def test_job_without_transform(job: Job, df: DataFrame) -> None:
     """
-    Assert that job with no transform functions does not call transform, returning the dataframe.
+    Assert that job with no transform functions does not call transform, returning the df.
 
     Args:
         job (Job): Job matrix fixture.

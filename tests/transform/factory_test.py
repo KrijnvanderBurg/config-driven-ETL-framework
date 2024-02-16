@@ -37,7 +37,7 @@ def test_transform_factory(transform_spec_matrix, df: DataFrame) -> None:
     """
     try:
         # Act
-        transform = TransformContext.factory(spec=transform_spec_matrix, dataframe=df)
+        transform = TransformContext.factory(spec=transform_spec_matrix, df=df)
 
         # Assert
         assert isinstance(transform, TransformStrategy)

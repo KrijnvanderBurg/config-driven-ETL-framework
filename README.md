@@ -20,7 +20,7 @@ The extracted data is passed to the Transform stage.
 The `Job._transform()` method invokes the data transformation process by utilising `transform.factory.TransformFactory.get()`. This factory pattern dynamically determines the Transform functions to execute based on the list specified in the CONFETI file. The key `transform.function` is interpreted as a callable function, similar to a lambda function.
 
 - The factory identifies the function names and replaces them with its respective Callable function, incorporating the provided arguments.
-- Each callable function is performed on the DataFrame using `dataframe.transform(callable)`.
+- Each callable function is performed on the DataFrame using `df.transform(callable)`.
 
 The resulting transformed data is passed to the Load stage.
 
@@ -81,7 +81,7 @@ This example provides a template for configuring both the extract and load stage
     "transform": {
         "spec_id": "bronze-test-transform-dev",
         "transforms": [
-            {"function": "cast", "arguments": {"cols": {"age": "LongType"}}},
+            {"function": "cast", "arguments": {"columns": {"age": "LongType"}}},
             // etc.
         ],
     },

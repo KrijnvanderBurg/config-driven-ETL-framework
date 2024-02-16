@@ -30,24 +30,20 @@ def fixture_transform_spec() -> TransformSpec:
     Returns:
         (TransformSpec): TransformSpec fixture.
     """
-    transform = TransformFunction(function="cast", arguments={"cols": {"age": "LongType"}})
+    transform = TransformFunction(function="cast", arguments={"columns": {"age": "LongType"}})
     spec = TransformSpec(spec_id="bronze-test-transform-dev", transforms=[transform])
     return spec
 
 
-@pytest.fixture(
-    name="transform_spec_matrix",
-    params=["transform_cast"],
-)
-def fixture_transform_spec_matrix(request) -> TransformSpec:
+@pytest.fixture(name="transform_spec_matrix")
+def fixture_transform_spec_matrix() -> TransformSpec:
     """
     Matrix fixture for creating a LoadSpec instance.
 
     Returns:
         (TransformSpec): TransformSpec fixture.
     """
-    transform = request.getfixturevalue(request.param)
-
+    transform = TransformFunction(function="cast", arguments={"columns": {"age": "LongType"}})
     spec = TransformSpec(spec_id="bronze-test-transform-dev", transforms=[transform])
     return spec
 
@@ -61,7 +57,7 @@ def test_transform_spec_confeti() -> dict:
     return {
         "spec_id": "bronze-test-transform-dev",
         "functions": [
-            {"function": "cast", "arguments": {"cols": {"age": "LongType"}}},
+            {"function": "cast", "arguments": {"columns": {"age": "LongType"}}},
         ],
     }
 

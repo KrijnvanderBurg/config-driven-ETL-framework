@@ -24,13 +24,13 @@ class LoadContext(ABC):
     """Abstract class representing a factory for creating data loads."""
 
     @classmethod
-    def factory(cls, spec: LoadSpec, dataframe: DataFrame) -> LoadStrategy:
+    def factory(cls, spec: LoadSpec, df: DataFrame) -> LoadStrategy:
         """
         Get a load instance based on the load specification via factory pattern.
 
         Args:
             spec (LoadSpec): Load specification to write data.
-            dataframe (DataFrame): DataFrame to be written.
+            df (DataFrame): DataFrame to be written.
 
         Returns:
             Load: An instance of a data load.
@@ -39,9 +39,9 @@ class LoadContext(ABC):
             NotImplementedError: If the specified load format is not implemented.
         """
         factory = {
-            LoadFormat.PARQUET: LoadFile(spec=spec, dataframe=dataframe),
-            LoadFormat.JSON: LoadFile(spec=spec, dataframe=dataframe),
-            LoadFormat.CSV: LoadFile(spec=spec, dataframe=dataframe),
+            LoadFormat.PARQUET: LoadFile(spec=spec, df=df),
+            LoadFormat.JSON: LoadFile(spec=spec, df=df),
+            LoadFormat.CSV: LoadFile(spec=spec, df=df),
         }
 
         extract_strategy = LoadFormat(spec.data_format)

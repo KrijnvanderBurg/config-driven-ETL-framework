@@ -4,7 +4,7 @@ File extract class tests.
 | ✓ | Tests
 |---|------------------------------------------------------------------
 | ✓ | Test extract method returns correct type.
-| ✓ | Test writing a dataframe and extract it results in equal dataframe.
+| ✓ | Test writing a df and extract it results in equal df.
 | ✓ | Test that protected methods call the respective extract method.
 
 

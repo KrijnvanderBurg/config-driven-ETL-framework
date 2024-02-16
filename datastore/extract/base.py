@@ -95,6 +95,6 @@ class ExtractStrategy(ABC):
         Abstract extract method.
 
         Returns:
-            A dataframe extract according to the extract specification.
+            A df extract according to the extract specification.
         """
         raise NotImplementedError
