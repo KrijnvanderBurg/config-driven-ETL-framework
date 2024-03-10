@@ -22,6 +22,7 @@ from unittest import mock
 import pytest
 from datastore.extract.base import ExtractMethod, ExtractSpec
 from datastore.extract.file import ExtractFile
+from datastore.spark_handler import SparkHandler
 from pyspark import testing
 from pyspark.sql import DataFrame, SparkSession
 
@@ -54,6 +55,7 @@ def test_extract_file_extract_type(df: DataFrame, extract_spec: ExtractSpec) -> 
         extract_spec (ExtractSpec): The ExtractSpec for testing.
     """
     # Arrange
+    SparkHandler.get_or_create()
     extract_file = ExtractFile(spec=extract_spec)
 
     df.write.format(extract_file.spec.data_format.value).save(extract_file.spec.location)
@@ -73,6 +75,8 @@ def test_extract_file_extract_called(extract_file_matrix: ExtractFile) -> None:
         extract_file_matrix (ExtractFile): Matrix ExtractFile fixture.
     """
     # Arrange
+    SparkHandler.get_or_create()
+
     with (
         mock.patch.object(extract_file_matrix, "_extract_batch") as extract_batch_mock,
         mock.patch.object(extract_file_matrix, "_extract_streaming") as extract_streaming_mock,
@@ -102,6 +106,7 @@ def test_extract_file_extract_df_equals(spark: SparkSession, df: DataFrame, extr
     Returns: None
     """
     # Arrange
+    SparkHandler.get_or_create()
     df.write.format(extract_file_matrix.spec.data_format.value).save(extract_file_matrix.spec.location)
 
     # Act

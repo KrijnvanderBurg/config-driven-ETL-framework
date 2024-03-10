@@ -40,12 +40,13 @@ class SparkHandler:
 
         if session:
             cls.session = session
-        else:
-            # get application name of active session
-            if active_session := SparkSession.getActiveSession():
-                app_name = active_session.sparkContext.appName or "datastore"
+            return cls.session
 
-            session_builder = SparkSession.builder.appName(app_name)
-            cls.session = session_builder.getOrCreate()
+        # get application name of active session
+        if active_session := SparkSession.getActiveSession():
+            app_name = active_session.sparkContext.appName or "datastore"
+
+        session_builder = SparkSession.builder.appName(app_name)
+        cls.session = session_builder.getOrCreate()
 
         return cls.session
