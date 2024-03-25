@@ -1,7 +1,7 @@
 """
-Transform Factory.
+Transform Strategy.
 
-This module provides an abstract factory class `TransformFactory` for creating instances of data transforms.
+This module provides an abstract strategy class `TransformStrategy` for creating instances of data transforms.
 The transform implementations are located in the `datastore.transform` module.
 
 
@@ -21,12 +21,12 @@ from pyspark.sql import DataFrame
 
 
 class TransformContext(ABC):
-    """Abstract class representing a factory for creating data extracts."""
+    """Abstract class representing a strategy context for creating data extracts."""
 
     @classmethod
-    def factory(cls, spec: TransformSpec, df: DataFrame) -> TransformStrategy:
+    def get(cls, spec: TransformSpec, df: DataFrame) -> TransformStrategy:
         """
-        Get a Transform instance based on the Transform specification using the factory pattern.
+        Get a Transform instance based on the Transform specification using the strategy pattern.
 
         Args:
             spec (TransformSpec): Transform specification to transform data.

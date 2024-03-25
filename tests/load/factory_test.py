@@ -41,7 +41,7 @@ def test_load_factory(df: DataFrame, load_spec_matrix: LoadSpec) -> None:
     """
     try:
         # Act
-        load = LoadContext.factory(spec=load_spec_matrix, df=df)
+        load = LoadContext.get(spec=load_spec_matrix, df=df)
         # Assert
         assert isinstance(load, LoadStrategy)
     # Assert

@@ -1,7 +1,7 @@
 """
-IO Extract Interface and Factory.
+IO Extract Interface and Strategy.
 
-This module provides an abstract factory class `ExtractFactory` for creating instances of data extracts.
+This module provides an abstract strategy class `ExtractStrategy` for creating instances of data extracts.
 Extract implementations are located in the `datastore.extract` module.
 
 
@@ -20,12 +20,12 @@ from datastore.extract.file import ExtractFile
 
 
 class ExtractContext(ABC):
-    """Abstract class representing a factory for creating data extracts."""
+    """Abstract class representing a strategy context for creating data extracts."""
 
     @classmethod
-    def factory(cls, spec: ExtractSpec) -> ExtractStrategy:
+    def get(cls, spec: ExtractSpec) -> ExtractStrategy:
         """
-        Get an extract instance based on the extract specification using the factory pattern.
+        Get an extract instance based on the extract specification using the strategy pattern.
 
         Args:
             spec (ExtractSpec): Extract specification to extract data.
@@ -36,7 +36,7 @@ class ExtractContext(ABC):
         Raises:
             NotImplementedError: If the specified extract format is not supported.
         """
-        factory = {
+        strategy = {
             ExtractFormat.PARQUET: ExtractFile(spec=spec),
             ExtractFormat.JSON: ExtractFile(spec=spec),
             ExtractFormat.CSV: ExtractFile(spec=spec),
@@ -44,7 +44,7 @@ class ExtractContext(ABC):
 
         extract_strategy = ExtractFormat(spec.data_format)
 
-        if extract_strategy:
-            return factory[extract_strategy]
+        if extract_strategy in strategy.keys():
+            return strategy[extract_strategy]
 
         raise NotImplementedError(f"Extract strategy {spec.data_format.value} is not supported.")

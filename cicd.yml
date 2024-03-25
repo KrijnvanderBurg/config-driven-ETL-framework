@@ -3,7 +3,7 @@ resources:
   - repository: cicd
     type: git
     name: CompliancyCarnivalCacophony/az.cicd.templates
-    ref: refs/heads/main
+    ref: refs/heads/feature/fix_jobs
 
 trigger:
   branches:
@@ -11,8 +11,6 @@ trigger:
     - main
 
 extends:
-  template: /pipelines/python/wheel/azure-pipelines.yml@cicd
+  template: /pipelines/datastore/azure-pipelines.yml@cicd
   parameters:
     pythonVersion: 3.11
-    coveragePath: .
-    

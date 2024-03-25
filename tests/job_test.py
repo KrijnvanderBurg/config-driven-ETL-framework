@@ -143,7 +143,7 @@ def test_job_from_confeti(job_confeti: dict) -> None:
 
 def test_job(job: Job, df: DataFrame) -> None:
     """
-    Assert that job calls all extract, transform, and load factory methods.
+    Assert that job calls all extract, transform, and load strategy methods.
 
     Args:
         job (Job): Job matrix fixture.

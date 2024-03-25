@@ -1,7 +1,7 @@
 """
-IO Load Interface and Factory.
+IO Load Interface and Strategy.
 
-This module provides an abstract factory class `LoadFactory` for creating instances of data loads.
+This module provides an abstract strategy class `LoadStrategy` for creating instances of data loads.
 The load implementations are located in the `datastore.loads` module.
 
 
@@ -21,12 +21,12 @@ from pyspark.sql import DataFrame
 
 
 class LoadContext(ABC):
-    """Abstract class representing a factory for creating data loads."""
+    """Abstract class representing a strategy context for creating data loads."""
 
     @classmethod
-    def factory(cls, spec: LoadSpec, df: DataFrame) -> LoadStrategy:
+    def get(cls, spec: LoadSpec, df: DataFrame) -> LoadStrategy:
         """
-        Get a load instance based on the load specification via factory pattern.
+        Get a load instance based on the load specification via strategy pattern.
 
         Args:
             spec (LoadSpec): Load specification to write data.
@@ -38,7 +38,7 @@ class LoadContext(ABC):
         Raises:
             NotImplementedError: If the specified load format is not implemented.
         """
-        factory = {
+        strategy = {
             LoadFormat.PARQUET: LoadFile(spec=spec, df=df),
             LoadFormat.JSON: LoadFile(spec=spec, df=df),
             LoadFormat.CSV: LoadFile(spec=spec, df=df),
@@ -46,7 +46,7 @@ class LoadContext(ABC):
 
         extract_strategy = LoadFormat(spec.data_format)
 
-        if extract_strategy:
-            return factory[extract_strategy]
+        if extract_strategy in strategy.keys():
+            return strategy[extract_strategy]
 
         raise NotImplementedError(f"Load strategy {spec.data_format} is not supported.")

@@ -3,8 +3,8 @@ TransformFactory class tests.
 
 | ✓ | Tests
 |---|-----------------------------------------------------------
-| ✓ | Create Transform class from Factory by spec format.
-| ✓ | Raise NotImplementedError in Factory if spec combination is not implemented.
+| ✓ | Create Transform class from Strategy by spec format.
+| ✓ | Raise NotImplementedError in Strategy if spec combination is not implemented.
 
 
 Copyright (c) Krijn van der Burg.
@@ -37,7 +37,7 @@ def test_transform_factory(transform_spec_matrix, df: DataFrame) -> None:
     """
     try:
         # Act
-        transform = TransformContext.factory(spec=transform_spec_matrix, df=df)
+        transform = TransformContext.get(spec=transform_spec_matrix, df=df)
 
         # Assert
         assert isinstance(transform, TransformStrategy)

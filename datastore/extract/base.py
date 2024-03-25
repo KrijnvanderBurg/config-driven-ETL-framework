@@ -1,5 +1,5 @@
 """
-IO extract interface and factory, extract implementations are in module datastore.loads.
+IO extract interface and strategy, extract implementations are in module datastore.loads.
 
 
 Copyright (c) Krijn van der Burg.

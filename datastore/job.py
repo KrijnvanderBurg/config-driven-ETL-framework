@@ -73,8 +73,8 @@ class Job:
         Returns:
             DataFrame: Extracted data.
         """
-        factory = ExtractContext.factory(spec=self.extract_spec)
-        df = factory.extract()
+        strategy = ExtractContext.get(spec=self.extract_spec)
+        df = strategy.extract()
         return df
 
     def _transform(self, df: DataFrame) -> DataFrame:
@@ -87,8 +87,8 @@ class Job:
         Returns:
             DataFrame: transformed data.
         """
-        factory = TransformContext.factory(spec=self.transform_spec, df=df)
-        df = factory.transform()
+        strategy = TransformContext.get(spec=self.transform_spec, df=df)
+        df = strategy.transform()
         return df
 
     def _load(self, df: DataFrame) -> StreamingQuery | None:
@@ -101,6 +101,6 @@ class Job:
         Returns:
             DataFrame: The loaded data.
         """
-        factory = LoadContext.factory(spec=self.load_spec, df=df)
-        sq = factory.load()
+        strategy = LoadContext.get(spec=self.load_spec, df=df)
+        sq = strategy.load()
         return sq

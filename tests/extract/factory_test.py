@@ -39,7 +39,7 @@ def test_extract_factory(extract_spec_matrix: ExtractSpec) -> None:
     """
     try:
         # Act
-        extract = ExtractContext.factory(spec=extract_spec_matrix)
+        extract = ExtractContext.get(spec=extract_spec_matrix)
         # Assert
         assert isinstance(extract, ExtractStrategy)
     # Assert
