@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "datastore"
-version = "0.0.20"
+version = "0.0.24"
 description = "Config driven Data Ingestion Framework"
 authors = ["Krijn van der Burg <krijnvdburg@protonmail.com>"]
 readme = "README.md"
@@ -9,6 +9,8 @@ readme = "README.md"
 python = "^3.11"
 pyspark = "^3.5.0"
 pyarrow = "^14.0.2"
+pyyaml = "^6.0.1"
+jsonschema = "^4.21.1"
 
 [tool.poetry.group.test.dependencies]
 pytest = "^8.1.1"
