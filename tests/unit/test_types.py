@@ -8,12 +8,20 @@ from ingestion_framework.types import RegistryDecorator, RegistryInstance, Singl
 
 
 class TestSingleton:
-    """
-    Unit tests for the SingletonType metaclass.
+    """Unit tests for the Singleton metaclass.
+
+    This test class validates the behavior of the Singleton metaclass implementation,
+    ensuring that only a single instance of any class using this metaclass is created,
+    regardless of how many times the class is instantiated.
     """
 
     def test_singleton_instance_creation(self) -> None:
-        """Test that a singleton class only creates one instance."""
+        """Test that a singleton class only creates one instance.
+
+        This test verifies that multiple instantiations of a class using the
+        Singleton metaclass return the same object instance, maintaining the
+        singleton pattern integrity.
+        """
 
         # Arrange
         class TestClassSingleton(metaclass=Singleton):

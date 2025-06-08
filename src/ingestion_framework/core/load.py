@@ -1,8 +1,16 @@
-"""
-Load interface and implementations for various data formats.
+"""Load interface and implementations for various data formats.
 
-This module provides abstract classes and implementations for data loading
-to various destinations and formats.
+This module provides abstract classes and implementations for loading data to
+various destinations and formats using Apache PySpark. It includes:
+
+- Abstract base classes defining the loading interface
+- Concrete implementations for different output formats (CSV, JSON, etc.)
+- Support for both batch and streaming writes
+- Registry mechanisms for dynamically selecting appropriate loaders
+- Configuration-driven loading functionality
+
+The Load components represent the final phase in the ETL pipeline, responsible
+for writing processed data to target destinations.
 """
 
 import json
@@ -107,7 +115,6 @@ class Load(Generic[LoadModelT], ABC):
         spark_handler: SparkHandler = SparkHandler()
         spark_handler.add_configs(options=self.model.options)
 
-        # Copy the dataframe from upstream to current name
         self.data_registry[self.model.name] = self.data_registry[self.model.upstream_name]
 
         if self.model.method == LoadMethod.BATCH:

@@ -1,3 +1,9 @@
+"""Logging utilities for the ingestion framework.
+
+This module provides standardized logging configuration for the framework,
+with support for both console and file-based logging with rotation.
+"""
+
 import logging
 from logging.handlers import RotatingFileHandler
 from sys import stdout
@@ -7,16 +13,26 @@ FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(
 
 
 def set_logger(name: str, filename: str = "ingestion.log", level: int = logging.INFO) -> logging.Logger:
-    """
-    Configure the logging settings.
+    """Configure and return a logger with file and console handlers.
+
+    Creates a logger with the specified name and configures it with both a rotating
+    file handler and a console handler. The file handler automatically rotates log
+    files when they reach 5MB, keeping up to 10 backup files.
 
     Args:
-        name (str): Logger name.
-        filename (str): Name of the log file, defaults to "ingestion.log" (optional).
-        level (enum): Logging level (default is INFO).
+        name: The name for the logger, typically the module name
+        filename: Path to the log file (defaults to "ingestion.log")
+        level: The minimum logging level to capture (defaults to INFO)
 
     Returns:
-        logging.Logger: Configured logger instance.
+        A configured Logger instance ready to use
+
+    Example:
+        ```python
+        logger = set_logger(__name__)
+        logger.info("Processing started")
+        logger.error("An error occurred: %s", error_message)
+        ```
     """
     logger = logging.getLogger(name)
 

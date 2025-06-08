@@ -19,14 +19,14 @@ from ingestion_framework.utils.spark import SparkHandler
 
 
 # https://learn.microsoft.com/en-us/azure/databricks/sql/language-manual/functions/cast
-@pytest.mark.parametrize("confeti_path", glob.glob("tests/e2e/**/confeti.json", recursive=True))
-def test__main(tmp_path: Path, confeti_path: str) -> None:
+@pytest.mark.parametrize("job_path", glob.glob("tests/e2e/**/job.json", recursive=True))
+def test__main(tmp_path: Path, job_path: str) -> None:
     """Test main function with different configurations."""
     # Arrange
-    confeti_tmp_path = Path(tmp_path, "confeti_cast.json")
+    job_tmp_path = Path(tmp_path, "job_cast.json")
 
     # Step 1: Read the original JSON file
-    with open(file=confeti_path, mode="r", encoding="utf-8") as file:
+    with open(file=job_path, mode="r", encoding="utf-8") as file:
         data: dict = json.load(file)
 
     # Step 2: Prepend the load location filepath with tmp_path to write results to temporary directory
@@ -35,14 +35,14 @@ def test__main(tmp_path: Path, confeti_path: str) -> None:
         load[SCHEMA_LOCATION] = str(Path(tmp_path, load[SCHEMA_LOCATION]))
 
     # Step 3: Overwrite the modified data to the existing JSON file
-    with open(file=confeti_tmp_path, mode="w", encoding="utf-8") as file:
+    with open(file=job_tmp_path, mode="w", encoding="utf-8") as file:
         json.dump(data, file)
 
     # Step 4: Create a Spark session, only needed for reading output files to assert equal
     SparkHandler()
 
     # Step 5: Use the modified file path for the test
-    args = argparse.Namespace(filepath=str(confeti_tmp_path))
+    args = argparse.Namespace(config_filepath=str(job_tmp_path))
 
     with mock.patch.object(argparse.ArgumentParser, "parse_args", return_value=args):
         # Act

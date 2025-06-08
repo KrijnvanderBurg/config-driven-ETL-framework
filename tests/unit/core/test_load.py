@@ -83,9 +83,7 @@ class TestLoadRegistry:
 
 
 class TestLoad:
-    """
-    Unit tests for the Load class.
-    """
+    """Unit tests for the Load class and its implementations."""
 
     def test_load_initialization(self) -> None:
         """Test Load initialization."""
@@ -106,7 +104,7 @@ class TestLoad:
     def test_from_dict(self, mock_from_dict: MagicMock) -> None:
         """Test creating a Load from a dict."""
         # Arrange
-        load_dict = {
+        load_dict: dict = {
             "name": "test_load",
             "upstream_name": "source",
             "method": "batch",

@@ -1,0 +1,6 @@
+{"order_id": 101, "customer_id": 1, "order_date": "2022-06-10", "amount": 125.99}
+{"order_id": 102, "customer_id": 3, "order_date": "2022-06-12", "amount": 89.50}
+{"order_id": 103, "customer_id": 2, "order_date": "2022-06-15", "amount": 54.25}
+{"order_id": 104, "customer_id": 5, "order_date": "2022-06-18", "amount": 210.75}
+{"order_id": 105, "customer_id": 1, "order_date": "2022-06-22", "amount": 75.00}
+{"order_id": 106, "customer_id": 4, "order_date": "2022-06-25", "amount": 44.99}

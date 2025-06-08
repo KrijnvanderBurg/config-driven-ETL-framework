@@ -1,7 +1,15 @@
-"""
- implementation for data transformation operations.
+"""PySpark implementation for data transformation operations.
 
-This module provides concrete implementations for transforming data using .
+This module provides concrete implementations for transforming data using Apache PySpark.
+It includes:
+
+- Abstract base classes defining the transformation interface
+- Function-based transformation support with configurable arguments
+- Registry mechanisms for dynamically selecting transformation functions
+- Configuration-driven transformation functionality
+
+The Transform components represent the middle phase in the ETL pipeline, responsible
+for manipulating data between extraction and loading.
 """
 
 from abc import ABC, abstractmethod
@@ -23,10 +31,24 @@ FunctionModelT = TypeVar("FunctionModelT", bound=FunctionModel)
 
 
 class TransformFunctionRegistry(RegistryDecorator, metaclass=Singleton):
-    """
-    Registry for Transform Function implementations.
+    """Registry for transformation function implementations.
 
-    Maps function names to concrete Function implementations.
+    A singleton registry that maps function names to their corresponding
+    concrete Function implementations.
+
+    This registry enables dynamic selection of the appropriate transformation
+    function based on the function name specified in the configuration.
+
+    Example:
+        ```python
+        # Register a new transformation function
+        @TransformFunctionRegistry.register("filter_data")
+        class FilterFunction(Function):
+            # Implementation
+
+        # Get the registered implementation for a function
+        function_class = TransformFunctionRegistry.get("filter_data")
+        ```
     """
 
 
@@ -38,7 +60,7 @@ class Function(Generic[FunctionModelT], ABC):
     Each function has a model that defines its behavior and parameters.
     """
 
-    model_concrete: type[FunctionModelT]
+    _model: type[FunctionModelT]
 
     def __init__(self, model: FunctionModelT) -> None:
         """
@@ -49,6 +71,7 @@ class Function(Generic[FunctionModelT], ABC):
         """
         self.model = model
         self.callable_ = self.transform()
+        self.data_registry = DataFrameRegistry()
 
     @abstractmethod
     def transform(self) -> Callable[..., Any]:
@@ -76,7 +99,7 @@ class Function(Generic[FunctionModelT], ABC):
         Raises:
             DictKeyError: If required keys are missing from the configuration.
         """
-        model = cls.model_concrete.from_dict(dict_=dict_)
+        model = cls._model.from_dict(dict_=dict_)
         return cls(model=model)
 
 
@@ -149,6 +172,6 @@ class Transform(Generic[FunctionT]):
         # Copy the dataframe from upstream to current name
         self.data_registry[self.model.name] = self.data_registry[self.model.upstream_name]
 
-        # Apply transformations sequentially
+        # Apply transformations
         for function in self.functions:
-            function.callable_(dataframe_registry=self.data_registry, dataframe_name=self.model.name)
+            self.data_registry[self.model.name] = function.callable_(df=self.data_registry[self.model.name])

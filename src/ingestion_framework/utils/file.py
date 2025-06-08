@@ -1,8 +1,15 @@
-"""
-File handling utilities for reading and validating configuration files.
+"""File handling utilities for reading and validating configuration files.
 
 This module provides a factory implementation for handling different file formats
-like JSON, YAML, etc. with a common interface.
+like JSON, YAML, etc. with a common interface. It includes:
+
+- Abstract base FileHandler class defining the file handling interface
+- Concrete implementations for different file formats (JSON, YAML, etc.)
+- Factory pattern for dynamically selecting appropriate file handlers
+- Validation utilities to ensure files exist and have correct format
+
+The file handlers are primarily used for loading ETL pipeline configurations,
+but can be used for any structured data file reading needs.
 """
 
 import json
@@ -15,16 +22,27 @@ import yaml
 
 
 class FileHandler(ABC):
-    """
-    Base file handler class for reading configuration files.
+    """Abstract base class for file handling operations.
+
+    Provides a common interface for file operations like checking existence,
+    reading content, and validating format across different file types.
+
+    All concrete file handlers should inherit from this class and implement
+    the required abstract methods.
+
+    Attributes:
+        filepath: Path to the file being handled
     """
 
     def __init__(self, filepath: Path) -> None:
-        """
-        Initialize the file handler with a file path.
+        """Initialize the file handler with a file path.
 
         Args:
-            filepath (str): The path to the file.
+            filepath: Path object pointing to the target file
+
+        Note:
+            The file is not accessed during initialization,
+            only when operations are performed.
         """
         self.filepath = filepath
 

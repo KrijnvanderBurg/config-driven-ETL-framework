@@ -1,5 +1,13 @@
-"""
-Calculate birth year transform function model.
+"""Configuration model for the birth year calculation transform function.
+
+This module defines the data models used to configure birth year calculation
+transformations in the ingestion framework. It includes:
+
+- CalculateBirthYearFunctionModel: Main configuration model for birth year calculations
+- Args nested class: Container for the calculation parameters
+
+These models provide a type-safe interface for configuring birth year calculations
+from configuration files or dictionaries.
 """
 
 from dataclasses import dataclass
@@ -17,14 +25,29 @@ BIRTH_YEAR_COLUMN: Final[str] = "birth_year_column"
 
 @dataclass
 class CalculateBirthYearFunctionModel(FunctionModel):
-    """A concrete implementation of calculate birth year function."""
+    """Configuration model for birth year calculation transform operations.
+
+    This model defines the structure for configuring a birth year calculation
+    transformation, specifying which columns to use, the current year, and
+    where to store the results.
+
+    Attributes:
+        function: The name of the function to be used (always "calculate_birth_year")
+        arguments: Container for the calculation parameters
+    """
 
     function: str
     arguments: "CalculateBirthYearFunctionModel.Args"
 
     @dataclass
     class Args:
-        """Arguments for calculate birth year function."""
+        """Arguments for birth year calculation transform operations.
+
+        Attributes:
+            current_year: The reference year to use for the calculation
+            age_column: The source column containing the person's age
+            birth_year_column: The target column to store the calculated birth year
+        """
 
         current_year: int
         age_column: str
