@@ -1,9 +1,0 @@
-{
-    "type": "struct",
-    "fields": [
-        {"name": "name", "type": "string", "nullable": true, "metadata": {}},
-        {"name": "age", "type": "integer", "nullable": true, "metadata": {}},
-        {"name": "job_title", "type": "string", "nullable": true, "metadata": {}},
-        {"name": "started_at", "type": "interval day to time", "nullable": false, "metadata": {}}
-    ]
-}
