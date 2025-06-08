@@ -1,5 +1,10 @@
-"""
-Column transform function.
+"""Column selection transform function.
+
+This module provides a transform function for selecting specific columns
+from a DataFrame, allowing for projection operations in the ETL pipeline.
+
+The SelectFunction is registered with the TransformFunctionRegistry under
+the name 'select', making it available for use in configuration files.
 """
 
 from collections.abc import Callable
@@ -16,25 +21,44 @@ COLUMNS: Final[str] = "columns"
 
 @TransformFunctionRegistry.register("select")
 class SelectFunction(Function[SelectFunctionModel]):
-    """
-    Encapsulates column transformation logic for DataFrames.
+    """Function that selects specified columns from a DataFrame.
+
+    This transform function allows for projecting specific columns from
+    a DataFrame, similar to the SELECT statement in SQL. It's useful for
+    filtering out unnecessary columns and focusing only on the data needed
+    for downstream processing.
+
+    The function is configured using a SelectFunctionModel that specifies
+    which columns to include in the output.
 
     Attributes:
-        model (...): The SelectModel object containing the Selecting information.
+        model: Configuration model specifying which columns to select
+        model_concrete: The concrete model class used for configuration
+        data_registry: Shared registry for accessing and storing DataFrames
 
-    Methods:
-        from_dict(dict_: dict[str, Any]) -> Self: Create SelectTransform object from json.
-        transform() -> Callable: Selects column(s) to new type.
+    Example:
+        ```json
+        {
+            "function": "select",
+            "arguments": {
+                "columns": ["id", "name", "age"]
+            }
+        }
+        ```
     """
 
     model_concrete = SelectFunctionModel
 
     def transform(self) -> Callable:
-        """
-        Selects columns with aliases.
+        """Apply the column selection transformation to the DataFrame.
+
+        This method extracts the column selection configuration from the model
+        and applies it to the DataFrame, returning only the specified columns.
+        It supports selecting specific columns by name.
 
         Returns:
-            (Callable): Function for `DataFrame.transform()`.
+            A callable function that performs the column selection when applied
+            to a DataFrame
 
         Examples:
             Consider the following DataFrame schema:

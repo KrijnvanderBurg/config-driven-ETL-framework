@@ -1,5 +1,14 @@
-"""
-TODO
+"""Command-line interface for the PySpark Ingestion Framework.
+
+This module provides a command-line entry point for executing data ingestion
+jobs defined by configuration files. It parses command-line arguments,
+validates inputs, initializes the job from a configuration file, and
+executes the ETL pipeline.
+
+Example:
+    ```
+    python -m ingestion_framework --filepath path/to/config.json
+    ```
 """
 
 import logging
@@ -13,7 +22,18 @@ logger: logging.Logger = set_logger(__name__)
 
 
 def main() -> None:
-    """TODO"""
+    """Run the ingestion framework pipeline from command line arguments.
+
+    Parses command line arguments, validates the input filepath,
+    creates a job from the specified configuration file, and
+    executes the ETL pipeline.
+
+    Returns:
+        None
+
+    Raises:
+        ValueError: If the filepath argument is empty.
+    """
     logger.info("Starting something...")
 
     parser = ArgumentParser(description="config driven etl.")

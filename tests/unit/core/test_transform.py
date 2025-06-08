@@ -7,11 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ingestion_framework.core.transform import (
-    Function,
-    Transform,
-    TransformFunctionRegistry,
-)
+from ingestion_framework.core.transform import Function, Transform, TransformFunctionRegistry
 from ingestion_framework.models.model_transform import TransformModel
 from ingestion_framework.types import DataFrameRegistry
 
@@ -81,10 +77,8 @@ class TestFunction(Function[MockFunctionModel]):
         return transform_func
 
 
-class TestTransformClass:
-    """
-    Unit tests for the Transform class.
-    """
+class TestTransform:
+    """Unit tests for the Transform class and its implementations."""
 
     def test_transform_initialization(self) -> None:
         """Test Transform initialization."""

@@ -1,7 +1,15 @@
-"""
-PySpark implementation for data extraction operations.
+"""Data models for extraction operations in the ingestion framework.
 
-This module provides concrete implementations for extracting data using PySpark.
+This module defines the data models and configuration structures used for
+representing extraction operations. It includes:
+
+- Enums for representing extraction methods and formats
+- Data classes for structuring extraction configuration
+- Utility methods for parsing and validating extraction parameters
+- Constants for standard configuration keys
+
+These models serve as the configuration schema for the Extract components
+and provide a type-safe interface between configuration and implementation.
 """
 
 from dataclasses import dataclass
@@ -25,8 +33,13 @@ OPTIONS: Final[str] = "options"
 
 
 class ExtractMethod(Enum):
-    """
-    Types of extract modes.
+    """Enumeration of supported data extraction methods.
+
+    Defines the different methods that can be used to read data from sources,
+    such as batch processing or streaming.
+
+    These values are used in configuration files to specify how data should
+    be extracted from the source.
     """
 
     BATCH = "batch"

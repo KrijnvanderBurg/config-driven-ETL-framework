@@ -1,7 +1,15 @@
-"""
- implementation for data transformation operations.
+"""PySpark implementation for data transformation operations.
 
-This module provides concrete implementations for transforming data using .
+This module provides concrete implementations for transforming data using Apache PySpark.
+It includes:
+
+- Abstract base classes defining the transformation interface
+- Function-based transformation support with configurable arguments
+- Registry mechanisms for dynamically selecting transformation functions
+- Configuration-driven transformation functionality
+
+The Transform components represent the middle phase in the ETL pipeline, responsible
+for manipulating data between extraction and loading.
 """
 
 from abc import ABC, abstractmethod
@@ -23,10 +31,24 @@ FunctionModelT = TypeVar("FunctionModelT", bound=FunctionModel)
 
 
 class TransformFunctionRegistry(RegistryDecorator, metaclass=Singleton):
-    """
-    Registry for Transform Function implementations.
+    """Registry for transformation function implementations.
 
-    Maps function names to concrete Function implementations.
+    A singleton registry that maps function names to their corresponding
+    concrete Function implementations.
+
+    This registry enables dynamic selection of the appropriate transformation
+    function based on the function name specified in the configuration.
+
+    Example:
+        ```python
+        # Register a new transformation function
+        @TransformFunctionRegistry.register("filter_data")
+        class FilterFunction(Function):
+            # Implementation
+
+        # Get the registered implementation for a function
+        function_class = TransformFunctionRegistry.get("filter_data")
+        ```
     """
 
 

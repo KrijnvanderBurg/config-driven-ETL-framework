@@ -1,5 +1,13 @@
-"""
-Unit tests for the job module.
+"""Unit tests for the job module.
+
+This module contains tests for the Job class, which is the central component
+of the ingestion framework responsible for orchestrating the ETL pipeline.
+
+The tests verify various aspects of Job functionality including:
+- Initialization with extracts, transforms, and loads
+- Creation from configuration files and dictionaries
+- Execution of the complete ETL pipeline
+- Proper sequencing of extract, transform, and load operations
 """
 
 from pathlib import Path
@@ -14,12 +22,21 @@ from ingestion_framework.core.transform import Transform
 
 
 class TestJob:
-    """
-    Unit tests for the Job class.
+    """Unit tests for the Job class.
+
+    Tests cover:
+        - Initialization with extract, transform, and load components
+        - Creation from configuration files and dictionaries
+        - Execution and sequencing of ETL pipeline phases
+        - Error handling for missing configuration keys
     """
 
-    def test_job_initialization(self) -> None:
-        """Test Job initialization."""
+    def test_init(self) -> None:
+        """Test Job initialization with extract, transform, and load components.
+
+        Verifies that a Job instance correctly stores the provided extract,
+        transform, and load components when initialized.
+        """
         # Arrange
         extracts = [MagicMock(spec=Extract)]
         transforms = [MagicMock(spec=Transform)]
@@ -34,8 +51,8 @@ class TestJob:
         assert job.loads == loads
 
     @patch("ingestion_framework.utils.file.FileHandlerContext.from_filepath")
-    def test_from_file_json(self, mock_from_filepath: MagicMock) -> None:
-        """Test creating a Job from a JSON file."""
+    def test_from_file(self, mock_from_filepath: MagicMock) -> None:
+        """Test creating a Job from a configuration file."""
         # Arrange
         mock_file_handler = MagicMock()
         mock_file_handler.read.return_value = {
@@ -92,9 +109,9 @@ class TestJob:
             Job.from_file(Path("test.yaml"))
 
     def test_from_dict(self) -> None:
-        """Test creating a Job from a dictionary."""
+        """Test creating a Job from a configuration dictionary."""
         # Arrange
-        job_dict = {
+        job_dict: dict = {
             "extracts": [{"name": "test_extract"}],
             "transforms": [{"name": "test_transform", "upstream_name": "test_extract"}],
             "loads": [{"name": "test_load", "upstream_name": "test_transform"}],
@@ -133,7 +150,7 @@ class TestJob:
             assert job.loads[0] == mock_load
 
     def test_execute(self) -> None:
-        """Test the job execution flow."""
+        """Test execution of the ETL pipeline (extract, transform, load)."""
         # Arrange
         extract = MagicMock(spec=Extract)
 

@@ -1,3 +1,14 @@
+"""Unit tests for the file handling utility module.
+
+This module contains tests for the file handling utilities that are responsible
+for reading and parsing configuration files in various formats like JSON and YAML.
+
+The tests verify that:
+- Files in different formats can be correctly read and parsed
+- Error conditions like missing files are properly handled
+- The factory pattern correctly selects the appropriate handler for each file type
+"""
+
 from pathlib import Path
 from unittest.mock import mock_open, patch
 
@@ -8,7 +19,13 @@ from ingestion_framework.utils.file import FileHandlerContext, FileJsonHandler, 
 
 
 class TestYamlHandler:
-    """Tests for FileYamlHandler class."""
+    """Unit tests for FileYamlHandler.
+
+    Tests cover:
+        - Reading YAML data from files
+        - Handling missing files
+        - Error handling for invalid YAML content
+    """
 
     def test_read(self) -> None:
         """Test reading YAML data from a file."""
@@ -25,7 +42,7 @@ class TestYamlHandler:
             assert data == {"key": "value"}
 
     def test_read__file_not_exists(self) -> None:
-        """Test reading YAML file raises `FileNotFoundError` when `self._file_exists()` returns false."""
+        """Test reading YAML file raises FileNotFoundError when file does not exist."""
         # Arrange
         with (
             patch("builtins.open", side_effect=FileNotFoundError),
@@ -63,8 +80,8 @@ class TestYamlHandler:
                 handler = FileYamlHandler(filepath=Path("test.yaml"))
                 handler.read()
 
-    def test_read__yaml_error(self) -> None:
-        """Test reading YAML file raises `YAMLError` when file contains invalid yaml."""
+    def test_read__invalid_yaml(self) -> None:
+        """Test reading invalid YAML content raises yaml.YAMLError."""
         # Arrange
         invalid_yaml = "key: value:"  # colon `:` after value: is invalid yaml.
         with (

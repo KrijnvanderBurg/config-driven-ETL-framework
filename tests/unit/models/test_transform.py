@@ -102,7 +102,7 @@ class TestFunctionModelClass:
 
 
 class TestTransformModel:
-    """Tests for TransformModel class."""
+    """Unit tests for the TransformModel and related transformation models."""
 
     @pytest.fixture
     def valid_transform_dict(self):
@@ -119,7 +119,7 @@ class TestTransformModel:
         assert transform_model.name == "test_transform"
         assert transform_model.upstream_name == "test_extract"
 
-    def test_transform_model_from_dict_valid(self, valid_transform_dict) -> None:
+    def test_transform_model_from_dict(self, valid_transform_dict) -> None:
         """Test from_dict method with valid dictionary."""
         # Execute
         model = TransformModel.from_dict(valid_transform_dict)

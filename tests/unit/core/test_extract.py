@@ -2,6 +2,7 @@
 Unit tests for the extract module.
 """
 
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -79,9 +80,7 @@ class TestExtractRegistry:
 
 
 class TestExtract:
-    """
-    Unit tests for the Extract class.
-    """
+    """Unit tests for the Extract class and its implementations."""
 
     def test_extract_initialization(self) -> None:
         """Test Extract initialization."""
@@ -100,7 +99,7 @@ class TestExtract:
     def test_from_dict(self, mock_from_dict: MagicMock) -> None:
         """Test creating an Extract from a dict."""
         # Arrange
-        extract_dict = {
+        extract_dict: dict = {
             "name": "test_extract",
             "method": "batch",
             "data_format": "csv",
