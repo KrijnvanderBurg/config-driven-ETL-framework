@@ -2,15 +2,15 @@
 Unit tests for the transform module.
 """
 
-import pytest
 from typing import Any, Callable
 from unittest.mock import MagicMock, patch
+
+import pytest
 
 from ingestion_framework.core.transform import (
     Function,
     Transform,
     TransformFunctionRegistry,
-    TransformRegistry,
 )
 from ingestion_framework.models.transform import TransformModel
 from ingestion_framework.types import DataFrameRegistry
@@ -38,7 +38,7 @@ class TestTransformFunctionRegistry:
 
         # Mock function class
         mock_function_class = MagicMock()
-        
+
         # Act
         registry.register("test_function")(mock_function_class)
         retrieved_class = registry.get("test_function")
@@ -58,7 +58,7 @@ class TestTransformFunctionRegistry:
 
 class MockFunctionModel:
     """Mock function model for testing."""
-    
+
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]):
         """Mock from_dict method."""
@@ -72,10 +72,12 @@ class TestFunction(Function[MockFunctionModel]):
 
     def transform(self) -> Callable[..., Any]:
         """Implementation of abstract method."""
+
         def transform_func(dataframe_registry: DataFrameRegistry, dataframe_name: str) -> None:
             """Mock transform function."""
             # Mock transformation implementation
             pass
+
         return transform_func
 
 
@@ -101,11 +103,7 @@ class TestTransformClass:
     def test_from_dict_with_no_functions(self) -> None:
         """Test creating a Transform from a dict with no functions."""
         # Arrange
-        transform_dict = {
-            "name": "test_transform",
-            "upstream_name": "source",
-            "functions": []
-        }
+        transform_dict = {"name": "test_transform", "upstream_name": "source", "functions": []}
 
         # Act
         transform = Transform.from_dict(transform_dict)
@@ -120,16 +118,11 @@ class TestTransformClass:
         """Test creating a Transform from a dict with functions."""
         # Arrange
         mock_get.return_value = TestFunction
-        
+
         transform_dict = {
             "name": "test_transform",
             "upstream_name": "source",
-            "functions": [
-                {
-                    "function": "test_function",
-                    "arguments": {"key": "value"}
-                }
-            ]
+            "functions": [{"function": "test_function", "arguments": {"key": "value"}}],
         }
 
         # Act
@@ -146,16 +139,11 @@ class TestTransformClass:
         """Test that creating a Transform with an unsupported function raises NotImplementedError."""
         # Arrange
         mock_get.side_effect = KeyError("Unsupported function")
-        
+
         transform_dict = {
             "name": "test_transform",
             "upstream_name": "source",
-            "functions": [
-                {
-                    "function": "unknown_function",
-                    "arguments": {"key": "value"}
-                }
-            ]
+            "functions": [{"function": "unknown_function", "arguments": {"key": "value"}}],
         }
 
         # Act & Assert
@@ -166,13 +154,13 @@ class TestTransformClass:
         """Test the transform method."""
         # Arrange
         model = TransformModel(name="test_transform", upstream_name="source")
-        
+
         # Create mock function with callable
         function = TestFunction(model=MockFunctionModel())
         function.callable_ = MagicMock()
-        
+
         transform = Transform(model=model, functions=[function])
-        
+
         # Add test data to registry
         transform.data_registry["source"] = "test_dataframe"
 
@@ -182,6 +170,5 @@ class TestTransformClass:
         # Assert
         assert transform.data_registry["test_transform"] == "test_dataframe"
         function.callable_.assert_called_once_with(
-            dataframe_registry=transform.data_registry,
-            dataframe_name="test_transform"
+            dataframe_registry=transform.data_registry, dataframe_name="test_transform"
         )

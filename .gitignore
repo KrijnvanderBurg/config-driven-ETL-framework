@@ -1,6 +1,8 @@
 
 poetry.lock
 *.puml
+JUNIT-TEST.xml
+semgrep-junit.xml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
