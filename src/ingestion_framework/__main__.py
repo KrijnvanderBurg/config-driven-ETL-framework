@@ -22,14 +22,12 @@ logger: logging.Logger = set_logger(__name__)
 
 
 def main() -> None:
-    """Run the ingestion framework pipeline from command line arguments.
+    """
+    Run the ingestion framework pipeline from command line arguments.
 
     Parses command line arguments, validates the input filepath,
     creates a job from the specified configuration file, and
     executes the ETL pipeline.
-
-    Returns:
-        None
 
     Raises:
         ValueError: If the filepath argument is empty.
