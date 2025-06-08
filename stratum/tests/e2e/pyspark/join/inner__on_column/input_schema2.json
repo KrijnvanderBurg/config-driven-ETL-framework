@@ -1,7 +1,0 @@
-{
-    "type": "struct",
-    "fields": [
-        {"name": "height", "type": "integer", "nullable": true, "metadata": {}},
-        {"name": "name", "type": "string", "nullable": true, "metadata": {}}
-    ]
-}
