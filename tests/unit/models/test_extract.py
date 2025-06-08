@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 from pyspark.sql.types import StringType, StructField, StructType
 
-from ingestion_framework.models.extract import DictKeyError, ExtractFileModel, ExtractFormat, ExtractMethod
+from ingestion_framework.models.model_extract import DictKeyError, ExtractFileModel, ExtractFormat, ExtractMethod
 from ingestion_framework.utils.schema import SchemaFilepathHandler
 
 

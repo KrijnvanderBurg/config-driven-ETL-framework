@@ -9,7 +9,7 @@ from typing import Any, Final, Generic, Self, TypeVar
 
 from pyspark.sql import DataFrame
 
-from ingestion_framework.models.extract import ExtractFileModel, ExtractFormat, ExtractMethod
+from ingestion_framework.models.model_extract import ExtractFileModel, ExtractFormat, ExtractMethod
 from ingestion_framework.types import DataFrameRegistry, RegistryDecorator, Singleton
 from ingestion_framework.utils.spark import SparkHandler
 

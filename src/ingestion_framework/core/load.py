@@ -11,7 +11,7 @@ from typing import Any, Final, Generic, Self, TypeVar
 
 from pyspark.sql.streaming.query import StreamingQuery
 
-from ingestion_framework.models.load import LoadFormat, LoadMethod, LoadModel, LoadModelFile
+from ingestion_framework.models.model_load import LoadFormat, LoadMethod, LoadModel, LoadModelFile
 from ingestion_framework.types import DataFrameRegistry, RegistryDecorator, Singleton, StreamingQueryRegistry
 from ingestion_framework.utils.spark import SparkHandler
 

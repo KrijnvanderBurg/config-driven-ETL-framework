@@ -12,7 +12,7 @@ from ingestion_framework.core.transform import (
     Transform,
     TransformFunctionRegistry,
 )
-from ingestion_framework.models.transform import TransformModel
+from ingestion_framework.models.model_transform import TransformModel
 from ingestion_framework.types import DataFrameRegistry
 
 

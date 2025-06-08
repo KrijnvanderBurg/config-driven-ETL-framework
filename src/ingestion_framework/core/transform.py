@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import Any, Final, Generic, Self, TypeVar
 
-from ingestion_framework.models.transform import FunctionModel, TransformModel
+from ingestion_framework.models.model_transform import FunctionModel, TransformModel
 from ingestion_framework.types import DataFrameRegistry, RegistryDecorator, Singleton
 
 FUNCTIONS: Final[str] = "functions"
