@@ -38,7 +38,8 @@ class TestSelectFunction:
 
         # Assert
         assert function.model == model
-        assert callable(function.callable_)
+        # Check that transform() returns a callable function
+        assert callable(function.transform())
 
     @patch.object(SelectFunctionModel, "from_dict")
     def test_from_dict(self, mock_from_dict: MagicMock) -> None:
@@ -91,7 +92,7 @@ class TestSelectFunction:
 
         # Act - Create function from dict and get transform callable
         function = SelectFunction.from_dict(function_dict)
-        transform_func = function.callable_
+        transform_func = function.transform()
 
         # Create mock DataFrame with proper select method
         mock_df = MagicMock()
