@@ -1,0 +1,9 @@
+# install steps
+# - `git submodule init`
+# - `git submodule update --recursive`
+# if that does not work, then add manually via `git submodule add https://github.com/KrijnvanderBurg/.devcontainer.git .devcontainer`
+
+[submodule ".devcontainer"]
+	path = .devcontainer
+	url = https://github.com/KrijnvanderBurg/.devcontainer.git
+    branch = main
