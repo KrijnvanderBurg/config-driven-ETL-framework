@@ -1,8 +1,15 @@
-"""
-Load interface and implementations for various data formats.
+"""Data models for loading operations in the ingestion framework.
 
-This module provides abstract classes and implementations for data loading
-to various destinations and formats.
+This module defines the data models and configuration structures used for
+representing data loading operations. It includes:
+
+- Enums for representing loading methods, modes, and formats
+- Data classes for structuring loading configuration
+- Utility methods for parsing and validating loading parameters
+- Constants for standard configuration keys
+
+These models serve as the configuration schema for the Load components
+and provide a type-safe interface between configuration and implementation.
 """
 
 from abc import ABC, abstractmethod
@@ -25,14 +32,29 @@ OPTIONS: Final[str] = "options"
 
 
 class LoadMethod(Enum):
-    """Enumeration for methods of load modes."""
+    """Enumeration of supported data loading methods.
+
+    Defines the different methods that can be used to write data to destinations,
+    such as batch processing or streaming.
+
+    These values are used in configuration files to specify how data should
+    be loaded to the destination.
+    """
 
     BATCH = "batch"
     STREAMING = "streaming"
 
 
 class LoadMode(Enum):
-    """Enumeration for methods of load modes."""
+    """Enumeration of supported data loading modes/behaviors.
+
+    Defines the different modes that can be used when writing data to destinations,
+    controlling behavior like appending vs. overwriting existing data.
+
+    Includes both batch and streaming write modes supported by PySpark.
+    These values are used in configuration files to specify the behavior
+    when data is written to the destination.
+    """
 
     # pyspark batch
     APPEND = "append"
@@ -48,7 +70,14 @@ class LoadMode(Enum):
 
 
 class LoadFormat(Enum):
-    """Enumeration for methods of input and structures for the load."""
+    """Enumeration of supported data formats for loading operations.
+
+    Defines the different file formats that can be used when writing data
+    to destinations, such as Parquet, JSON, and CSV.
+
+    These values are used in configuration files to specify the format
+    of the output data.
+    """
 
     PARQUET = "parquet"
     JSON = "json"
@@ -57,16 +86,18 @@ class LoadFormat(Enum):
 
 @dataclass
 class LoadModel(Model, ABC):
-    """
-    Abstract base class for load operation models.
+    """Abstract base class for load operation models.
 
     This class defines the configuration model for data loading operations,
     specifying the name, upstream source, method, and destination for the load.
 
-    Args:
-        name (str): ID of the sink modelification.
-        upstream_name (list[str]): ID of the sink modelification.
-        method (LoadMethod): Type of sink load mode.
+    It serves as the foundation for more specific load model types based on
+    the destination type (file, database, etc.).
+
+    Attributes:
+        name: Unique identifier for this load operation
+        upstream_name: Identifier of the upstream component providing data
+        method: Loading method (batch or streaming)
         location (str): URI that identifies where to load data in the modelified format.
         schema_location (str): URI that identifies where to load schema.
         options (dict[str, Any]): Options for the sink input.

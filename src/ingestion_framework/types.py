@@ -108,6 +108,35 @@ class RegistryDecorator(Generic[K, V]):
 
 
 class RegistryInstance(Generic[K, V], metaclass=Singleton):
+    """
+    A generic registry implementing a singleton pattern that stores items of type V with keys of type K.
+
+    This class provides dictionary-like access to a registry of items, ensuring only one
+    registry instance exists through the Singleton metaclass. It can be used to create
+    type-specific registries by specifying the key and value types as generic parameters.
+
+    Type Parameters:
+        K: The type of the keys used to identify items in the registry.
+        V: The type of the values stored in the registry.
+
+    Example:
+        ```
+        # Define a registry for string-keyed integers
+        IntRegistry = RegistryInstance[str, int]
+        registry = IntRegistry()
+
+        # Add items
+        registry['one'] = 1
+        registry['two'] = 2
+
+        # Access items
+        value = registry['one']  # Returns 1
+
+        # Check existence
+        'one' in registry  # Returns True
+        ```
+    """
+
     def __init__(self) -> None:
         """Initialize the instance registry."""
         self._items: dict[K, V] = dict()

@@ -1,3 +1,15 @@
+"""Unit tests for the schema handling utility module.
+
+This module contains tests for the schema handling utilities that are responsible
+for creating and managing PySpark schemas from different source formats including
+dictionaries, JSON strings, and files.
+
+The tests verify that:
+- Schemas can be correctly created from various source formats
+- Error conditions are properly handled
+- The conversion between formats preserves schema structure and field definitions
+"""
+
 from unittest.mock import patch
 
 import pytest
@@ -8,7 +20,13 @@ from ingestion_framework.utils.schema import SchemaDictHandler, SchemaFilepathHa
 
 
 class TestSchemaHandlers:
-    """Test suite for schema handler classes in the ingestion framework."""
+    """Unit tests for schema handler classes.
+
+    Tests cover:
+        - Creating PySpark schemas from dict, string, and file
+        - Error handling for invalid schema input
+        - Edge cases for missing or malformed schema definitions
+    """
 
     @pytest.fixture
     def schema_struct(self) -> StructType:

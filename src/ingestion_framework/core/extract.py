@@ -2,6 +2,11 @@
 PySpark implementation for data extraction operations.
 
 This module provides concrete implementations for extracting data using PySpark.
+It includes:
+    - Abstract base classes for extraction
+    - Concrete file-based extractors
+    - A registry and context for selecting extraction strategies
+    - Support for both batch and streaming extraction
 """
 
 from abc import abstractmethod
@@ -24,26 +29,30 @@ ExtractModelT = TypeVar("ExtractModelT", bound=ExtractFileModel)
 
 
 class ExtractRegistry(RegistryDecorator, metaclass=Singleton):
-    """
-    Registry for Extract implementations.
+    """Registry for Extract implementations.
 
-    Maps ExtractFormat enum values to concrete ExtractAbstract implementations.
+    Maps ExtractFormat enum values to concrete Extract implementations.
+    Enables dynamic selection of the appropriate Extract class based on the
+    data format specified in configuration.
     """
 
 
 class Extract(Generic[ExtractModelT]):
-    """
-    Abstract base class for data extraction operations.
+    """Abstract base class for data extraction operations.
 
-    This class defines the interface for all extraction implementations,
-    supporting both batch and streaming extractions.
+    Defines the interface for all extraction implementations, supporting both
+    batch and streaming extractions. Manages a data registry for extracted DataFrames.
+
+    Attributes:
+        extract_model_concrete: The model class used for configuration
+        model: The configuration model for this extraction
+        data_registry: Registry for storing extracted DataFrames
     """
 
     extract_model_concrete: type[ExtractModelT]
 
     def __init__(self, model: ExtractModelT) -> None:
-        """
-        Initialize the extraction operation.
+        """Initialize the extraction operation.
 
         Args:
             model: Configuration model for the extraction
@@ -53,8 +62,7 @@ class Extract(Generic[ExtractModelT]):
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
-        """
-        Create an extraction instance from a configuration dictionary.
+        """Create an extraction instance from a configuration dictionary.
 
         Args:
             dict_: Configuration dictionary containing extraction specifications
@@ -70,25 +78,25 @@ class Extract(Generic[ExtractModelT]):
 
     @abstractmethod
     def _extract_batch(self) -> DataFrame:
-        """
-        Extract data in batch mode.
+        """Extract data in batch mode.
 
         Returns:
-            The extracted data as a DataFrame
+            DataFrame: The extracted data as a DataFrame.
         """
 
     @abstractmethod
     def _extract_streaming(self) -> DataFrame:
-        """
-        Extract data in streaming mode.
+        """Extract data in streaming mode.
 
         Returns:
-            The extracted data as a streaming DataFrame
+            DataFrame: The extracted data as a streaming DataFrame.
         """
 
     def extract(self) -> None:
-        """
-        Main extraction method.
+        """Main extraction method.
+
+        Selects batch or streaming extraction based on the model configuration
+        and stores the result in the data registry.
         """
         spark_handler: SparkHandler = SparkHandler()
         spark_handler.add_configs(options=self.model.options)
@@ -105,18 +113,20 @@ class Extract(Generic[ExtractModelT]):
 @ExtractRegistry.register(ExtractFormat.JSON)
 @ExtractRegistry.register(ExtractFormat.CSV)
 class ExtractFile(Extract[ExtractFileModel]):
-    """
-    Abstract class for file extraction.
+    """Concrete extractor for file-based sources (CSV, JSON, Parquet).
+
+    Supports both batch and streaming extraction using PySpark's DataFrame API.
     """
 
     extract_model_concrete = ExtractFileModel
     _spark_handler: SparkHandler = SparkHandler()
 
     def _extract_batch(self) -> DataFrame:
-        """
-        Read from file in batch mode using PySpark.
-        """
+        """Read from file in batch mode using PySpark.
 
+        Returns:
+            DataFrame: The extracted data as a DataFrame.
+        """
         return self._spark_handler.session.read.load(
             path=self.model.location,
             format=self.model.data_format.value,
@@ -125,8 +135,10 @@ class ExtractFile(Extract[ExtractFileModel]):
         )
 
     def _extract_streaming(self) -> DataFrame:
-        """
-        Read from file in streaming mode using PySpark.
+        """Read from file in streaming mode using PySpark.
+
+        Returns:
+            DataFrame: The extracted data as a streaming DataFrame.
         """
         return self._spark_handler.session.readStream.load(
             path=self.model.location,
@@ -137,31 +149,29 @@ class ExtractFile(Extract[ExtractFileModel]):
 
 
 class ExtractContext:
-    """
-    Abstract context class for creating and managing extraction strategies.
+    """Context for creating and managing extraction strategies.
 
-    This class implements the Strategy pattern for data extraction, allowing
-    different extraction implementations to be selected based on the data format.
+    Implements the Strategy pattern for data extraction, allowing different
+    extraction implementations to be selected based on the data format.
     """
 
     @classmethod
     def factory(cls, dict_: dict[str, type[Extract]]) -> type[Extract]:
-        """
-        Create an appropriate extract class based on the format specified in the configuration.
+        """Create an appropriate extract class based on the format specified in the configuration.
 
-        This factory method uses the ExtractRegistry to look up the appropriate
-        implementation class based on the data format.
+        Uses the ExtractRegistry to look up the appropriate implementation class
+        based on the data format specified in the configuration.
 
         Args:
             dict_: Configuration dictionary that must include a 'data_format' key
                 compatible with the ExtractFormat enum
 
         Returns:
-            The concrete extraction class for the specified format
+            type[Extract]: The concrete extraction class for the specified format.
 
         Raises:
-            NotImplementedError: If the specified extract format is not supported
-            KeyError: If the 'data_format' key is missing from the configuration
+            NotImplementedError: If the specified extract format is not supported.
+            KeyError: If the 'data_format' key is missing from the configuration.
         """
         try:
             extract_format = ExtractFormat(dict_[DATA_FORMAT])

@@ -1,10 +1,18 @@
-"""
- implementation for data transformation operations.
+"""Data models for transformation operations in the ingestion framework.
 
-This module provides concrete implementations for transforming data using .
+This module defines the data models and configuration structures used for
+representing transformation operations. It includes:
+
+- Base models for transformation function arguments
+- Data classes for structuring transformation configuration
+- Utility methods for parsing and validating transformation parameters
+- Constants for standard configuration keys
+
+These models serve as the configuration schema for the Transform components
+and provide a type-safe interface between configuration and implementation.
 """
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Final, Generic, Self, TypeVar
 
@@ -22,12 +30,15 @@ UPSTREAM_NAME: Final[str] = "upstream_name"
 
 @dataclass
 class ArgsModel(Model, ABC):
-    """
-     base class for the arguments of a transformation function.
+    """Abstract base class for transformation function arguments.
 
-    This class defines the interface for all argument containers used by
-    transformation functions. Each concrete implementation should provide
-    type-specific argument handling.
+    Serves as the foundation for all argument containers used by
+    transformation functions in the framework. Each concrete subclass
+    should implement type-specific argument handling for different
+    transformation operations.
+
+    All transformation argument models should inherit from this class
+    to ensure a consistent interface throughout the framework.
     """
 
 
@@ -47,6 +58,7 @@ class FunctionModel(Model, Generic[ArgsT], ABC):
     arguments: ArgsT
 
     @classmethod
+    @abstractmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
         Create a transformation function model from a configuration dictionary.
@@ -56,15 +68,10 @@ class FunctionModel(Model, Generic[ArgsT], ABC):
                 - 'function': The name of the function to execute
                 - 'arguments': The arguments specification for the function
 
-        Returns:
-            An initialized function model.
-
         Raises:
             DictKeyError: If required keys are missing from the configuration.
             NotImplementedError: If the subclass doesn't override this method.
         """
-        # This is an abstract method that subclasses must override
-        raise NotImplementedError(f"{cls.__name__} must override from_dict")
 
 
 FunctionModelT = TypeVar("FunctionModelT", bound=FunctionModel)

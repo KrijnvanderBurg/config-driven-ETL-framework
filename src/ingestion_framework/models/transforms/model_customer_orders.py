@@ -3,7 +3,7 @@
 This module defines the data models used to configure column selection
 transformations in the ingestion framework. It includes:
 
-- SelectFunctionModel: Main configuration model for select operations
+- CustomersOrdersFunctionModel: Main configuration model for select operations
 - Args nested class: Container for the selection parameters
 
 These models provide a type-safe interface for configuring column selections
@@ -13,19 +13,16 @@ from configuration files or dictionaries.
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from pyspark.sql import functions as f
-from pyspark.sql.column import Column
-
 from ingestion_framework.exceptions import DictKeyError
 
 # Import these locally to avoid circular imports
 from ingestion_framework.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
-COLUMNS: Final[str] = "columns"
+FILTER_AMOUNT: Final[str] = "filter_amount"
 
 
 @dataclass
-class SelectFunctionModel(FunctionModel):
+class CustomersOrdersFunctionModel(FunctionModel):
     """Configuration model for column selection transform operations.
 
     This model defines the structure for configuring a column selection
@@ -37,7 +34,7 @@ class SelectFunctionModel(FunctionModel):
     """
 
     function: str
-    arguments: "SelectFunctionModel.Args"
+    arguments: "CustomersOrdersFunctionModel.Args"
 
     @dataclass
     class Args:
@@ -47,29 +44,26 @@ class SelectFunctionModel(FunctionModel):
             columns: List of column names to select from the DataFrame
         """
 
-        columns: list[Column]
+        filter_amount: int
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
-        Create a SelectFunctionModel from a dictionary.
+        Create a CustomersOrdersFunctionModel from a dictionary.
 
         Args:
             dict_: The configuration dictionary.
 
         Returns:
-            An initialized SelectFunctionModel.
+            An initialized CustomersOrdersFunctionModel.
         """
         try:
             function_name = dict_[FUNCTION]
             arguments_dict = dict_[ARGUMENTS]
 
             # Process the arguments
-            columns = []
-            for col_name in arguments_dict[COLUMNS]:
-                columns.append(f.col(col_name))
-
-            arguments = cls.Args(columns=columns)
+            filter_amount = arguments_dict[FILTER_AMOUNT]
+            arguments = cls.Args(filter_amount=filter_amount)
 
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e

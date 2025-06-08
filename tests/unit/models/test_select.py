@@ -10,7 +10,7 @@ from ingestion_framework.models.transforms.model_select import DictKeyError, Sel
 
 
 class TestSelectFunctionModel:
-    """Tests for SelectFunctionModel class."""
+    """Unit tests for the SelectFunctionModel transformation model."""
 
     @pytest.fixture
     def valid_select_dict(self) -> dict[str, Any]:

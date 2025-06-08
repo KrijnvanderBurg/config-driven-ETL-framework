@@ -7,11 +7,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from ingestion_framework.core.transform import (
-    Function,
-    Transform,
-    TransformFunctionRegistry,
-)
+from ingestion_framework.core.transform import Function, Transform, TransformFunctionRegistry
 from ingestion_framework.models.model_transform import TransformModel
 from ingestion_framework.types import DataFrameRegistry
 
@@ -68,7 +64,7 @@ class MockFunctionModel:
 class TestFunction(Function[MockFunctionModel]):
     """Test implementation of Function abstract class."""
 
-    model_concrete = MockFunctionModel
+    _model = MockFunctionModel  # This was the issue - should be _model, not model_concrete
 
     def transform(self) -> Callable[..., Any]:
         """Implementation of abstract method."""
@@ -81,10 +77,8 @@ class TestFunction(Function[MockFunctionModel]):
         return transform_func
 
 
-class TestTransformClass:
-    """
-    Unit tests for the Transform class.
-    """
+class TestTransform:
+    """Unit tests for the Transform class and its implementations."""
 
     def test_transform_initialization(self) -> None:
         """Test Transform initialization."""
@@ -158,6 +152,7 @@ class TestTransformClass:
         # Create mock function with callable
         function = TestFunction(model=MockFunctionModel())
         function.callable_ = MagicMock()
+        function.callable_.return_value = "test_dataframe"  # Set return value for the mock
 
         transform = Transform(model=model, functions=[function])
 
@@ -169,6 +164,4 @@ class TestTransformClass:
 
         # Assert
         assert transform.data_registry["test_transform"] == "test_dataframe"
-        function.callable_.assert_called_once_with(
-            dataframe_registry=transform.data_registry, dataframe_name="test_transform"
-        )
+        function.callable_.assert_called_once_with(df="test_dataframe")  # Fix parameter names

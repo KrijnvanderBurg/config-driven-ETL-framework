@@ -1,5 +1,4 @@
 {
-    "engine": "pyspark",
     "extracts": [
         {
             "data_format": "csv",

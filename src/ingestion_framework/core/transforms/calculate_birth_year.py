@@ -18,28 +18,50 @@ from ingestion_framework.types import DataFrameRegistry
 
 @TransformFunctionRegistry.register("calculate_birth_year")
 class CalculateBirthYearFunction(Function[CalculateBirthYearFunctionModel]):
-    """
-    Encapsulates birth year calculation logic for DataFrames.
+    """Function that calculates birth year based on age and current year.
+
+    This transform function takes a person's age from a specified column
+    and calculates their approximate birth year by subtracting the age
+    from the current year. The result is added as a new column to the DataFrame.
+
+    The function is configured using a CalculateBirthYearFunctionModel that
+    specifies which columns to use and any additional parameters.
 
     Attributes:
-        model (CalculateBirthYearFunctionModel): The model object containing the calculation parameters.
+        model: Configuration model specifying input/output columns and parameters
+        _model: The concrete model class used for configuration
+        data_registry: Shared registry for accessing and storing DataFrames
 
-    Methods:
-        from_dict(dict_: dict[str, Any]) -> Self: Create CalculateBirthYearFunction object from json.
-        transform() -> Callable: Calculates birth year from age.
+    Example:
+        ```json
+        {
+            "function": "calculate_birth_year",
+            "arguments": {
+                "age_column": "age",
+                "birth_year_column": "birth_year",
+                "current_year": 2025
+            }
+        }
+        ```
     """
 
-    model_concrete = CalculateBirthYearFunctionModel
+    _model = CalculateBirthYearFunctionModel
 
     def transform(self) -> Callable:
-        """
-                Calculates birth year based on age.
+        """Apply the birth year calculation transformation to the DataFrame.
 
-                Returns:
-                    (Callable): Function for `DataFrame.transform()`.
+        This method subtracts a person's age from the current year to estimate
+        their birth year. It creates a new column with the calculated birth year
+        while preserving all existing columns.
 
-                Examples:
-                    Consider the following DataFrame schema:
+        The calculation uses the age column and current year specified in the model.
+
+        Returns:
+            A callable function that performs the birth year calculation when
+            applied to a DataFrame
+
+        Examples:
+            Consider the following DataFrame schema:
 
                     ```
                     root
