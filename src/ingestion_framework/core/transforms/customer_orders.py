@@ -1,12 +1,10 @@
 from collections.abc import Callable
 
+from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 
 from ingestion_framework.core.transform import Function, TransformFunctionRegistry
 from ingestion_framework.models.transforms.model_customer_orders import CustomersOrdersFunctionModel
-
-# Import these locally to avoid circular imports
-from ingestion_framework.types import DataFrameRegistry
 
 
 @TransformFunctionRegistry.register("customers_orders_bronze")
@@ -16,7 +14,7 @@ class CustomersOrdersBronzeFunction(Function[CustomersOrdersFunctionModel]):
 
     Attributes:
         model: Configuration model specifying transformation parameters
-        model_concrete: The concrete model class used for configuration
+        _model: The concrete model class used for configuration
         data_registry: Shared registry for accessing and storing DataFrames
 
     Example:
@@ -31,7 +29,7 @@ class CustomersOrdersBronzeFunction(Function[CustomersOrdersFunctionModel]):
         ```
     """
 
-    model_ = CustomersOrdersFunctionModel
+    _model = CustomersOrdersFunctionModel
 
     def transform(self) -> Callable:
         """Apply transformations to customers and orders DataFrames.
@@ -46,10 +44,9 @@ class CustomersOrdersBronzeFunction(Function[CustomersOrdersFunctionModel]):
             A callable that performs the transformations
         """
 
-        def __f(dataframe_registry: DataFrameRegistry, dataframe_name: str) -> None:
-            # Get source DataFrames
-            customers_df = dataframe_registry[dataframe_name]
-            orders_df = dataframe_registry["extract-orders"]
+        def __f(df: DataFrame) -> DataFrame:
+            customers_df = df  # df is data_registry["extract-customers"]
+            orders_df = self.data_registry["extract-orders"]
 
             # Cast data types
             customers_df = customers_df.withColumn("customer_id", F.col("customer_id").cast("integer"))
@@ -58,8 +55,10 @@ class CustomersOrdersBronzeFunction(Function[CustomersOrdersFunctionModel]):
 
             # Join datasets
             combined_df = customers_df.join(orders_df, "customer_id", "inner")
+
+            # Filter
             large_orders = combined_df.filter(F.col("amount") > self.model.arguments.filter_amount)
 
-            dataframe_registry[dataframe_name] = large_orders
+            return large_orders
 
         return __f

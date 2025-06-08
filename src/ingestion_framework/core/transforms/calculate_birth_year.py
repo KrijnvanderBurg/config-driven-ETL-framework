@@ -29,7 +29,7 @@ class CalculateBirthYearFunction(Function[CalculateBirthYearFunctionModel]):
 
     Attributes:
         model: Configuration model specifying input/output columns and parameters
-        model_concrete: The concrete model class used for configuration
+        _model: The concrete model class used for configuration
         data_registry: Shared registry for accessing and storing DataFrames
 
     Example:
@@ -45,7 +45,7 @@ class CalculateBirthYearFunction(Function[CalculateBirthYearFunctionModel]):
         ```
     """
 
-    model_concrete = CalculateBirthYearFunctionModel
+    _model = CalculateBirthYearFunctionModel
 
     def transform(self) -> Callable:
         """Apply the birth year calculation transformation to the DataFrame.

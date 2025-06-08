@@ -71,6 +71,7 @@ class Function(Generic[FunctionModelT], ABC):
         """
         self.model = model
         self.callable_ = self.transform()
+        self.data_registry = DataFrameRegistry()
 
     @abstractmethod
     def transform(self) -> Callable[..., Any]:
@@ -171,6 +172,6 @@ class Transform(Generic[FunctionT]):
         # Copy the dataframe from upstream to current name
         self.data_registry[self.model.name] = self.data_registry[self.model.upstream_name]
 
-        # Apply transformations sequentially
+        # Apply transformations
         for function in self.functions:
-            self.data_registry[self.model.name] = function.callable_(dataframe_=self.data_registry[self.model.name])
+            self.data_registry[self.model.name] = function.callable_(df=self.data_registry[self.model.name])

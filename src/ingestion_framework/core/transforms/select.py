@@ -9,11 +9,10 @@ the name 'select', making it available for use in configuration files.
 
 from collections.abc import Callable
 
+from pyspark.sql import DataFrame
+
 from ingestion_framework.core.transform import Function, TransformFunctionRegistry
 from ingestion_framework.models.transforms.model_select import SelectFunctionModel
-
-# Import these locally to avoid circular imports
-from ingestion_framework.types import DataFrameRegistry
 
 
 @TransformFunctionRegistry.register("select")
@@ -30,7 +29,7 @@ class SelectFunction(Function[SelectFunctionModel]):
 
     Attributes:
         model: Configuration model specifying which columns to select
-        model_concrete: The concrete model class used for configuration
+        _model: The concrete model class used for configuration
         data_registry: Shared registry for accessing and storing DataFrames
 
     Example:
@@ -44,7 +43,7 @@ class SelectFunction(Function[SelectFunctionModel]):
         ```
     """
 
-    model_concrete = SelectFunctionModel
+    _model = SelectFunctionModel
 
     def transform(self) -> Callable:
         """Apply the column selection transformation to the DataFrame.
@@ -80,9 +79,7 @@ class SelectFunction(Function[SelectFunctionModel]):
             ```
         """
 
-        def __f(dataframe_registry: DataFrameRegistry, dataframe_name: str) -> None:
-            dataframe_registry[dataframe_name] = dataframe_registry[dataframe_name].select(
-                *self.model.arguments.columns
-            )
+        def __f(df: DataFrame) -> DataFrame:
+            return df.select(*self.model.arguments.columns)
 
         return __f

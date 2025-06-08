@@ -79,11 +79,11 @@ class TestSelectFunction:
 
         # Act
         transform_func = function.transform()
-        transform_func(dataframe_registry=dataframe_registry, dataframe_name="test_df")
+        result = transform_func(df=dataframe_registry["test_df"])
 
         # Assert
         mock_df.select.assert_called_once_with(*model.arguments.columns)
-        assert dataframe_registry["test_df"] == mock_select_result
+        assert result == mock_select_result  # Verify the return value
 
     def test_transform_integration(self) -> None:
         """Integration test for the transform function with real classes."""
@@ -104,10 +104,10 @@ class TestSelectFunction:
         dataframe_registry["test_df"] = mock_df
 
         # Apply transform
-        transform_func(dataframe_registry=dataframe_registry, dataframe_name="test_df")
+        result = transform_func(df=dataframe_registry["test_df"])
 
         # Assert
         # 1. Verify select was called
         mock_df.select.assert_called_once()
-        # 2. Verify the DataFrame in the registry was updated
-        assert dataframe_registry["test_df"] == mock_select_result
+        # 2. Verify the result is the transformed DataFrame
+        assert result == mock_select_result
