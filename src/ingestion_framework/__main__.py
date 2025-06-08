@@ -35,15 +35,15 @@ def main() -> None:
     logger.info("Starting something...")
 
     parser = ArgumentParser(description="config driven etl.")
-    parser.add_argument("--filepath", required=True, type=str, help="dict_ filepath")
+    parser.add_argument("--config-filepath", required=True, type=str, help="config filepath")
     args = parser.parse_args()
     logger.info("args: %s", args)
 
-    if args.filepath == "":
-        raise ValueError("Filepath is required.")
-    filepath: Path = Path(args.filepath)
+    if args.config_filepath == "":
+        raise ValueError("Config filepath is required.")
+    config_filepath: Path = Path(args.config_filepath)
 
-    job = Job.from_file(filepath=filepath)
+    job = Job.from_file(filepath=config_filepath)
     job.execute()
 
     logger.info("Exiting.")

@@ -115,7 +115,6 @@ class Load(Generic[LoadModelT], ABC):
         spark_handler: SparkHandler = SparkHandler()
         spark_handler.add_configs(options=self.model.options)
 
-        # Copy the dataframe from upstream to current name
         self.data_registry[self.model.name] = self.data_registry[self.model.upstream_name]
 
         if self.model.method == LoadMethod.BATCH:

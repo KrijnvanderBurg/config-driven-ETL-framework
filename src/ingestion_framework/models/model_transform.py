@@ -12,7 +12,7 @@ These models serve as the configuration schema for the Transform components
 and provide a type-safe interface between configuration and implementation.
 """
 
-from abc import ABC
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Final, Generic, Self, TypeVar
 
@@ -58,6 +58,7 @@ class FunctionModel(Model, Generic[ArgsT], ABC):
     arguments: ArgsT
 
     @classmethod
+    @abstractmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
         Create a transformation function model from a configuration dictionary.
@@ -67,15 +68,10 @@ class FunctionModel(Model, Generic[ArgsT], ABC):
                 - 'function': The name of the function to execute
                 - 'arguments': The arguments specification for the function
 
-        Returns:
-            An initialized function model.
-
         Raises:
             DictKeyError: If required keys are missing from the configuration.
             NotImplementedError: If the subclass doesn't override this method.
         """
-        # This is an abstract method that subclasses must override
-        raise NotImplementedError(f"{cls.__name__} must override from_dict")
 
 
 FunctionModelT = TypeVar("FunctionModelT", bound=FunctionModel)

@@ -90,16 +90,6 @@ class TestFunctionModelClass:
         assert func_model.function == "test_function"
         assert func_model.arguments.value == "test_value"
 
-    def test_function_model_abstract_from_dict(self):
-        """Test that FunctionModel's from_dict raises NotImplementedError when not overridden."""
-
-        # Create a new class that does not override from_dict
-        class BrokenFunctionModel(FunctionModel):
-            pass
-
-        with pytest.raises(NotImplementedError):
-            BrokenFunctionModel.from_dict({})
-
 
 class TestTransformModel:
     """Unit tests for the TransformModel and related transformation models."""

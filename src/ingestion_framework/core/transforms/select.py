@@ -8,15 +8,12 @@ the name 'select', making it available for use in configuration files.
 """
 
 from collections.abc import Callable
-from typing import Final
 
 from ingestion_framework.core.transform import Function, TransformFunctionRegistry
 from ingestion_framework.models.transforms.model_select import SelectFunctionModel
 
 # Import these locally to avoid circular imports
 from ingestion_framework.types import DataFrameRegistry
-
-COLUMNS: Final[str] = "columns"
 
 
 @TransformFunctionRegistry.register("select")

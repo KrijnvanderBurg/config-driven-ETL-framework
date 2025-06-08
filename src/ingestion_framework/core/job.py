@@ -18,7 +18,6 @@ from ingestion_framework.core.transform import Function, Transform
 from ingestion_framework.exceptions import DictKeyError
 from ingestion_framework.utils.file import FileHandlerContext
 
-ENGINE: Final[str] = "engine"
 EXTRACTS: Final[str] = "extracts"
 TRANSFORMS: Final[str] = "transforms"
 LOADS: Final[str] = "loads"
@@ -144,7 +143,6 @@ class Job:
         and applies the transformation operations to modify the data.
         """
         for transform in self.transforms:
-            transform.data_registry[transform.model.name] = transform.data_registry[transform.model.upstream_name]
             transform.transform()
 
     def _load(self) -> None:
@@ -154,5 +152,4 @@ class Job:
         and writes the transformed data to the target destinations.
         """
         for load in self.loads:
-            load.data_registry[load.model.name] = load.data_registry[load.model.upstream_name]
             load.load()

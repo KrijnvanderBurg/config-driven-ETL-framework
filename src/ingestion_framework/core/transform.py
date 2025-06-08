@@ -60,7 +60,7 @@ class Function(Generic[FunctionModelT], ABC):
     Each function has a model that defines its behavior and parameters.
     """
 
-    model_concrete: type[FunctionModelT]
+    _model: type[FunctionModelT]
 
     def __init__(self, model: FunctionModelT) -> None:
         """
@@ -98,7 +98,7 @@ class Function(Generic[FunctionModelT], ABC):
         Raises:
             DictKeyError: If required keys are missing from the configuration.
         """
-        model = cls.model_concrete.from_dict(dict_=dict_)
+        model = cls._model.from_dict(dict_=dict_)
         return cls(model=model)
 
 
@@ -173,4 +173,4 @@ class Transform(Generic[FunctionT]):
 
         # Apply transformations sequentially
         for function in self.functions:
-            function.callable_(dataframe_registry=self.data_registry, dataframe_name=self.model.name)
+            self.data_registry[self.model.name] = function.callable_(dataframe_=self.data_registry[self.model.name])
