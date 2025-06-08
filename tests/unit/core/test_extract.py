@@ -8,7 +8,7 @@ import pytest
 from pyspark.sql import DataFrame
 
 from ingestion_framework.core.extract import DATA_FORMAT, Extract, ExtractContext, ExtractFormat, ExtractRegistry
-from ingestion_framework.models.extract import ExtractFileModel, ExtractMethod
+from ingestion_framework.models.model_extract import ExtractFileModel, ExtractMethod
 from ingestion_framework.types import DataFrameRegistry
 
 

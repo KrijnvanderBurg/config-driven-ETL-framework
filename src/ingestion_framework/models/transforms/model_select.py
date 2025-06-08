@@ -11,7 +11,7 @@ from pyspark.sql.column import Column
 from ingestion_framework.exceptions import DictKeyError
 
 # Import these locally to avoid circular imports
-from ingestion_framework.models.transform import ARGUMENTS, FUNCTION, FunctionModel
+from ingestion_framework.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 COLUMNS: Final[str] = "columns"
 

@@ -6,7 +6,7 @@ from collections.abc import Callable
 from typing import Final
 
 from ingestion_framework.core.transform import Function, TransformFunctionRegistry
-from ingestion_framework.models.transforms.select import SelectFunctionModel
+from ingestion_framework.models.transforms.model_select import SelectFunctionModel
 
 # Import these locally to avoid circular imports
 from ingestion_framework.types import DataFrameRegistry

@@ -6,7 +6,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pyspark.sql.column import Column
 
-from ingestion_framework.models.transforms.select import DictKeyError, SelectFunctionModel
+from ingestion_framework.models.transforms.model_select import DictKeyError, SelectFunctionModel
 
 
 class TestSelectFunctionModel:

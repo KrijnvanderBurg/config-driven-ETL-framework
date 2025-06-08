@@ -10,7 +10,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.streaming.query import StreamingQuery
 
 from ingestion_framework.core.load import DATA_FORMAT, Load, LoadContext, LoadFormat, LoadRegistry
-from ingestion_framework.models.load import LoadFormat, LoadMethod, LoadModelFile
+from ingestion_framework.models.model_load import LoadFormat, LoadMethod, LoadModelFile
 from ingestion_framework.types import DataFrameRegistry, StreamingQueryRegistry
 
 
