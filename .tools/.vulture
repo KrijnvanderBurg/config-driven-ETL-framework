@@ -1,0 +1,9 @@
+[tool.vulture]
+exclude = []
+ignore_decorators = ["@app.route", "@require_*"]
+ignore_names = ["visit_*", "do_*"]
+make_whitelist = true
+min_confidence = 80
+paths = []
+sort_by_size = true
+verbose = true

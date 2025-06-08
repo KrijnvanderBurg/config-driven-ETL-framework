@@ -1,0 +1,22 @@
+{
+  "include": [
+    "./"
+  ],
+  "exclude": [
+    "**/node_modules",
+    "**/__pycache__"
+  ],
+  "ignore": [],
+  "executionEnvironments": [
+    {
+      "root": "./"
+    }
+  ],
+  "defineConstant": {
+    "DEBUG": false
+  },
+  "reportInvalidTypeForm": false,
+  "reportInvalidTypeArguments": false,
+  "reportMissingImports": false,
+  "reportMissingTypeStubs": false
+}

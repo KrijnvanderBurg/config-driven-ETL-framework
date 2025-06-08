@@ -1,0 +1,105 @@
+
+# https://marketplace.visualstudio.com/items?itemName=dependency-check.dependencycheck
+
+# Requirements
+# - allow internet connection to: https://www.cisa.gov/sites/default/files/feeds/known_exploited_vulnerabilities.json, see https://jeremylong.github.io/DependencyCheck/data/index.html
+
+# Usage notes:
+# - Results are found under `Tests` tab in pipeline UI -> dependency-check
+# - Uses caching for dependency-check to avoid 20-minute NVD database downloads.
+#   Cache refreshes every 24 hours or when the dependency file changes (requirements.txt, poetry.lock).
+#   Add this template at the end of a job; cache is created only upon successful completion of the entire job.
+
+# Issues:
+# - Currently does not support pyproject.toml without using poetry - https://github.com/jeremylong/DependencyCheck/issues/5971
+
+# Configuration:
+# - Dependency-check step fails if vulnerability risk score exceeds configured threshold.
+#   Scores: 0-3 = low, 3-6 = medium, 6-9 = high.
+#   See https://owasp.org/www-community/OWASP_Risk_Rating_Methodology for details.
+# - API key can be supplied to speed up NVD database download. This is not embedded in the template but can be added.
+
+# How to test:
+# - Add package pydash==5.0.0, containing a high vulnerability, to requirements.txt
+
+parameters:
+- name: enabled
+  type: boolean
+  default: true
+
+- name: continueOnError
+  type: boolean
+  default: false
+
+# see Configuration comment above.
+- name: failOnCVSS
+  type: number
+  default: 4 
+  values:
+  - 0
+  - 1
+  - 2
+  - 3
+  - 4
+  - 5
+  - 6
+  - 7
+  - 8
+  - 9
+
+- name: dependencyFilepath
+  type: string
+
+- name: configFilepath
+  type: string
+  default: $(Build.Repository.LocalPath)/.tools/cve_suppressions.xml
+
+steps:
+# find the current location of the NVD cache (it is task version specific).
+- powershell: |
+    $nvdcachepath = $(get-childitem "$(Agent.WorkFolder)\_tasks\dependency-check-build-task*\*.*.*\dependency-check\data").FullName
+    echo "OWASP data path: $nvdcachepath"
+    echo "##vso[task.setvariable variable=nvdcachepath;]$nvdcachepath"     
+  displayName: OWASP get cache path
+  enabled: ${{ parameters.enabled }}
+  condition: succeededOrFailed()
+
+# Cache is created only if the entire job, including dependency-check-build-task@6, succeeds.
+- task: Cache@2
+  inputs:
+    key: 'v1 | NVD'
+    path: $(nvdcachepath)
+  displayName: OWASP cache
+  enabled: ${{ parameters.enabled }}
+  condition: succeededOrFailed()
+
+# https://jeremylong.github.io/DependencyCheck/dependency-check-cli/arguments.html
+- task: dependency-check-build-task@6
+  displayName: OWASP Dependency-check (scanner)
+  inputs:
+    projectName: $(Build.Repository.Name)
+    scanPath: ${{ parameters.dependencyFilepath }}
+    suppressionPath: ${{ parameters.configFilepath }}
+    failOnCVSS: ${{ parameters.failOnCVSS }}
+    format: JUNIT
+    enableExperimental: true
+    additionalArguments: >
+      --nvdValidForHours 24
+      --disableKnownExploited false
+    # NVD database (cache) valid for 24 hours; default 4 hours.
+    # Always check for known exploited vulnerabilities - https://jeremylong.github.io/DependencyCheck/data/index.html#CISA_Known_Exploited_Vulnerabilities
+  continueOnError: ${{ parameters.continueOnError }}
+  enabled: ${{ parameters.enabled }}
+  condition: succeededOrFailed()
+
+- task: PublishTestResults@2
+  displayName: OWASP dependency-check publish results
+  inputs:
+    testResultsFormat: JUnit
+    testResultsFiles: dependency-check/*junit.xml
+    searchFolder: $(Common.TestResultsDirectory)
+    failTaskOnMissingResultsFile: true
+    failTaskOnFailureToPublishResults: true
+    testRunTitle: dependency-check
+  enabled: ${{ parameters.enabled }}
+  condition: succeededOrFailed()

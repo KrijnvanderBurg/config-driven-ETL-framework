@@ -1,0 +1,14 @@
+resources:
+  repositories:
+  - repository: cicd
+    type: git
+    name: CompliancyCarnivalCacophony/dataplatform.datastore.python
+    ref: refs/heads/feature/first_version
+
+trigger:
+  branches:
+    include:
+    - main
+
+extends:
+  template: .azure-pipelines/azure-pipelines.yml@cicd

@@ -1,0 +1,34 @@
+{
+    "engine": "pyspark",
+    "extracts": [
+        {
+            "name": "extract-test",
+            "method": "batch",
+            "data_format": "json",
+            "location": "tests/e2e/pyspark/cast/null_to_string/input_data.json",
+            "schema": "tests/e2e/pyspark/cast/null_to_string/input_schema.json",
+            "options": {}
+        }
+    ],
+    "transforms": [
+        {
+            "name": "transform-test",
+            "upstream_name": "extract-test",
+            "functions": [
+                {"function": "cast", "arguments": {"column_name": "age", "data_type": "string"}}
+            ]
+        }
+    ],
+    "loads": [
+        {
+            "name": "load-test",
+            "upstream_name": "transform-test",
+            "method": "batch",
+            "data_format": "json",
+            "mode": "overwrite",
+            "schema_location": "tests/e2e/pyspark/cast/null_to_string/schema_output.json",
+            "location": "tests/e2e/pyspark/cast/null_to_string/json",
+            "options": {}
+        }
+    ]
+}

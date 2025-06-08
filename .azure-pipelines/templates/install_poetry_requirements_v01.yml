@@ -1,0 +1,35 @@
+parameters:
+- name: pythonPyprojectFilepath
+  type: string
+
+- name: poetryHome
+  type: string
+  default: $(Agent.WorkFolder)/poetry/
+
+- name: poetryCacheDirectory
+  type: string
+  default: $(Agent.WorkFolder)/.cache/pypoetry/
+
+steps:
+  - script: |
+      curl -sSL https://install.python-poetry.org | python3 -
+
+      poetry config --list
+    displayName: Agent install Poetry
+
+  - task: Cache@2
+    inputs:
+      key: v1 | poetry | $(Agent.OS) | ${{ parameters.pythonPyprojectFilepath }}
+      restoreKeys: |
+        poetry | $(Agent.OS)
+      path: ${{ parameters.poetryCacheDirectory }}
+    displayName: Poetry restore cache
+
+  - script: |
+      poetry install --directory ${{ parameters.pythonPyprojectFilepath }} \
+      --no-root
+    displayName: Poetry install
+    env:
+      POETRY_HOME: $(Poetry.Home)
+      POETRY_CACHE_DIR: ${{ parameters.poetryCacheDirectory }}
+      POETRY_VIRTUALENVS_CREATE: false

@@ -1,0 +1,41 @@
+# https://pyre-check.org
+
+# Requirements:
+# - Python version/architecture is set in pipeline'
+
+# Pyre doesn't support ignoring errors via configuration. Use inline comments:
+# Single line: # pyre-ignore[16]
+# Whole file: # pyre-ignore-all-errors[56] at the file's top
+
+# Pysa, a static analysis tool in Pyre, isn't supported in this template as it needs additional .pysa models
+parameters:
+- name: enabled
+  type: boolean
+  default: true
+  
+- name: continueOnError
+  type: boolean
+  default: false
+
+- name: targetPath
+  type: string
+
+# Pyre is hardcoded to read config from the working directory, so provide the directory containing .pyre_configuration
+- name: configDirectory
+  type: string
+  default: $(Build.Repository.LocalPath)/.tools/
+
+steps:
+
+- script: |
+    pip install pyre-check --quiet
+
+    pyre --version
+
+    pyre --source-directory ${{ parameters.targetPath }} --log-level INFO --noninteractive --sequential check
+  displayName: Pyre (type-checker)
+  timeoutInMinutes: 5 # Set timeout in case tool expects manual input and runs forever.
+  condition: succeededOrFailed()
+  continueOnError: ${{ parameters.continueOnError }}
+  enabled: ${{ parameters.enabled }}
+  workingDirectory: ${{ parameters.configDirectory }}

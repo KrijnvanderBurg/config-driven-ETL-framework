@@ -1,0 +1,8 @@
+parameters:
+- name: pythonProjectDirectory
+  type: string
+
+steps:
+  - script: |
+      pip3 install -e ${{ parameters.pythonProjectDirectory }}
+    displayName: Pip install editable

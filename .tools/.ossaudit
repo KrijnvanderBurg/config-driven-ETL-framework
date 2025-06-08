@@ -1,0 +1,14 @@
+[ossaudit]
+# Optional: OSS Index username.
+# username = string
+
+# Optional: OSS Index token
+# token = string
+
+# Optional: comma-separated list of columns to show.
+# Default: name, version, title
+# Supported: id, name, version, cve, cvss_score, title, description
+columns = id, name, version, cve, cvss_score, title, description
+
+# Optional: comman-separated list of vulnerability IDs (Sonatype ID or CVE) to ignore.
+ignore-ids = CVE-2020-13091

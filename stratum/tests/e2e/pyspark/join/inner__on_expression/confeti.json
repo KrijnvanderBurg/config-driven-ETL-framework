@@ -1,0 +1,51 @@
+{
+    "engine": "pyspark",
+    "extracts": [
+        {
+            "name": "extract-test",
+            "method": "batch",
+            "data_format": "csv",
+            "location": "tests/e2e/pyspark/join/inner__on_expression/input_data.csv",
+            "schema": "tests/e2e/pyspark/join/inner__on_expression/input_schema.json",
+            "options": {
+                "header": true,
+                "inferSchema": false,
+                "delimiter": ","
+            }
+        },
+        {
+            "name": "extract_test2",
+            "method": "batch",
+            "data_format": "json",
+            "location": "tests/e2e/pyspark/join/inner__on_expression/input_data2.json",
+            "schema": "tests/e2e/pyspark/join/inner__on_expression/input_schema2.json",
+            "options": {
+                "header": true,
+                "inferSchema": false,
+                "delimiter": ","
+            }
+        }
+    ],
+    "transforms": [
+        {
+            "name": "transform_test",
+            "upstream_name": "extract-test",
+            "functions": [
+                {"function": "join", "arguments": { "how": "inner", "other": "extract_test2", "on_expression": "transform_test.name = extract_test2.name"}},
+                {"function": "select", "arguments": {"columns": ["transform_test.name", "transform_test.age", "extract_test2.height"]}}
+            ]
+        }
+    ],
+    "loads": [
+        {
+            "name": "load-test",
+            "upstream_name": "transform_test",
+            "method": "batch",
+            "data_format": "csv",
+            "mode": "overwrite",
+            "location": "tests/e2e/pyspark/join/inner__on_expression/csv",
+            "schema_location": "tests/e2e/pyspark/join/inner__on_expression/schema_output.json",
+            "options": {}
+        }
+    ]
+}

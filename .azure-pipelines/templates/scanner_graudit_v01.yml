@@ -1,0 +1,29 @@
+# https://github.com/wireghoul/graudit
+
+parameters:
+- name: enabled
+  type: boolean
+  default: true
+  
+- name: continueOnError
+  type: boolean
+  default: false
+
+- name: targetPath
+  type: string
+
+steps:
+- script: | 
+    git clone https://github.com/wireghoul/graudit $(Agent.ToolsDirectory)/.graudit/
+
+    echo "export PATH=$PATH:$(Agent.ToolsDirectory)/.graudit" >> ~/.profile
+    source ~/.profile
+
+    graudit -v
+    graudit -d python -A ${{ parameters.targetPath }}
+  displayName: Graudit (scanner)
+  condition: succeededOrFailed()
+  continueOnError: ${{ parameters.continueOnError }}
+  enabled: ${{ parameters.enabled }}
+  env:
+    GRDIR: $(Agent.ToolsDirectory)/graudit/signatures

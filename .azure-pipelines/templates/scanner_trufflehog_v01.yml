@@ -1,0 +1,47 @@
+# https://github.com/trufflesecurity/trufflehog
+
+# should be used with fetchDepth of 0 to scan entire git commit history
+
+# - checkout: self
+#   fetchDepth: 0
+
+parameters:
+- name: enabled
+  type: boolean
+  default: true
+
+- name: continueOnError
+  type: boolean
+  default: false
+
+# should be repository root directory with .git folder present
+- name: targetPath
+  type: string
+  default: $(Build.Repository.LocalPath)
+
+- name: configFilepath
+  type: string
+  default: $(Build.Repository.LocalPath)/.tools/.trufflehog
+
+steps:
+
+# target folder should be specified as file://<path>, targetPath is already prepended with a /
+# therefore its file:/ as appending the path will make it file://...
+- script: |
+    curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+
+    trufflehog --version
+
+    echo "Scanning folder file://."
+    echo "Working directory: $(pwd)"
+
+    trufflehog git file://. \
+    --config ${{ parameters.configFilepath }} \
+    --include-detectors="all" \
+    --only-verified \
+    --fail
+  displayName: Trufflehog (secret-scanner)
+  condition: succeededOrFailed()
+  continueOnError: ${{ parameters.continueOnError }}
+  enabled: ${{ parameters.enabled }}
+  workingDirectory: ${{ parameters.targetPath }}

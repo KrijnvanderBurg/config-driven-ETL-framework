@@ -1,0 +1,34 @@
+# https://github.com/jendrikseipp/vulture
+
+# Requirements:
+# - Python version/architecture is set in pipeline
+
+parameters:
+- name: enabled
+  type: boolean
+  default: true
+  
+- name: continueOnError
+  type: boolean
+  default: false
+
+- name: targetPath
+  type: string
+
+- name: configFilepath
+  type: string
+  default: $(Build.Repository.LocalPath)/.tools/.vulture
+
+steps:
+# NOTE: --config flag option is released in version 2.21 - https://github.com/jendrikseipp/vulture/blob/main/CHANGELOG.md
+- script: |
+    pip install vulture --quiet
+
+    vulture --version
+
+    vulture ${{ parameters.targetPath }} \
+    --config ${{ parameters.configFilepath }} \
+  displayName: Vulture (scanner)
+  condition: succeededOrFailed()
+  continueOnError: ${{ parameters.continueOnError }}
+  enabled: ${{ parameters.enabled }}

@@ -1,0 +1,36 @@
+# should be used with fetchDepth of 0 to scan entire git commit history
+
+# - checkout: self
+#   fetchDepth: 0
+
+parameters:
+- name: enabled
+  type: boolean
+  default: true
+
+- name: continueOnError
+  type: boolean
+  default: false
+
+# should be repository root directory with .git folder present
+- name: targetPath
+  type: string
+  default: $(Build.Repository.LocalPath)
+
+- name: configFilepath
+  type: string
+  default: $(Build.Repository.LocalPath)/.tools/.gitleaks.toml
+
+steps:
+- task: Gitleaks@2
+  displayName: Gitleaks (secret-scanner)
+  inputs:
+    scanlocation: ${{ parameters.targetPath }}
+    configtype: custom
+    configfile: ${{ parameters.configFilepath }}
+    scanmode: all
+    reportformat: sarif
+    verbose: true
+  condition: succeededOrFailed()
+  continueOnError: ${{ parameters.continueOnError }}
+  enabled: ${{ parameters.enabled }}
