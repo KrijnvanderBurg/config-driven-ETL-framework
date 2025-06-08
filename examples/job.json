@@ -26,10 +26,7 @@
             "name": "transform-join-orders",
             "upstream_name": "extract-customers",
             "functions": [
-                {
-                    "function": "customers_orders_bronze", 
-                    "arguments": {"filter_amount": 100} 
-                }
+                { "function": "customers_orders_bronze", "arguments": {"filter_amount": 100} }
             ]
         }
     ],
