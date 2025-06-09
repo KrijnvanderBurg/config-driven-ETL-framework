@@ -9,7 +9,7 @@ import pytest
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming.query import StreamingQuery
 
-from ingestion_framework.core.load import DATA_FORMAT, Load, LoadContext, LoadFormat, LoadRegistry
+from ingestion_framework.core.load import DATA_FORMAT, Load, LoadRegistry
 from ingestion_framework.models.model_load import LoadFormat, LoadMethod, LoadModelFile
 from ingestion_framework.types import DataFrameRegistry, StreamingQueryRegistry
 
@@ -17,7 +17,7 @@ from ingestion_framework.types import DataFrameRegistry, StreamingQueryRegistry
 class TestLoadModel:
     """Dummy model for testing Load class."""
 
-    load_model_concrete = LoadModelFile
+    model_cls = LoadModelFile
 
     def __init__(self, name: str, upstream_name: str, method: LoadMethod = LoadMethod.BATCH):
         """Initialize test model."""
@@ -31,7 +31,7 @@ class TestLoadModel:
 class TestLoadClass(Load[LoadModelFile]):
     """Test implementation of Load abstract class."""
 
-    load_model_concrete = LoadModelFile
+    model_cls = LoadModelFile
 
     def _load_batch(self) -> None:
         """Implementation of abstract method."""
@@ -114,14 +114,14 @@ class TestLoad:
             "options": {},
         }
 
-        mock_model = MagicMock(spec=LoadModelFile)
-        mock_from_dict.return_value = mock_model
+        mock_model_cls = MagicMock(spec=LoadModelFile)
+        mock_from_dict.return_value = mock_model_cls
 
         # Act
         load = TestLoadClass.from_dict(load_dict)
 
         # Assert
-        assert load.model == mock_model
+        assert load.model == mock_model_cls
         mock_from_dict.assert_called_once_with(dict_=load_dict)
 
     @patch("ingestion_framework.utils.spark.SparkHandler")
@@ -251,45 +251,44 @@ class TestLoad:
         # Assert
         mock_open.assert_not_called()
 
-
-class TestLoadContext:
-    """
-    Unit tests for the LoadContext class.
-    """
-
     @patch.object(LoadRegistry, "get")
-    def test_factory_with_valid_format(self, mock_registry_get: MagicMock) -> None:
-        """Test factory method with a valid format."""
+    def test_base_class_from_dict_with_valid_format(self, mock_registry_get: MagicMock) -> None:
+        """Test Load.from_dict method with a valid format."""
         # Arrange
         mock_load_class = MagicMock(spec=Load)
+        mock_model_cls = MagicMock()
+        mock_load_class.model_cls = MagicMock()
+        mock_load_class.model_cls.from_dict = MagicMock(return_value=mock_model_cls)
+        mock_load_class.return_value = MagicMock()
         mock_registry_get.return_value = mock_load_class
 
         config: dict[str, Any] = {DATA_FORMAT: "csv"}
 
         # Act
-        result = LoadContext.factory(config)
+        Load.from_dict(config)
 
         # Assert
-        assert result == mock_load_class
         mock_registry_get.assert_called_once_with(LoadFormat("csv"))
+        mock_load_class.model_cls.from_dict.assert_called_once_with(dict_=config)
+        mock_load_class.assert_called_once_with(model=mock_model_cls)
 
-    def test_factory_with_invalid_format(self) -> None:
-        """Test factory method with an invalid format."""
+    def test_base_class_from_dict_with_invalid_format(self) -> None:
+        """Test Load.from_dict method with an invalid format."""
         # Arrange
         config: dict[str, Any] = {DATA_FORMAT: "invalid_format"}
 
         # Act & Assert
         with pytest.raises(ValueError):
-            LoadContext.factory(config)
+            Load.from_dict(config)
 
-    def test_factory_with_missing_data_format_key(self) -> None:
-        """Test factory method with a missing 'data_format' key."""
+    def test_base_class_from_dict_with_missing_data_format_key(self) -> None:
+        """Test Load.from_dict method with a missing 'data_format' key."""
         # Arrange
         config: dict[str, Any] = {}
 
         # Act & Assert
-        with pytest.raises(KeyError) as excinfo:
-            LoadContext.factory(config)
+        with pytest.raises(NotImplementedError) as excinfo:
+            Load.from_dict(config)
 
-        # KeyError contains the missing key name
-        assert "data_format" in str(excinfo.value)
+        # NotImplementedError contains helpful message about missing format
+        assert "Load format <missing> is not supported" in str(excinfo.value)

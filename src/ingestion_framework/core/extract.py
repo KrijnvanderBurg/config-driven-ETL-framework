@@ -5,11 +5,11 @@ This module provides concrete implementations for extracting data using PySpark.
 It includes:
     - Abstract base classes for extraction
     - Concrete file-based extractors
-    - A registry and context for selecting extraction strategies
+    - A registry for selecting extraction strategies
     - Support for both batch and streaming extraction
 """
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Any, Final, Generic, Self, TypeVar
 
 from pyspark.sql import DataFrame
@@ -37,19 +37,19 @@ class ExtractRegistry(RegistryDecorator, metaclass=Singleton):
     """
 
 
-class Extract(Generic[ExtractModelT]):
+class Extract(Generic[ExtractModelT], ABC):
     """Abstract base class for data extraction operations.
 
     Defines the interface for all extraction implementations, supporting both
     batch and streaming extractions. Manages a data registry for extracted DataFrames.
 
     Attributes:
-        extract_model_concrete: The model class used for configuration
+        model_cls: The model class used for configuration
         model: The configuration model for this extraction
         data_registry: Registry for storing extracted DataFrames
     """
 
-    extract_model_concrete: type[ExtractModelT]
+    model_cls: type[ExtractModelT]
 
     def __init__(self, model: ExtractModelT) -> None:
         """Initialize the extraction operation.
@@ -68,29 +68,26 @@ class Extract(Generic[ExtractModelT]):
             dict_: Configuration dictionary containing extraction specifications
 
         Returns:
-            An initialized extraction instance
+            An initialized extraction instance of the appropriate type based on data_format
 
         Raises:
             DictKeyError: If required keys are missing from the configuration
+            NotImplementedError: If the specified extract format is not supported.
         """
-        model = cls.extract_model_concrete.from_dict(dict_=dict_)
-        return cls(model=model)
+        # If called on a concrete class, use that class directly
+        if cls is not Extract:
+            model = cls.model_cls.from_dict(dict_=dict_)
+            return cls(model=model)
 
-    @abstractmethod
-    def _extract_batch(self) -> DataFrame:
-        """Extract data in batch mode.
-
-        Returns:
-            DataFrame: The extracted data as a DataFrame.
-        """
-
-    @abstractmethod
-    def _extract_streaming(self) -> DataFrame:
-        """Extract data in streaming mode.
-
-        Returns:
-            DataFrame: The extracted data as a streaming DataFrame.
-        """
+        # If called on the base class, determine the concrete class using the registry
+        try:
+            data_format = dict_[DATA_FORMAT]
+            extract_format = ExtractFormat(data_format)
+            extract_class = ExtractRegistry.get(extract_format)
+            model = extract_class.model_cls.from_dict(dict_=dict_)
+            return extract_class(model=model)
+        except KeyError as e:
+            raise NotImplementedError(f"Extract format {dict_.get(DATA_FORMAT, '<missing>')} is not supported.") from e
 
     def extract(self) -> None:
         """Main extraction method.
@@ -108,6 +105,22 @@ class Extract(Generic[ExtractModelT]):
         else:
             raise ValueError(f"Extraction method {self.model.method} is not supported for Pyspark.")
 
+    @abstractmethod
+    def _extract_batch(self) -> DataFrame:
+        """Extract data in batch mode.
+
+        Returns:
+            DataFrame: The extracted data as a DataFrame.
+        """
+
+    @abstractmethod
+    def _extract_streaming(self) -> DataFrame:
+        """Extract data in streaming mode.
+
+        Returns:
+            DataFrame: The extracted data as a streaming DataFrame.
+        """
+
 
 @ExtractRegistry.register(ExtractFormat.PARQUET)
 @ExtractRegistry.register(ExtractFormat.JSON)
@@ -118,8 +131,8 @@ class ExtractFile(Extract[ExtractFileModel]):
     Supports both batch and streaming extraction using PySpark's DataFrame API.
     """
 
-    extract_model_concrete = ExtractFileModel
-    _spark_handler: SparkHandler = SparkHandler()
+    model_cls = ExtractFileModel
+    _spark: SparkHandler = SparkHandler()
 
     def _extract_batch(self) -> DataFrame:
         """Read from file in batch mode using PySpark.
@@ -127,7 +140,7 @@ class ExtractFile(Extract[ExtractFileModel]):
         Returns:
             DataFrame: The extracted data as a DataFrame.
         """
-        return self._spark_handler.session.read.load(
+        return self._spark.session.read.load(
             path=self.model.location,
             format=self.model.data_format.value,
             schema=self.model.schema,
@@ -140,42 +153,9 @@ class ExtractFile(Extract[ExtractFileModel]):
         Returns:
             DataFrame: The extracted data as a streaming DataFrame.
         """
-        return self._spark_handler.session.readStream.load(
+        return self._spark.session.readStream.load(
             path=self.model.location,
             format=self.model.data_format.value,
             schema=self.model.schema,
             **self.model.options,
         )
-
-
-class ExtractContext:
-    """Context for creating and managing extraction strategies.
-
-    Implements the Strategy pattern for data extraction, allowing different
-    extraction implementations to be selected based on the data format.
-    """
-
-    @classmethod
-    def factory(cls, dict_: dict[str, type[Extract]]) -> type[Extract]:
-        """Create an appropriate extract class based on the format specified in the configuration.
-
-        Uses the ExtractRegistry to look up the appropriate implementation class
-        based on the data format specified in the configuration.
-
-        Args:
-            dict_: Configuration dictionary that must include a 'data_format' key
-                compatible with the ExtractFormat enum
-
-        Returns:
-            type[Extract]: The concrete extraction class for the specified format.
-
-        Raises:
-            NotImplementedError: If the specified extract format is not supported.
-            KeyError: If the 'data_format' key is missing from the configuration.
-        """
-        try:
-            extract_format = ExtractFormat(dict_[DATA_FORMAT])
-            return ExtractRegistry.get(extract_format)
-        except KeyError as e:
-            format_name = dict_.get(DATA_FORMAT, "<missing>")
-            raise NotImplementedError(f"Extract format {format_name} is not supported.") from e

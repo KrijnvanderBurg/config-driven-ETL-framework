@@ -25,7 +25,7 @@ def valid_extract_dict() -> dict[str, Any]:
 
 
 @pytest.fixture
-def extract_file_model() -> ExtractFileModel:
+def extract_file_model_cls() -> ExtractFileModel:
     """Return an initialized ExtractFileModel instance."""
     return ExtractFileModel(
         name="test_extract_file",
@@ -46,14 +46,14 @@ def test_schema() -> StructType:
 class TestExtractFileModel:
     """Tests for ExtractFileModel class."""
 
-    def test_extract_file_model_initialization(self, extract_file_model) -> None:
+    def test_extract_file_model_cls_initialization(self, extract_file_model_cls) -> None:
         """Test that ExtractFileModel can be initialized with valid parameters."""
-        assert extract_file_model.name == "test_extract_file"
-        assert extract_file_model.method == ExtractMethod.BATCH
-        assert extract_file_model.data_format == ExtractFormat.PARQUET
-        assert extract_file_model.location == "s3://test-bucket/path"
-        assert extract_file_model.options == {"inferSchema": "true"}
-        assert extract_file_model.schema is None
+        assert extract_file_model_cls.name == "test_extract_file"
+        assert extract_file_model_cls.method == ExtractMethod.BATCH
+        assert extract_file_model_cls.data_format == ExtractFormat.PARQUET
+        assert extract_file_model_cls.location == "s3://test-bucket/path"
+        assert extract_file_model_cls.options == {"inferSchema": "true"}
+        assert extract_file_model_cls.schema is None
 
     @patch.object(SchemaFilepathHandler, "parse")
     def test_from_dict_valid(self, mock_schema_parse, valid_extract_dict, test_schema) -> None:

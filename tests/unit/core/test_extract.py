@@ -8,7 +8,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pyspark.sql import DataFrame
 
-from ingestion_framework.core.extract import DATA_FORMAT, Extract, ExtractContext, ExtractFormat, ExtractRegistry
+from ingestion_framework.core.extract import DATA_FORMAT, Extract, ExtractFormat, ExtractRegistry
 from ingestion_framework.models.model_extract import ExtractFileModel, ExtractMethod
 from ingestion_framework.types import DataFrameRegistry
 
@@ -16,7 +16,7 @@ from ingestion_framework.types import DataFrameRegistry
 class TestExtractModel:
     """Dummy model for testing Extract class."""
 
-    extract_model_concrete = ExtractFileModel
+    model_cls = ExtractFileModel
 
     def __init__(self, name: str, method: ExtractMethod = ExtractMethod.BATCH):
         """Initialize test model."""
@@ -28,7 +28,7 @@ class TestExtractModel:
 class TestExtractClass(Extract[ExtractFileModel]):
     """Test implementation of Extract abstract class."""
 
-    extract_model_concrete = ExtractFileModel
+    model_cls = ExtractFileModel
 
     def _extract_batch(self) -> DataFrame:
         """Implementation of abstract method."""
@@ -108,14 +108,14 @@ class TestExtract:
             "options": {},
         }
 
-        mock_model = MagicMock(spec=ExtractFileModel)
-        mock_from_dict.return_value = mock_model
+        mock_model_cls = MagicMock(spec=ExtractFileModel)
+        mock_from_dict.return_value = mock_model_cls
 
         # Act
         extract = TestExtractClass.from_dict(extract_dict)
 
         # Assert
-        assert extract.model == mock_model
+        assert extract.model == mock_model_cls
         mock_from_dict.assert_called_once_with(dict_=extract_dict)
 
     @patch("ingestion_framework.utils.spark.SparkHandler")
@@ -182,44 +182,43 @@ class TestExtract:
         with pytest.raises(ValueError):
             extract.extract()
 
-
-class TestExtractContext:
-    """
-    Unit tests for the ExtractContext class.
-    """
-
     @patch.object(ExtractRegistry, "get")
-    def test_factory_with_valid_format(self, mock_registry_get: MagicMock) -> None:
-        """Test factory method with a valid format."""
+    def test_base_class_from_dict_with_valid_format(self, mock_registry_get: MagicMock) -> None:
+        """Test Extract.from_dict method with a valid format."""
         # Arrange
         mock_extract_class = MagicMock(spec=Extract)
+        mock_model_cls = MagicMock()
+        mock_extract_class.model_cls = MagicMock()
+        mock_extract_class.model_cls.from_dict = MagicMock(return_value=mock_model_cls)
+        mock_extract_class.return_value = MagicMock()
         mock_registry_get.return_value = mock_extract_class
 
         config: dict[str, Any] = {DATA_FORMAT: "csv"}
 
         # Act
-        result = ExtractContext.factory(config)
+        Extract.from_dict(config)
 
         # Assert
-        assert result == mock_extract_class
         mock_registry_get.assert_called_once_with(ExtractFormat("csv"))
+        mock_extract_class.model_cls.from_dict.assert_called_once_with(dict_=config)
+        mock_extract_class.assert_called_once_with(model=mock_model_cls)
 
-    def test_factory_with_invalid_format(self) -> None:
-        """Test factory method with an invalid format."""
+    def test_base_class_from_dict_with_invalid_format(self) -> None:
+        """Test Extract.from_dict method with an invalid format."""
         # Arrange
         config: dict[str, Any] = {DATA_FORMAT: "invalid_format"}
 
         # Act & Assert
         with pytest.raises(ValueError):
-            ExtractContext.factory(config)
+            Extract.from_dict(config)
 
-    def test_factory_with_missing_data_format_key(self) -> None:
-        """Test factory method with a missing 'data_format' key."""
+    def test_base_class_from_dict_with_missing_data_format_key(self) -> None:
+        """Test Extract.from_dict method with a missing 'data_format' key."""
         # Arrange
         config: dict[str, Any] = {}
 
         # Act & Assert
         with pytest.raises(NotImplementedError) as excinfo:
-            ExtractContext.factory(config)
+            Extract.from_dict(config)
 
         assert "Extract format <missing> is not supported" in str(excinfo.value)

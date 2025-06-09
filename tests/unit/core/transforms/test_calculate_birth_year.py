@@ -50,14 +50,14 @@ class TestCalculateBirthYearFunction:
             "arguments": {"current_year": 2025, "age_column": "age", "birth_year_column": "birth_year"},
         }
 
-        mock_model = MagicMock(spec=CalculateBirthYearFunctionModel)
-        mock_from_dict.return_value = mock_model
+        mock_model_cls = MagicMock(spec=CalculateBirthYearFunctionModel)
+        mock_from_dict.return_value = mock_model_cls
 
         # Act
         function = CalculateBirthYearFunction.from_dict(function_dict)
 
         # Assert
-        assert function.model == mock_model
+        assert function.model == mock_model_cls
         mock_from_dict.assert_called_once_with(dict_=function_dict)
 
     def test_transform_function(self) -> None:

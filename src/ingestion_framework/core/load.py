@@ -6,7 +6,7 @@ various destinations and formats using Apache PySpark. It includes:
 - Abstract base classes defining the loading interface
 - Concrete implementations for different output formats (CSV, JSON, etc.)
 - Support for both batch and streaming writes
-- Registry mechanisms for dynamically selecting appropriate loaders
+- Registry mechanism for dynamically selecting appropriate loaders
 - Configuration-driven loading functionality
 
 The Load components represent the final phase in the ETL pipeline, responsible
@@ -51,7 +51,7 @@ class Load(Generic[LoadModelT], ABC):
     supporting both batch and streaming loads to various destinations.
     """
 
-    load_model_concrete: type[LoadModelT]
+    model_cls: type[LoadModelT]
 
     def __init__(self, model: LoadModelT) -> None:
         """
@@ -73,13 +73,26 @@ class Load(Generic[LoadModelT], ABC):
             dict_: Configuration dictionary containing loading specifications
 
         Returns:
-            An initialized loading instance
+            An initialized loading instance of the appropriate type based on data_format
 
         Raises:
             DictKeyError: If required keys are missing from the configuration
+            NotImplementedError: If the specified load format is not supported
         """
-        model = cls.load_model_concrete.from_dict(dict_=dict_)
-        return cls(model=model)
+        # If called on a concrete class, use that class directly
+        if cls is not Load:
+            model = cls.model_cls.from_dict(dict_=dict_)
+            return cls(model=model)
+
+        # If called on the base class, determine the concrete class using the registry
+        try:
+            data_format = dict_[DATA_FORMAT]
+            load_format = LoadFormat(data_format)
+            load_class = LoadRegistry.get(load_format)
+            model = load_class.model_cls.from_dict(dict_=dict_)
+            return load_class(model=model)
+        except KeyError as e:
+            raise NotImplementedError(f"Load format {dict_.get(DATA_FORMAT, '<missing>')} is not supported.") from e
 
     @abstractmethod
     def _load_batch(self) -> None:
@@ -135,7 +148,7 @@ class LoadFile(Load[LoadModelFile]):
     Concrete class for file loading using PySpark DataFrame.
     """
 
-    load_model_concrete = LoadModelFile
+    model_cls = LoadModelFile
 
     def _load_batch(self) -> None:
         """
@@ -161,39 +174,3 @@ class LoadFile(Load[LoadModelFile]):
             outputMode=self.model.mode.value,
             **self.model.options,
         )
-
-
-class LoadContext:
-    """
-    Abstract context class for creating and managing loading strategies.
-
-    This class implements the Strategy pattern for data loading, allowing
-    different loading implementations to be selected based on the data format.
-    """
-
-    @classmethod
-    def factory(cls, dict_: dict[str, type[Load]]) -> type[Load[LoadModel]]:
-        """
-        Create an appropriate load class based on the format specified in the configuration.
-
-        This factory method uses the LoadRegistry to look up the appropriate
-        implementation class based on the data format.
-
-        Args:
-            dict_: Configuration dictionary that must include a 'data_format' key
-                compatible with the LoadFormat enum
-
-        Returns:
-            The concrete loading class for the specified format
-
-        Raises:
-            NotImplementedError: If the specified load format is not supported
-            KeyError: If the 'data_format' key is missing from the configuration
-        """
-        data_format = dict_[DATA_FORMAT]
-
-        try:
-            load_format = LoadFormat(data_format)
-            return LoadRegistry.get(load_format)
-        except KeyError as e:
-            raise NotImplementedError(f"Load format {data_format} is not supported.") from e
