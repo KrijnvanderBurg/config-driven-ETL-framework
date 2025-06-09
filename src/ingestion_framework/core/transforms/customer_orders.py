@@ -14,7 +14,7 @@ class CustomersOrdersBronzeFunction(Function[CustomersOrdersFunctionModel]):
 
     Attributes:
         model: Configuration model specifying transformation parameters
-        _model: The concrete model class used for configuration
+        model_cls: The concrete model class used for configuration
         data_registry: Shared registry for accessing and storing DataFrames
 
     Example:
@@ -29,7 +29,7 @@ class CustomersOrdersBronzeFunction(Function[CustomersOrdersFunctionModel]):
         ```
     """
 
-    _model = CustomersOrdersFunctionModel
+    model_cls = CustomersOrdersFunctionModel
 
     def transform(self) -> Callable:
         """Apply transformations to customers and orders DataFrames.

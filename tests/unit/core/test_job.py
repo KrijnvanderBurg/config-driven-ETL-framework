@@ -62,10 +62,8 @@ class TestJob:
         }
         mock_from_filepath.return_value = mock_file_handler
 
-        # Mock the factory methods
+        # Mock the from_dict methods
         with (
-            patch("ingestion_framework.core.extract.ExtractContext.factory") as mock_extract_factory,
-            patch("ingestion_framework.core.load.LoadContext.factory") as mock_load_factory,
             patch.object(Extract, "from_dict") as mock_extract_from_dict,
             patch.object(Transform, "from_dict") as mock_transform_from_dict,
             patch.object(Load, "from_dict") as mock_load_from_dict,
@@ -74,9 +72,6 @@ class TestJob:
             mock_extract = MagicMock(spec=Extract)
             mock_transform = MagicMock(spec=Transform)
             mock_load = MagicMock(spec=Load)
-
-            mock_extract_factory.return_value = Extract
-            mock_load_factory.return_value = Load
 
             mock_extract_from_dict.return_value = mock_extract
             mock_transform_from_dict.return_value = mock_transform
@@ -117,10 +112,8 @@ class TestJob:
             "loads": [{"name": "test_load", "upstream_name": "test_transform"}],
         }
 
-        # Mock the factory methods
+        # Mock the from_dict methods
         with (
-            patch("ingestion_framework.core.extract.ExtractContext.factory") as mock_extract_factory,
-            patch("ingestion_framework.core.load.LoadContext.factory") as mock_load_factory,
             patch.object(Extract, "from_dict") as mock_extract_from_dict,
             patch.object(Transform, "from_dict") as mock_transform_from_dict,
             patch.object(Load, "from_dict") as mock_load_from_dict,
@@ -129,9 +122,6 @@ class TestJob:
             mock_extract = MagicMock(spec=Extract)
             mock_transform = MagicMock(spec=Transform)
             mock_load = MagicMock(spec=Load)
-
-            mock_extract_factory.return_value = Extract
-            mock_load_factory.return_value = Load
 
             mock_extract_from_dict.return_value = mock_extract
             mock_transform_from_dict.return_value = mock_transform

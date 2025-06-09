@@ -29,7 +29,7 @@ class SelectFunction(Function[SelectFunctionModel]):
 
     Attributes:
         model: Configuration model specifying which columns to select
-        _model: The concrete model class used for configuration
+        model_cls: The concrete model class used for configuration
         data_registry: Shared registry for accessing and storing DataFrames
 
     Example:
@@ -43,7 +43,7 @@ class SelectFunction(Function[SelectFunctionModel]):
         ```
     """
 
-    _model = SelectFunctionModel
+    model_cls = SelectFunctionModel
 
     def transform(self) -> Callable:
         """Apply the column selection transformation to the DataFrame.

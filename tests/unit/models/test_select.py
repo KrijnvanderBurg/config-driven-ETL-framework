@@ -28,21 +28,21 @@ class TestSelectFunctionModel:
         return SelectFunctionModel.Args(columns=mock_columns)
 
     @pytest.fixture
-    def select_model(self, select_args) -> SelectFunctionModel:
+    def select_model_cls(self, select_args) -> SelectFunctionModel:
         """Return initialized SelectFunctionModel instance."""
         return SelectFunctionModel(function="select", arguments=select_args)
 
-    def test_select_function_model_args(self, mock_columns: list[MagicMock], select_args) -> None:
+    def test_select_function_model_cls_args(self, mock_columns: list[MagicMock], select_args) -> None:
         """Test SelectFunctionModel.Args initialization."""
         assert len(select_args.columns) == 2
         assert select_args.columns[0] is mock_columns[0]
         assert select_args.columns[1] is mock_columns[1]
 
-    def test_select_function_model_initialization(self, select_model: SelectFunctionModel, select_args) -> None:
+    def test_select_function_model_cls_initialization(self, select_model_cls: SelectFunctionModel, select_args) -> None:
         """Test that SelectFunctionModel can be initialized with valid parameters."""
-        assert select_model.function == "select"
-        assert select_model.arguments is select_args
-        assert len(select_model.arguments.columns) == 2
+        assert select_model_cls.function == "select"
+        assert select_model_cls.arguments is select_args
+        assert len(select_model_cls.arguments.columns) == 2
 
     @patch("pyspark.sql.functions.col")
     def test_from_dict_valid(self, mock_col, valid_select_dict) -> None:

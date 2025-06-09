@@ -47,14 +47,14 @@ class TestSelectFunction:
         # Arrange
         function_dict = {"function": "select", "arguments": {"columns": ["col1", "col2"]}}
 
-        mock_model = MagicMock(spec=SelectFunctionModel)
-        mock_from_dict.return_value = mock_model
+        mock_model_cls = MagicMock(spec=SelectFunctionModel)
+        mock_from_dict.return_value = mock_model_cls
 
         # Act
         function = SelectFunction.from_dict(function_dict)
 
         # Assert
-        assert function.model == mock_model
+        assert function.model == mock_model_cls
         mock_from_dict.assert_called_once_with(dict_=function_dict)
 
     def test_transform_function(self) -> None:

@@ -6,6 +6,7 @@ from typing import Any, Callable
 from unittest.mock import MagicMock, patch
 
 import pytest
+from pyspark.sql import DataFrame
 
 from ingestion_framework.core.transform import Function, Transform, TransformFunctionRegistry
 from ingestion_framework.models.model_transform import TransformModel
@@ -64,15 +65,14 @@ class MockFunctionModel:
 class TestFunction(Function[MockFunctionModel]):
     """Test implementation of Function abstract class."""
 
-    _model = MockFunctionModel  # This was the issue - should be _model, not model_concrete
+    model_cls = MockFunctionModel  # This was the issue - should be model_cls, not model_concrete
 
     def transform(self) -> Callable[..., Any]:
         """Implementation of abstract method."""
 
-        def transform_func(dataframe_registry: DataFrameRegistry, dataframe_name: str) -> None:
+        def transform_func(df: DataFrame) -> None:
             """Mock transform function."""
             # Mock transformation implementation
-            pass
 
         return transform_func
 
