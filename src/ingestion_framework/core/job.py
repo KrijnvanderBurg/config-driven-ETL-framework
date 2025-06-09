@@ -12,8 +12,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final, Self
 
-from ingestion_framework.core.extract import Extract, ExtractContext
-from ingestion_framework.core.load import Load, LoadContext
+from ingestion_framework.core.extract import Extract
+from ingestion_framework.core.load import Load
 from ingestion_framework.core.transform import Function, Transform
 from ingestion_framework.exceptions import DictKeyError
 from ingestion_framework.utils.file import FileHandlerContext
@@ -97,8 +97,7 @@ class Job:
         try:
             extracts: list = []
             for extract_dict in dict_[EXTRACTS]:
-                extract_class = ExtractContext.factory(dict_=extract_dict)
-                extract = extract_class.from_dict(dict_=extract_dict)
+                extract = Extract.from_dict(dict_=extract_dict)
                 extracts.append(extract)
 
             transforms: list = []
@@ -109,8 +108,7 @@ class Job:
 
             loads: list = []
             for load_dict in dict_[LOADS]:
-                load_class = LoadContext.factory(dict_=load_dict)
-                load = load_class.from_dict(dict_=load_dict)
+                load = Load.from_dict(dict_=load_dict)
                 loads.append(load)
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e

@@ -5,7 +5,7 @@ This module provides concrete implementations for extracting data using PySpark.
 It includes:
     - Abstract base classes for extraction
     - Concrete file-based extractors
-    - A registry and context for selecting extraction strategies
+    - A registry for selecting extraction strategies
     - Support for both batch and streaming extraction
 """
 
@@ -68,13 +68,26 @@ class Extract(Generic[ExtractModelT], ABC):
             dict_: Configuration dictionary containing extraction specifications
 
         Returns:
-            An initialized extraction instance
+            An initialized extraction instance of the appropriate type based on data_format
 
         Raises:
             DictKeyError: If required keys are missing from the configuration
+            NotImplementedError: If the specified extract format is not supported.
         """
-        model = cls._model.from_dict(dict_=dict_)
-        return cls(model=model)
+        # If called on a concrete class, use that class directly
+        if cls is not Extract:
+            model = cls._model.from_dict(dict_=dict_)
+            return cls(model=model)
+
+        # If called on the base class, determine the concrete class using the registry
+        try:
+            data_format = dict_[DATA_FORMAT]
+            extract_format = ExtractFormat(data_format)
+            extract_class = ExtractRegistry.get(extract_format)
+            model = extract_class._model.from_dict(dict_=dict_)
+            return extract_class(model=model)
+        except KeyError as e:
+            raise NotImplementedError(f"Extract format {dict_.get(DATA_FORMAT, '<missing>')} is not supported.") from e
 
     def extract(self) -> None:
         """Main extraction method.
@@ -146,36 +159,3 @@ class ExtractFile(Extract[ExtractFileModel]):
             schema=self.model.schema,
             **self.model.options,
         )
-
-
-class ExtractContext:
-    """Context for creating and managing extraction strategies.
-
-    Implements the Strategy pattern for data extraction, allowing different
-    extraction implementations to be selected based on the data format.
-    """
-
-    @classmethod
-    def factory(cls, dict_: dict[str, type[Extract]]) -> type[Extract]:
-        """Create an appropriate extract class based on the format specified in the configuration.
-
-        Uses the ExtractRegistry to look up the appropriate implementation class
-        based on the data format specified in the configuration.
-
-        Args:
-            dict_: Configuration dictionary that must include a 'data_format' key
-                compatible with the ExtractFormat enum
-
-        Returns:
-            type[Extract]: The concrete extraction class for the specified format.
-
-        Raises:
-            NotImplementedError: If the specified extract format is not supported.
-            KeyError: If the 'data_format' key is missing from the configuration.
-        """
-        try:
-            extract_format = ExtractFormat(dict_[DATA_FORMAT])
-            return ExtractRegistry.get(extract_format)
-        except KeyError as e:
-            format_name = dict_.get(DATA_FORMAT, "<missing>")
-            raise NotImplementedError(f"Extract format {format_name} is not supported.") from e
