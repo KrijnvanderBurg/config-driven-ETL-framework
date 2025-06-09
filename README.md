@@ -1,8 +1,5 @@
 # Data Ingestion Framework
 
-![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-
 ## Overview
 
 The Data Ingestion Framework is a robust, configurable ETL (Extract, Transform, Load) solution built on Apache Spark. It provides a declarative approach to data pipelines, allowing engineers to define complex data workflows through configuration rather than code.
