@@ -14,7 +14,7 @@ from typing import Any, Final, Self
 
 from ingestion_framework.core.extract import Extract
 from ingestion_framework.core.load import Load
-from ingestion_framework.core.transform import Function, Transform
+from ingestion_framework.core.transform import Transform
 from ingestion_framework.exceptions import DictKeyError
 from ingestion_framework.utils.file import FileHandlerContext
 
@@ -102,8 +102,7 @@ class Job:
 
             transforms: list = []
             for transform_dict in dict_[TRANSFORMS]:
-                transform_class = Transform[Function]
-                transform = transform_class.from_dict(dict_=transform_dict)
+                transform = Transform.from_dict(dict_=transform_dict)
                 transforms.append(transform)
 
             loads: list = []

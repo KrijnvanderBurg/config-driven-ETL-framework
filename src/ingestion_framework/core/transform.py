@@ -73,18 +73,6 @@ class Function(Generic[FunctionModelT], ABC):
         self.callable_ = self.transform()
         self.data_registry = DataFrameRegistry()
 
-    @abstractmethod
-    def transform(self) -> Callable[..., Any]:
-        """
-        Create a callable transformation function based on the model.
-
-        This method should implement the logic to create a function that
-        can be called to transform data according to the model configuration.
-
-        Returns:
-            A callable function that applies the transformation to data.
-        """
-
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
@@ -102,18 +90,27 @@ class Function(Generic[FunctionModelT], ABC):
         model = cls.model_cls.from_dict(dict_=dict_)
         return cls(model=model)
 
+    @abstractmethod
+    def transform(self) -> Callable[..., Any]:
+        """
+        Create a callable transformation function based on the model.
 
-FunctionT = TypeVar("FunctionT", bound=Function)
+        This method should implement the logic to create a function that
+        can be called to transform data according to the model configuration.
+
+        Returns:
+            A callable function that applies the transformation to data.
+        """
 
 
-class Transform(Generic[FunctionT]):
+class Transform:
     """
     Concrete implementation for DataFrame transformation.
 
     This class provides functionality for transforming data.
     """
 
-    def __init__(self, model: TransformModel, functions: list[FunctionT]) -> None:
+    def __init__(self, model: TransformModel, functions: list[Function]) -> None:
         self.model = model
         self.functions = functions
         self.data_registry = DataFrameRegistry()
