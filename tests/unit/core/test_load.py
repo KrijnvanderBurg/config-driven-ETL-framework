@@ -17,7 +17,7 @@ from ingestion_framework.types import DataFrameRegistry, StreamingQueryRegistry
 class TestLoadModel:
     """Dummy model for testing Load class."""
 
-    _model = LoadModelFile
+    model_cls = LoadModelFile
 
     def __init__(self, name: str, upstream_name: str, method: LoadMethod = LoadMethod.BATCH):
         """Initialize test model."""
@@ -31,7 +31,7 @@ class TestLoadModel:
 class TestLoadClass(Load[LoadModelFile]):
     """Test implementation of Load abstract class."""
 
-    _model = LoadModelFile
+    model_cls = LoadModelFile
 
     def _load_batch(self) -> None:
         """Implementation of abstract method."""
@@ -114,14 +114,14 @@ class TestLoad:
             "options": {},
         }
 
-        mock_model = MagicMock(spec=LoadModelFile)
-        mock_from_dict.return_value = mock_model
+        mock_model_cls = MagicMock(spec=LoadModelFile)
+        mock_from_dict.return_value = mock_model_cls
 
         # Act
         load = TestLoadClass.from_dict(load_dict)
 
         # Assert
-        assert load.model == mock_model
+        assert load.model == mock_model_cls
         mock_from_dict.assert_called_once_with(dict_=load_dict)
 
     @patch("ingestion_framework.utils.spark.SparkHandler")
@@ -256,9 +256,9 @@ class TestLoad:
         """Test Load.from_dict method with a valid format."""
         # Arrange
         mock_load_class = MagicMock(spec=Load)
-        mock_model = MagicMock()
-        mock_load_class._model = MagicMock()
-        mock_load_class._model.from_dict = MagicMock(return_value=mock_model)
+        mock_model_cls = MagicMock()
+        mock_load_class.model_cls = MagicMock()
+        mock_load_class.model_cls.from_dict = MagicMock(return_value=mock_model_cls)
         mock_load_class.return_value = MagicMock()
         mock_registry_get.return_value = mock_load_class
 
@@ -269,8 +269,8 @@ class TestLoad:
 
         # Assert
         mock_registry_get.assert_called_once_with(LoadFormat("csv"))
-        mock_load_class._model.from_dict.assert_called_once_with(dict_=config)
-        mock_load_class.assert_called_once_with(model=mock_model)
+        mock_load_class.model_cls.from_dict.assert_called_once_with(dict_=config)
+        mock_load_class.assert_called_once_with(model=mock_model_cls)
 
     def test_base_class_from_dict_with_invalid_format(self) -> None:
         """Test Load.from_dict method with an invalid format."""

@@ -51,7 +51,7 @@ class Load(Generic[LoadModelT], ABC):
     supporting both batch and streaming loads to various destinations.
     """
 
-    _model: type[LoadModelT]
+    model_cls: type[LoadModelT]
 
     def __init__(self, model: LoadModelT) -> None:
         """
@@ -81,7 +81,7 @@ class Load(Generic[LoadModelT], ABC):
         """
         # If called on a concrete class, use that class directly
         if cls is not Load:
-            model = cls._model.from_dict(dict_=dict_)
+            model = cls.model_cls.from_dict(dict_=dict_)
             return cls(model=model)
 
         # If called on the base class, determine the concrete class using the registry
@@ -89,7 +89,7 @@ class Load(Generic[LoadModelT], ABC):
             data_format = dict_[DATA_FORMAT]
             load_format = LoadFormat(data_format)
             load_class = LoadRegistry.get(load_format)
-            model = load_class._model.from_dict(dict_=dict_)
+            model = load_class.model_cls.from_dict(dict_=dict_)
             return load_class(model=model)
         except KeyError as e:
             raise NotImplementedError(f"Load format {dict_.get(DATA_FORMAT, '<missing>')} is not supported.") from e
@@ -148,7 +148,7 @@ class LoadFile(Load[LoadModelFile]):
     Concrete class for file loading using PySpark DataFrame.
     """
 
-    _model = LoadModelFile
+    model_cls = LoadModelFile
 
     def _load_batch(self) -> None:
         """

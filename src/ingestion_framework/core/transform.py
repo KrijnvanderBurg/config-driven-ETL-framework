@@ -60,7 +60,7 @@ class Function(Generic[FunctionModelT], ABC):
     Each function has a model that defines its behavior and parameters.
     """
 
-    _model: type[FunctionModelT]
+    model_cls: type[FunctionModelT]
 
     def __init__(self, model: FunctionModelT) -> None:
         """
@@ -99,7 +99,7 @@ class Function(Generic[FunctionModelT], ABC):
         Raises:
             DictKeyError: If required keys are missing from the configuration.
         """
-        model = cls._model.from_dict(dict_=dict_)
+        model = cls.model_cls.from_dict(dict_=dict_)
         return cls(model=model)
 
 

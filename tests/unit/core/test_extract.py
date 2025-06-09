@@ -16,7 +16,7 @@ from ingestion_framework.types import DataFrameRegistry
 class TestExtractModel:
     """Dummy model for testing Extract class."""
 
-    _model = ExtractFileModel
+    model_cls = ExtractFileModel
 
     def __init__(self, name: str, method: ExtractMethod = ExtractMethod.BATCH):
         """Initialize test model."""
@@ -28,7 +28,7 @@ class TestExtractModel:
 class TestExtractClass(Extract[ExtractFileModel]):
     """Test implementation of Extract abstract class."""
 
-    _model = ExtractFileModel
+    model_cls = ExtractFileModel
 
     def _extract_batch(self) -> DataFrame:
         """Implementation of abstract method."""
@@ -108,14 +108,14 @@ class TestExtract:
             "options": {},
         }
 
-        mock_model = MagicMock(spec=ExtractFileModel)
-        mock_from_dict.return_value = mock_model
+        mock_model_cls = MagicMock(spec=ExtractFileModel)
+        mock_from_dict.return_value = mock_model_cls
 
         # Act
         extract = TestExtractClass.from_dict(extract_dict)
 
         # Assert
-        assert extract.model == mock_model
+        assert extract.model == mock_model_cls
         mock_from_dict.assert_called_once_with(dict_=extract_dict)
 
     @patch("ingestion_framework.utils.spark.SparkHandler")
@@ -187,9 +187,9 @@ class TestExtract:
         """Test Extract.from_dict method with a valid format."""
         # Arrange
         mock_extract_class = MagicMock(spec=Extract)
-        mock_model = MagicMock()
-        mock_extract_class._model = MagicMock()
-        mock_extract_class._model.from_dict = MagicMock(return_value=mock_model)
+        mock_model_cls = MagicMock()
+        mock_extract_class.model_cls = MagicMock()
+        mock_extract_class.model_cls.from_dict = MagicMock(return_value=mock_model_cls)
         mock_extract_class.return_value = MagicMock()
         mock_registry_get.return_value = mock_extract_class
 
@@ -200,8 +200,8 @@ class TestExtract:
 
         # Assert
         mock_registry_get.assert_called_once_with(ExtractFormat("csv"))
-        mock_extract_class._model.from_dict.assert_called_once_with(dict_=config)
-        mock_extract_class.assert_called_once_with(model=mock_model)
+        mock_extract_class.model_cls.from_dict.assert_called_once_with(dict_=config)
+        mock_extract_class.assert_called_once_with(model=mock_model_cls)
 
     def test_base_class_from_dict_with_invalid_format(self) -> None:
         """Test Extract.from_dict method with an invalid format."""

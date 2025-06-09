@@ -64,7 +64,7 @@ class MockFunctionModel:
 class TestFunction(Function[MockFunctionModel]):
     """Test implementation of Function abstract class."""
 
-    _model = MockFunctionModel  # This was the issue - should be _model, not model_concrete
+    model_cls = MockFunctionModel  # This was the issue - should be model_cls, not model_concrete
 
     def transform(self) -> Callable[..., Any]:
         """Implementation of abstract method."""

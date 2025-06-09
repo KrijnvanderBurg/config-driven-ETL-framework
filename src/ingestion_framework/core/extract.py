@@ -44,12 +44,12 @@ class Extract(Generic[ExtractModelT], ABC):
     batch and streaming extractions. Manages a data registry for extracted DataFrames.
 
     Attributes:
-        _model: The model class used for configuration
+        model_cls: The model class used for configuration
         model: The configuration model for this extraction
         data_registry: Registry for storing extracted DataFrames
     """
 
-    _model: type[ExtractModelT]
+    model_cls: type[ExtractModelT]
 
     def __init__(self, model: ExtractModelT) -> None:
         """Initialize the extraction operation.
@@ -76,7 +76,7 @@ class Extract(Generic[ExtractModelT], ABC):
         """
         # If called on a concrete class, use that class directly
         if cls is not Extract:
-            model = cls._model.from_dict(dict_=dict_)
+            model = cls.model_cls.from_dict(dict_=dict_)
             return cls(model=model)
 
         # If called on the base class, determine the concrete class using the registry
@@ -84,7 +84,7 @@ class Extract(Generic[ExtractModelT], ABC):
             data_format = dict_[DATA_FORMAT]
             extract_format = ExtractFormat(data_format)
             extract_class = ExtractRegistry.get(extract_format)
-            model = extract_class._model.from_dict(dict_=dict_)
+            model = extract_class.model_cls.from_dict(dict_=dict_)
             return extract_class(model=model)
         except KeyError as e:
             raise NotImplementedError(f"Extract format {dict_.get(DATA_FORMAT, '<missing>')} is not supported.") from e
@@ -131,7 +131,7 @@ class ExtractFile(Extract[ExtractFileModel]):
     Supports both batch and streaming extraction using PySpark's DataFrame API.
     """
 
-    _model = ExtractFileModel
+    model_cls = ExtractFileModel
     _spark: SparkHandler = SparkHandler()
 
     def _extract_batch(self) -> DataFrame:
