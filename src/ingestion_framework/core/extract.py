@@ -9,7 +9,7 @@ It includes:
     - Support for both batch and streaming extraction
 """
 
-from abc import abstractmethod
+from abc import ABC, abstractmethod
 from typing import Any, Final, Generic, Self, TypeVar
 
 from pyspark.sql import DataFrame
@@ -37,19 +37,19 @@ class ExtractRegistry(RegistryDecorator, metaclass=Singleton):
     """
 
 
-class Extract(Generic[ExtractModelT]):
+class Extract(Generic[ExtractModelT], ABC):
     """Abstract base class for data extraction operations.
 
     Defines the interface for all extraction implementations, supporting both
     batch and streaming extractions. Manages a data registry for extracted DataFrames.
 
     Attributes:
-        extract_model_concrete: The model class used for configuration
+        _model: The model class used for configuration
         model: The configuration model for this extraction
         data_registry: Registry for storing extracted DataFrames
     """
 
-    extract_model_concrete: type[ExtractModelT]
+    _model: type[ExtractModelT]
 
     def __init__(self, model: ExtractModelT) -> None:
         """Initialize the extraction operation.
@@ -73,24 +73,8 @@ class Extract(Generic[ExtractModelT]):
         Raises:
             DictKeyError: If required keys are missing from the configuration
         """
-        model = cls.extract_model_concrete.from_dict(dict_=dict_)
+        model = cls._model.from_dict(dict_=dict_)
         return cls(model=model)
-
-    @abstractmethod
-    def _extract_batch(self) -> DataFrame:
-        """Extract data in batch mode.
-
-        Returns:
-            DataFrame: The extracted data as a DataFrame.
-        """
-
-    @abstractmethod
-    def _extract_streaming(self) -> DataFrame:
-        """Extract data in streaming mode.
-
-        Returns:
-            DataFrame: The extracted data as a streaming DataFrame.
-        """
 
     def extract(self) -> None:
         """Main extraction method.
@@ -108,6 +92,22 @@ class Extract(Generic[ExtractModelT]):
         else:
             raise ValueError(f"Extraction method {self.model.method} is not supported for Pyspark.")
 
+    @abstractmethod
+    def _extract_batch(self) -> DataFrame:
+        """Extract data in batch mode.
+
+        Returns:
+            DataFrame: The extracted data as a DataFrame.
+        """
+
+    @abstractmethod
+    def _extract_streaming(self) -> DataFrame:
+        """Extract data in streaming mode.
+
+        Returns:
+            DataFrame: The extracted data as a streaming DataFrame.
+        """
+
 
 @ExtractRegistry.register(ExtractFormat.PARQUET)
 @ExtractRegistry.register(ExtractFormat.JSON)
@@ -118,8 +118,8 @@ class ExtractFile(Extract[ExtractFileModel]):
     Supports both batch and streaming extraction using PySpark's DataFrame API.
     """
 
-    extract_model_concrete = ExtractFileModel
-    _spark_handler: SparkHandler = SparkHandler()
+    _model = ExtractFileModel
+    _spark: SparkHandler = SparkHandler()
 
     def _extract_batch(self) -> DataFrame:
         """Read from file in batch mode using PySpark.
@@ -127,7 +127,7 @@ class ExtractFile(Extract[ExtractFileModel]):
         Returns:
             DataFrame: The extracted data as a DataFrame.
         """
-        return self._spark_handler.session.read.load(
+        return self._spark.session.read.load(
             path=self.model.location,
             format=self.model.data_format.value,
             schema=self.model.schema,
@@ -140,7 +140,7 @@ class ExtractFile(Extract[ExtractFileModel]):
         Returns:
             DataFrame: The extracted data as a streaming DataFrame.
         """
-        return self._spark_handler.session.readStream.load(
+        return self._spark.session.readStream.load(
             path=self.model.location,
             format=self.model.data_format.value,
             schema=self.model.schema,

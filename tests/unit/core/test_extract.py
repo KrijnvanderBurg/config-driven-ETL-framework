@@ -16,7 +16,7 @@ from ingestion_framework.types import DataFrameRegistry
 class TestExtractModel:
     """Dummy model for testing Extract class."""
 
-    extract_model_concrete = ExtractFileModel
+    _model = ExtractFileModel
 
     def __init__(self, name: str, method: ExtractMethod = ExtractMethod.BATCH):
         """Initialize test model."""
@@ -28,7 +28,7 @@ class TestExtractModel:
 class TestExtractClass(Extract[ExtractFileModel]):
     """Test implementation of Extract abstract class."""
 
-    extract_model_concrete = ExtractFileModel
+    _model = ExtractFileModel
 
     def _extract_batch(self) -> DataFrame:
         """Implementation of abstract method."""

@@ -51,7 +51,7 @@ class Load(Generic[LoadModelT], ABC):
     supporting both batch and streaming loads to various destinations.
     """
 
-    load_model_concrete: type[LoadModelT]
+    _model: type[LoadModelT]
 
     def __init__(self, model: LoadModelT) -> None:
         """
@@ -78,7 +78,7 @@ class Load(Generic[LoadModelT], ABC):
         Raises:
             DictKeyError: If required keys are missing from the configuration
         """
-        model = cls.load_model_concrete.from_dict(dict_=dict_)
+        model = cls._model.from_dict(dict_=dict_)
         return cls(model=model)
 
     @abstractmethod
@@ -135,7 +135,7 @@ class LoadFile(Load[LoadModelFile]):
     Concrete class for file loading using PySpark DataFrame.
     """
 
-    load_model_concrete = LoadModelFile
+    _model = LoadModelFile
 
     def _load_batch(self) -> None:
         """

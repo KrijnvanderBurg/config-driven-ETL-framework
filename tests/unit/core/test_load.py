@@ -9,7 +9,7 @@ import pytest
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming.query import StreamingQuery
 
-from ingestion_framework.core.load import DATA_FORMAT, Load, LoadContext, LoadFormat, LoadRegistry
+from ingestion_framework.core.load import DATA_FORMAT, Load, LoadContext, LoadRegistry
 from ingestion_framework.models.model_load import LoadFormat, LoadMethod, LoadModelFile
 from ingestion_framework.types import DataFrameRegistry, StreamingQueryRegistry
 
@@ -17,7 +17,7 @@ from ingestion_framework.types import DataFrameRegistry, StreamingQueryRegistry
 class TestLoadModel:
     """Dummy model for testing Load class."""
 
-    load_model_concrete = LoadModelFile
+    _model = LoadModelFile
 
     def __init__(self, name: str, upstream_name: str, method: LoadMethod = LoadMethod.BATCH):
         """Initialize test model."""
@@ -31,7 +31,7 @@ class TestLoadModel:
 class TestLoadClass(Load[LoadModelFile]):
     """Test implementation of Load abstract class."""
 
-    load_model_concrete = LoadModelFile
+    _model = LoadModelFile
 
     def _load_batch(self) -> None:
         """Implementation of abstract method."""
