@@ -77,9 +77,9 @@ python -m ingestion_framework --config-filepath examples/job.json
 ```
 
 ## Architecture
-This framework is a modular data processing system built on Apache PySpark that implements the ETL (Extract, Transform, Load) pattern. The framework uses a registry-based architecture to dynamically match different data formats and operations to their implementations, allowing for extension without modifying existing code.
+This framework is a config driven ETL (Extract, Transform, Load) approach for Apache Pyspark jobs. It is purposely barebones so you have the necessary structure and can create your own implementation classes. It uses a registry-based architecture to dynamically match different data formats and operations to their implementations, allowing for extension without modifying existing code.
 
-The system is configuration-driven, parsing JSON or YAML files into strongly-typed models that define pipeline behavior. Each pipeline starts with Extract components that read data from various sources (files, databases), passes the data through Transform components that apply business logic and manipulations, and finishes with Load components that write results to target destinations.
+The framework is configuration-driven, parsing JSON or YAML files into strongly-typed models that define pipeline behavior. Each job starts with Extract components that read data from various sources (files, databases), passes the data through Transform components that apply business logic and manipulations, and finishes with Load components that write results to target destinations.
 
 DataFrames flow through the pipeline via a singleton registry that maintains references by name, enabling multi-step transformations. The framework supports both batch and streaming operations throughout the pipeline. This design separates configuration from implementation, making pipelines flexible and maintainable while leveraging Spark's distributed processing capabilities for scalable data operations.
 
