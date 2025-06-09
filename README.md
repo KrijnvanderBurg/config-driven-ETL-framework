@@ -73,7 +73,7 @@ The Data Ingestion Framework is a robust, configurable ETL (Extract, Transform, 
 2. Execute the pipeline:
 
 ```bash
-python -m ingestion_framework --config-filepath path/to/job.json
+python -m ingestion_framework --config-filepath examples/job.json
 ```
 
 ## Architecture
