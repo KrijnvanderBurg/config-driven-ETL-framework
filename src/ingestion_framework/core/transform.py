@@ -106,14 +106,6 @@ class Function(Generic[FunctionModelT], ABC):
 FunctionT = TypeVar("FunctionT", bound=Function)
 
 
-class TransformRegistry(RegistryDecorator, metaclass=Singleton):
-    """
-    Registry for Transform implementations.
-
-    Maps transform enum values to concrete transform implementations.
-    """
-
-
 class Transform(Generic[FunctionT]):
     """
     Concrete implementation for DataFrame transformation.
