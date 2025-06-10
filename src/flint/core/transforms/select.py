@@ -11,8 +11,8 @@ from collections.abc import Callable
 
 from pyspark.sql import DataFrame
 
-from ingestion_framework.core.transform import Function, TransformFunctionRegistry
-from ingestion_framework.models.transforms.model_select import SelectFunctionModel
+from flint.core.transform import Function, TransformFunctionRegistry
+from flint.models.transforms.model_select import SelectFunctionModel
 
 
 @TransformFunctionRegistry.register("select")

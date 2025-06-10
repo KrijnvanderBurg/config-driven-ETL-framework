@@ -12,11 +12,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final, Self
 
-from ingestion_framework.core.extract import Extract
-from ingestion_framework.core.load import Load
-from ingestion_framework.core.transform import Transform
-from ingestion_framework.exceptions import DictKeyError
-from ingestion_framework.utils.file import FileHandlerContext
+from flint.core.extract import Extract
+from flint.core.load import Load
+from flint.core.transform import Transform
+from flint.exceptions import DictKeyError
+from flint.utils.file import FileHandlerContext
 
 EXTRACTS: Final[str] = "extracts"
 TRANSFORMS: Final[str] = "transforms"
@@ -40,7 +40,7 @@ class Job:
     Example:
         ```python
         from pathlib import Path
-        from ingestion_framework.core.job import Job
+        from flint.core.job import Job
 
         # Create from a configuration file
         job = Job.from_file(Path("config.json"))

@@ -19,9 +19,9 @@ from typing import Any, Final, Generic, Self, TypeVar
 
 from pyspark.sql.streaming.query import StreamingQuery
 
-from ingestion_framework.models.model_load import LoadFormat, LoadMethod, LoadModel, LoadModelFile
-from ingestion_framework.types import DataFrameRegistry, RegistryDecorator, Singleton, StreamingQueryRegistry
-from ingestion_framework.utils.spark import SparkHandler
+from flint.models.model_load import LoadFormat, LoadMethod, LoadModel, LoadModelFile
+from flint.types import DataFrameRegistry, RegistryDecorator, Singleton, StreamingQueryRegistry
+from flint.utils.spark import SparkHandler
 
 NAME: Final[str] = "name"
 UPSTREAM_NAME: Final[str] = "upstream_name"

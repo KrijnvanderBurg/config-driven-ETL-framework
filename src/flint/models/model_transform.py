@@ -16,7 +16,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Final, Generic, Self, TypeVar
 
-from ingestion_framework.exceptions import DictKeyError
+from flint.exceptions import DictKeyError
 
 from . import Model
 
