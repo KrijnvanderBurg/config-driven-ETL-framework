@@ -15,8 +15,8 @@ from unittest.mock import patch
 import pytest
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-from ingestion_framework.utils.file import FileHandlerContext
-from ingestion_framework.utils.schema import SchemaDictHandler, SchemaFilepathHandler, SchemaStringHandler
+from flint.utils.file import FileHandlerContext
+from flint.utils.schema import SchemaDictHandler, SchemaFilepathHandler, SchemaStringHandler
 
 
 class TestSchemaHandlers:

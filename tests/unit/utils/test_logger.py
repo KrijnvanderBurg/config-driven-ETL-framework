@@ -1,6 +1,6 @@
 from logging import Logger
 
-from ingestion_framework.utils.logger import get_logger, set_logger
+from flint.utils.logger import get_logger, set_logger
 
 
 class TestLogger:

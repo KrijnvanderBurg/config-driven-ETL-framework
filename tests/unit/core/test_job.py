@@ -15,10 +15,10 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
-from ingestion_framework.core.extract import Extract
-from ingestion_framework.core.job import Job
-from ingestion_framework.core.load import Load
-from ingestion_framework.core.transform import Transform
+from flint.core.extract import Extract
+from flint.core.job import Job
+from flint.core.load import Load
+from flint.core.transform import Transform
 
 
 class TestJob:
@@ -50,7 +50,7 @@ class TestJob:
         assert job.transforms == transforms
         assert job.loads == loads
 
-    @patch("ingestion_framework.utils.file.FileHandlerContext.from_filepath")
+    @patch("flint.utils.file.FileHandlerContext.from_filepath")
     def test_from_file(self, mock_from_filepath: MagicMock) -> None:
         """Test creating a Job from a configuration file."""
         # Arrange
@@ -90,7 +90,7 @@ class TestJob:
             assert job.loads[0] == mock_load
 
     @patch("pathlib.Path.suffix", new_callable=PropertyMock)
-    @patch("ingestion_framework.utils.file.FileHandlerContext.from_filepath")
+    @patch("flint.utils.file.FileHandlerContext.from_filepath")
     def test_from_file_unsupported_format(self, mock_from_filepath: MagicMock, mock_suffix: PropertyMock) -> None:
         """Test that using an unsupported file format raises NotImplementedError."""
         # Arrange

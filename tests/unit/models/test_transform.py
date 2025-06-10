@@ -6,7 +6,7 @@ from typing import Any, Self
 
 import pytest
 
-from ingestion_framework.models.model_transform import ArgsModel, DictKeyError, FunctionModel, TransformModel
+from flint.models.model_transform import ArgsModel, DictKeyError, FunctionModel, TransformModel
 
 
 # Define some simple concrete implementations for testing abstract classes
