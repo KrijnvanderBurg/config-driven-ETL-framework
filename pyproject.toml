@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "ingestion-framework"
+name = "flint"
 version = "0.0.1"
-description = "Config driven Data Ingestion Framework"
+description = "Config Driven Pyspark Framework"
 authors = ["Krijn van der Burg"]
 readme = "README.md"
 packages = [{ include = "flint", from = "src" }]
