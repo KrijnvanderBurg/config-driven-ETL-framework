@@ -16,10 +16,10 @@ from typing import Any, Final, Self
 from pyspark.sql import functions as f
 from pyspark.sql.column import Column
 
-from ingestion_framework.exceptions import DictKeyError
+from flint.exceptions import DictKeyError
 
 # Import these locally to avoid circular imports
-from ingestion_framework.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
+from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 COLUMNS: Final[str] = "columns"
 

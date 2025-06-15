@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 from pyspark.sql import DataFrame
 
-from ingestion_framework.core.transform import TransformFunctionRegistry
-from ingestion_framework.core.transforms.select import SelectFunction
-from ingestion_framework.models.transforms.model_select import SelectFunctionModel
-from ingestion_framework.types import DataFrameRegistry
+from flint.core.transform import TransformFunctionRegistry
+from flint.core.transforms.select import SelectFunction
+from flint.models.transforms.model_select import SelectFunctionModel
+from flint.types import DataFrameRegistry
 
 
 class TestSelectFunction:

@@ -9,11 +9,11 @@ from collections.abc import Callable
 
 from pyspark.sql import functions as F
 
-from ingestion_framework.core.transform import Function, TransformFunctionRegistry
-from ingestion_framework.models.transforms.model_calculate_birth_year import CalculateBirthYearFunctionModel
+from flint.core.transform import Function, TransformFunctionRegistry
+from flint.models.transforms.model_calculate_birth_year import CalculateBirthYearFunctionModel
 
 # Import these locally to avoid circular imports
-from ingestion_framework.types import DataFrameRegistry
+from flint.types import DataFrameRegistry
 
 
 @TransformFunctionRegistry.register("calculate_birth_year")

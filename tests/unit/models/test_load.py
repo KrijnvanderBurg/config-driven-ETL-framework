@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from ingestion_framework.models.model_load import DictKeyError, LoadFormat, LoadMethod, LoadMode, LoadModelFile
+from flint.models.model_load import DictKeyError, LoadFormat, LoadMethod, LoadMode, LoadModelFile
 
 
 @pytest.fixture

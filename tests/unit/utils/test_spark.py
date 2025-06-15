@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 from pyspark.sql import SparkSession
 
-from ingestion_framework.utils.spark import SparkHandler
+from flint.utils.spark import SparkHandler
 
 
 @pytest.fixture(autouse=True)
@@ -21,7 +21,7 @@ class TestSparkHandler:
         SparkHandler()
 
         mock_builder.assert_called_once()
-        mock_builder.return_value.appName.assert_called_once_with(name="ingestion_framework")
+        mock_builder.return_value.appName.assert_called_once_with(name="flint")
         mock_builder.return_value.appName().config.assert_not_called()
 
     @patch.object(SparkSession, "Builder")

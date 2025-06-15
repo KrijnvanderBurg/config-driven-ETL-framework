@@ -12,11 +12,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final, Self
 
-from ingestion_framework.core.extract import Extract
-from ingestion_framework.core.load import Load
-from ingestion_framework.core.transform import Transform
-from ingestion_framework.exceptions import DictKeyError
-from ingestion_framework.utils.file import FileHandlerContext
+from flint.core.extract import Extract
+from flint.core.load import Load
+from flint.core.transform import Transform
+from flint.exceptions import DictKeyError
+from flint.utils.file import FileHandlerContext
 
 EXTRACTS: Final[str] = "extracts"
 TRANSFORMS: Final[str] = "transforms"
@@ -40,7 +40,7 @@ class Job:
     Example:
         ```python
         from pathlib import Path
-        from ingestion_framework.core.job import Job
+        from flint.core.job import Job
 
         # Create from a configuration file
         job = Job.from_file(Path("config.json"))
@@ -95,19 +95,19 @@ class Job:
             DictKeyError: If a required key is missing from the dictionary.
         """
         try:
-            extracts: list = []
+            extracts: list[Extract] = []
             for extract_dict in dict_[EXTRACTS]:
-                extract = Extract.from_dict(dict_=extract_dict)
+                extract: Extract = Extract.from_dict(dict_=extract_dict)
                 extracts.append(extract)
 
-            transforms: list = []
+            transforms: list[Transform] = []
             for transform_dict in dict_[TRANSFORMS]:
-                transform = Transform.from_dict(dict_=transform_dict)
+                transform: Transform = Transform.from_dict(dict_=transform_dict)
                 transforms.append(transform)
 
-            loads: list = []
+            loads: list[Load] = []
             for load_dict in dict_[LOADS]:
-                load = Load.from_dict(dict_=load_dict)
+                load: Load = Load.from_dict(dict_=load_dict)
                 loads.append(load)
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e

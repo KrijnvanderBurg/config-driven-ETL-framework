@@ -12,10 +12,10 @@ import pytest
 from pyspark.sql.types import StructType
 from pyspark.testing import assertDataFrameEqual
 
-from ingestion_framework.__main__ import main
-from ingestion_framework.core.job import LOADS
-from ingestion_framework.core.load import DATA_FORMAT, LOCATION, NAME, SCHEMA_LOCATION
-from ingestion_framework.utils.spark import SparkHandler
+from flint.__main__ import main
+from flint.core.job import LOADS
+from flint.core.load import DATA_FORMAT, LOCATION, NAME, SCHEMA_LOCATION
+from flint.utils.spark import SparkHandler
 
 
 # https://learn.microsoft.com/en-us/azure/databricks/sql/language-manual/functions/cast
