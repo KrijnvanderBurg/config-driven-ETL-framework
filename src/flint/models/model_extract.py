@@ -19,8 +19,8 @@ from typing import Any, Final, Self
 
 from pyspark.sql.types import StructType
 
-from ingestion_framework.exceptions import DictKeyError
-from ingestion_framework.utils.schema import SchemaFilepathHandler
+from flint.exceptions import DictKeyError
+from flint.utils.schema import SchemaFilepathHandler
 
 from . import Model
 

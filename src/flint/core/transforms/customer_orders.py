@@ -3,8 +3,8 @@ from collections.abc import Callable
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 
-from ingestion_framework.core.transform import Function, TransformFunctionRegistry
-from ingestion_framework.models.transforms.model_customer_orders import CustomersOrdersFunctionModel
+from flint.core.transform import Function, TransformFunctionRegistry
+from flint.models.transforms.model_customer_orders import CustomersOrdersFunctionModel
 
 
 @TransformFunctionRegistry.register("customers_orders_bronze")

@@ -6,10 +6,10 @@ from unittest.mock import MagicMock, patch
 
 from pyspark.sql import DataFrame
 
-from ingestion_framework.core.transform import TransformFunctionRegistry
-from ingestion_framework.core.transforms.calculate_birth_year import CalculateBirthYearFunction
-from ingestion_framework.models.transforms.model_calculate_birth_year import CalculateBirthYearFunctionModel
-from ingestion_framework.types import DataFrameRegistry
+from flint.core.transform import TransformFunctionRegistry
+from flint.core.transforms.calculate_birth_year import CalculateBirthYearFunction
+from flint.models.transforms.model_calculate_birth_year import CalculateBirthYearFunctionModel
+from flint.types import DataFrameRegistry
 
 
 class TestCalculateBirthYearFunction:

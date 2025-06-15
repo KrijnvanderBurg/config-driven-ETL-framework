@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "ingestion-framework"
+name = "flint"
 version = "0.0.1"
-description = "Config driven Data Ingestion Framework"
+description = "Config Driven Pyspark Framework"
 authors = ["Krijn van der Burg"]
 readme = "README.md"
-packages = [{ include = "ingestion_framework", from = "src" }]
+packages = [{ include = "flint", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.11"

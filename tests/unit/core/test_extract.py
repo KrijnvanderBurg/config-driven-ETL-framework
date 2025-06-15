@@ -8,9 +8,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pyspark.sql import DataFrame
 
-from ingestion_framework.core.extract import DATA_FORMAT, Extract, ExtractFormat, ExtractRegistry
-from ingestion_framework.models.model_extract import ExtractFileModel, ExtractMethod
-from ingestion_framework.types import DataFrameRegistry
+from flint.core.extract import DATA_FORMAT, Extract, ExtractFormat, ExtractRegistry
+from flint.models.model_extract import ExtractFileModel, ExtractMethod
+from flint.types import DataFrameRegistry
 
 
 class TestExtractModel:
@@ -118,7 +118,7 @@ class TestExtract:
         assert extract.model == mock_model_cls
         mock_from_dict.assert_called_once_with(dict_=extract_dict)
 
-    @patch("ingestion_framework.utils.spark.SparkHandler")
+    @patch("flint.utils.spark.SparkHandler")
     def test_extract_batch_method(self, mock_spark_handler_class: MagicMock) -> None:
         """Test the extract method with batch extraction."""
         # Arrange
@@ -141,7 +141,7 @@ class TestExtract:
             # Assert - removed assertion for add_configs which isn't actually called in our test
             assert extract.data_registry["test_extract"] == mock_df
 
-    @patch("ingestion_framework.utils.spark.SparkHandler")
+    @patch("flint.utils.spark.SparkHandler")
     def test_extract_streaming_method(self, mock_spark_handler_class: MagicMock) -> None:
         """Test the extract method with streaming extraction."""
         # Arrange
@@ -164,7 +164,7 @@ class TestExtract:
             # Assert - removed assertion for add_configs which isn't actually called in our test
             assert extract.data_registry["test_extract"] == mock_df
 
-    @patch("ingestion_framework.utils.spark.SparkHandler")
+    @patch("flint.utils.spark.SparkHandler")
     def test_extract_invalid_method(self, mock_spark_handler_class: MagicMock) -> None:
         """Test the extract method with an invalid extraction method."""
         # Arrange

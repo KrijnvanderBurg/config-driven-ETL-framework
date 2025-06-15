@@ -15,7 +15,7 @@ from unittest.mock import mock_open, patch
 import pytest
 import yaml
 
-from ingestion_framework.utils.file import FileHandlerContext, FileJsonHandler, FileYamlHandler
+from flint.utils.file import FileHandlerContext, FileJsonHandler, FileYamlHandler
 
 
 class TestYamlHandler:

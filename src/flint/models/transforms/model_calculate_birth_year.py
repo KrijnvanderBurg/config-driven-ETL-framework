@@ -13,10 +13,10 @@ from configuration files or dictionaries.
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from ingestion_framework.exceptions import DictKeyError
+from flint.exceptions import DictKeyError
 
 # Import these locally to avoid circular imports
-from ingestion_framework.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
+from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 CURRENT_YEAR: Final[str] = "current_year"
 AGE_COLUMN: Final[str] = "age_column"

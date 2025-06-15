@@ -7,7 +7,7 @@ executes the ETL pipeline.
 
 Example:
     ```
-    python -m ingestion_framework --filepath path/to/config.json
+    python -m flint --filepath path/to/config.json
     ```
 """
 
@@ -15,8 +15,8 @@ import logging
 from argparse import ArgumentParser
 from pathlib import Path
 
-from ingestion_framework.core.job import Job
-from ingestion_framework.utils.logger import set_logger
+from flint.core.job import Job
+from flint.utils.logger import set_logger
 
 logger: logging.Logger = set_logger(__name__)
 

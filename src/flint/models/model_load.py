@@ -17,7 +17,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Final, Self
 
-from ingestion_framework.exceptions import DictKeyError
+from flint.exceptions import DictKeyError
 
 from . import Model
 

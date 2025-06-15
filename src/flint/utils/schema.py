@@ -19,8 +19,8 @@ from pathlib import Path
 
 from pyspark.sql.types import StructType
 
-from ingestion_framework.utils.file import FileHandler, FileHandlerContext
-from ingestion_framework.utils.logger import get_logger
+from flint.utils.file import FileHandler, FileHandlerContext
+from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

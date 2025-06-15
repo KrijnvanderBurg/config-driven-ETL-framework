@@ -13,7 +13,7 @@ Example:
 
     ```python
     from pathlib import Path
-    from ingestion_framework.core.job import Job
+    from flint.core.job import Job
 
     # Create a job from configuration
     job = Job.from_file(filepath=Path("config.json"))

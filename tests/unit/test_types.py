@@ -4,7 +4,7 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from ingestion_framework.types import RegistryDecorator, RegistryInstance, Singleton
+from flint.types import RegistryDecorator, RegistryInstance, Singleton
 
 
 class TestSingleton:

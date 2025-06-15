@@ -9,9 +9,9 @@ import pytest
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming.query import StreamingQuery
 
-from ingestion_framework.core.load import DATA_FORMAT, Load, LoadRegistry
-from ingestion_framework.models.model_load import LoadFormat, LoadMethod, LoadModelFile
-from ingestion_framework.types import DataFrameRegistry, StreamingQueryRegistry
+from flint.core.load import DATA_FORMAT, Load, LoadRegistry
+from flint.models.model_load import LoadFormat, LoadMethod, LoadModelFile
+from flint.types import DataFrameRegistry, StreamingQueryRegistry
 
 
 class TestLoadModel:
@@ -124,7 +124,7 @@ class TestLoad:
         assert load.model == mock_model_cls
         mock_from_dict.assert_called_once_with(dict_=load_dict)
 
-    @patch("ingestion_framework.utils.spark.SparkHandler")
+    @patch("flint.utils.spark.SparkHandler")
     def test_load_batch_method(self, mock_spark_handler_class: MagicMock) -> None:
         """Test the load method with batch loading."""
         # Arrange
@@ -154,7 +154,7 @@ class TestLoad:
         load._load_schema.assert_called_once()
         # Skip asserting on add_configs since implementation may vary
 
-    @patch("ingestion_framework.utils.spark.SparkHandler")
+    @patch("flint.utils.spark.SparkHandler")
     def test_load_streaming_method(self, mock_spark_handler_class: MagicMock) -> None:
         """Test the load method with streaming loading."""
         # Arrange
@@ -186,7 +186,7 @@ class TestLoad:
         assert load.streaming_query_registry["test_load"] == mock_streaming_query
         # Skip asserting on add_configs since implementation may vary
 
-    @patch("ingestion_framework.utils.spark.SparkHandler")
+    @patch("flint.utils.spark.SparkHandler")
     def test_load_invalid_method(self, mock_spark_handler_class: MagicMock) -> None:
         """Test the load method with an invalid loading method."""
         # Arrange

@@ -15,8 +15,8 @@ import logging
 
 from pyspark.sql import SparkSession
 
-from ingestion_framework.types import Singleton
-from ingestion_framework.utils.logger import get_logger
+from flint.types import Singleton
+from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
@@ -38,7 +38,7 @@ class SparkHandler(metaclass=Singleton):
 
     def __init__(
         self,
-        app_name: str = "ingestion_framework",
+        app_name: str = "flint",
         options: dict[str, str] | None = None,
     ) -> None:
         """Initialize the SparkHandler with app name and configuration options.
