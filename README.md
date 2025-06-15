@@ -80,7 +80,11 @@ The framework is configuration-driven, parsing JSON or YAML files into strongly-
 
 DataFrames flow through the pipeline via a singleton registry that maintains references by name, enabling multi-step transformations. The framework supports both batch and streaming operations throughout the pipeline. This design separates configuration from implementation, making pipelines flexible and maintainable while leveraging Spark's distributed processing capabilities for scalable data operations.
 
-![Data Ingestion Framework Architecture](docs/class_diagram.drawio.png)
+## Sequence Diagram
+![sequence diagram](docs/sequence_diagram.png)
+
+### Class Diagram
+![class diagram](docs/class_diagram.drawio.png)
 
 The diagram above illustrates the modular architecture of the Data Ingestion Framework, showing the flow of data through extract, transform, and load components.
 

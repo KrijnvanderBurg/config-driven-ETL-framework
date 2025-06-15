@@ -32,7 +32,7 @@ Job -> Extract: Extract.from_dict(extract_dict)
 activate Extract EXTRACT_COLOR
 Extract -> Extract: parse config
 Extract -> Registry: create DataFrameRegistry
-Note right of Extract: Dynamic class selection \nbased on ExtractFormat
+Note right of Extract: Dynamic class selection \nbased on ExtractFormat.
 Extract --> Job: extract instance
 deactivate Extract
 
@@ -40,7 +40,7 @@ Job -> Transform: Transform.from_dict(transform_dict)
 activate Transform TRANSFORM_COLOR
 Transform -> Transform: parse config
 Transform -> Registry: access DataFrameRegistry
-Note right of Transform: Configure transformation \nfunctions and arguments
+Note right of Transform: Dynamic class selection \nbased on function name.
 Transform --> Job: transform instance
 deactivate Transform
 
@@ -48,7 +48,7 @@ Job -> Load: Load.from_dict(load_dict)
 activate Load LOAD_COLOR
 Load -> Load: parse config
 Load -> Registry: access DataFrameRegistry
-Note right of Load: Dynamic class selection \nbased on LoadFormat
+Note right of Load: Dynamic class selection \nbased on LoadFormat.
 Load --> Job: load instance
 deactivate Load
 
