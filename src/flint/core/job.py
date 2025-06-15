@@ -95,19 +95,19 @@ class Job:
             DictKeyError: If a required key is missing from the dictionary.
         """
         try:
-            extracts: list = []
+            extracts: list[Extract] = []
             for extract_dict in dict_[EXTRACTS]:
-                extract = Extract.from_dict(dict_=extract_dict)
+                extract: Extract = Extract.from_dict(dict_=extract_dict)
                 extracts.append(extract)
 
-            transforms: list = []
+            transforms: list[Transform] = []
             for transform_dict in dict_[TRANSFORMS]:
-                transform = Transform.from_dict(dict_=transform_dict)
+                transform: Transform = Transform.from_dict(dict_=transform_dict)
                 transforms.append(transform)
 
-            loads: list = []
+            loads: list[Load] = []
             for load_dict in dict_[LOADS]:
-                load = Load.from_dict(dict_=load_dict)
+                load: Load = Load.from_dict(dict_=load_dict)
                 loads.append(load)
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e
