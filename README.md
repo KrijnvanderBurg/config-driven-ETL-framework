@@ -5,12 +5,13 @@
 <h1 align="center">Flint</h1>
 
 <p align="center">
-  <b>Build PySpark ETL pipelines with the ultimate extensible framework</b>
+  <b>A lightweight, extensible framework for PySpark ETL pipelines</b>
 </p>
 
 <p align="center">
   <a href="https://pypi.org/project/flint/"><img src="https://img.shields.io/badge/python-3.11-informational" alt="Python Versions"></a>
   <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/LICENSE"><img src="https://img.shields.io/github/license/krijnvanderburg/config-driven-pyspark-framework?style=flat-square" alt="License"></a>
+  <a href="https://spark.apache.org/docs/latest/"><img src="https://img.shields.io/badge/spark-3.5.0+-lightgrey" alt="Apache Spark"></a>
 </p>
 
 ---
@@ -39,30 +40,23 @@ No more writing repetitive, error-prone Spark code. Flint lets you focus on data
 ### Installation
 
 ```bash
+# Clone the repository
 git clone https://github.com/krijnvanderburg/config-driven-pyspark-framework.git
 cd config-driven-pyspark-framework
+
+# Install dependencies
 poetry install
 ```
 
-### Built-in Transformations
+## 🔍 Example: Customer Order Analysis
 
-Flint comes with several example transformations, from generic transform functionality to an example source specific business logic:
+The included example demonstrates Flint's power with a real-world ETL pipeline:
 
-| Transform | Description |
-|-----------|-------------|
-| `select` | Generic Select specific columns from a DataFrame. |
-| `calculate_birth_year` | Calculate birth year based on age. |
-| `customer_orders_bronze` | Example join customer and order data with filtering. |
+- 📄 **Config**: `examples/job.json`
+- 🏃 **Execution**: `python -m flint --config-filepath examples/job.json`
+- 📂 **Output**: `examples/customer_orders/output/`
 
-### Example: Customer Order Analysis
-
-The included example demonstrates Flint's power with a real-world ETL task - joining customer data with orders and filtering high-value purchases:
-
-```bash
-python -m flint --config-filepath examples/job.json
-```
-
-This single command runs a complete pipeline that demonstrates Flint's key capabilities:
+This single command runs a complete pipeline that showcases Flint's key capabilities:
 
 - **Multi-format extraction**: Seamlessly reads from both CSV and JSON sources
   - Source options like delimiters and headers are easily configurable
@@ -76,8 +70,6 @@ This single command runs a complete pipeline that demonstrates Flint's key capab
 - **Configurable loading**: Writes results as CSV with customizable settings
   - Easily change to Parquet, Delta, or other formats by modifying `data_format`
   - Output mode (overwrite/append) controlled by a simple parameter
-
-After running, check the output at `examples/customer_orders/output/`.
 
 #### Configuration: examples/job.json
 
@@ -115,7 +107,6 @@ After running, check the output at `examples/customer_orders/output/`.
             "functions": [
                 // Join datasets and filter for high-value orders
                 { "function": "customers_orders_bronze", "arguments": {"amount_minimum": 100} },
-                
                 // Select only the fields we need for our report
                 { "function": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]} }
             ]
@@ -137,21 +128,31 @@ After running, check the output at `examples/customer_orders/output/`.
 }
 ```
 
+### Built-in Transformations
+
+Flint includes ready-to-use transformations to jumpstart your development:
+
+| Transform | Description | Usage |
+|-----------|-------------|-------|
+| `select` | Select specific columns from a DataFrame | Data projection and field filtering |
+| `calculate_birth_year` | Calculate birth year based on age | Date transformations |
+| `customer_orders_bronze` | Join customer and order data with filtering | Complex data merging |
+
 
 ## 📋 Configuration Reference
 
-### Full Schema Structure
+### Pipeline Structure
 
-A Flint pipeline consists of three main components working together:
+A Flint pipeline is defined by three core components in your configuration file:
 
 ```
 Configuration
-├── Extracts - Read data from source systems
-├── Transforms - Apply business logic
-└── Loads - Write data to destination systems
+├── Extracts - Read data from source systems (CSV, JSON, Parquet, etc.)
+├── Transforms - Apply business logic and data processing
+└── Loads - Write results to destination systems
 ```
 
-Each component is configured through a specific schema:
+Each component has a standardized schema and connects through named references:
 
 <details>
 <summary><b>Extract Configuration</b></summary>
@@ -163,7 +164,7 @@ Each component is configured through a specific schema:
   "data_format": "csv|json|parquet|...",     // Required: Source format
   "location": "path/to/source",              // Required: Source location
   "schema": "path/to/schema.json",           // Optional: Schema definition
-  "options": {                               // Optional: Format-specific options
+  "options": {                               // Optional: Pyspark dict options
     "header": true,
     "delimiter": ",",
     "inferSchema": false
@@ -207,10 +208,7 @@ Each component is configured through a specific schema:
   "data_format": "csv|json|parquet|...",     // Required: Destination format
   "location": "path/to/destination",         // Required: Output location
   "mode": "overwrite|append|ignore|error",   // Required: Write mode
-  "options": {                               // Optional: Format-specific options
-    "compression": "snappy",
-    "partitionBy": ["column1", "column2"]
-  }
+  "options": {}                              // Optional: Pyspark dict options
 }
 ```
 
@@ -268,7 +266,6 @@ Flint's power comes from its extensibility. Create custom transformations to enc
 
 @dataclass
 class SelectFunctionModel(FunctionModel):
-
     function: str
     arguments: "SelectFunctionModel.Args"
 
@@ -278,20 +275,14 @@ class SelectFunctionModel(FunctionModel):
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
-        try:
-            function_name = dict_[FUNCTION]
-            arguments_dict = dict_[ARGUMENTS]
-
-            # Process the arguments
-            columns = []
-            for col_name in arguments_dict[COLUMNS]:
-                columns.append(f.col(col_name))
-
-            arguments = cls.Args(columns=columns)
-
-        except KeyError as e:
-            raise DictKeyError(key=e.args[0], dict_=dict_) from e
-
+        """Convert JSON configuration to typed model."""
+        function_name = dict_[FUNCTION]
+        arguments_dict = dict_[ARGUMENTS]
+        
+        # Convert column names to PySpark Column objects
+        columns = [f.col(col_name) for col_name in arguments_dict["columns"]]
+        arguments = cls.Args(columns=columns)
+        
         return cls(function=function_name, arguments=arguments)
 ```
 
@@ -302,9 +293,11 @@ class SelectFunctionModel(FunctionModel):
 
 @TransformFunctionRegistry.register("select")
 class SelectFunction(Function[SelectFunctionModel]):
+    """Selects specified columns from a DataFrame."""
     model_cls = SelectFunctionModel
 
     def transform(self) -> Callable:
+        """Returns a function that projects columns from a DataFrame."""
         def __f(df: DataFrame) -> DataFrame:
             return df.select(*self.model.arguments.columns)
 
@@ -315,6 +308,7 @@ class SelectFunction(Function[SelectFunctionModel]):
 
 ```json
 {
+  "extracts": [],
   "transforms": [
     {
       "name": "transform-user-data",
@@ -323,7 +317,8 @@ class SelectFunction(Function[SelectFunctionModel]):
         { "function": "select", "arguments": { "columns": ["user_id", "email", "signup_date"] } }
       ]
     }
-  ]
+  ],
+  "loads": []
 }
 ```
 
@@ -342,13 +337,20 @@ The registration system makes it easy to discover and use all available transfor
 
 ## 🚀 Getting Help
 
-- Check out the [examples/](examples/) directory for working samples
-- Read the [Configuration Reference](#-configuration-reference) for detailed syntax
-- Visit our [GitHub Issues](https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues) page for support
+- **Examples**: Explore working samples in the [examples/](examples/) directory
+- **Documentation**: Refer to the [Configuration Reference](#-configuration-reference) for detailed syntax
+- **Community**: Ask questions and report issues on [GitHub Issues](https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues)
+- **Source Code**: Browse the implementation in [src/flint](src/flint/)
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+Contributions are welcome! Here's how you can help:
+
+1. Fork the repository
+2. Create your feature branch: `git checkout -b feature/amazing-feature`
+3. Commit your changes: `git commit -m 'Add amazing feature'`
+4. Push to the branch: `git push origin feature/amazing-feature`
+5. Open a Pull Request
 
 ## 📄 License
 
@@ -356,19 +358,19 @@ This project is licensed under the CC-BY-4.0 License - see the [LICENSE](LICENSE
 
 
 ---
-<br>
+
 <p align="center">
   <b>Built by Krijn van der Burg for the data engineering community</b>
 </p>
 
 <p align="center">
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/stargazers">⭐ Star us on GitHub</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/stargazers">⭐ Star this repo</a> •
   <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues">🐛 Report Issues</a> •
   <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/discussions">💬 Join Discussions</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/releases">📥 Releases (TBD)</a> •
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CHANGELOG.md">📝 Changelog (TBD)</a> •
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CONTRIBUTING.md">🤝 Contributing (TBD)</a>
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/releases">📥 Releases</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CHANGELOG.md">📝 Changelog</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CONTRIBUTING.md">🤝 Contributing</a>
 </p>
