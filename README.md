@@ -40,11 +40,8 @@ No more writing repetitive, error-prone Spark code. Flint lets you focus on data
 ### Installation
 
 ```bash
-# Clone the repository
 git clone https://github.com/krijnvanderburg/config-driven-pyspark-framework.git
 cd config-driven-pyspark-framework
-
-# Install dependencies (requires Poetry)
 poetry install
 ```
 
@@ -134,11 +131,11 @@ Running this command executes a complete pipeline that showcases Flint's key cap
 
 Flint includes ready-to-use transformations to jumpstart your development:
 
-| Transform | Description | Usage |
-|-----------|-------------|-------|
-| `select` | Select specific columns from a DataFrame | Data projection and field filtering |
-| `calculate_birth_year` | Calculate birth year based on age | Date transformations |
-| `customer_orders_bronze` | Join customer and order data with filtering | Complex data merging |
+| Transform | Description
+|-----------|-------------|
+| `select` | Select specific columns from a DataFrame.
+| `calculate_birth_year` | Calculate birth year based on age.
+| `customer_orders_bronze` | Join customer and order data with filtering.
 
 
 ## 📋 Configuration Reference
@@ -220,8 +217,6 @@ Each component has a standardized schema and connects through named references:
 - `ignore`: Ignore operation if data exists
 - `error`: Fail if data already exists
 </details>
-
-
 
 ### Data Flow
 
@@ -374,7 +369,7 @@ This project is licensed under the Creative Commons Attribution 4.0 Internationa
 </p>
 
 <p align="center">
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/releases">📥 Releases</a> •
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CHANGELOG.md">📝 Changelog</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/releases">📥 Releases (TBD)</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CHANGELOG.md">📝 Changelog (TBD)</a> •
   <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CONTRIBUTING.md">🤝 Contributing</a>
 </p>
