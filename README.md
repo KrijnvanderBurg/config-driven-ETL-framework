@@ -306,7 +306,7 @@ class SelectFunction(Function[SelectFunctionModel]):
 
 ```json
 {
-  "extracts": [],
+  "extracts": [...],
   "transforms": [
     {
       "name": "transform-user-data",
@@ -316,7 +316,7 @@ class SelectFunction(Function[SelectFunctionModel]):
       ]
     }
   ],
-  "loads": []
+  "loads": [...]
 }
 ```
 
