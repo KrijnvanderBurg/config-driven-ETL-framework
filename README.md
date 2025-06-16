@@ -1,26 +1,37 @@
-# Flint - A Config Driven Pyspark Framework
+<p align="center">
+  <img src="docs/logo.svg" alt="Flint Logo" width="250"/>
+</p>
 
-## Overview
+<h1 align="center">Flint</h1>
 
-Flint is a config-driven ETL (Extract, Transform, Load) framework built on Apache Spark. It enables data engineers to define complex data pipelines through declarative configuration files rather than writing extensive code, reducing development time and promoting standardization across teams.
+<p align="center">
+  <b>Build PySpark ETL pipelines with the ultimate extensible framework</b>
+</p>
 
-The framework follows a "configuration as code" philosophy, allowing for version-controlled, easily reviewable data pipelines that separate the business logic from implementation details.
+<p align="center">
+  <a href="https://pypi.org/project/flint/"><img src="https://img.shields.io/badge/python-3.11-informational" alt="Python Versions"></a>
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/LICENSE"><img src="https://img.shields.io/github/license/krijnvanderburg/config-driven-pyspark-framework?style=flat-square" alt="License"></a>
+</p>
 
-## Key Features
+---
 
-- **Declarative Configuration**: Define entire ETL pipelines using JSON or YAML configuration files
-- **Modular Architecture**: Cleanly separated extract, transform, and load components
-- **Extensible Transform System**: Easily add custom transformations through a plugin registry
-- **Batch & Streaming Support**: Process data in batch or streaming mode using the same framework
+## 🔍 Overview
 
-### Benefits for Teams
+**Flint is a barebones, logical framework for Apache Spark** that eliminates repetitive code through a declarative, configuration-driven approach.
 
-- **Reduced Development Time**: Create new data pipelines with minimal code
-- **Standardization**: Enforce consistent approaches to data processing across teams
-- **Maintainability**: Declarative configs make pipelines easier to understand and modify
-- **Reusability**: Common transformations can be shared across multiple pipelines
-- **Type Safety**: Strongly-typed models ensure configuration correctness
-- **Separation of Concerns**: Data engineers focus solely on data logic, not implementation details
+The core philosophy is simple: provide a clean, intuitive structure that lets teams easily create and share their own transformations. No complex abstractions—just a logical framework that makes PySpark development straightforward and maintainable.
+
+Flint was designed to be **minimal yet powerful** - giving you the structural foundations while letting your team extend it with your own business-specific transforms.
+
+Data teams waste countless hours writing and maintaining boilerplate Spark code. Flint solves this by letting you define complete ETL workflows with simple JSON/YAML files.
+
+### Build pipelines that are:
+
+✅ **Version-controlled** - More easily track changes by inspecting one config file  
+✅ **Maintainable** - Clear separation of business logic and implementation details  
+✅ **Standardized** - Consistent patterns across your organization
+
+No more writing repetitive, error-prone Spark code. Flint lets you focus on data transformations while handling the application structure complexities.
 
 
 ## ⚡ Quick Start
@@ -28,6 +39,8 @@ The framework follows a "configuration as code" philosophy, allowing for version
 ### Installation
 
 ```bash
+git clone https://github.com/krijnvanderburg/config-driven-pyspark-framework.git
+cd config-driven-pyspark-framework
 poetry install
 ```
 
@@ -53,105 +66,173 @@ Flint comes with several example transformations, from generic transform functio
 
 ## 📋 Configuration Reference
 
-Each pipeline is defined through a configuration file with three main sections: extracts, transforms, and loads, each may consist of multiple elements.
+### Full Schema Structure
 
-### Extract Configuration
+A Flint pipeline consists of three main components working together:
+
+```
+Configuration
+├── Extracts - Read data from source systems
+├── Transforms - Apply business logic
+└── Loads - Write data to destination systems
+```
+
+Each component is configured through a specific schema:
+
+<details>
+<summary><b>Extract Configuration</b></summary>
 
 ```json
 {
-  "name": "extract-name",
-  "method": "batch|stream",
-  "data_format": "csv|json|parquet|...",
-  "location": "path/to/source",
-  "schema": "path/to/schema.json",
-  "options": {
+  "name": "extract-name",                    // Required: Unique identifier
+  "method": "batch|stream",                  // Required: Processing method
+  "data_format": "csv|json|parquet|...",     // Required: Source format
+  "location": "path/to/source",              // Required: Source location
+  "schema": "path/to/schema.json",           // Optional: Schema definition
+  "options": {                               // Optional: Format-specific options
     "header": true,
     "delimiter": ",",
     "inferSchema": false
-    // Other format-specific options
   }
 }
 ```
 
-### Transform Configuration
+**Supported Formats:** CSV, JSON, Parquet, Avro, ORC, Text, JDBC, Delta (with appropriate dependencies)
+</details>
+
+<details>
+<summary><b>Transform Configuration</b></summary>
 
 ```json
 {
-  "name": "transform-name",
-  "upstream_name": "previous-step-name",
-  "functions": [
+  "name": "transform-name",                  // Required: Unique identifier
+  "upstream_name": "previous-step-name",     // Required: Input data source
+  "functions": [                             // Required: List of transformations
     {
-      "function": "transform-function-name",
-      "arguments": {
-        // Function-specific arguments
+      "function": "transform-function-name", // Required: Registered function name
+      "arguments": {                         // Required: Function-specific arguments
+        "key1": "value1",
+        "key2": "value2"
       }
     }
   ]
 }
 ```
 
-### Load Configuration
+**Function Application:** Transformations are applied in sequence, with each function's output feeding into the next.
+</details>
+
+<details>
+<summary><b>Load Configuration</b></summary>
 
 ```json
 {
-  "name": "load-name",
-  "upstream_name": "previous-step-name",
-  "method": "batch|stream",
-  "data_format": "csv|json|parquet|...",
-  "location": "path/to/destination",
-  "mode": "overwrite|append|ignore|error",
-  "options": {
-    // Format-specific options
+  "name": "load-name",                       // Required: Unique identifier
+  "upstream_name": "previous-step-name",     // Required: Input data source
+  "method": "batch|stream",                  // Required: Processing method
+  "data_format": "csv|json|parquet|...",     // Required: Destination format
+  "location": "path/to/destination",         // Required: Output location
+  "mode": "overwrite|append|ignore|error",   // Required: Write mode
+  "options": {                               // Optional: Format-specific options
+    "compression": "snappy",
+    "partitionBy": ["column1", "column2"]
   }
 }
 ```
 
-## 🏗️ Architecture
+**Modes explained:**
+- `overwrite`: Replace existing data
+- `append`: Add to existing data
+- `ignore`: Ignore operation if data exists
+- `error`: Fail if data already exists
+</details>
 
-Flint is built with a registry-based architecture that dynamically matches different data formats and operations to their implementations. This allows for extension without modifying existing code.
 
-### How It Works
 
-The framework parses configuration files into strongly-typed models that define pipeline behavior. Each job follows this flow:
+### Data Flow
 
-1. **Configuration Parsing**: JSON/YAML files are parsed into typed models
-2. **Extract Phase**: Data is read from source systems into DataFrames
-3. **Transform Phase**: Business logic is applied through registered transform functions
-4. **Load Phase**: Processed data is written to destination systems
-5. **Execution**: The job orchestrates the flow between these components
+1. **Parse Configuration** → Validate and convert JSON/YAML into typed models
+2. **Initialize Components** → Set up extract, transform, and load objects
+3. **Execute Pipeline** → Process data through the configured workflow
+4. **Monitor & Log** → Track execution and handle errors
 
-DataFrames flow through the pipeline via a singleton registry that maintains references by name, enabling multi-step transformations. This design separates configuration from implementation, making pipelines flexible and maintainable while leveraging Spark's distributed processing capabilities.
+![Flint Data Flow](docs/sequence_diagram.png)
 
-### Sequence Diagram
+### Key Components
 
-![sequence diagram](docs/sequence_diagram.png)
+- **Registry System**: Central repository that manages registered components and data frames
+- **Type Models**: Strongly-typed configuration models providing compile-time validation
+- **Function Framework**: Plugin system for custom transformations
+- **Execution Engine**: Coordinates the pipeline flow and handles dependencies
 
-### Class Diagram
+<details>
+<summary><b>Class Structure</b></summary>
 
-![class diagram](docs/class_diagram.drawio.png)
+![Class Diagram](docs/class_diagram.drawio.png)
 
-## 🧩 Extending the Framework
+- **Job**: Orchestrates the entire pipeline execution
+- **Extract**: Reads data from various sources into DataFrames
+- **Transform**: Applies business logic through registered functions
+- **Load**: Writes processed data to destination systems
+</details>
 
-### Creating a Custom Transform
+### Design Principles
 
-Flint is designed to be extended with custom transformations:
+- **Separation of Concerns**: Each component has a single, well-defined responsibility
+- **Dependency Injection**: Components receive their dependencies rather than creating them
+- **Plugin Architecture**: Extensions are registered with the framework without modifying core code
+- **Configuration as Code**: All pipeline behavior is defined declaratively in configuration files
 
-1. Create a model in `src/flint/models/transforms/`
-2. Create a transformer class in `src/flint/core/transforms/` and register it:
+## 🧩 Extending with Custom Transforms
+
+Flint's power comes from its extensibility. Create custom transformations to encapsulate your business logic:
+
+### Step 1: Define the configuration model
 
 ```python
+# src/flint/models/transforms/model_encryption.py
+from pydantic import BaseModel, Field
+from typing import List
+
+class EncryptColumnsModel(BaseModel):
+    """Configuration model for column encryption transform."""
+    columns: List[str] = Field(
+        description="Columns to encrypt",
+        min_items=1
+    )
+    key_name: str = Field(
+        description="Encryption key name to use"
+    )
+```
+
+### Step 2: Create the transform function
+
+```python
+# src/flint/core/transforms/encryption.py
 from pyspark.sql import DataFrame
+from pyspark.sql import functions as F
 from flint.core.transform import Function, TransformFunctionRegistry
-from flint.models.transforms.your_model import YourFunctionModel
+from flint.models.transforms.model_encryption import EncryptColumnsModel
 
-@TransformFunctionRegistry.register("your_transform_name")
-class YourTransformFunction(Function[YourFunctionModel]):
-    model_cls = YourFunctionModel
-
+@TransformFunctionRegistry.register("encrypt_columns")
+class EncryptColumnsFunction(Function[EncryptColumnsModel]):
+    """Encrypts specified columns in a DataFrame."""
+    model_cls = EncryptColumnsModel
+    
     def transform(self):
         def __f(df: DataFrame) -> DataFrame:
-            # Your transformation logic here
-            return transformed_df
+            # Get parameters from the model
+            columns = self.model.columns
+            key_name = self.model.key_name
+            
+            # Apply encryption to each column
+            result_df = df
+            for column in columns:
+                result_df = result_df.withColumn(
+                    column,
+                    F.expr(f"aes_encrypt({column}, '{key_name}')")
+                )
+            return result_df
         return __f
 ```
 
@@ -172,3 +253,24 @@ The [examples/](examples/) directory contains sample configurations and data fil
 
 Contributions are welcome! Please feel free to submit a Pull Request.
 
+## 📄 License
+
+This project is licensed under the CC-BY-4.0 License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+<p align="center">
+  <b>Built with ❤️ by the data engineering community</b>
+</p>
+
+<p align="center">
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/stargazers">⭐ Star us on GitHub</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues">🐛 Report Issues</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/discussions">💬 Join Discussions</a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/releases">📥 Releases</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CHANGELOG.md">📝 Changelog</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CONTRIBUTING.md">🤝 Contributing</a>
+</p>
