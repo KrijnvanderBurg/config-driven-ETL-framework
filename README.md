@@ -52,7 +52,82 @@ Try the included example that joins customer and order data:
 python -m flint --config-filepath examples/job.json
 ```
 
-This example uses sample data provided in the `examples/customer_orders/` directory.
+### Example
+The [examples/](examples/) directory contains sample configurations and data files:
+- `examples/job.json` - Basic example joining customer and order data
+- `examples/customer_orders/` - Sample data files and schemas
+
+The benefits:
+
+- **Multi-format extraction**: Seamlessly reads from both CSV and JSON sources
+  - Source options like delimiters and headers are easily configurable
+  - Schema validation ensures type safety for both sources
+
+- **Flexible transformation chain**: Combines domain-specific and generic transforms
+  - First uses a custom `customers_orders_bronze` transform to join datasets and filter orders > $100
+  - Then applies the generic `select` transform to project only needed columns
+  - Each transform function can be easily customized through its arguments
+
+- **Configurable loading**: Writes results as CSV with customizable settings
+  - Easily change to Parquet, Delta, or other formats by modifying `data_format`
+  - Output mode (overwrite/append) controlled by a simple parameter
+
+To run this example:
+
+```bash
+python -m flint --config-filepath examples/job.json
+```
+
+Checkout the `examples/output/` folder for the result.
+
+```json
+{
+    "extracts": [
+        {
+            "data_format": "csv",
+            "location": "examples/customer_orders/customers.csv",
+            "method": "batch",
+            "name": "extract-customers",
+            "options": {
+                "delimiter": ",",
+                "header": true,
+                "inferSchema": false
+            },
+            "schema": "examples/customer_orders/customers_schema.json"
+        },
+        {
+            "data_format": "json",
+            "location": "examples/customer_orders/orders.json",
+            "method": "batch",
+            "name": "extract-orders",
+            "options": {},
+            "schema": "examples/customer_orders/orders_schema.json"
+        }
+    ],
+    "transforms": [
+        {
+            "name": "transform-join-orders",
+            "upstream_name": "extract-customers",
+            "functions": [
+                { "function": "customers_orders_bronze", "arguments": {"filter_amount": 100} },
+                { "function": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]} }
+            ]
+        }
+    ],
+    "loads": [
+        {
+            "name": "load-customer-orders",
+            "upstream_name": "transform-join-orders",
+            "data_format": "csv",
+            "location": "examples/customer_orders/output",
+            "method": "batch",
+            "mode": "overwrite",
+            "options": {}
+        }
+    ]
+}
+```
+
 
 ### Built-in Transformations
 
@@ -185,63 +260,86 @@ Each component is configured through a specific schema:
 
 ## 🧩 Extending with Custom Transforms
 
-Flint's power comes from its extensibility. Create custom transformations to encapsulate your business logic:
+Flint's power comes from its extensibility. Create custom transformations to encapsulate your business logic. Let's look at a real example from Flint's codebase - the `select` transform:
 
 ### Step 1: Define the configuration model
 
 ```python
-# src/flint/models/transforms/model_encryption.py
-from pydantic import BaseModel, Field
-from typing import List
+# src/flint/models/transforms/model_select.py
 
-class EncryptColumnsModel(BaseModel):
-    """Configuration model for column encryption transform."""
-    columns: List[str] = Field(
-        description="Columns to encrypt",
-        min_items=1
-    )
-    key_name: str = Field(
-        description="Encryption key name to use"
-    )
+@dataclass
+class SelectFunctionModel(FunctionModel):
+
+    function: str
+    arguments: "SelectFunctionModel.Args"
+
+    @dataclass
+    class Args:
+        columns: list[Column]
+
+    @classmethod
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
+        try:
+            function_name = dict_[FUNCTION]
+            arguments_dict = dict_[ARGUMENTS]
+
+            # Process the arguments
+            columns = []
+            for col_name in arguments_dict[COLUMNS]:
+                columns.append(f.col(col_name))
+
+            arguments = cls.Args(columns=columns)
+
+        except KeyError as e:
+            raise DictKeyError(key=e.args[0], dict_=dict_) from e
+
+        return cls(function=function_name, arguments=arguments)
 ```
 
 ### Step 2: Create the transform function
 
 ```python
-# src/flint/core/transforms/encryption.py
-from pyspark.sql import DataFrame
-from pyspark.sql import functions as F
-from flint.core.transform import Function, TransformFunctionRegistry
-from flint.models.transforms.model_encryption import EncryptColumnsModel
+# src/flint/core/transforms/select.py
 
-@TransformFunctionRegistry.register("encrypt_columns")
-class EncryptColumnsFunction(Function[EncryptColumnsModel]):
-    """Encrypts specified columns in a DataFrame."""
-    model_cls = EncryptColumnsModel
-    
-    def transform(self):
+@TransformFunctionRegistry.register("select")
+class SelectFunction(Function[SelectFunctionModel]):
+    model_cls = SelectFunctionModel
+
+    def transform(self) -> Callable:
         def __f(df: DataFrame) -> DataFrame:
-            # Get parameters from the model
-            columns = self.model.columns
-            key_name = self.model.key_name
-            
-            # Apply encryption to each column
-            result_df = df
-            for column in columns:
-                result_df = result_df.withColumn(
-                    column,
-                    F.expr(f"aes_encrypt({column}, '{key_name}')")
-                )
-            return result_df
+            return df.select(*self.model.arguments.columns)
+
         return __f
 ```
 
-## 📚 Examples
+### Step 3: Use in your pipeline configuration
 
-The [examples/](examples/) directory contains sample configurations and data files:
+```json
+{
+  "transforms": [
+    {
+      "name": "transform-user-data",
+      "upstream_name": "extract-users",
+      "functions": [
+        { "function": "select", "arguments": { "columns": ["user_id", "email", "signup_date"] } }
+      ]
+    }
+  ]
+}
+```
 
-- `examples/job.json` - Basic example joining customer and order data
-- `examples/customer_orders/` - Sample data files and schemas
+> 🔍 **Best Practice**: Create transforms that are generic enough to be reusable but specific enough to encapsulate meaningful business logic.
+
+### Building a Transform Library
+
+As your team develops more custom transforms, you create a powerful library of reusable components:
+
+1. **Domain-Specific Transforms**: Create transforms that encapsulate your business rules
+2. **Industry-Specific Logic**: Build transforms tailored to your industry's specific needs
+3. **Data Quality Rules**: Implement your organization's data quality standards
+
+The registration system makes it easy to discover and use all available transforms in your configurations without modifying the core framework code.
+
 
 ## 🚀 Getting Help
 
@@ -257,10 +355,11 @@ Contributions are welcome! Please feel free to submit a Pull Request.
 
 This project is licensed under the CC-BY-4.0 License - see the [LICENSE](LICENSE) file for details.
 
----
 
+---
+<br>
 <p align="center">
-  <b>Built with ❤️ by the data engineering community</b>
+  <b>Built by Krijn van der Burg for the data engineering community</b>
 </p>
 
 <p align="center">
@@ -270,7 +369,7 @@ This project is licensed under the CC-BY-4.0 License - see the [LICENSE](LICENSE
 </p>
 
 <p align="center">
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/releases">📥 Releases</a> •
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CHANGELOG.md">📝 Changelog</a> •
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CONTRIBUTING.md">🤝 Contributing</a>
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/releases">📥 Releases (TBD)</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CHANGELOG.md">📝 Changelog (TBD)</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CONTRIBUTING.md">🤝 Contributing (TBD)</a>
 </p>
