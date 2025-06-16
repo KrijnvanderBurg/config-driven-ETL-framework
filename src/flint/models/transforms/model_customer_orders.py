@@ -18,7 +18,7 @@ from flint.exceptions import DictKeyError
 # Import these locally to avoid circular imports
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
-FILTER_AMOUNT: Final[str] = "filter_amount"
+AMOUNT_MINIMUM: Final[str] = "amount_minimum"
 
 
 @dataclass
@@ -44,7 +44,7 @@ class CustomersOrdersFunctionModel(FunctionModel):
             columns: List of column names to select from the DataFrame
         """
 
-        filter_amount: int
+        amount_minimum: int
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -62,8 +62,8 @@ class CustomersOrdersFunctionModel(FunctionModel):
             arguments_dict = dict_[ARGUMENTS]
 
             # Process the arguments
-            filter_amount = arguments_dict[FILTER_AMOUNT]
-            arguments = cls.Args(filter_amount=filter_amount)
+            amount_minimum = arguments_dict[AMOUNT_MINIMUM]
+            arguments = cls.Args(amount_minimum=amount_minimum)
 
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e
