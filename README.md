@@ -44,20 +44,25 @@ cd config-driven-pyspark-framework
 poetry install
 ```
 
-### Running the Example Pipeline
+### Built-in Transformations
 
-Try the included example that joins customer and order data:
+Flint comes with several example transformations, from generic transform functionality to an example source specific business logic:
+
+| Transform | Description |
+|-----------|-------------|
+| `select` | Generic Select specific columns from a DataFrame. |
+| `calculate_birth_year` | Calculate birth year based on age. |
+| `customer_orders_bronze` | Example join customer and order data with filtering. |
+
+### Example: Customer Order Analysis
+
+The included example demonstrates Flint's power with a real-world ETL task - joining customer data with orders and filtering high-value purchases:
 
 ```bash
 python -m flint --config-filepath examples/job.json
 ```
 
-### Example
-The [examples/](examples/) directory contains sample configurations and data files:
-- `examples/job.json` - Basic example joining customer and order data
-- `examples/customer_orders/` - Sample data files and schemas
-
-The benefits:
+This single command runs a complete pipeline that demonstrates Flint's key capabilities:
 
 - **Multi-format extraction**: Seamlessly reads from both CSV and JSON sources
   - Source options like delimiters and headers are easily configurable
@@ -72,22 +77,19 @@ The benefits:
   - Easily change to Parquet, Delta, or other formats by modifying `data_format`
   - Output mode (overwrite/append) controlled by a simple parameter
 
-To run this example:
+After running, check the output at `examples/customer_orders/output/`.
 
-```bash
-python -m flint --config-filepath examples/job.json
-```
-
-Checkout the `examples/output/` folder for the result.
+#### Configuration: examples/job.json
 
 ```json
 {
+    // EXTRACT: Read from multiple data sources with different formats
     "extracts": [
         {
-            "data_format": "csv",
+            "name": "extract-customers",
+            "data_format": "csv",                                  // CSV format for customers
             "location": "examples/customer_orders/customers.csv",
             "method": "batch",
-            "name": "extract-customers",
             "options": {
                 "delimiter": ",",
                 "header": true,
@@ -96,48 +98,45 @@ Checkout the `examples/output/` folder for the result.
             "schema": "examples/customer_orders/customers_schema.json"
         },
         {
-            "data_format": "json",
+            "name": "extract-orders",
+            "data_format": "json",                                 // JSON format for orders
             "location": "examples/customer_orders/orders.json",
             "method": "batch",
-            "name": "extract-orders",
             "options": {},
             "schema": "examples/customer_orders/orders_schema.json"
         }
     ],
+    
+    // TRANSFORM: Apply business logic through transform functions
     "transforms": [
         {
             "name": "transform-join-orders",
-            "upstream_name": "extract-customers",
+            "upstream_name": "extract-customers",                  // Process customers data first
             "functions": [
-                { "function": "customers_orders_bronze", "arguments": {"filter_amount": 100} },
+                // Join datasets and filter for high-value orders
+                { "function": "customers_orders_bronze", "arguments": {"amount_minimum": 100} },
+                
+                // Select only the fields we need for our report
                 { "function": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]} }
             ]
         }
     ],
+    
+    // LOAD: Write processed data to destination
     "loads": [
         {
             "name": "load-customer-orders",
-            "upstream_name": "transform-join-orders",
-            "data_format": "csv",
+            "upstream_name": "transform-join-orders",              // Use transformed data
+            "data_format": "csv",                                  // Output as CSV
             "location": "examples/customer_orders/output",
             "method": "batch",
-            "mode": "overwrite",
+            "mode": "overwrite",                                   // Replace existing data
             "options": {}
         }
     ]
 }
 ```
 
-
-### Built-in Transformations
-
-Flint comes with several example transformations, from generic transform functionality to an example source specific business logic:
-
-| Transform | Description |
-|-----------|-------------|
-| `select` | Generic Select specific columns from a DataFrame. |
-| `calculate_birth_year` | Calculate birth year based on age. |
-| `customer_orders_bronze` | Example join customer and order data with filtering. |
 
 ## 📋 Configuration Reference
 
