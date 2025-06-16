@@ -22,9 +22,9 @@
 
 The core philosophy is simple: provide a clean, intuitive structure that lets teams easily create and share their own transformations. No complex abstractions—just a logical framework that makes PySpark development straightforward and maintainable.
 
-Flint was designed to be **minimal yet powerful** - giving you the structural foundations while letting your team extend it with your own business-specific transforms.
+Flint was designed to be **minimal yet powerful** - providing structural foundations while enabling your team to extend it with business-specific transforms.
 
-Data teams waste countless hours writing and maintaining boilerplate Spark code. Flint solves this by letting you define complete ETL workflows with simple JSON/YAML files.
+Data engineering teams often waste hours writing and maintaining boilerplate Spark code. Flint addresses this by allowing you to define complete ETL workflows with simple JSON/YAML configuration files.
 
 ### Build pipelines that are:
 
@@ -44,7 +44,7 @@ No more writing repetitive, error-prone Spark code. Flint lets you focus on data
 git clone https://github.com/krijnvanderburg/config-driven-pyspark-framework.git
 cd config-driven-pyspark-framework
 
-# Install dependencies
+# Install dependencies (requires Poetry)
 poetry install
 ```
 
@@ -56,11 +56,11 @@ The included example demonstrates Flint's power with a real-world ETL pipeline:
 - 🏃 **Execution**: `python -m flint --config-filepath examples/job.json`
 - 📂 **Output**: `examples/customer_orders/output/`
 
-This single command runs a complete pipeline that showcases Flint's key capabilities:
+Running this command executes a complete pipeline that showcases Flint's key capabilities:
 
 - **Multi-format extraction**: Seamlessly reads from both CSV and JSON sources
-  - Source options like delimiters and headers are easily configurable
-  - Schema validation ensures type safety for both sources
+  - Source options like delimiters and headers are configurable through the configuration file
+  - Schema validation ensures data type safety and consistency across all sources
 
 - **Flexible transformation chain**: Combines domain-specific and generic transforms
   - First uses a custom `customers_orders_bronze` transform to join datasets and filter orders > $100
@@ -73,7 +73,7 @@ This single command runs a complete pipeline that showcases Flint's key capabili
 
 #### Configuration: examples/job.json
 
-```json
+```jsonc
 {
     // EXTRACT: Read from multiple data sources with different formats
     "extracts": [
@@ -159,14 +159,14 @@ Each component has a standardized schema and connects through named references:
 <details>
 <summary><b>Extract Configuration</b></summary>
 
-```json
+```jsonc
 {
   "name": "extract-name",                    // Required: Unique identifier
   "method": "batch|stream",                  // Required: Processing method
   "data_format": "csv|json|parquet|...",     // Required: Source format
   "location": "path/to/source",              // Required: Source location
   "schema": "path/to/schema.json",           // Optional: Schema definition
-  "options": {                               // Optional: Pyspark dict options
+  "options": {                               // Optional: PySpark reader options
     "header": true,
     "delimiter": ",",
     "inferSchema": false
@@ -180,7 +180,7 @@ Each component has a standardized schema and connects through named references:
 <details>
 <summary><b>Transform Configuration</b></summary>
 
-```json
+```jsonc
 {
   "name": "transform-name",                  // Required: Unique identifier
   "upstream_name": "previous-step-name",     // Required: Input data source
@@ -202,7 +202,7 @@ Each component has a standardized schema and connects through named references:
 <details>
 <summary><b>Load Configuration</b></summary>
 
-```json
+```jsonc
 {
   "name": "load-name",                       // Required: Unique identifier
   "upstream_name": "previous-step-name",     // Required: Input data source
@@ -210,7 +210,7 @@ Each component has a standardized schema and connects through named references:
   "data_format": "csv|json|parquet|...",     // Required: Destination format
   "location": "path/to/destination",         // Required: Output location
   "mode": "overwrite|append|ignore|error",   // Required: Write mode
-  "options": {}                              // Optional: Pyspark dict options
+  "options": {}                              // Optional: PySpark writer options
 }
 ```
 
@@ -225,10 +225,10 @@ Each component has a standardized schema and connects through named references:
 
 ### Data Flow
 
-1. **Parse Configuration** → Validate and convert JSON/YAML into typed models
-2. **Initialize Components** → Set up extract, transform, and load objects
-3. **Execute Pipeline** → Process data through the configured workflow
-4. **Monitor & Log** → Track execution and handle errors
+1. **Parse Configuration** → Validate and convert JSON/YAML configurations into typed models
+2. **Initialize Components** → Set up extract, transform, and load objects based on configuration
+3. **Execute Pipeline** → Process data through the configured workflow in sequence
+4. **Monitor & Log** → Track execution progress and handle errors
 
 #### Sequence Diagram
 ![Flint Data Flow](docs/sequence_diagram.png)
@@ -306,7 +306,7 @@ class SelectFunction(Function[SelectFunctionModel]):
 
 ### Step 3: Use in your pipeline configuration
 
-```json
+```jsonc
 {
   "extracts": [...],
   "transforms": [
@@ -338,9 +338,9 @@ The registration system makes it easy to discover and use all available transfor
 ## 🚀 Getting Help
 
 - **Examples**: Explore working samples in the [examples/](examples/) directory
-- **Documentation**: Refer to the [Configuration Reference](#-configuration-reference) for detailed syntax
+- **Documentation**: Refer to the [Configuration Reference](#-configuration-reference) section for detailed syntax
 - **Community**: Ask questions and report issues on [GitHub Issues](https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues)
-- **Source Code**: Browse the implementation in [src/flint](src/flint/)
+- **Source Code**: Browse the implementation in the [src/flint](src/flint/) directory
 
 ## 🤝 Contributing
 
@@ -354,7 +354,7 @@ Contributions are welcome! Here's how you can help:
 
 ## 📄 License
 
-This project is licensed under the CC-BY-4.0 License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the Creative Commons Attribution 4.0 International License (CC-BY-4.0) - see the [LICENSE](LICENSE) file for details.
 
 
 ---
