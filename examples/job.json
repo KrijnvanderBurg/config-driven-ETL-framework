@@ -26,7 +26,8 @@
             "name": "transform-join-orders",
             "upstream_name": "extract-customers",
             "functions": [
-                { "function": "customers_orders_bronze", "arguments": {"filter_amount": 100} }
+                { "function": "customers_orders_bronze", "arguments": {"filter_amount": 100} },
+                { "function": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]} }
             ]
         }
     ],

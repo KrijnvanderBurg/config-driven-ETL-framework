@@ -1,4 +1,4 @@
-# Flint - Config Driven Pyspark Framework
+# Flint - A Config Driven Pyspark Framework
 
 ## Overview
 
@@ -13,7 +13,7 @@ The framework follows a "configuration as code" philosophy, allowing for version
 - **Extensible Transform System**: Easily add custom transformations through a plugin registry
 - **Batch & Streaming Support**: Process data in batch or streaming mode using the same framework
 
-## Benefits
+### Benefits for Teams
 
 - **Reduced Development Time**: Create new data pipelines with minimal code
 - **Standardization**: Enforce consistent approaches to data processing across teams
@@ -23,72 +23,37 @@ The framework follows a "configuration as code" philosophy, allowing for version
 - **Separation of Concerns**: Data engineers focus solely on data logic, not implementation details
 
 
-## Getting Started
+## ⚡ Quick Start
 
-### Quick Start Example
+### Installation
 
-1. Create a configuration file (e.g., `job.json`):
-
-```json
-{
-  "extracts": [
-    {
-      "name": "extract-customers",
-      "method": "batch",
-      "data_format": "csv",
-      "location": "path/to/customers.csv",
-      "schema": "path/to/schema.json",
-      "options": {
-        "header": true,
-        "delimiter": ","
-      }
-    }
-  ],
-  "transforms": [
-    {
-      "name": "transform-customers",
-      "upstream_name": "extract-customers",
-      "functions": [
-        {
-          "function": "select",
-          "arguments": {
-            "columns": ["customer_id", "name", "email"]
-          }
-        }
-      ]
-    }
-  ],
-  "loads": [
-    {
-      "name": "load-customers",
-      "method": "batch",
-      "data_format": "parquet",
-      "location": "path/to/output/",
-      "upstream_name": "transform-customers",
-      "mode": "overwrite",
-      "options": {}
-    }
-  ]
-}
+```bash
+poetry install
 ```
 
-2. Execute the pipeline:
+### Running the Example Pipeline
+
+Try the included example that joins customer and order data:
 
 ```bash
 python -m flint --config-filepath examples/job.json
 ```
 
-### Available Transformations
+This example uses sample data provided in the `examples/customer_orders/` directory.
 
-Flint comes with several built-in transformations:
+### Built-in Transformations
+
+Flint comes with several example transformations, from generic transform functionality to an example source specific business logic:
 
 | Transform | Description |
 |-----------|-------------|
-| `customer_orders_bronze` | Example Join customer and order data with filtering |
-| `select` | Generic select specific columns from a DataFrame |
-| `calculate_birth_year` | Generic calculate birth year based on age |
+| `select` | Generic Select specific columns from a DataFrame. |
+| `calculate_birth_year` | Calculate birth year based on age. |
+| `customer_orders_bronze` | Example join customer and order data with filtering. |
 
-## Configuration Reference
+## 📋 Configuration Reference
+
+Each pipeline is defined through a configuration file with three main sections: extracts, transforms, and loads, each may consist of multiple elements.
 
 ### Extract Configuration
 
@@ -141,21 +106,21 @@ Flint comes with several built-in transformations:
 }
 ```
 
-## Architecture
+## 🏗️ Architecture
 
 Flint is built with a registry-based architecture that dynamically matches different data formats and operations to their implementations. This allows for extension without modifying existing code.
 
-The framework parses configuration files into strongly-typed models that define pipeline behavior. Each job starts with Extract components that read data from various sources, passes the data through Transform components that apply business logic, and finishes with Load components that write results to target destinations.
+### How It Works
 
-DataFrames flow through the pipeline via a singleton registry that maintains references by name, enabling multi-step transformations. This design separates configuration from implementation, making pipelines flexible and maintainable while leveraging Spark's distributed processing capabilities.
-
-### Pipeline Flow
+The framework parses configuration files into strongly-typed models that define pipeline behavior. Each job follows this flow:
 
 1. **Configuration Parsing**: JSON/YAML files are parsed into typed models
 2. **Extract Phase**: Data is read from source systems into DataFrames
 3. **Transform Phase**: Business logic is applied through registered transform functions
 4. **Load Phase**: Processed data is written to destination systems
 5. **Execution**: The job orchestrates the flow between these components
+
+DataFrames flow through the pipeline via a singleton registry that maintains references by name, enabling multi-step transformations. This design separates configuration from implementation, making pipelines flexible and maintainable while leveraging Spark's distributed processing capabilities.
 
 ### Sequence Diagram
 
@@ -165,9 +130,11 @@ DataFrames flow through the pipeline via a singleton registry that maintains ref
 
 ![class diagram](docs/class_diagram.drawio.png)
 
-## Extending the Framework
+## 🧩 Extending the Framework
 
 ### Creating a Custom Transform
+
+Flint is designed to be extended with custom transformations:
 
 1. Create a model in `src/flint/models/transforms/`
 2. Create a transformer class in `src/flint/core/transforms/` and register it:
@@ -188,13 +155,20 @@ class YourTransformFunction(Function[YourFunctionModel]):
         return __f
 ```
 
-## Examples
+## 📚 Examples
 
-The [examples/](examples/) directory contains sample configurations and use cases to help you get started:
+The [examples/](examples/) directory contains sample configurations and data files:
 
 - `examples/job.json` - Basic example joining customer and order data
 - `examples/customer_orders/` - Sample data files and schemas
 
-## Contributing
+## 🚀 Getting Help
+
+- Check out the [examples/](examples/) directory for working samples
+- Read the [Configuration Reference](#-configuration-reference) for detailed syntax
+- Visit our [GitHub Issues](https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues) page for support
+
+## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+
