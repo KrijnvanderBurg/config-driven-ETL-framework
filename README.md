@@ -122,7 +122,9 @@ This single command runs a complete pipeline that showcases Flint's key capabili
             "location": "examples/customer_orders/output",
             "method": "batch",
             "mode": "overwrite",                                   // Replace existing data
-            "options": {}
+            "options": {
+                "header": true
+            }
         }
     ]
 }

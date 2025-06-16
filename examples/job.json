@@ -39,7 +39,9 @@
             "location": "examples/customer_orders/output",
             "method": "batch",
             "mode": "overwrite",
-            "options": {}
+            "options": {
+                "header": true
+            }
         }
     ]
 }
