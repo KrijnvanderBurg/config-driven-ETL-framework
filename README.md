@@ -103,7 +103,7 @@ This single command runs a complete pipeline that showcases Flint's key capabili
     "transforms": [
         {
             "name": "transform-join-orders",
-            "upstream_name": "extract-customers",                  // Process customers data first
+            "upstream_name": "extract-customers",
             "functions": [
                 // Join datasets and filter for high-value orders
                 { "function": "customers_orders_bronze", "arguments": {"amount_minimum": 100} },
@@ -237,16 +237,12 @@ Each component has a standardized schema and connects through named references:
 - **Function Framework**: Plugin system for custom transformations
 - **Execution Engine**: Coordinates the pipeline flow and handles dependencies
 
-<details>
-<summary><b>Class Structure</b></summary>
-
 ![Class Diagram](docs/class_diagram.drawio.png)
 
 - **Job**: Orchestrates the entire pipeline execution
 - **Extract**: Reads data from various sources into DataFrames
 - **Transform**: Applies business logic through registered functions
 - **Load**: Writes processed data to destination systems
-</details>
 
 ### Design Principles
 
