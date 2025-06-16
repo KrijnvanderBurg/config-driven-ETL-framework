@@ -228,6 +228,7 @@ Each component has a standardized schema and connects through named references:
 3. **Execute Pipeline** → Process data through the configured workflow
 4. **Monitor & Log** → Track execution and handle errors
 
+#### Sequence Diagram
 ![Flint Data Flow](docs/sequence_diagram.png)
 
 ### Key Components
@@ -237,6 +238,7 @@ Each component has a standardized schema and connects through named references:
 - **Function Framework**: Plugin system for custom transformations
 - **Execution Engine**: Coordinates the pipeline flow and handles dependencies
 
+#### Class Diagram
 ![Class Diagram](docs/class_diagram.drawio.png)
 
 - **Job**: Orchestrates the entire pipeline execution
