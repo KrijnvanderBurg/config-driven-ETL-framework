@@ -308,7 +308,9 @@ class SelectFunction(Function[SelectFunctionModel]):
 
 ```jsonc
 {
-  "extracts": [...],
+  "extracts": [
+    // ...
+  ],
   "transforms": [
     {
       "name": "transform-user-data",
@@ -318,7 +320,9 @@ class SelectFunction(Function[SelectFunctionModel]):
       ]
     }
   ],
-  "loads": [...]
+  "loads": [
+    // ...
+  ]
 }
 ```
 
