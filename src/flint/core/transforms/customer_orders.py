@@ -19,13 +19,7 @@ class CustomersOrdersBronzeFunction(Function[CustomersOrdersFunctionModel]):
 
     Example:
         ```json
-        {
-            "function": "customers_orders_bronze",
-            "arguments": {
-                "columns": ["customer_id", "name", "order_date", "amount"],
-                "amount_minimum": 100
-            }
-        }
+        { "function": "customers_orders_bronze", "arguments": { "amount_minimum": 100 } }
         ```
     """
 

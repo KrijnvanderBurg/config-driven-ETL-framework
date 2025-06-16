@@ -18,7 +18,7 @@ from flint.exceptions import DictKeyError
 # Import these locally to avoid circular imports
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
-amount_minimum: Final[str] = "amount_minimum"
+AMOUNT_MINIMUM: Final[str] = "amount_minimum"
 
 
 @dataclass
@@ -62,7 +62,7 @@ class CustomersOrdersFunctionModel(FunctionModel):
             arguments_dict = dict_[ARGUMENTS]
 
             # Process the arguments
-            amount_minimum = arguments_dict[amount_minimum]
+            amount_minimum = arguments_dict[AMOUNT_MINIMUM]
             arguments = cls.Args(amount_minimum=amount_minimum)
 
         except KeyError as e:
