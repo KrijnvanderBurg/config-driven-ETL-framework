@@ -19,13 +19,7 @@ class CustomersOrdersBronzeFunction(Function[CustomersOrdersFunctionModel]):
 
     Example:
         ```json
-        {
-            "function": "customers_orders_bronze",
-            "arguments": {
-                "columns": ["customer_id", "name", "order_date", "amount"],
-                "filter_amount": 100
-            }
-        }
+        { "function": "customers_orders_bronze", "arguments": { "amount_minimum": 100 } }
         ```
     """
 
@@ -57,7 +51,7 @@ class CustomersOrdersBronzeFunction(Function[CustomersOrdersFunctionModel]):
             combined_df = customers_df.join(orders_df, "customer_id", "inner")
 
             # Filter
-            large_orders = combined_df.filter(F.col("amount") > self.model.arguments.filter_amount)
+            large_orders = combined_df.filter(F.col("amount") > self.model.arguments.amount_minimum)
 
             return large_orders
 
