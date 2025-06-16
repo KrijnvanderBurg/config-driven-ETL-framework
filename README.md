@@ -28,9 +28,9 @@ Data teams waste countless hours writing and maintaining boilerplate Spark code.
 
 ### Build pipelines that are:
 
-✅ **Version-controlled** - More easily track changes by inspecting one config file  
 ✅ **Maintainable** - Clear separation of business logic and implementation details  
 ✅ **Standardized** - Consistent patterns across your organization
+✅ **Version-controlled** - More easily track changes by inspecting one config file  
 
 No more writing repetitive, error-prone Spark code. Flint lets you focus on data transformations while handling the application structure complexities.
 
