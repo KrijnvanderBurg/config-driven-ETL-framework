@@ -7,7 +7,7 @@ from flint.core.transform import Function, TransformFunctionRegistry
 from flint.models.transforms.model_customer_orders import CustomersOrdersFunctionModel
 
 
-@TransformFunctionRegistry.register("customers_orders_bronze")
+@TransformFunctionRegistry.register("customers_orders")
 class CustomersOrdersBronzeFunction(Function[CustomersOrdersFunctionModel]):
     """Function that joins customers and orders, performs type casting,
     and calculates aggregations.
@@ -19,7 +19,7 @@ class CustomersOrdersBronzeFunction(Function[CustomersOrdersFunctionModel]):
 
     Example:
         ```json
-        { "function": "customers_orders_bronze", "arguments": { "amount_minimum": 100 } }
+        { "function": "customers_orders", "arguments": { "amount_minimum": 100 } }
         ```
     """
 
