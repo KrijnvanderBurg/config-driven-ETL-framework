@@ -34,21 +34,19 @@
 
 ## 🔍 Overview
 
-**Flint is a barebones, logical framework for Apache Spark** that eliminates repetitive code through a declarative, configuration-driven approach. This is not a library you install and use, take the source code and extend it with your implementations.
+**Flint is a barebones, logical framework for Apache Spark** that eliminates repetitive code through a configuration-driven approach. This is not a library you install and use, take the source code and extend the application with your implementations.
 
-The core philosophy is simple: provide a clean, intuitive structure that lets teams easily create and share their own transformations. No complex abstractions—just a logical framework that makes PySpark development straightforward and maintainable.
+The core philosophy is simple: provide an intuitive clean barebones structure that lets teams easily create and share their own transformations. No complex abstractions—just a logical framework that makes PySpark development straightforward and maintainable.
 
 Flint was designed to be **minimal yet powerful** - providing structural foundations while enabling your team to extend it with business-specific transforms.
 
-Data engineering teams often waste hours writing and maintaining boilerplate Spark code. Flint addresses this by allowing you to define complete ETL workflows with simple JSON/YAML configuration files.
-
 ### Build pipelines that are:
 
-✅ **Maintainable** - Clear separation of business logic and implementation details  
-✅ **Standardized** - Consistent patterns across your organization  
+✅ **Maintainable** - Clear separation of application code and business logics.
+✅ **Standardized** - Consistent pipelines and patterns across your organization  
 ✅ **Version-controlled** - More easily track changes by inspecting one config file  
 
-No more writing repetitive, error-prone Spark code. Flint lets you focus on data transformations while handling the application structure complexities.
+Flint lets you focus on data transformations while handling the application structure complexities.
 
 
 ## ⚡ Quick Start
@@ -63,7 +61,7 @@ poetry install
 
 ## 🔍 Example: Customer Order Analysis
 
-The included example demonstrates Flint's power with a real-world ETL pipeline:
+The included example demonstrates a real-world ETL pipeline:
 
 - 📄 **Config**: `examples/job.json`
 - 🏃 **Execution**: `python -m flint --config-filepath examples/job.json`
@@ -76,7 +74,7 @@ Running this command executes a complete pipeline that showcases Flint's key cap
   - Schema validation ensures data type safety and consistency across all sources
 
 - **Flexible transformation chain**: Combines domain-specific and generic transforms
-  - First uses a custom `customers_orders_bronze` transform to join datasets and filter orders > $100
+  - First uses a custom `customers_orders` transform to join datasets and filter orders > $100
   - Then applies the generic `select` transform to project only needed columns
   - Each transform function can be easily customized through its arguments
 
@@ -111,21 +109,21 @@ Running this command executes a complete pipeline that showcases Flint's key cap
             "schema": "examples/customer_orders/orders_schema.json"
         }
     ],
-    
+
     // TRANSFORM: Apply business logic through transform functions
     "transforms": [
         {
             "name": "transform-join-orders",
             "upstream_name": "extract-customers",
             "functions": [
-                // Join datasets and filter for high-value orders
-                { "function": "customers_orders_bronze", "arguments": {"amount_minimum": 100} },
+                // Use a custom transform to join datasets and filter for high-value orders
+                { "function": "customers_orders", "arguments": {"amount_minimum": 100} },
                 // Select only the fields we need for our report
                 { "function": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]} }
             ]
         }
     ],
-    
+
     // LOAD: Write processed data to destination
     "loads": [
         {
@@ -196,7 +194,7 @@ Each component has a standardized schema and connects through named references:
 ```jsonc
 {
   "name": "transform-name",                  // Required: Unique identifier
-  "upstream_name": "previous-step-name",     // Required: Input data source
+  "upstream_name": "previous-step-name",     // Required: Reference previous stage
   "functions": [                             // Required: List of transformations
     {
       "function": "transform-function-name", // Required: Registered function name
@@ -218,7 +216,7 @@ Each component has a standardized schema and connects through named references:
 ```jsonc
 {
   "name": "load-name",                       // Required: Unique identifier
-  "upstream_name": "previous-step-name",     // Required: Input data source
+  "upstream_name": "previous-step-name",     // Required: Reference previous stage
   "method": "batch|stream",                  // Required: Processing method
   "data_format": "csv|json|parquet|...",     // Required: Destination format
   "location": "path/to/destination",         // Required: Output location
@@ -256,8 +254,8 @@ Each component has a standardized schema and connects through named references:
 
 - **Job**: Orchestrates the entire pipeline execution
 - **Extract**: Reads data from various sources into DataFrames
-- **Transform**: Applies business logic through registered functions
-- **Load**: Writes processed data to destination systems
+- **Transform**: Applies business transform logic through registered functions
+- **Load**: Writes processed data to destination
 
 ### Design Principles
 
@@ -290,8 +288,7 @@ class SelectFunctionModel(FunctionModel):
         function_name = dict_[FUNCTION]
         arguments_dict = dict_[ARGUMENTS]
         
-        # Convert column names to PySpark Column objects
-        columns = [f.col(col_name) for col_name in arguments_dict["columns"]]
+        columns = arguments_dict["columns"]
         arguments = cls.Args(columns=columns)
         
         return cls(function=function_name, arguments=arguments)
@@ -359,15 +356,8 @@ The registration system makes it easy to discover and use all available transfor
 
 ## 🤝 Contributing
 
-Contributions are welcome! Here's how you can help:
-
-1. Fork the repository
-2. Create your feature branch: `git checkout -b feature/amazing-feature`
-3. Commit your changes: `git commit -m 'Add amazing feature'`
-4. Push to the branch: `git push origin feature/amazing-feature`
-5. Open a Pull Request
+Contributions are welcome! Feel free to submit a pull request and message me.
 
 ## 📄 License
 
 This project is licensed under the Creative Commons Attribution 4.0 International License (CC-BY-4.0) - see the [LICENSE](LICENSE) file for details.
-
