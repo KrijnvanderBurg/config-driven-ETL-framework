@@ -44,20 +44,16 @@ class TestSelectFunctionModel:
         assert select_model_cls.arguments is select_args
         assert len(select_model_cls.arguments.columns) == 2
 
-    @patch("pyspark.sql.functions.col")
-    def test_from_dict_valid(self, mock_col, valid_select_dict) -> None:
+    def test_from_dict_valid(self, valid_select_dict) -> None:
         """Test from_dict method with valid dictionary."""
-        # Setup
-        mock_col.side_effect = MagicMock(spec=Column)
-
         # Execute
         model = SelectFunctionModel.from_dict(valid_select_dict)
 
         # Assert
         assert model.function == "select"
         assert len(model.arguments.columns) == 2
-        mock_col.assert_any_call("column1")
-        mock_col.assert_any_call("column2")
+        assert "column1" in model.arguments.columns
+        assert "column2" in model.arguments.columns
 
     @patch("pyspark.sql.functions.col")
     def test_from_dict_missing_function(self, _, valid_select_dict) -> None:

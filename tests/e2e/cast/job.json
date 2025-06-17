@@ -1,0 +1,49 @@
+{
+    "extracts": [
+        {
+            "data_format": "csv",
+            "location": "tests/e2e/cast/input_data.csv",
+            "method": "batch",
+            "name": "extract-test",
+            "options": {
+                "delimiter": ",",
+                "header": true,
+                "inferSchema": false
+            },
+            "schema": "tests/e2e/cast/input_schema.json"
+        }
+    ],
+    "transforms": [
+        {
+            "name": "transform-test",
+            "upstream_name": "extract-test",
+            "functions": [
+                { 
+                    "function": "cast", 
+                    "arguments": { 
+                        "columns": {
+                            "id": "integer",
+                            "age": "integer",
+                            "price": "decimal(5,2)",
+                            "is_active": "boolean",
+                            "join_date": "date"
+                        }
+                    } 
+                }
+            ]
+        }
+    ],
+    "loads": [
+        {
+            "data_format": "csv",
+            "location": "tests/e2e/cast/csv",
+            "method": "batch",
+            "mode": "overwrite",
+            "name": "load-test",
+            "options": {
+                "header": true
+            },
+            "upstream_name": "transform-test"
+        }
+    ]
+}
