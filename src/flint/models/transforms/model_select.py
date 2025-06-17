@@ -13,7 +13,6 @@ from configuration files or dictionaries.
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from pyspark.sql import functions as f
 from pyspark.sql.column import Column
 
 from flint.exceptions import DictKeyError
@@ -64,11 +63,7 @@ class SelectFunctionModel(FunctionModel):
             function_name = dict_[FUNCTION]
             arguments_dict = dict_[ARGUMENTS]
 
-            # Process the arguments
-            columns = []
-            for col_name in arguments_dict[COLUMNS]:
-                columns.append(f.col(col_name))
-
+            columns = arguments_dict[COLUMNS]
             arguments = cls.Args(columns=columns)
 
         except KeyError as e:
