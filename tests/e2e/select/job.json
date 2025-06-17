@@ -1,10 +1,10 @@
 {
     "extracts": [
         {
+            "name": "extract-test",
             "data_format": "csv",
             "location": "tests/e2e/select/input_data.csv",
             "method": "batch",
-            "name": "extract-test",
             "options": {
                 "delimiter": ",",
                 "header": true,
@@ -24,14 +24,14 @@
     ],
     "loads": [
         {
+            "name": "load-test",
+            "upstream_name": "transform-test",
             "data_format": "csv",
             "location": "tests/e2e/select/csv",
             "method": "batch",
             "mode": "overwrite",
-            "name": "load-test",
             "options": {},
-            "schema_location": "tests/e2e/select/schema_output.json",
-            "upstream_name": "transform-test"
+            "schema_location": "tests/e2e/select/schema_output.json"
         }
     ]
 }
