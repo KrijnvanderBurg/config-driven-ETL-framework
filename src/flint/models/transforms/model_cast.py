@@ -20,6 +20,8 @@ from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 COLUMNS: Final[str] = "columns"
 TYPES: Final[str] = "types"
+COLUMN_NAME: Final[str] = "column_name"
+CAST_TYPE: Final[str] = "cast_type"
 
 
 @dataclass
@@ -38,14 +40,26 @@ class CastFunctionModel(FunctionModel):
     arguments: "CastFunctionModel.Args"
 
     @dataclass
+    class Column:
+        """Single column casting definition.
+
+        Attributes:
+            column_name: Name of the column to cast
+            cast_type: Target data type to cast the column to
+        """
+
+        column_name: str
+        cast_type: str
+
+    @dataclass
     class Args:
         """Arguments for column casting transform operations.
 
         Attributes:
-            columns: Dictionary mapping column names to target data types
+            columns: List of column casting definitions
         """
 
-        columns: dict[str, str]
+        columns: list["CastFunctionModel.Column"]
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -66,9 +80,21 @@ class CastFunctionModel(FunctionModel):
         try:
             function_name = dict_[FUNCTION]
             arguments_dict = dict_[ARGUMENTS]
-            columns = arguments_dict[COLUMNS]
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e
+
+        try:
+            columns_data = arguments_dict[COLUMNS]
+        except KeyError as e:
+            raise DictKeyError(key=e.args[0], dict_=arguments_dict) from e
+
+        # Process list of column objects
+        columns = []
+        for column_data in columns_data:
+            try:
+                columns.append(cls.Column(column_name=column_data[COLUMN_NAME], cast_type=column_data[CAST_TYPE]))
+            except KeyError as e:
+                raise DictKeyError(key=e.args[0], dict_=column_data) from e
 
         arguments = cls.Args(columns=columns)
 

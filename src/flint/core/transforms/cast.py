@@ -49,12 +49,12 @@ class CastFunction(Function[CastFunctionModel]):
         {
             "function": "cast",
             "arguments": {
-                "columns": {
-                    "age": "int",
-                    "price": "decimal(10,2)",
-                    "is_active": "boolean",
-                    "created_at": "timestamp"
-                }
+                "columns": [
+                    {"column_name": "age", "cast_type": "int"},
+                    {"column_name": "price", "cast_type": "decimal(10,2)"},
+                    {"column_name": "is_active", "cast_type": "boolean"},
+                    {"column_name": "created_at", "cast_type": "timestamp"}
+                ]
             }
         }
         ```
@@ -87,9 +87,9 @@ class CastFunction(Function[CastFunctionModel]):
                 DataFrame with the specified column type conversions applied
             """
             result = df
-            for column_name, data_type in self.model.arguments.columns.items():
+            for column in self.model.arguments.columns:
                 # Apply the cast operation based on the data type
-                result = result.withColumn(column_name, col(column_name).cast(data_type))
+                result = result.withColumn(column.column_name, col(column.column_name).cast(column.cast_type))
             return result
 
         return __f
