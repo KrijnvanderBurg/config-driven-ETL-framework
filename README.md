@@ -34,9 +34,9 @@
 
 ## 🔍 Overview
 
-**Flint is a barebones, logical framework for Apache Spark** that eliminates repetitive code through a configuration-driven approach. This is not a library you install and use, take the source code and extend the application with your implementations.
+**Flint is an intuitive barebones application framework for Apache Spark** that eliminates complex application setups and provides a configuration-driven approach. This is not a library you install and use, take the source code and extend the application with your implementations.
 
-The core philosophy is simple: provide an intuitive clean barebones structure that lets teams easily create and share their own transformations. No complex abstractions—just a logical framework that makes PySpark development straightforward and maintainable.
+The core philosophy is simple: provide an barebones structure that lets teams easily create and share their own transformations. No complex abstractions—just a logical framework that makes PySpark development straightforward and maintainable.
 
 Flint was designed to be **minimal yet powerful** - providing structural foundations while enabling your team to extend it with business-specific transforms.
 
