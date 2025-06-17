@@ -18,9 +18,7 @@
             "name": "transform-test",
             "upstream_name": "extract-test",
             "functions": [
-                { 
-                    "function": "cast", 
-                    "arguments": { 
+                { "function": "cast", "arguments": { 
                         "columns": [
                             {"column_name": "id", "cast_type": "integer"},
                             {"column_name": "age", "cast_type": "integer"},
