@@ -23,12 +23,12 @@ class TestCastFunction:
         )
 
     @pytest.fixture
-    def cast_model(self, cast_args) -> CastFunctionModel:
+    def cast_model(self, cast_args: CastFunctionModel.Args) -> CastFunctionModel:
         """Return initialized CastFunctionModel instance."""
         return CastFunctionModel(function="cast", arguments=cast_args)
 
     @pytest.fixture
-    def cast_function(self, cast_model) -> CastFunction:
+    def cast_function(self, cast_model: CastFunctionModel) -> CastFunction:
         """Return initialized CastFunction instance."""
         return CastFunction(model=cast_model)
 
