@@ -69,12 +69,11 @@ class JoinFunctionModel(FunctionModel):
         """
         try:
             function_name = dict_[FUNCTION]
-            arguments_dict = dict_[ARGUMENTS]
+            arguments_dict: dict = dict_[ARGUMENTS]
 
             other_upstream_name = arguments_dict[OTHER_UPSTREAM_NAME]
             on = arguments_dict[ON]
-            # How parameter is optional, defaults to "inner"
-            how = arguments_dict.get(HOW, "inner")
+            how = arguments_dict[HOW]
 
             arguments = cls.Args(
                 other_upstream_name=other_upstream_name,
@@ -84,8 +83,5 @@ class JoinFunctionModel(FunctionModel):
 
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e
-
-        if function_name != "join":
-            raise ValueError(f"Expected 'join' as function name, got '{function_name}'")
 
         return cls(function=function_name, arguments=arguments)
