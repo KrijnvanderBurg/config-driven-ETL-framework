@@ -1,0 +1,22 @@
+{
+  "fields": [
+    {
+      "name": "id",
+      "type": "integer",
+      "nullable": false,
+      "metadata": {}
+    },
+    {
+      "name": "category",
+      "type": "string",
+      "nullable": false,
+      "metadata": {}
+    },
+    {
+      "name": "value",
+      "type": "integer",
+      "nullable": false,
+      "metadata": {}
+    }
+  ]
+}

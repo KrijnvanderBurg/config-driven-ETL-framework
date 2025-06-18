@@ -25,22 +25,14 @@ class TestCastFunctionModel:
         """Return a valid dictionary for creating a CastFunctionModel."""
         return {
             "function": "cast",
-            "arguments": {
-                "columns": [
-                    {"column_name": name, "cast_type": type_}
-                    for name, type_ in test_columns
-                ]
-            },
+            "arguments": {"columns": [{"column_name": name, "cast_type": type_} for name, type_ in test_columns]},
         }
 
     @pytest.fixture
     def cast_args(self, test_columns) -> CastFunctionModel.Args:
         """Return CastFunctionModel.Args instance."""
         return CastFunctionModel.Args(
-            columns=[
-                CastFunctionModel.Column(column_name=name, cast_type=type_)
-                for name, type_ in test_columns
-            ]
+            columns=[CastFunctionModel.Column(column_name=name, cast_type=type_) for name, type_ in test_columns]
         )
 
     @pytest.fixture
@@ -51,7 +43,7 @@ class TestCastFunctionModel:
     def test_cast_function_model_cls_args(self, cast_args, test_columns) -> None:
         """Test CastFunctionModel.Args initialization."""
         assert len(cast_args.columns) == len(test_columns)
-        
+
         # Check all columns
         for i, (name, type_) in enumerate(test_columns):
             assert cast_args.columns[i].column_name == name
