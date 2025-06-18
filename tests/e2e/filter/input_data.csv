@@ -1,0 +1,7 @@
+id,name,age,is_active,salary
+1,John,25,true,50000
+2,Sarah,17,true,0
+3,Mike,42,false,75000
+4,Lisa,28,true,65000
+5,David,16,false,0
+6,Emma,35,true,80000

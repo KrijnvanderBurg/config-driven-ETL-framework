@@ -1,0 +1,35 @@
+{
+    "type": "struct",
+    "fields": [
+        {
+            "name": "id",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+        },
+        {
+            "name": "first_name",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+        },
+        {
+            "name": "last_name",
+            "type": "string",
+            "nullable": true,
+            "metadata": {}
+        },
+        {
+            "name": "age",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+        },
+        {
+            "name": "salary",
+            "type": "integer",
+            "nullable": true,
+            "metadata": {}
+        }
+    ]
+}
