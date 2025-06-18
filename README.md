@@ -143,13 +143,30 @@ Running this command executes a complete pipeline that showcases Flint's key cap
 
 ### Built-in Transformations
 
-Flint includes ready-to-use transformations to jumpstart your development:
+Flint includes ready-to-use generic transformations to jumpstart your development. These transformations can be configured directly through your JSON configuration files without writing any additional code.
 
-| Transform | Description
-|-----------|-------------|
-| `select` | Select specific columns from a DataFrame.
-| `calculate_birth_year` | Calculate birth year based on age.
-| `customer_orders_bronze` | Join customer and order data with filtering.
+#### Core Transformations
+
+| Transform | Description | Example Usage |
+|-----------|-------------|---------------|
+| `select` | Select specific columns from a DataFrame | `{"function": "select", "arguments": {"columns": ["id", "name", "email"]}}` |
+| `cast` | Convert columns to specified data types | `{"function": "cast", "arguments": {"columns": {"amount": "double", "date": "timestamp"}}}` |
+| `drop` | Remove specified columns from a DataFrame | `{"function": "drop", "arguments": {"columns": ["temp_col", "unused_field"]}}` |
+| `dropduplicates` | Remove duplicate rows based on specified columns | `{"function": "dropduplicates", "arguments": {"columns": ["id"]}}` |
+| `filter` | Apply conditions to filter rows in a DataFrame | `{"function": "filter", "arguments": {"condition": "amount > 100"}}` |
+| `join` | Combine DataFrames using specified join conditions | `{"function": "join", "arguments": {"other_df": "orders_df", "on": ["customer_id"], "how": "inner"}}` |
+| `withcolumn` | Add or replace columns with computed values | `{"function": "withcolumn", "arguments": {"column_name": "full_name", "expression": "concat(first_name, ' ', last_name)"}}` |
+
+#### Sample Domain-Specific Transformations
+
+The following custom transformations are included to showcase how you can create your own domain-specific transformations:
+
+| Transform | Description | Use Case |
+|-----------|-------------|----------|
+| `calculate_birth_year` | Calculate birth year based on age | Demonstrates simple field derivation based on existing fields |
+| `customer_orders_bronze` | Join customer and order data with filtering | Shows how to combine multiple operations (join, filter, select) into a single reusable transform |
+
+> **💡 Tip:** You can create your own custom transformations for specific business needs following the pattern shown in the [Extending with Custom Transforms](#-extending-with-custom-transforms) section.
 
 
 ## 📋 Configuration Reference
