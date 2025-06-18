@@ -1,0 +1,42 @@
+{
+    "extracts": [
+        {
+            "name": "extract-drop-test",
+            "data_format": "csv",
+            "location": "tests/e2e/drop/input_data.csv",
+            "method": "batch",
+            "options": {
+                "delimiter": ",",
+                "header": true,
+                "inferSchema": false
+            },
+            "schema": "tests/e2e/drop/input_schema.json"
+        }
+    ],
+    "transforms": [
+        {
+            "name": "transform-drop-test",
+            "upstream_name": "extract-drop-test",
+            "functions": [
+                { "function": "drop", "arguments": { 
+                        "columns": ["address", "phone", "temp_column"]
+                    }
+                }
+            ]
+        }
+    ],
+    "loads": [
+        {
+            "name": "load-drop-test",
+            "upstream_name": "transform-drop-test",
+            "data_format": "csv",
+            "location": "tests/e2e/drop/csv",
+            "method": "batch",
+            "mode": "overwrite",
+            "options": {
+                "header": true
+            },
+            "schema_location": "tests/e2e/drop/schema_output.json"
+        }
+    ]
+}
