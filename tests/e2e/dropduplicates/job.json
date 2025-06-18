@@ -27,10 +27,10 @@
     ],
     "loads": [
         {
-            "name": "load-dropduplicates-test",
+            "name": "load-test",
             "upstream_name": "transform-dropduplicates-test",
             "data_format": "csv",
-            "location": "tests/e2e/dropduplicates/csv",
+            "location": "tests/e2e/dropduplicates/load-test",
             "method": "batch",
             "mode": "overwrite",
             "options": {

@@ -27,7 +27,7 @@
             "name": "load-test",
             "upstream_name": "transform-test",
             "data_format": "csv",
-            "location": "tests/e2e/select/csv",
+            "location": "tests/e2e/select/load-test",
             "method": "batch",
             "mode": "overwrite",
             "options": {},

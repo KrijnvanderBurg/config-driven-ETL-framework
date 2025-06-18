@@ -27,10 +27,10 @@
     ],
     "loads": [
         {
-            "name": "load-filter-test",
+            "name": "load-test",
             "upstream_name": "transform-filter-test",
             "data_format": "csv",
-            "location": "tests/e2e/filter/csv",
+            "location": "tests/e2e/filter/load-test",
             "method": "batch",
             "mode": "overwrite",
             "options": {

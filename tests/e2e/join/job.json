@@ -49,10 +49,10 @@
     ],
     "loads": [
         {
-            "name": "load-join-result",
+            "name": "load-test",
             "upstream_name": "transform-join",
             "data_format": "csv",
-            "location": "tests/e2e/join/csv",
+            "location": "tests/e2e/join/load-test",
             "schema_location": "tests/e2e/join/schema_output.json",
             "method": "batch",
             "mode": "overwrite",
