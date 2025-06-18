@@ -1,5 +1,5 @@
 """
-TODO
+Test module for the main function.
 """
 
 import argparse
@@ -18,7 +18,6 @@ from flint.core.load import DATA_FORMAT, LOCATION, NAME, SCHEMA_LOCATION
 from flint.utils.spark import SparkHandler
 
 
-# https://learn.microsoft.com/en-us/azure/databricks/sql/language-manual/functions/cast
 @pytest.mark.parametrize("job_path", glob.glob("tests/e2e/**/job.json", recursive=True))
 def test__main(tmp_path: Path, job_path: str) -> None:
     """Test main function with different configurations."""
