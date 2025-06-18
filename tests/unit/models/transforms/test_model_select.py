@@ -32,35 +32,35 @@ class TestSelectFunctionModel:
         """Return initialized SelectFunctionModel instance."""
         return SelectFunctionModel(function="select", arguments=select_args)
 
-    def test_select_function_model_cls_args(self, mock_columns: list[MagicMock], select_args) -> None:
+    def test_select_function_model_cls_args(
+        self, mock_columns: list[MagicMock], select_args: SelectFunctionModel.Args
+    ) -> None:
         """Test SelectFunctionModel.Args initialization."""
         assert len(select_args.columns) == 2
         assert select_args.columns[0] is mock_columns[0]
         assert select_args.columns[1] is mock_columns[1]
 
-    def test_select_function_model_cls_initialization(self, select_model_cls: SelectFunctionModel, select_args) -> None:
+    def test_select_function_model_cls_initialization(
+        self, select_model_cls: SelectFunctionModel, select_args: SelectFunctionModel.Args
+    ) -> None:
         """Test that SelectFunctionModel can be initialized with valid parameters."""
         assert select_model_cls.function == "select"
         assert select_model_cls.arguments is select_args
         assert len(select_model_cls.arguments.columns) == 2
 
-    @patch("pyspark.sql.functions.col")
-    def test_from_dict_valid(self, mock_col, valid_select_dict) -> None:
+    def test_from_dict_valid(self, valid_select_dict: dict[str, Any]) -> None:
         """Test from_dict method with valid dictionary."""
-        # Setup
-        mock_col.side_effect = MagicMock(spec=Column)
-
         # Execute
         model = SelectFunctionModel.from_dict(valid_select_dict)
 
         # Assert
         assert model.function == "select"
         assert len(model.arguments.columns) == 2
-        mock_col.assert_any_call("column1")
-        mock_col.assert_any_call("column2")
+        assert "column1" in model.arguments.columns
+        assert "column2" in model.arguments.columns
 
     @patch("pyspark.sql.functions.col")
-    def test_from_dict_missing_function(self, _, valid_select_dict) -> None:
+    def test_from_dict_missing_function(self, _, valid_select_dict: dict[str, Any]) -> None:
         """Test from_dict method with missing function key."""
         # Remove the function key
         invalid_dict = valid_select_dict.copy()
@@ -71,7 +71,7 @@ class TestSelectFunctionModel:
             SelectFunctionModel.from_dict(invalid_dict)
 
     @patch("pyspark.sql.functions.col")
-    def test_from_dict_missing_arguments(self, mock_col, valid_select_dict) -> None:
+    def test_from_dict_missing_arguments(self, _, valid_select_dict: dict[str, Any]) -> None:
         """Test from_dict method with missing arguments key."""
         # Remove the arguments key
         invalid_dict = valid_select_dict.copy()
@@ -82,7 +82,7 @@ class TestSelectFunctionModel:
             SelectFunctionModel.from_dict(invalid_dict)
 
     @patch("pyspark.sql.functions.col")
-    def test_from_dict_missing_columns(self, mock_col, valid_select_dict) -> None:
+    def test_from_dict_missing_columns(self, _, valid_select_dict: dict[str, Any]) -> None:
         """Test from_dict method with missing columns in arguments."""
         # Remove the columns key from arguments
         invalid_dict = valid_select_dict.copy()

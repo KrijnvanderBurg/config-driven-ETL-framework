@@ -4,7 +4,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 
 from flint.core.transform import Function, TransformFunctionRegistry
-from flint.models.transforms.model_customer_orders import CustomersOrdersFunctionModel
+from flint.models.transforms.custom.model_customer_orders import CustomersOrdersFunctionModel
 
 
 @TransformFunctionRegistry.register("customers_orders")

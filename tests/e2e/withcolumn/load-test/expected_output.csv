@@ -1,0 +1,5 @@
+id,first_name,last_name,age,salary,full_name,salary_bracket
+1,John,Doe,25,50000,John Doe,Low
+2,Sarah,Smith,30,60000,Sarah Smith,Medium
+3,Mike,Johnson,42,75000,Mike Johnson,High
+4,Lisa,Brown,28,65000,Lisa Brown,Medium

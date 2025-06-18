@@ -1,5 +1,5 @@
 """
-TODO
+Test module for the main function.
 """
 
 import argparse
@@ -14,11 +14,10 @@ from pyspark.testing import assertDataFrameEqual
 
 from flint.__main__ import main
 from flint.core.job import LOADS
-from flint.core.load import DATA_FORMAT, LOCATION, NAME, SCHEMA_LOCATION
+from flint.core.load import DATA_FORMAT, LOCATION, SCHEMA_LOCATION
 from flint.utils.spark import SparkHandler
 
 
-# https://learn.microsoft.com/en-us/azure/databricks/sql/language-manual/functions/cast
 @pytest.mark.parametrize("job_path", glob.glob("tests/e2e/**/job.json", recursive=True))
 def test__main(tmp_path: Path, job_path: str) -> None:
     """Test main function with different configurations."""
@@ -53,7 +52,7 @@ def test__main(tmp_path: Path, job_path: str) -> None:
             test_output_path_relative = Path(load[LOCATION]).relative_to(tmp_path)
 
             load_output_actual = Path(load[LOCATION])
-            load_output_expected = Path(test_output_path_relative, f"expected_output__{load[NAME]}").with_suffix(
+            load_output_expected = Path(test_output_path_relative, "expected_output").with_suffix(
                 f".{load[DATA_FORMAT]}"
             )
 
@@ -63,9 +62,7 @@ def test__main(tmp_path: Path, job_path: str) -> None:
                 json_content = json.load(fp=file)
             schema_actual = StructType.fromJson(json=json_content)
 
-            expected_schema_path = Path(f"{test_output_path_relative}/expected_schema__{load[NAME]}").with_suffix(
-                ".json"
-            )
+            expected_schema_path = Path(test_output_path_relative, "expected_schema").with_suffix(".json")
             with open(expected_schema_path, "r", encoding="utf-8") as file:
                 json_content = json.load(fp=file)
             schema_expected = StructType.fromJson(json=json_content)

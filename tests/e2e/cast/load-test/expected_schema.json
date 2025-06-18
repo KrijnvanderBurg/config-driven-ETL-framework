@@ -1,0 +1,41 @@
+{
+  "type": "struct",
+  "fields": [
+    {
+      "name": "id",
+      "type": "integer",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "age",
+      "type": "integer",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "price",
+      "type": "decimal(5,2)",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "is_active",
+      "type": "boolean",
+      "nullable": true,
+      "metadata": {}
+    },
+    {
+      "name": "join_date",
+      "type": "date",
+      "nullable": true,
+      "metadata": {}
+    }
+  ]
+}

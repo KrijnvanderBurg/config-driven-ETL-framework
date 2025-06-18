@@ -1,0 +1,5 @@
+id,name,age,address,phone,email,temp_column
+1,John Doe,25,"123 Main St",555-1234,john@example.com,delete_me
+2,Jane Smith,30,"456 Oak Ave",555-5678,jane@example.com,delete_me
+3,Mike Johnson,42,"789 Pine Rd",555-9012,mike@example.com,delete_me
+4,Lisa Brown,28,"321 Elm Blvd",555-3456,lisa@example.com,delete_me
