@@ -9,7 +9,20 @@ This allows the functions to be referenced by name in configuration files.
 """
 
 from . import cast, drop, dropduplicates, filter_, join, select, withcolumn
+from .custom import calculate_birth_year, customer_orders
 
 # Define __all__ to satisfy linters about "unused" imports
 # These imports are actually used for their side effects (registering transforms)
-__all__ = ["cast", "drop", "filter_", "join", "select", "withcolumn", "dropduplicates"]
+__all__ = [
+    # generic transforms
+    "cast",
+    "drop",
+    "filter_",
+    "join",
+    "select",
+    "withcolumn",
+    "dropduplicates",
+    # custom transforms
+    "customer_orders",
+    "calculate_birth_year",
+]
