@@ -9,10 +9,10 @@ packages = [{ include = "flint", from = "src" }]
 [tool.poetry.dependencies]
 python = "^3.11"
 pyspark = "^3.5.0"
-pandas = "^2.2.0"
-pyarrow = ">=4.0.0,<17.0.0" # Support pyarrow 4.x.x
-pyyaml = "^6.0.1"
-numpy = "<2.0.0"
+# pandas = "^2.2.0"
+# pyarrow = ">=4.0.0,<17.0.0" # Support pyarrow 4.x.x
+# pyyaml = "^6.0.1"
+# numpy = "<2.0.0"
 
 [tool.poetry.group.test.dependencies]
 pytest = ">=8.3.0"
