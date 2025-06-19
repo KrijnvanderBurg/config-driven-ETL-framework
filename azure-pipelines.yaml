@@ -38,7 +38,7 @@ stages:
       inputs:
         versionSpec: ${{ parameters.pythonVersion }}
 
-    - template: ./.azuredevops/v1/templates/atomic/python/poetry-install-pyproject.yaml
+    - template: .azuredevops/v1/templates/atomic/python/poetry-install-pyproject.yaml
       parameters:
         targetPath: ${{ parameters.pythonSrcDirectory }}
         pythonPyprojectFilepath: ${{ parameters.pythonPyprojectFilepath }}
