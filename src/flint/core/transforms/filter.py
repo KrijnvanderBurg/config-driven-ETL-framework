@@ -19,7 +19,7 @@ from flint.models.transforms.model_filter import FilterFunctionModel
 class FilterFunction(Function[FilterFunctionModel]):
     """Function that filters rows from a DataFrame based on a condition.
 
-    This transform function allows for filtering rows from a DataFrame based on a 
+    This transform function allows for filtering rows from a DataFrame based on a
     specified condition, similar to the WHERE clause in SQL. It's useful for
     removing rows that don't meet certain criteria.
 

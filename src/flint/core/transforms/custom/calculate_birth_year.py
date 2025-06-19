@@ -11,8 +11,6 @@ from pyspark.sql import functions as F
 
 from flint.core.transform import Function, TransformFunctionRegistry
 from flint.models.transforms.custom.model_calculate_birth_year import CalculateBirthYearFunctionModel
-
-# Import these locally to avoid circular imports
 from flint.types import DataFrameRegistry
 
 
