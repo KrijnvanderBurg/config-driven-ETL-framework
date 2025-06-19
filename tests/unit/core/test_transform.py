@@ -56,24 +56,26 @@ class TestTransformFunctionRegistry:
 @pytest.fixture
 def mock_args_model() -> ArgsModel:
     """Create a mock ArgsModel for testing."""
+
     class MockArgsModel(ArgsModel):
         pass
+
     return MockArgsModel()
 
 
 class MockFunctionModel(FunctionModel):
     """Mock function model for testing."""
-    
+
     function: str = "test_function"
     arguments: ArgsModel
-    
+
     def __init__(self) -> None:
         """Initialize with default values for testing."""
         self.function = "test_function"
-        
+
         class MockArgs(ArgsModel):
             pass
-            
+
         self.arguments = MockArgs()
 
     @classmethod
