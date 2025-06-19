@@ -1,0 +1,99 @@
+parameters:
+  - name: projectName
+    type: string
+    
+  - name: pythonVersion
+    type: string
+    
+  - name: pythonSrcDirectory
+    type: string
+    default: $(Build.Repository.LocalPath)/src
+    
+  - name: pythonTestsDirectory
+    type: string
+    default: $(Build.Repository.LocalPath)/tests
+
+  - name: pythonPyprojectFilepath
+    type: string
+    default: $(Build.Repository.LocalPath)/src/pyproject.toml
+    
+resources:
+  repositories:
+    - repository: self
+      fetchDepth: 1
+
+stages:
+- stage: CodeQuality
+  displayName: Code Quality
+  jobs:
+  - job: CodeQuality
+    displayName: Code Quality
+    steps:
+    - checkout: self
+
+    - task: UsePythonVersion@0
+      inputs:
+        versionSpec: ${{ parameters.pythonVersion }}
+
+    - template: .azuredevops/v1/templates/atomic/python/poetry-install-pyproject.yaml
+      parameters:
+        targetPath: ${{ parameters.pythonSrcDirectory }}
+        pythonPyprojectFilepath: ${{ parameters.pythonPyprojectFilepath }}
+
+    - template: .azuredevops/v1/templates/composite/python/formatter.yaml
+      parameters:
+        pythonSrcDirectory: ${{ parameters.pythonSrcDirectory }}
+
+    - template: .azuredevops/v1/templates/composite/python/linter.yaml
+      parameters:
+        pythonSrcDirectory: ${{ parameters.pythonSrcDirectory }}
+
+    - template: .azuredevops/v1/templates/composite/python/typechecking.yaml
+      parameters:
+        pythonSrcDirectory: ${{ parameters.pythonSrcDirectory }}
+
+  # - job: Test
+  #   displayName: Run Tests
+  #   dependsOn: QualityChecks
+  #   steps:
+  #   - checkout: self
+
+  #   - task: UsePythonVersion@0
+  #     inputs:
+  #       versionSpec: ${{ parameters.pythonVersion }}
+  #       addToPath: true
+
+  #   - template: .azuredevops/v1/templates/atomic/python/poetry_install.yaml
+  #     parameters:
+  #       pythonSrcDirectory: ${{ parameters.pythonSrcDirectory }}
+  #       pythonPyprojectFilepath: ${{ parameters.pythonSrcDirectory }}/pyproject.toml
+
+  #   - template: .azuredevops/v1/templates/atomic/python/pytest_test.yaml
+  #     parameters:
+  #       pythonTestsDirectory: ${{ parameters.pythonTestsDirectory }}
+  #       publishCoverage: ${{ parameters.publishCoverage }}
+  #       enabled: ${{ parameters.enableTests }}
+
+  # - job: Security
+  #   displayName: Security Scanning
+  #   dependsOn: Test
+  #   steps:
+  #   - checkout: self
+
+  #   - task: UsePythonVersion@0
+  #     inputs:
+  #       versionSpec: ${{ parameters.pythonVersion }}
+  #       addToPath: true
+
+  #   - template: .azuredevops/v1/templates/atomic/python/poetry_install.yaml
+  #     parameters:
+  #       pythonSrcDirectory: ${{ parameters.pythonSrcDirectory }}
+  #       pythonPyprojectFilepath: ${{ parameters.pythonSrcDirectory }}/pyproject.toml
+
+  #   - template: .azuredevops/v1/templates/composite/python/scanning_1st_vulnerabilities.yaml
+  #     parameters:
+  #       pythonSrcDirectory: ${{ parameters.pythonSrcDirectory }}
+
+  #   - template: .azuredevops/v1/templates/composite/python/scanning_3rd_vulnerabilities.yaml
+  #     parameters:
+  #       pythonSrcDirectory: ${{ parameters.pythonSrcDirectory }}
