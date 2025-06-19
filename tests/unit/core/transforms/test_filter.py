@@ -5,7 +5,7 @@ from unittest.mock import MagicMock, patch
 from pyspark.sql import SparkSession
 
 from flint.core.transform import TransformFunctionRegistry
-from flint.core.transforms.filter import FilterFunction
+from flint.core.transforms.filter_ import FilterFunction
 
 
 class TestFilterFunction:

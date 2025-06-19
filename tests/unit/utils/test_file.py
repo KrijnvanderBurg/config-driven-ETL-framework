@@ -1,6 +1,6 @@
 """Unit tests for the file handling utility module.
 
-This module contains tests for the file handling utilities that are responsible
+This module contains tests for the file utilities that are responsible
 for reading and parsing configuration files in various formats like JSON and YAML.
 
 The tests verify that:
@@ -44,10 +44,7 @@ class TestYamlHandler:
     def test_read__file_not_exists(self) -> None:
         """Test reading YAML file raises FileNotFoundError when file does not exist."""
         # Arrange
-        with (
-            patch("builtins.open", side_effect=FileNotFoundError),
-            # patch.object(FileYamlHandler, "_file_exists", return_value=False),
-        ):
+        with patch("builtins.open", side_effect=FileNotFoundError):
             with pytest.raises(FileNotFoundError):  # Assert
                 # Act
                 handler = FileYamlHandler(filepath=Path("test.yaml"))
@@ -59,10 +56,7 @@ class TestYamlHandler:
             when file does not exist while `self._file_exists() returns true.
         """
         # Arrange
-        with (
-            patch("builtins.open", side_effect=FileNotFoundError),
-            # patch.object(FileYamlHandler, "_file_exists", return_value=True),
-        ):
+        with patch("builtins.open", side_effect=FileNotFoundError):
             with pytest.raises(FileNotFoundError):  # Assert
                 # Act
                 handler = FileYamlHandler(filepath=Path("test.yaml"))

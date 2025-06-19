@@ -10,6 +10,7 @@ the name 'withColumn', making it available for use in configuration files.
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame
+from pyspark.sql.functions import expr
 
 from flint.core.transform import Function, TransformFunctionRegistry
 from flint.models.transforms.model_withcolumn import WithColumnFunctionModel
@@ -70,7 +71,13 @@ class WithColumnFunction(Function[WithColumnFunctionModel]):
             Applying the withColumn function:
 
             ```
-            {"function": "withColumn", "arguments": {"col_name": "full_name", "col_expr": "concat(first_name, ' ', last_name)"}}
+            {
+                "function": "withColumn",
+                "arguments": {
+                    "col_name": "full_name",
+                    "col_expr": "concat(first_name, ' ', last_name)"
+                }
+            }
             ```
 
             The resulting DataFrame will be:
@@ -86,13 +93,6 @@ class WithColumnFunction(Function[WithColumnFunctionModel]):
         """
 
         def __f(df: DataFrame) -> DataFrame:
-            # Import the necessary modules for expression parsing
-            from pyspark.sql.functions import expr
-
-            # Convert the string expression to a PySpark Column expression
-            col_expr_str = self.model.arguments.col_expr
-            column_expr = expr(col_expr_str)
-
-            return df.withColumn(self.model.arguments.col_name, column_expr)
+            return df.withColumn(self.model.arguments.col_name, expr(self.model.arguments.col_expr))
 
         return __f

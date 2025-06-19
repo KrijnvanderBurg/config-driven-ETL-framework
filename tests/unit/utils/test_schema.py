@@ -10,6 +10,7 @@ The tests verify that:
 - The conversion between formats preserves schema structure and field definitions
 """
 
+from pathlib import Path
 from unittest.mock import patch
 
 import pytest
@@ -128,7 +129,7 @@ class TestSchemaHandlers:
             schema_dict: Dictionary representation of the schema.
         """
         # Arrange
-        file_path = "schema.json"
+        file_path = Path("schema.json")
         with patch.object(FileHandlerContext, "from_filepath", autospec=True) as mock_file_handler_context:
             mock_file_handler = mock_file_handler_context.return_value
             mock_file_handler.read.return_value = schema_dict
@@ -147,7 +148,7 @@ class TestSchemaHandlers:
         Verifies that exceptions from file handling are properly propagated.
         """
         # Arrange
-        file_path = "nonexistent.json"
+        file_path = Path("nonexistent.json")
         with patch.object(FileHandlerContext, "from_filepath", autospec=True) as mock_file_handler_context:
             mock_file_handler = mock_file_handler_context.return_value
             mock_file_handler.read.side_effect = FileNotFoundError("File not found")
@@ -163,7 +164,7 @@ class TestSchemaHandlers:
         Verifies that permission errors during file access are properly propagated.
         """
         # Arrange
-        file_path = "protected.json"
+        file_path = Path("protected.json")
         with patch.object(FileHandlerContext, "from_filepath", autospec=True) as mock_file_handler_context:
             mock_file_handler = mock_file_handler_context.return_value
             mock_file_handler.read.side_effect = PermissionError("Permission denied")
@@ -178,7 +179,7 @@ class TestSchemaHandlers:
         Verifies that schema validation occurs after successfully reading a file.
         """
         # Arrange
-        file_path = "invalid_schema.json"
+        file_path = Path("invalid_schema.json")
         with patch.object(FileHandlerContext, "from_filepath", autospec=True) as mock_file_handler_context:
             mock_file_handler = mock_file_handler_context.return_value
             mock_file_handler.read.return_value = {"invalid": "schema"}

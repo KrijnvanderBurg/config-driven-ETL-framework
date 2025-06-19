@@ -14,8 +14,6 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.exceptions import DictKeyError
-
-# Import these locally to avoid circular imports
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 COL_NAME: Final[str] = "col_name"

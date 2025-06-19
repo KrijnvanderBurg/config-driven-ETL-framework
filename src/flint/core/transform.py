@@ -27,7 +27,7 @@ NAME: Final[str] = "name"
 UPSTREAM_NAME: Final[str] = "upstream_name"
 
 
-FunctionModelT = TypeVar("FunctionModelT", bound=FunctionModel)
+FunctionModelT_co = TypeVar("FunctionModelT_co", bound=FunctionModel, covariant=True)
 
 
 class TransformFunctionRegistry(RegistryDecorator, metaclass=Singleton):
@@ -52,7 +52,7 @@ class TransformFunctionRegistry(RegistryDecorator, metaclass=Singleton):
     """
 
 
-class Function(Generic[FunctionModelT], ABC):
+class Function(Generic[FunctionModelT_co], ABC):
     """
      base class for transformation functions.
 
@@ -60,9 +60,11 @@ class Function(Generic[FunctionModelT], ABC):
     Each function has a model that defines its behavior and parameters.
     """
 
-    model_cls: type[FunctionModelT]
+    # Model class property with covariant type that allows subclasses to specify
+    # more derived types than the base FunctionModel
+    model_cls: type[FunctionModelT_co]
 
-    def __init__(self, model: FunctionModelT) -> None:
+    def __init__(self, model: FunctionModelT_co) -> None:
         """
         Initialize a function transformation object.
 
@@ -110,7 +112,7 @@ class Transform:
     This class provides functionality for transforming data.
     """
 
-    def __init__(self, model: TransformModel, functions: list[Function]) -> None:
+    def __init__(self, model: TransformModel, functions: list[Function[Any]]) -> None:
         self.model = model
         self.functions = functions
         self.data_registry = DataFrameRegistry()

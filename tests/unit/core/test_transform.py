@@ -2,14 +2,15 @@
 Unit tests for the transform module.
 """
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
 from pyspark.sql import DataFrame
 
 from flint.core.transform import Function, Transform, TransformFunctionRegistry
-from flint.models.model_transform import TransformModel
+from flint.models.model_transform import ArgsModel, FunctionModel, TransformModel
 from flint.types import DataFrameRegistry
 
 
@@ -53,11 +54,28 @@ class TestTransformFunctionRegistry:
             registry.get("nonexistent_function")
 
 
-class MockFunctionModel:
-    """Mock function model for testing."""
+class MockArgsModel(ArgsModel):
+    """Create a mock ArgsModel for testing."""
 
     @classmethod
-    def from_dict(cls, dict_: dict[str, Any]):
+    def from_dict(cls, dict_: dict[str, Any]) -> "MockArgsModel":
+        """Mock from_dict implementation."""
+        return cls()
+
+
+class MockFunctionModel(FunctionModel[MockArgsModel]):
+    """Mock function model for testing."""
+
+    function: str
+    arguments: MockArgsModel
+
+    def __init__(self) -> None:
+        """Initialize with default values for testing."""
+        self.function = "test_function"
+        self.arguments = MockArgsModel()
+
+    @classmethod
+    def from_dict(cls, dict_: dict[str, Any]) -> "MockFunctionModel":
         """Mock from_dict method."""
         return cls()
 
@@ -65,14 +83,15 @@ class MockFunctionModel:
 class TestFunction(Function[MockFunctionModel]):
     """Test implementation of Function abstract class."""
 
-    model_cls = MockFunctionModel  # This was the issue - should be model_cls, not model_concrete
+    model_cls = MockFunctionModel  # Define the class variable properly
 
     def transform(self) -> Callable[..., Any]:
         """Implementation of abstract method."""
 
-        def transform_func(df: DataFrame) -> None:
+        def transform_func(df: DataFrame) -> DataFrame:
             """Mock transform function."""
             # Mock transformation implementation
+            return df
 
         return transform_func
 
@@ -84,7 +103,8 @@ class TestTransform:
         """Test Transform initialization."""
         # Arrange
         model = TransformModel(name="test_transform", upstream_name="source")
-        functions = [TestFunction(model=MockFunctionModel())]
+        function = TestFunction(model=MockFunctionModel())
+        functions: list[Function[MockFunctionModel]] = [function]
 
         # Act
         transform = Transform(model=model, functions=functions)
