@@ -23,7 +23,7 @@ resources:
   repositories:
     - repository: azuredevops
       type: github
-      name: .azuredevops
+      name: KrijnvanderBurg/.azuredevops
       endpoint: KrijnvanderBurg
       ref: main
 
