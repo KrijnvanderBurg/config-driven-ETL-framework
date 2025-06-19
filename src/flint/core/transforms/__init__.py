@@ -14,7 +14,7 @@ from pathlib import Path
 
 # Automatically import all Python modules in this package (transforms directory)
 # This will register all transforms without requiring explicit imports
-__path__ = [str(Path(__file__).parent)]
+__path__ = [str(Path(__file__).parent)]  # type: ignore
 for _, module_name, _ in pkgutil.iter_modules(__path__):
     if module_name != "__init__":
         importlib.import_module(f"{__name__}.{module_name}")
