@@ -17,7 +17,7 @@ parameters:
 
   - name: pythonPyprojectFilepath
     type: string
-    default: $(Build.Repository.LocalPath)/src/pyproject.toml
+    default: $(Build.Repository.LocalPath)/pyproject.toml
     
 resources:
   repositories:
