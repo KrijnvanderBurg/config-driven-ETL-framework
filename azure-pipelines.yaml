@@ -1,9 +1,11 @@
 parameters:
   - name: projectName
     type: string
+    default: flint
     
   - name: pythonVersion
     type: string
+    default: 3.11
     
   - name: pythonSrcDirectory
     type: string
