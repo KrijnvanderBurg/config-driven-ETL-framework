@@ -8,13 +8,8 @@ and is automatically registered with the TransformFunctionRegistry when imported
 This allows the functions to be referenced by name in configuration files.
 """
 
-import importlib
-import pkgutil
-from pathlib import Path
+from . import cast, drop, dropduplicates, filter_, join, select, withcolumn
 
-# Automatically import all Python modules in this package (transforms directory)
-# This will register all transforms without requiring explicit imports
-__path__ = [str(Path(__file__).parent)]
-for _, module_name, _ in pkgutil.iter_modules(__path__):  # type: ignore
-    if module_name != "__init__":
-        importlib.import_module(f"{__name__}.{module_name}")
+# Define __all__ to satisfy linters about "unused" imports
+# These imports are actually used for their side effects (registering transforms)
+__all__ = ["cast", "drop", "filter_", "join", "select", "withcolumn", "dropduplicates"]
