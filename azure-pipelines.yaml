@@ -32,6 +32,9 @@ stages:
     displayName: Code Quality
     steps:
     - checkout: self
+      submodules: recursive
+
+
 
     - task: UsePythonVersion@0
       inputs:
