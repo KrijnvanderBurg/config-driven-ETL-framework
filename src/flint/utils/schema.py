@@ -16,6 +16,7 @@ import json
 import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
+from typing import Any
 
 from pyspark.sql.types import StructType
 
@@ -35,7 +36,7 @@ class SchemaHandler(ABC):
 
     @staticmethod
     @abstractmethod
-    def parse(schema) -> StructType:
+    def parse(schema: Any) -> StructType:
         """Create a PySpark schema from the provided source.
 
         Args:
