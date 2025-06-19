@@ -9,7 +9,7 @@ import pytest
 from pyspark.sql import DataFrame
 
 from flint.core.transform import Function, Transform, TransformFunctionRegistry
-from flint.models.model_transform import TransformModel
+from flint.models.model_transform import ArgsModel, FunctionModel, TransformModel
 from flint.types import DataFrameRegistry
 
 
@@ -53,8 +53,28 @@ class TestTransformFunctionRegistry:
             registry.get("nonexistent_function")
 
 
-class MockFunctionModel:
+@pytest.fixture
+def mock_args_model() -> ArgsModel:
+    """Create a mock ArgsModel for testing."""
+    class MockArgsModel(ArgsModel):
+        pass
+    return MockArgsModel()
+
+
+class MockFunctionModel(FunctionModel):
     """Mock function model for testing."""
+    
+    function: str = "test_function"
+    arguments: ArgsModel
+    
+    def __init__(self) -> None:
+        """Initialize with default values for testing."""
+        self.function = "test_function"
+        
+        class MockArgs(ArgsModel):
+            pass
+            
+        self.arguments = MockArgs()
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]):
@@ -65,14 +85,15 @@ class MockFunctionModel:
 class TestFunction(Function[MockFunctionModel]):
     """Test implementation of Function abstract class."""
 
-    model_cls = MockFunctionModel  # This was the issue - should be model_cls, not model_concrete
+    model_cls = MockFunctionModel  # Define the class variable properly
 
     def transform(self) -> Callable[..., Any]:
         """Implementation of abstract method."""
 
-        def transform_func(df: DataFrame) -> None:
+        def transform_func(df: DataFrame) -> DataFrame:
             """Mock transform function."""
             # Mock transformation implementation
+            return df
 
         return transform_func
 

@@ -62,7 +62,7 @@ class TestFilterFunction:
 
         # Create model with filter condition
         model = MagicMock()
-        model.arguments.condition = "age > 18"
+        model.arguments.condition = df["age"] > 18
 
         filter_function = FilterFunction(model=model)
 

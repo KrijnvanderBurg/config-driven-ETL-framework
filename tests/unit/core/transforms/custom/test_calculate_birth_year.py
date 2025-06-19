@@ -84,7 +84,7 @@ class TestCalculateBirthYearFunction:
 
         # Act
         transform_func = function.transform()
-        transform_func(dataframe_registry=dataframe_registry, dataframe_name="test_df")
+        transform_func(df=dataframe_registry["test_df"])
 
         # Assert
         mock_df.withColumn.assert_called_once()
@@ -112,7 +112,7 @@ class TestCalculateBirthYearFunction:
         dataframe_registry["test_df"] = mock_df
 
         # Apply transform
-        transform_func(dataframe_registry=dataframe_registry, dataframe_name="test_df")
+        transform_func(df=dataframe_registry["test_df"])
 
         # Assert
         # 1. Verify withColumn was called
