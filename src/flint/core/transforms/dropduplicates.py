@@ -8,7 +8,6 @@ the name 'dropDuplicates', making it available for use in configuration files.
 """
 
 from collections.abc import Callable
-from typing import Optional
 
 from pyspark.sql import DataFrame
 
@@ -90,10 +89,9 @@ class DropDuplicatesFunction(Function[DropDuplicatesFunctionModel]):
         """
 
         def __f(df: DataFrame) -> DataFrame:
-            columns: Optional[list[str]] = self.model.arguments.columns
+            columns: list[str] | None = self.model.arguments.columns
             if columns:
                 return df.dropDuplicates(columns)
-            else:
-                return df.dropDuplicates()
+            return df.dropDuplicates()
 
         return __f

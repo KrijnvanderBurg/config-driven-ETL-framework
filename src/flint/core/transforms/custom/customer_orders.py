@@ -1,3 +1,9 @@
+"""Custom transform functions for processing customer orders.
+
+This module provides specialized transformation functions for working with customer and order data.
+It includes custom join and aggregation operations tailored for the customer orders use case.
+"""
+
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame

@@ -40,7 +40,8 @@ class SchemaHandler(ABC):
 
         Args:
             schema: The schema definition in a format specific to the handler
-                implementation (could be string, dict, file path, etc.)
+                implementation (could be string, dict, file path, etc.).
+                Type varies depending on the specific handler implementation.
 
         Returns:
             A fully configured PySpark StructType schema

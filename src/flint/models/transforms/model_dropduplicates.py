@@ -11,7 +11,7 @@ from configuration files or dictionaries.
 """
 
 from dataclasses import dataclass
-from typing import Any, Final, Optional, Self
+from typing import Any, Final, Self
 
 from flint.exceptions import DictKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
@@ -43,7 +43,7 @@ class DropDuplicatesFunctionModel(FunctionModel):
                     If None, all columns are considered.
         """
 
-        columns: Optional[list[str]] = None
+        columns: list[str] | None = None
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
