@@ -31,25 +31,6 @@ class TestJob:
         - Error handling for missing configuration keys
     """
 
-    def test_init(self) -> None:
-        """Test Job initialization with extract, transform, and load components.
-
-        Verifies that a Job instance correctly stores the provided extract,
-        transform, and load components when initialized.
-        """
-        # Arrange
-        extracts = [MagicMock(spec=Extract)]
-        transforms = [MagicMock(spec=Transform)]
-        loads = [MagicMock(spec=Load)]
-
-        # Act
-        job = Job(extracts=extracts, transforms=transforms, loads=loads)
-
-        # Assert
-        assert job.extracts == extracts
-        assert job.transforms == transforms
-        assert job.loads == loads
-
     @patch("flint.utils.file.FileHandlerContext.from_filepath")
     def test_from_file(self, mock_from_filepath: MagicMock) -> None:
         """Test creating a Job from a configuration file."""

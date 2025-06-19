@@ -7,13 +7,11 @@ based on their age and the current year.
 
 from collections.abc import Callable
 
-from pyspark.sql import functions as F
+from pyspark.sql.dataframe import DataFrame
+from pyspark.sql.functions import col, lit
 
 from flint.core.transform import Function, TransformFunctionRegistry
 from flint.models.transforms.custom.model_calculate_birth_year import CalculateBirthYearFunctionModel
-
-# Import these locally to avoid circular imports
-from flint.types import DataFrameRegistry
 
 
 @TransformFunctionRegistry.register("calculate_birth_year")
@@ -45,7 +43,7 @@ class CalculateBirthYearFunction(Function[CalculateBirthYearFunctionModel]):
         ```
     """
 
-    model_cls = CalculateBirthYearFunctionModel
+    model_cls: type[CalculateBirthYearFunctionModel] = CalculateBirthYearFunctionModel
 
     def transform(self) -> Callable:
         """Apply the birth year calculation transformation to the DataFrame.
@@ -92,10 +90,11 @@ class CalculateBirthYearFunction(Function[CalculateBirthYearFunctionModel]):
                     ```
         """
 
-        def __f(dataframe_registry: DataFrameRegistry, dataframe_name: str) -> None:
-            dataframe_registry[dataframe_name] = dataframe_registry[dataframe_name].withColumn(
-                self.model.arguments.birth_year_column,
-                F.lit(self.model.arguments.current_year) - F.col(self.model.arguments.age_column),
-            )
+        def __f(df: DataFrame) -> DataFrame:
+            args = self.model.arguments  # Type is CalculateBirthYearFunctionModel.Args
+
+            # Create the birth year column by subtracting age from current year
+            # Convert the subtraction to use literal for the current year
+            return df.withColumn(args.birth_year_column, lit(args.current_year) - col(args.age_column))
 
         return __f

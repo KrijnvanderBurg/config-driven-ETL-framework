@@ -139,7 +139,7 @@ class RegistryInstance(Generic[K, V], metaclass=Singleton):
 
     def __init__(self) -> None:
         """Initialize the instance registry."""
-        self._items: dict[K, V] = dict()
+        self._items: dict[K, V] = {}
 
     # Instance registry methods
     def __setitem__(self, name: K, item: V) -> None:

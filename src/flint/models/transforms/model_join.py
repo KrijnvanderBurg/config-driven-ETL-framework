@@ -14,8 +14,6 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.exceptions import DictKeyError
-
-# Import these locally to avoid circular imports
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 # Constants for keys in the configuration dictionary
