@@ -2,7 +2,8 @@
 Unit tests for the transform module.
 """
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -53,33 +54,28 @@ class TestTransformFunctionRegistry:
             registry.get("nonexistent_function")
 
 
-@pytest.fixture
-def mock_args_model() -> ArgsModel:
+class MockArgsModel(ArgsModel):
     """Create a mock ArgsModel for testing."""
 
-    class MockArgsModel(ArgsModel):
-        pass
+    @classmethod
+    def from_dict(cls, dict_: dict[str, Any]) -> "MockArgsModel":
+        """Mock from_dict implementation."""
+        return cls()
 
-    return MockArgsModel()
 
-
-class MockFunctionModel(FunctionModel):
+class MockFunctionModel(FunctionModel[MockArgsModel]):
     """Mock function model for testing."""
 
-    function: str = "test_function"
-    arguments: ArgsModel
+    function: str
+    arguments: MockArgsModel
 
     def __init__(self) -> None:
         """Initialize with default values for testing."""
         self.function = "test_function"
-
-        class MockArgs(ArgsModel):
-            pass
-
-        self.arguments = MockArgs()
+        self.arguments = MockArgsModel()
 
     @classmethod
-    def from_dict(cls, dict_: dict[str, Any]):
+    def from_dict(cls, dict_: dict[str, Any]) -> "MockFunctionModel":
         """Mock from_dict method."""
         return cls()
 
