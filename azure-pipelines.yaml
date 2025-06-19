@@ -23,7 +23,7 @@ resources:
   repositories:
     - repository: azuredevops
       type: github
-      name: YourGithubUsername/.azuredevops
+      name: krijnvanderburg/.azuredevops
       endpoint: github
       ref: main
 
