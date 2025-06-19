@@ -103,7 +103,8 @@ class TestTransform:
         """Test Transform initialization."""
         # Arrange
         model = TransformModel(name="test_transform", upstream_name="source")
-        functions = [TestFunction(model=MockFunctionModel())]
+        function = TestFunction(model=MockFunctionModel())
+        functions: list[Function[MockFunctionModel]] = [function]
 
         # Act
         transform = Transform(model=model, functions=functions)

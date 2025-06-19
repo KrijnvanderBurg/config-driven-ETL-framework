@@ -112,7 +112,7 @@ class Transform:
     This class provides functionality for transforming data.
     """
 
-    def __init__(self, model: TransformModel, functions: list[Function]) -> None:
+    def __init__(self, model: TransformModel, functions: list[Function[Any]]) -> None:
         self.model = model
         self.functions = functions
         self.data_registry = DataFrameRegistry()
