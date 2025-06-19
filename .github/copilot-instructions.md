@@ -1,4 +1,3 @@
-
 Flint is a configuration-driven PySpark ETL framework. It uses JSON files to define extract-transform-load pipelines. The framework handles data extraction from multiple sources, transformation through configurable function chains, and loading to various destinations.
 
 Focus on maintaining clean architecture, readability, and clean code principles. Always adhere to design patterns and principles like:
