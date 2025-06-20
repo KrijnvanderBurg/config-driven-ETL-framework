@@ -1,3 +1,9 @@
+trigger:
+  batch: true  # Batch changes if true; only the latest commit is built
+
+pr:
+  autoCancel: true  # Cancel previous builds when a new commit is pushed
+
 parameters:
   - name: pythonVersion
     type: string
