@@ -1,3 +1,4 @@
+# This is a minimal implementation that only uses the flint.yaml template
 parameters:
   - name: pythonVersion
     type: string
@@ -17,16 +18,24 @@ parameters:
     
 resources:
   repositories:
-    - repository: azuredevops
+    - repository: flint
       type: github
-      name: KrijnvanderBurg/.azuredevops
-      endpoint: KrijnvanderBurg
+      name: YourOrganization/flint-pipeline-templates # Replace with actual org/repo
+      endpoint: GitHubConnection # Replace with your service connection name
       ref: main
 
 stages:
-  - template: pipelines/flint.yaml@azuredevops
+  # Extend the flint pipeline template
+  - template: pipelines/flint.yaml@flint
     parameters:
+      # Required parameters
       pythonVersion: ${{ parameters.pythonVersion }}
       pythonSrcDirectory: ${{ parameters.pythonSrcDirectory }}
       pythonTestsDirectory: ${{ parameters.pythonTestsDirectory }}
       pythonPyprojectFilepath: ${{ parameters.pythonPyprojectFilepath }}
+      
+      # Optional parameters - uncomment and adjust as needed based on the flint template requirements
+      # enableCodeCoverage: true
+      # minCodeCoveragePercent: 80
+      # enableSecurityScans: true
+      # artifactName: flint-package
