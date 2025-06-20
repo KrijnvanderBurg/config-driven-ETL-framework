@@ -24,7 +24,7 @@ resources:
       ref: main
 
 stages:
-  - template: .azuredevops/v1/pipelines/flint.yaml@azuredevops
+  - template: /.azuredevops/v1/pipelines/flint.yaml@azuredevops
     parameters:
       pythonVersion: ${{ parameters.pythonVersion }}
       pythonSrcDirectory: ${{ parameters.pythonSrcDirectory }}
