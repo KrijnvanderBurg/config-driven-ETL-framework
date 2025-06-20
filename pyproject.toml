@@ -10,6 +10,7 @@ packages = [{ include = "flint", from = "src" }]
 python = "^3.11"
 pyspark = "^3.5.0"
 pandas = "^2.3.0"
+pyarrow = "20.0.0"
 pyyaml = "^6.0.1"
 
 [tool.poetry.group.test.dependencies]
