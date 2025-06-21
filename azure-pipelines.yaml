@@ -1,0 +1,38 @@
+trigger:
+  batch: true  # Batch changes if true; only the latest commit is built
+
+pr:
+  autoCancel: true  # Cancel previous builds when a new commit is pushed
+
+parameters:
+  - name: pythonVersion
+    type: string
+    default: 3.11
+    
+  - name: pythonSrcDirectory
+    type: string
+    default: $(Build.Repository.LocalPath)/src
+    
+  - name: pythonTestsDirectory
+    type: string
+    default: $(Build.Repository.LocalPath)/tests
+
+  - name: pythonPyprojectFilepath
+    type: string
+    default: $(Build.Repository.LocalPath)/pyproject.toml
+    
+resources:
+  repositories:
+    - repository: azuredevops
+      type: github
+      name: KrijnvanderBurg/.azuredevops
+      endpoint: KrijnvanderBurg
+      ref: main
+
+stages:
+  - template: /v1/pipelines/flint.yaml@azuredevops
+    parameters:
+      pythonVersion: ${{ parameters.pythonVersion }}
+      pythonSrcDirectory: ${{ parameters.pythonSrcDirectory }}
+      pythonTestsDirectory: ${{ parameters.pythonTestsDirectory }}
+      pythonPyprojectFilepath: ${{ parameters.pythonPyprojectFilepath }}
