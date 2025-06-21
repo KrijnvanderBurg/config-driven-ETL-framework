@@ -10,5 +10,5 @@
 
 [submodule ".azuredevops"]
 	path = .azuredevops
-	url = https://github.com/KrijnvanderBurg/.azuredevops
+	url = https://github.com/KrijnvanderBurg/.azuredevops.git
 	branch = main
