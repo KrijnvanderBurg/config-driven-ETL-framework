@@ -56,7 +56,9 @@ Flint lets you focus on data transformations while handling the application stru
 ```bash
 git clone https://github.com/krijnvanderburg/config-driven-pyspark-framework.git
 cd config-driven-pyspark-framework
-poetry install
+code .                                   # shortcut for vscode
+git submodule update --init --recursive  # recursive because of nested submodules
+poetry install                           # install dependencies
 ```
 
 ## 🔍 Example: Customer Order Analysis

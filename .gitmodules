@@ -7,3 +7,8 @@
 	path = .devcontainer
 	url = https://github.com/KrijnvanderBurg/.devcontainer.git
     branch = main
+
+[submodule ".azuredevops"]
+	path = .azuredevops
+	url = https://github.com/KrijnvanderBurg/.azuredevops.git
+	branch = main
