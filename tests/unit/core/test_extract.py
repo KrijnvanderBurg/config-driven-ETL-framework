@@ -13,7 +13,7 @@ from flint.models.model_extract import ExtractFileModel, ExtractMethod
 from flint.types import DataFrameRegistry
 
 
-class TestExtractModel:
+class MockExtractModel:
     """Dummy model for testing Extract class."""
 
     model_cls = ExtractFileModel
@@ -25,7 +25,7 @@ class TestExtractModel:
         self.options = {}
 
 
-class TestExtractClass(Extract[ExtractFileModel]):
+class MockExtractClass(Extract[ExtractFileModel]):
     """Test implementation of Extract abstract class."""
 
     model_cls = ExtractFileModel
@@ -89,7 +89,7 @@ class TestExtract:
         model.name = "test_extract"
 
         # Act
-        extract = TestExtractClass(model=model)
+        extract = MockExtractClass(model=model)
 
         # Assert
         assert extract.model == model
@@ -112,7 +112,7 @@ class TestExtract:
         mock_from_dict.return_value = mock_model_cls
 
         # Act
-        extract = TestExtractClass.from_dict(extract_dict)
+        extract = MockExtractClass.from_dict(extract_dict)
 
         # Assert
         assert extract.model == mock_model_cls
@@ -130,11 +130,11 @@ class TestExtract:
         model.method = ExtractMethod.BATCH
         model.options = {"option1": "value1"}
 
-        extract = TestExtractClass(model=model)
+        extract = MockExtractClass(model=model)
         mock_df = MagicMock(spec=DataFrame)
 
         # Use patch to mock the protected method and SparkHandler
-        with patch.object(TestExtractClass, "_extract_batch", return_value=mock_df):
+        with patch.object(MockExtractClass, "_extract_batch", return_value=mock_df):
             # Act
             extract.extract()
 
@@ -153,11 +153,11 @@ class TestExtract:
         model.method = ExtractMethod.STREAMING
         model.options = {"option1": "value1"}
 
-        extract = TestExtractClass(model=model)
+        extract = MockExtractClass(model=model)
         mock_df = MagicMock(spec=DataFrame)
 
         # Use patch to mock the protected method
-        with patch.object(TestExtractClass, "_extract_streaming", return_value=mock_df):
+        with patch.object(MockExtractClass, "_extract_streaming", return_value=mock_df):
             # Act
             extract.extract()
 
@@ -176,7 +176,7 @@ class TestExtract:
         model.method = "invalid_method"
         model.options = {"option1": "value1"}
 
-        extract = TestExtractClass(model=model)
+        extract = MockExtractClass(model=model)
 
         # Act & Assert
         with pytest.raises(ValueError):

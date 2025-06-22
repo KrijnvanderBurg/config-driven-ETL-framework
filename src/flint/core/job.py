@@ -8,6 +8,7 @@ Jobs can be created from configuration files or dictionaries, with automatic ins
 of the appropriate Extract, Transform, and Load components based on the configuration.
 """
 
+import time
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final, Self
@@ -17,6 +18,9 @@ from flint.core.load import Load
 from flint.core.transform import Transform
 from flint.exceptions import DictKeyError
 from flint.utils.file import FileHandlerContext
+from flint.utils.logger import set_logger
+
+logger = set_logger(__name__)
 
 EXTRACTS: Final[str] = "extracts"
 TRANSFORMS: Final[str] = "transforms"
@@ -120,9 +124,15 @@ class Job:
         Runs the extract, transform, and load phases in sequence.
         This is the main entry point for running a configured job.
         """
+        start_time = time.time()
+        logger.info("Starting job execution")
+
         self._extract()
         self._transform()
         self._load()
+
+        execution_time = time.time() - start_time
+        logger.info("Job completed successfully in %.2f seconds", execution_time)
 
     def _extract(self) -> None:
         """Execute the extraction phase of the ETL pipeline.
@@ -130,7 +140,10 @@ class Job:
         Calls the extract method on each configured extract component,
         retrieving data from the specified sources.
         """
-        for extract in self.extracts:
+        logger.info("Starting extract phase with %d extractors", len(self.extracts))
+
+        for i, extract in enumerate(self.extracts, 1):
+            logger.debug("Running extractor %d/%d: %s", i, len(self.extracts), extract.model.name)
             extract.extract()
 
     def _transform(self) -> None:
@@ -139,7 +152,10 @@ class Job:
         Copies data from upstream components to the current transform component
         and applies the transformation operations to modify the data.
         """
-        for transform in self.transforms:
+        logger.info("Starting transform phase with %d transformers", len(self.transforms))
+
+        for i, transform in enumerate(self.transforms, 1):
+            logger.debug("Running transformer %d/%d: %s", i, len(self.transforms), transform.model.name)
             transform.transform()
 
     def _load(self) -> None:
@@ -148,5 +164,8 @@ class Job:
         Copies data from upstream components to the current load component
         and writes the transformed data to the target destinations.
         """
-        for load in self.loads:
+        logger.info("Starting load phase with %d loaders", len(self.loads))
+
+        for i, load in enumerate(self.loads, 1):
+            logger.debug("Running loader %d/%d: %s", i, len(self.loads), load.model.name)
             load.load()

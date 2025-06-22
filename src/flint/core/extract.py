@@ -103,7 +103,7 @@ class Extract(Generic[ExtractModelT], ABC):
         elif self.model.method == ExtractMethod.STREAMING:
             self.data_registry[self.model.name] = self._extract_streaming()
         else:
-            raise ValueError(f"Extraction method {self.model.method} is not supported for Pyspark.")
+            raise ValueError("Extraction method %s is not supported for PySpark" % self.model.method)
 
     @abstractmethod
     def _extract_batch(self) -> DataFrame:
