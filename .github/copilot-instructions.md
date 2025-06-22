@@ -1,3 +1,8 @@
+## General instructions
+- When editing or updating existing code, do not create separate files, classes or functions unless absolutely necessary. Instead, modify the existing code to improve it.
+- Do not run python code in the terminal.
+
+## My application: Flint
 Flint is a configuration-driven PySpark ETL framework. It uses JSON files to define extract-transform-load pipelines. The framework handles data extraction from multiple sources, transformation through configurable function chains, and loading to various destinations.
 
 Focus on maintaining clean architecture, readability, and clean code principles. Always adhere to design patterns and principles like:
