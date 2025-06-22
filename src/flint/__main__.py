@@ -45,17 +45,12 @@ def main() -> None:
     config_filepath: Path = Path(args.config_filepath)
     logger.info("Using configuration file: %s", config_filepath)
 
-    logger.info("Creating job from configuration file")
     job = Job.from_file(filepath=config_filepath)
 
-    logger.info("Starting job validation")
     job.validate()
-
-    logger.info("Starting job execution")
     job.execute()
 
-    logger.info("Job completed successfully")
-    logger.info("Exiting.")
+    logger.info("Job completed. Exiting.")
 
 
 if __name__ == "__main__":

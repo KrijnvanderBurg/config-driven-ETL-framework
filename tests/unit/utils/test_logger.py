@@ -1,4 +1,6 @@
-from logging import Logger
+from logging import DEBUG, WARNING, Logger
+
+from pytest import MonkeyPatch
 
 from flint.utils.logger import get_logger, set_logger
 
@@ -48,3 +50,33 @@ class TestLogger:
 
         # Assert
         assert rotating_file_handler.baseFilename.endswith(expected_log_filename)  # type: ignore[attr-defined]
+
+    def test_set_logger_respects_flint_log_level(self, monkeypatch: MonkeyPatch) -> None:
+        """
+        Test that set_logger sets the log level from FLINT_LOG_LEVEL.
+        """
+        monkeypatch.setenv("FLINT_LOG_LEVEL", "DEBUG")
+        monkeypatch.delenv("LOG_LEVEL", raising=False)
+        logger = set_logger("test_logger_env1")
+        for handler in logger.handlers:
+            assert handler.level == DEBUG
+
+    def test_set_logger_respects_log_level(self, monkeypatch: MonkeyPatch) -> None:
+        """
+        Test that set_logger sets the log level from LOG_LEVEL if FLINT_LOG_LEVEL is not set.
+        """
+        monkeypatch.delenv("FLINT_LOG_LEVEL", raising=False)
+        monkeypatch.setenv("LOG_LEVEL", "WARNING")
+        logger = set_logger("test_logger_env2")
+        for handler in logger.handlers:
+            assert handler.level == WARNING
+
+    def test_set_logger_env_priority(self, monkeypatch: MonkeyPatch) -> None:
+        """
+        Test that FLINT_LOG_LEVEL takes precedence over LOG_LEVEL.
+        """
+        monkeypatch.setenv("FLINT_LOG_LEVEL", "WARNING")
+        monkeypatch.setenv("LOG_LEVEL", "DEBUG")
+        logger = set_logger("test_logger_priority")
+        for handler in logger.handlers:
+            assert handler.level == WARNING

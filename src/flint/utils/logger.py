@@ -5,6 +5,7 @@ with support for both console and file-based logging with rotation.
 """
 
 import logging
+import os
 from logging.handlers import RotatingFileHandler
 from sys import stdout
 
@@ -12,7 +13,7 @@ from sys import stdout
 FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
 
 
-def set_logger(name: str, filename: str = "ingestion.log", level: int = logging.INFO) -> logging.Logger:
+def set_logger(name: str, filename: str = "ingestion.log") -> logging.Logger:
     """Configure and return a logger with file and console handlers.
 
     Creates a logger with the specified name and configures it with both a rotating
@@ -22,7 +23,6 @@ def set_logger(name: str, filename: str = "ingestion.log", level: int = logging.
     Args:
         name: The name for the logger, typically the module name
         filename: Path to the log file (defaults to "ingestion.log")
-        level: The minimum logging level to capture (defaults to INFO)
 
     Returns:
         A configured Logger instance ready to use
@@ -34,6 +34,11 @@ def set_logger(name: str, filename: str = "ingestion.log", level: int = logging.
         logger.error("An error occurred: %s", error_message)
         ```
     """
+
+    log_level: str | None = os.getenv("FLINT_LOG_LEVEL")
+    if not log_level:
+        log_level = os.getenv("LOG_LEVEL", "INFO")
+
     logger = logging.getLogger(name)
 
     # Add rotating log handler
@@ -42,13 +47,13 @@ def set_logger(name: str, filename: str = "ingestion.log", level: int = logging.
         maxBytes=5 * 1024 * 1024,  # 5MB
         backupCount=10,  # Max 10 log files before replacing the oldest
     )
-    rotating_handler.setLevel(level)
+    rotating_handler.setLevel(log_level)
     rotating_handler.setFormatter(FORMATTER)
     logger.addHandler(rotating_handler)
 
     # Add console stream handler
     console_handler = logging.StreamHandler(stream=stdout)
-    console_handler.setLevel(level)
+    console_handler.setLevel(log_level)
     console_handler.setFormatter(FORMATTER)
     logger.addHandler(console_handler)
 

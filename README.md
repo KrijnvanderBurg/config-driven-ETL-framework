@@ -251,7 +251,10 @@ Each component has a standardized schema and connects through named references:
 - `error`: Fail if data already exists
 </details>
 
-### Data Flow
+### Environment variables
+- Log level can be set by environment variable `FLINT_LOG_LEVEL`. If not present, then it will use `LOG_LEVEL`. If also not present, then it will default to `INFO`. Both env variables can be set to `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`.
+
+## Architecture and flow
 
 1. **Parse Configuration** → Validate and convert JSON/YAML configurations into typed models
 2. **Initialize Components** → Set up extract, transform, and load objects based on configuration
