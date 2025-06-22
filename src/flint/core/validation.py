@@ -1,3 +1,13 @@
+"""
+Validation classes
+
+Available Validators:
+    ValidateModelNamesAreUnique: Ensures all model names across extract, transform,
+        and load stages are unique within a job configuration.
+    ValidateUpstreamNamesExist: Verifies that all upstream references in transforms
+        and loads point to existing model names in the job configuration.
+"""
+
 from abc import ABC, abstractmethod
 from typing import TYPE_CHECKING, Generic, TypeVar
 
