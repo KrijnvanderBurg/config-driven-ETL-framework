@@ -14,13 +14,14 @@ enabling features like component registration, singleton services, and type safe
 
 import threading
 from collections.abc import Callable, Iterator
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar, Union
 
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming.query import StreamingQuery
 
-K = TypeVar("K")
-V = TypeVar("V")
+# Type variables with more specific constraints
+K = TypeVar("K", bound=Union[str, int])  # Key types typically used in registries
+V = TypeVar("V")  # Value type
 
 
 class Singleton(type):
@@ -43,13 +44,23 @@ class Singleton(type):
         logger1 = Logger()
         logger2 = Logger()
         assert logger1 is logger2
-        ```Z
+        ```
     """
 
-    _instances: dict[Any, Any] = {}
+    _instances: dict[type, Any] = {}
     _lock: threading.Lock = threading.Lock()
 
-    def __call__(cls, *args, **kwargs) -> Any:
+    def __call__(cls, *args: Any, **kwargs: Any) -> Any:
+        """
+        Create or return a singleton instance of the class.
+
+        Args:
+            *args: Positional arguments to pass to the class constructor.
+            **kwargs: Keyword arguments to pass to the class constructor.
+
+        Returns:
+            The singleton instance of the class.
+        """
         with cls._lock:
             if cls not in cls._instances:
                 # Assigning super().__call__ to a variable is crucial,
@@ -60,7 +71,16 @@ class Singleton(type):
 
 
 class RegistryDecorator(Generic[K, V]):
-    """A registry for classes that can be decorated and registered with a key."""
+    """A registry for classes that can be decorated and registered with a key.
+
+    This class implements the decorator pattern for registering classes with specific keys,
+    enabling dynamic selection of appropriate implementations at runtime.
+
+    Type Parameters:
+        K: The type of keys in the registry (typically an enum or string)
+        V: The type of values (typically a class type)
+        ```
+    """
 
     _registry: dict[K, list[type[V]]] = {}
 
@@ -75,12 +95,16 @@ class RegistryDecorator(Generic[K, V]):
         Returns:
             A decorator function that registers the class and returns it unchanged
         """
+        # Ensure the registry is initialized
+        if not hasattr(cls, "_registry"):
+            cls._registry = {}
 
         def decorator(registered_class: type[V]) -> type[V]:
             if key not in cls._registry:
                 cls._registry[key] = []
 
-            if registered_class not in cls._registry[key]:  # Prevent duplicate registration
+            # Prevent duplicate registration
+            if registered_class not in cls._registry[key]:
                 cls._registry[key].append(registered_class)
 
             return registered_class
@@ -102,9 +126,36 @@ class RegistryDecorator(Generic[K, V]):
             KeyError: If no class is registered for the given key
         """
         try:
-            return cls._registry[key][0]
+            registry = cls._registry
+            if not registry.get(key):
+                raise KeyError("No implementations registered for key: %s" % key)
+            return registry[key][0]
         except (KeyError, IndexError) as e:
-            raise KeyError(f"No class registered for key: {key}") from e
+            available_keys = list(cls._registry.keys())
+            raise KeyError("No class registered for key: %s. Available keys: %s" % (key, available_keys)) from e
+
+    @classmethod
+    def get_all(cls, key: K) -> list[type[V]]:
+        """
+        Get all registered classes for a key.
+
+        Args:
+            key: The key to look up
+
+        Returns:
+            List of all registered classes for the key
+
+        Raises:
+            KeyError: If no class is registered for the given key
+        """
+        try:
+            registry = cls._registry
+            if not registry.get(key):
+                raise KeyError("No implementations registered for key: %s" % key)
+            return registry[key][:]  # Return a copy of the list
+        except KeyError as e:
+            available_keys = list(cls._registry.keys())
+            raise KeyError("No class registered for key: %s. Available keys: %s" % (key, available_keys)) from e
 
 
 class RegistryInstance(Generic[K, V], metaclass=Singleton):
@@ -151,14 +202,14 @@ class RegistryInstance(Generic[K, V], metaclass=Singleton):
         try:
             return self._items[name]
         except KeyError as e:
-            raise KeyError(f"Item '{name}' not found.") from e
+            raise KeyError("Item '%s' not found." % name) from e
 
     def __delitem__(self, name: K) -> None:
         """Delete an item by its name. Raises KeyError if not found."""
         try:
             del self._items[name]
         except KeyError as e:
-            raise KeyError(f"Item '{name}' not found.") from e
+            raise KeyError("Item '%s' not found." % name) from e
 
     def __contains__(self, name: K) -> bool:
         """Check if an item exists by its name."""
@@ -174,8 +225,75 @@ class RegistryInstance(Generic[K, V], metaclass=Singleton):
 
 
 class DataFrameRegistry(RegistryInstance[str, DataFrame]):
-    """A registry for DataFrame objects."""
+    """A registry for DataFrame objects.
+
+    This singleton registry maintains a collection of named DataFrame objects
+    that can be shared between components in the ETL pipeline. It provides
+    dictionary-like access with proper error messages when frames are not found.
+
+    Example:
+        ```python
+        registry = DataFrameRegistry()
+
+        # Store a DataFrame
+        registry["customers"] = customers_df
+
+        # Access a DataFrame
+        transformed_df = transform(registry["customers"])
+        ```
+    """
+
+    def __getitem__(self, name: str) -> DataFrame:
+        """Get a DataFrame by name with enhanced error messaging.
+
+        Args:
+            name: Name of the DataFrame to retrieve
+
+        Returns:
+            The requested DataFrame
+
+        Raises:
+            KeyError: If the DataFrame is not found, with a list of available frames
+        """
+        try:
+            return super().__getitem__(name)
+        except KeyError as e:
+            available = list(self._items.keys())
+            raise KeyError(f"DataFrame '{name}' not found. Available DataFrames: {available}") from e
 
 
 class StreamingQueryRegistry(RegistryInstance[str, StreamingQuery]):
-    """A registry for StreamingQuery objects."""
+    """A registry for StreamingQuery objects.
+
+    This singleton registry maintains a collection of named StreamingQuery objects
+    that can be shared between components in the ETL pipeline, enabling management
+    and monitoring of streaming jobs.
+
+    Example:
+        ```python
+        registry = StreamingQueryRegistry()
+        registry["customers_stream"] = df.writeStream.start()
+
+        # Check if a stream is active
+        query = registry["customers_stream"]
+        is_active = query.isActive()
+        ```
+    """
+
+    def __getitem__(self, name: str) -> StreamingQuery:
+        """Get a StreamingQuery by name with enhanced error messaging.
+
+        Args:
+            name: Name of the StreamingQuery to retrieve
+
+        Returns:
+            The requested StreamingQuery
+
+        Raises:
+            KeyError: If the StreamingQuery is not found, with a list of available queries
+        """
+        try:
+            return super().__getitem__(name)
+        except KeyError as e:
+            available = list(self._items.keys())
+            raise KeyError(f"StreamingQuery '{name}' not found. Available queries: {available}") from e

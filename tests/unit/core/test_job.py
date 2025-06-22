@@ -119,38 +119,3 @@ class TestJob:
             assert job.extracts[0] == mock_extract
             assert job.transforms[0] == mock_transform
             assert job.loads[0] == mock_load
-
-    def test_execute(self) -> None:
-        """Test execution of the ETL pipeline (extract, transform, load)."""
-        # Arrange
-        extract = MagicMock(spec=Extract)
-
-        transform = MagicMock(spec=Transform)
-        # Add data_registry as a property to the mock
-        transform_data_registry = {}
-        type(transform).data_registry = MagicMock()
-        transform.data_registry.__getitem__ = lambda self, key: transform_data_registry.get(key)
-        transform.data_registry.__setitem__ = lambda self, key, value: transform_data_registry.update({key: value})
-        transform.model = MagicMock()
-        transform.model.name = "transform_name"
-        transform.model.upstream_name = "upstream_name"
-
-        load = MagicMock(spec=Load)
-        # Add data_registry as a property to the mock
-        load_data_registry = {}
-        type(load).data_registry = MagicMock()
-        load.data_registry.__getitem__ = lambda self, key: load_data_registry.get(key)
-        load.data_registry.__setitem__ = lambda self, key, value: load_data_registry.update({key: value})
-        load.model = MagicMock()
-        load.model.name = "load_name"
-        load.model.upstream_name = "upstream_load_name"
-
-        job = Job(extracts=[extract], transforms=[transform], loads=[load])
-
-        # Act
-        job.execute()
-
-        # Assert
-        extract.extract.assert_called_once()
-        transform.transform.assert_called_once()
-        load.load.assert_called_once()

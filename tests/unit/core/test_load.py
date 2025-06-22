@@ -14,7 +14,7 @@ from flint.models.model_load import LoadFormat, LoadMethod, LoadModelFile
 from flint.types import DataFrameRegistry, StreamingQueryRegistry
 
 
-class TestLoadModel:
+class MockLoadModel:
     """Dummy model for testing Load class."""
 
     model_cls = LoadModelFile
@@ -28,7 +28,7 @@ class TestLoadModel:
         self.options = {}
 
 
-class TestLoadClass(Load[LoadModelFile]):
+class MockLoadClass(Load[LoadModelFile]):
     """Test implementation of Load abstract class."""
 
     model_cls = LoadModelFile
@@ -93,7 +93,7 @@ class TestLoad:
         model.upstream_name = "source"
 
         # Act
-        load = TestLoadClass(model=model)
+        load = MockLoadClass(model=model)
 
         # Assert
         assert load.model == model
@@ -118,7 +118,7 @@ class TestLoad:
         mock_from_dict.return_value = mock_model_cls
 
         # Act
-        load = TestLoadClass.from_dict(load_dict)
+        load = MockLoadClass.from_dict(load_dict)
 
         # Assert
         assert load.model == mock_model_cls
@@ -138,7 +138,7 @@ class TestLoad:
         model.schema_location = None
         model.options = {}
 
-        load = TestLoadClass(model=model)
+        load = MockLoadClass(model=model)
         load._load_batch = MagicMock()
         load._load_schema = MagicMock()
 
@@ -168,7 +168,7 @@ class TestLoad:
         model.schema_location = None
         model.options = {}
 
-        load = TestLoadClass(model=model)
+        load = MockLoadClass(model=model)
         mock_streaming_query = MagicMock(spec=StreamingQuery)
         load._load_streaming = MagicMock(return_value=mock_streaming_query)
         load._load_schema = MagicMock()
@@ -199,7 +199,7 @@ class TestLoad:
         model.method = "invalid_method"
         model.options = {}
 
-        load = TestLoadClass(model=model)
+        load = MockLoadClass(model=model)
 
         # Add test data to registry
         load.data_registry["source"] = MagicMock(spec=DataFrame)
@@ -216,7 +216,7 @@ class TestLoad:
         model.name = "test_load"
         model.schema_location = "/path/to/schema.json"
 
-        load = TestLoadClass(model=model)
+        load = MockLoadClass(model=model)
 
         # Create mock DataFrame with schema
         mock_df = MagicMock(spec=DataFrame)
@@ -242,7 +242,7 @@ class TestLoad:
         model.name = "test_load"
         model.schema_location = None
 
-        load = TestLoadClass(model=model)
+        load = MockLoadClass(model=model)
 
         # Act
         with patch("builtins.open") as mock_open:

@@ -88,8 +88,9 @@ class SchemaDictHandler(SchemaHandler):
         """
         try:
             return StructType.fromJson(json=schema)
-        except Exception as e:
-            raise ValueError(f"Failed to convert dictionary to schema: {e}") from e
+        except (ValueError, TypeError, KeyError) as e:
+            # Using specific exceptions instead of generic Exception
+            raise ValueError("Failed to convert dictionary to schema: %s" % e) from e
 
 
 class SchemaStringHandler(SchemaHandler):

@@ -28,22 +28,12 @@ class DictKeyError(KeyError):
 
     def __init__(self, key: K, dict_: dict[K, Any]) -> None:
         """
-        Initialize a DictKeyError.
+        Initialize DictKeyError with the missing key and the dictionary.
 
         Args:
-            key: The key that was not found in the dictionary
+            key: The key that was not found
             dict_: The dictionary that was being accessed
         """
-        super().__init__(key)
         self.key = key
         self.dict_ = dict_
-
-    def __str__(self) -> str:
-        """
-        Return a string representation of the error.
-
-        Returns:
-            A formatted error message showing the missing key and available keys
-        """
-        found_keys = ", ".join(repr(k) for k in self.dict_.keys())
-        return f"Could not find key '{self.key}', available keys: [{found_keys}]"
+        super().__init__(f"Key '{key}' not found. Available keys: {list(dict_.keys())}")

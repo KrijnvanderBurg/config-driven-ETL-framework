@@ -80,7 +80,7 @@ class MockFunctionModel(FunctionModel[MockArgsModel]):
         return cls()
 
 
-class TestFunction(Function[MockFunctionModel]):
+class MockFunction(Function[MockFunctionModel]):
     """Test implementation of Function abstract class."""
 
     model_cls = MockFunctionModel  # Define the class variable properly
@@ -103,7 +103,7 @@ class TestTransform:
         """Test Transform initialization."""
         # Arrange
         model = TransformModel(name="test_transform", upstream_name="source")
-        function = TestFunction(model=MockFunctionModel())
+        function = MockFunction(model=MockFunctionModel())
         functions: list[Function[MockFunctionModel]] = [function]
 
         # Act
@@ -131,7 +131,7 @@ class TestTransform:
     def test_from_dict_with_functions(self, mock_get: MagicMock) -> None:
         """Test creating a Transform from a dict with functions."""
         # Arrange
-        mock_get.return_value = TestFunction
+        mock_get.return_value = MockFunction
 
         transform_dict = {
             "name": "test_transform",
@@ -170,7 +170,7 @@ class TestTransform:
         model = TransformModel(name="test_transform", upstream_name="source")
 
         # Create mock function with callable
-        function = TestFunction(model=MockFunctionModel())
+        function = MockFunction(model=MockFunctionModel())
         function.callable_ = MagicMock()
         function.callable_.return_value = "test_dataframe"  # Set return value for the mock
 
