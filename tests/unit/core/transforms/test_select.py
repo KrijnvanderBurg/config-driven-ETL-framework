@@ -32,6 +32,11 @@ class TestSelectFunction:
         """Test SelectFunction initialization."""
         # Arrange
         model = MagicMock(spec=SelectFunctionModel)
+        model.function = "select"
+        # Add mock arguments
+        mock_args = MagicMock()
+        mock_args.columns = ["col1", "col2"]
+        model.arguments = mock_args
 
         # Act
         function = SelectFunction(model=model)
@@ -48,6 +53,11 @@ class TestSelectFunction:
         function_dict = {"function": "select", "arguments": {"columns": ["col1", "col2"]}}
 
         mock_model_cls = MagicMock(spec=SelectFunctionModel)
+        mock_model_cls.function = "select"
+        # Add mock arguments
+        mock_args = MagicMock()
+        mock_args.columns = ["col1", "col2"]
+        mock_model_cls.arguments = mock_args
         mock_from_dict.return_value = mock_model_cls
 
         # Act
@@ -64,6 +74,7 @@ class TestSelectFunction:
         args_mock.columns = ["col1", "col2"]
 
         model = MagicMock(spec=SelectFunctionModel)
+        model.function = "select"
         model.arguments = args_mock
 
         function = SelectFunction(model=model)

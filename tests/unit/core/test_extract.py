@@ -109,6 +109,7 @@ class TestExtract:
         }
 
         mock_model_cls = MagicMock(spec=ExtractFileModel)
+        mock_model_cls.name = "test_extract"
         mock_from_dict.return_value = mock_model_cls
 
         # Act
@@ -173,7 +174,10 @@ class TestExtract:
 
         model = MagicMock(spec=ExtractFileModel)
         model.name = "test_extract"
-        model.method = "invalid_method"
+        # Create a mock method object that has value attribute but is invalid
+        mock_invalid_method = MagicMock()
+        mock_invalid_method.value = "invalid_method"
+        model.method = mock_invalid_method
         model.options = {"option1": "value1"}
 
         extract = MockExtractClass(model=model)
@@ -187,7 +191,9 @@ class TestExtract:
         """Test Extract.from_dict method with a valid format."""
         # Arrange
         mock_extract_class = MagicMock(spec=Extract)
+        mock_extract_class.__name__ = "MockExtractClass"
         mock_model_cls = MagicMock()
+        mock_model_cls.name = "test_extract"
         mock_extract_class.model_cls = MagicMock()
         mock_extract_class.model_cls.from_dict = MagicMock(return_value=mock_model_cls)
         mock_extract_class.return_value = MagicMock()

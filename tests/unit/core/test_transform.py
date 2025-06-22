@@ -172,16 +172,23 @@ class TestTransform:
         # Create mock function with callable
         function = MockFunction(model=MockFunctionModel())
         function.callable_ = MagicMock()
-        function.callable_.return_value = "test_dataframe"  # Set return value for the mock
+        
+        # Create mock dataframes that have count() method
+        mock_input_df = MagicMock()
+        mock_input_df.count.return_value = 100
+        mock_output_df = MagicMock()
+        mock_output_df.count.return_value = 50
+        
+        function.callable_.return_value = mock_output_df
 
         transform = Transform(model=model, functions=[function])
 
         # Add test data to registry
-        transform.data_registry["source"] = "test_dataframe"
+        transform.data_registry["source"] = mock_input_df
 
         # Act
         transform.transform()
 
         # Assert
-        assert transform.data_registry["test_transform"] == "test_dataframe"
-        function.callable_.assert_called_once_with(df="test_dataframe")  # Fix parameter names
+        assert transform.data_registry["test_transform"] == mock_output_df
+        function.callable_.assert_called_once_with(df=mock_input_df)
