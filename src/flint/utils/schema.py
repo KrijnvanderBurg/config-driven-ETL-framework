@@ -95,7 +95,7 @@ class SchemaDictHandler(SchemaHandler):
             logger.debug("Schema fields: %s", [f.name for f in struct_type.fields])
             return struct_type
         except (ValueError, TypeError, KeyError) as e:
-            raise ValueError("Failed to convert dictionary to schema: %s" % e) from e
+            raise ValueError(f"Failed to convert dictionary to schema: {e}") from e
 
 
 class SchemaStringHandler(SchemaHandler):

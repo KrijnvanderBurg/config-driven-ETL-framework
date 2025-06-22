@@ -129,7 +129,7 @@ class Extract(Generic[ExtractModelT], ABC):
             self.data_registry[self.model.name] = self._extract_streaming()
             logger.info("Streaming extraction completed successfully for: %s", self.model.name)
         else:
-            raise ValueError("Extraction method %s is not supported for PySpark" % self.model.method)
+            raise ValueError(f"Extraction method {self.model.method} is not supported for PySpark")
 
     @abstractmethod
     def _extract_batch(self) -> DataFrame:

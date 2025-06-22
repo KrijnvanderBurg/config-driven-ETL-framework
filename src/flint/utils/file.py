@@ -96,7 +96,7 @@ class FileYamlHandler(FileHandler):
         logger.info("Reading YAML file: %s", self.filepath)
 
         if not self._file_exists():
-            error_msg = "File '%s' not found." % self.filepath
+            error_msg = f"File '{self.filepath}' not found."
             logger.error("YAML file not found: %s", self.filepath)
             raise FileNotFoundError(error_msg)
 
@@ -107,11 +107,11 @@ class FileYamlHandler(FileHandler):
                 logger.info("Successfully read YAML file: %s", self.filepath)
                 return data
         except FileNotFoundError as e:
-            raise FileNotFoundError("File '%s' not found." % self.filepath) from e
+            raise FileNotFoundError(f"File '{self.filepath}' not found.") from e
         except PermissionError as e:
-            raise PermissionError("Permission denied for file '%s'." % self.filepath) from e
+            raise PermissionError(f"Permission denied for file '{self.filepath}'.") from e
         except yaml.YAMLError as e:
-            raise yaml.YAMLError("Error in YAML file '%s': %s" % (self.filepath, e)) from e
+            raise yaml.YAMLError(f"Error in YAML file '{self.filepath}': {e}") from e
 
 
 class FileJsonHandler(FileHandler):
@@ -133,7 +133,7 @@ class FileJsonHandler(FileHandler):
         logger.info("Reading JSON file: %s", self.filepath)
 
         if not self._file_exists():
-            raise FileNotFoundError("File '%s' not found." % self.filepath)
+            raise FileNotFoundError(f"File '{self.filepath}' not found.")
 
         try:
             logger.debug("Opening JSON file for reading: %s", self.filepath)
@@ -142,12 +142,12 @@ class FileJsonHandler(FileHandler):
                 logger.info("Successfully read JSON file: %s", self.filepath)
                 return data
         except FileNotFoundError as e:
-            raise FileNotFoundError("File '%s' not found." % self.filepath) from e
+            raise FileNotFoundError(f"File '{self.filepath}' not found.") from e
         except PermissionError as e:
-            raise PermissionError("Permission denied for file '%s'." % self.filepath) from e
+            raise PermissionError(f"Permission denied for file '{self.filepath}'.") from e
         except json.JSONDecodeError as e:
             # Using ValueError instead of JSONDecodeError due to complexity in supplying additional arguments.
-            raise ValueError("Error decoding JSON file '%s': %s" % (self.filepath, e)) from e
+            raise ValueError(f"Error decoding JSON file '{self.filepath}': {e}") from e
 
 
 class FileHandlerContext:
