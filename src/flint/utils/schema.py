@@ -86,10 +86,15 @@ class SchemaDictHandler(SchemaHandler):
             ValueError: If the dictionary format is invalid or cannot be
                 converted to a valid schema
         """
+        logger.debug("Parsing schema from dictionary with keys: %s", list(schema.keys()))
+
         try:
-            return StructType.fromJson(json=schema)
+            struct_type = StructType.fromJson(json=schema)
+            field_count = len(struct_type.fields)
+            logger.info("Successfully parsed schema from dictionary - %d fields", field_count)
+            logger.debug("Schema fields: %s", [f.name for f in struct_type.fields])
+            return struct_type
         except (ValueError, TypeError, KeyError) as e:
-            # Using specific exceptions instead of generic Exception
             raise ValueError("Failed to convert dictionary to schema: %s" % e) from e
 
 
@@ -128,11 +133,21 @@ class SchemaStringHandler(SchemaHandler):
             ValueError: If the JSON string is invalid or cannot be
                 converted to a valid schema
         """
+        logger.debug("Parsing schema from JSON string (length: %d)", len(schema))
+
         try:
+            logger.debug("Parsing JSON string to dictionary")
             parsed_json = json.loads(s=schema)
-            return SchemaDictHandler.parse(schema=parsed_json)
+            logger.debug("Successfully parsed JSON string")
+
+            result = SchemaDictHandler.parse(schema=parsed_json)
+            logger.info("Successfully parsed schema from JSON string")
+            return result
+
         except json.JSONDecodeError as e:
-            raise ValueError(f"Invalid JSON schema format: {e}") from e
+            error_msg = f"Invalid JSON schema format: {e}"
+            logger.error("JSON parsing failed for schema string: %s", error_msg)
+            raise ValueError(error_msg) from e
 
 
 class SchemaFilepathHandler(SchemaHandler):
@@ -168,6 +183,21 @@ class SchemaFilepathHandler(SchemaHandler):
             PermissionError: If there's no permission to read the file
             ValueError: If the file content can't be parsed as a valid schema
         """
-        file_handler: FileHandler = FileHandlerContext.from_filepath(filepath=schema)
-        file_content = file_handler.read()
-        return SchemaDictHandler.parse(schema=file_content)
+        logger.info("Parsing schema from file: %s", schema)
+
+        try:
+            logger.debug("Creating file handler for schema file: %s", schema)
+            file_handler: FileHandler = FileHandlerContext.from_filepath(filepath=schema)
+
+            logger.debug("Reading schema file content")
+            file_content = file_handler.read()
+
+            logger.debug("Converting file content to schema")
+            result = SchemaDictHandler.parse(schema=file_content)
+
+            logger.info("Successfully parsed schema from file: %s", schema)
+            return result
+
+        except (FileNotFoundError, PermissionError) as e:
+            logger.error("File access error reading schema file %s: %s", schema, str(e))
+            raise

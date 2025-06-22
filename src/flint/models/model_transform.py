@@ -12,13 +12,17 @@ These models serve as the configuration schema for the Transform components
 and provide a type-safe interface between configuration and implementation.
 """
 
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Final, Generic, Self, TypeVar
 
 from flint.exceptions import DictKeyError
+from flint.utils.logger import get_logger
 
 from . import Model
+
+logger: logging.Logger = get_logger(__name__)
 
 FUNCTIONS: Final[str] = "functions"
 FUNCTION: Final[str] = "function"
@@ -118,10 +122,15 @@ class TransformModel(Model):
             >>>     }
             >>> ],
         """
+        logger.debug("Creating TransformModel from dictionary: %s", dict_)
+
         try:
             name = dict_[NAME]
             upstream_name = dict_[UPSTREAM_NAME]
+            logger.debug("Parsed transform model - name: %s, upstream: %s", name, upstream_name)
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e
 
-        return cls(name=name, upstream_name=upstream_name)
+        model = cls(name=name, upstream_name=upstream_name)
+        logger.info("Successfully created TransformModel: %s", name)
+        return model

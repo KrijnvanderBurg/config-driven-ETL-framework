@@ -12,12 +12,16 @@ The Transform components represent the middle phase in the ETL pipeline, respons
 for manipulating data between extraction and loading.
 """
 
+import logging
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import Any, Final, Generic, Self, TypeVar
 
 from flint.models.model_transform import FunctionModel, TransformModel
 from flint.types import DataFrameRegistry, RegistryDecorator, Singleton
+from flint.utils.logger import get_logger
+
+logger: logging.Logger = get_logger(__name__)
 
 FUNCTIONS: Final[str] = "functions"
 FUNCTION: Final[str] = "function"
@@ -71,9 +75,11 @@ class Function(Generic[FunctionModelT_co], ABC):
         Args:
             model: The model object containing the function configuration.
         """
+        logger.debug("Initializing Function with model: %s", model.function)
         self.model = model
         self.callable_ = self.transform()
         self.data_registry = DataFrameRegistry()
+        logger.info("Function initialized successfully: %s", model.function)
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -89,8 +95,11 @@ class Function(Generic[FunctionModelT_co], ABC):
         Raises:
             DictKeyError: If required keys are missing from the configuration.
         """
+        logger.debug("Creating Function from dictionary: %s", dict_)
         model = cls.model_cls.from_dict(dict_=dict_)
-        return cls(model=model)
+        instance = cls(model=model)
+        logger.info("Successfully created Function instance: %s", model.function)
+        return instance
 
     @abstractmethod
     def transform(self) -> Callable[..., Any]:
@@ -113,9 +122,16 @@ class Transform:
     """
 
     def __init__(self, model: TransformModel, functions: list[Function[Any]]) -> None:
+        logger.debug(
+            "Initializing Transform - name: %s, upstream: %s, functions: %d",
+            model.name,
+            model.upstream_name,
+            len(functions),
+        )
         self.model = model
         self.functions = functions
         self.data_registry = DataFrameRegistry()
+        logger.info("Transform initialized successfully: %s with %d functions", model.name, len(functions))
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -132,21 +148,31 @@ class Transform:
         Raises:
             DictKeyError: If required keys are missing from the configuration.
             NotImplementedError: If a specified function is not supported.
+            Exception: If there's an unexpected error during Transform creation.
         """
+        logger.debug("Creating Transform from dictionary: %s", dict_)
+
         model = TransformModel.from_dict(dict_=dict_)
         functions: list = []
 
-        for functiondict_ in dict_.get(FUNCTIONS, []):
+        function_list = dict_.get(FUNCTIONS, [])
+        logger.debug("Processing %d transformation functions", len(function_list))
+
+        for functiondict_ in function_list:
             function_name: str = functiondict_[FUNCTION]
+            logger.debug("Creating function instance: %s", function_name)
 
             try:
                 function_concrete = TransformFunctionRegistry.get(function_name)
                 function_instance = function_concrete.from_dict(dict_=functiondict_)
                 functions.append(function_instance)
+                logger.debug("Successfully created function: %s", function_name)
             except KeyError as e:
                 raise NotImplementedError(f"{FUNCTION} {function_name} is not supported.") from e
 
-        return cls(model=model, functions=functions)
+        instance = cls(model=model, functions=functions)
+        logger.info("Successfully created Transform: %s with %d functions", model.name, len(functions))
+        return instance
 
     def transform(self) -> None:
         """
@@ -160,9 +186,26 @@ class Transform:
         Note:
             Functions are applied in the order they were defined in the configuration.
         """
+        logger.info("Starting transformation for: %s from upstream: %s", self.model.name, self.model.upstream_name)
+
         # Copy the dataframe from upstream to current name
+        logger.debug("Copying dataframe from %s to %s", self.model.upstream_name, self.model.name)
         self.data_registry[self.model.name] = self.data_registry[self.model.upstream_name]
 
         # Apply transformations
-        for function in self.functions:
+        logger.debug("Applying %d transformation functions", len(self.functions))
+        for i, function in enumerate(self.functions):
+            logger.debug("Applying function %d/%d: %s", i + 1, len(self.functions), function.model.function)
+
+            original_count = self.data_registry[self.model.name].count()
             self.data_registry[self.model.name] = function.callable_(df=self.data_registry[self.model.name])
+            new_count = self.data_registry[self.model.name].count()
+
+            logger.info(
+                "Function %s applied - rows changed from %d to %d",
+                function.model.function,
+                original_count,
+                new_count,
+            )
+
+        logger.info("Transformation completed successfully for: %s", self.model.name)

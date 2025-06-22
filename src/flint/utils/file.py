@@ -13,12 +13,17 @@ but can be used for any structured data file reading needs.
 """
 
 import json
+import logging
 import os
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
 import yaml
+
+from flint.utils.logger import get_logger
+
+logger: logging.Logger = get_logger(__name__)
 
 
 class FileHandler(ABC):
@@ -44,7 +49,9 @@ class FileHandler(ABC):
             The file is not accessed during initialization,
             only when operations are performed.
         """
+        logger.debug("Initializing FileHandler for path: %s", filepath)
         self.filepath = filepath
+        logger.debug("FileHandler initialized for: %s", filepath)
 
     def _file_exists(self) -> bool:
         """
@@ -53,7 +60,9 @@ class FileHandler(ABC):
         Returns:
             bool: True if the file exists, False otherwise.
         """
-        return self.filepath.exists()
+        exists = self.filepath.exists()
+        logger.debug("File existence check for %s: %s", self.filepath, exists)
+        return exists
 
     @abstractmethod
     def read(self) -> dict[str, Any]:
@@ -84,12 +93,19 @@ class FileYamlHandler(FileHandler):
             PermissionError: If permission is denied for accessing the file.
             yaml.YAMLError: If there is an error reading the YAML file.
         """
+        logger.info("Reading YAML file: %s", self.filepath)
+
         if not self._file_exists():
-            raise FileNotFoundError("File '%s' not found." % self.filepath)
+            error_msg = "File '%s' not found." % self.filepath
+            logger.error("YAML file not found: %s", self.filepath)
+            raise FileNotFoundError(error_msg)
 
         try:
+            logger.debug("Opening YAML file for reading: %s", self.filepath)
             with open(file=self.filepath, mode="r", encoding="utf-8") as file:
-                return yaml.safe_load(file)
+                data = yaml.safe_load(file)
+                logger.info("Successfully read YAML file: %s", self.filepath)
+                return data
         except FileNotFoundError as e:
             raise FileNotFoundError("File '%s' not found." % self.filepath) from e
         except PermissionError as e:
@@ -114,12 +130,17 @@ class FileJsonHandler(FileHandler):
             json.JSONDecodeError: If there is an error decoding the JSON file.
             ValueError: If JSON cannot be decoded.
         """
+        logger.info("Reading JSON file: %s", self.filepath)
+
         if not self._file_exists():
             raise FileNotFoundError("File '%s' not found." % self.filepath)
 
         try:
+            logger.debug("Opening JSON file for reading: %s", self.filepath)
             with open(file=self.filepath, mode="r", encoding="utf-8") as file:
-                return json.load(file)
+                data = json.load(file)
+                logger.info("Successfully read JSON file: %s", self.filepath)
+                return data
         except FileNotFoundError as e:
             raise FileNotFoundError("File '%s' not found." % self.filepath) from e
         except PermissionError as e:
@@ -152,7 +173,10 @@ class FileHandlerContext:
         Raises:
             NotImplementedError: If the file extension is not supported.
         """
+        logger.debug("Creating file handler for path: %s", filepath)
         _, file_extension = os.path.splitext(filepath)
+        logger.debug("Detected file extension: %s", file_extension)
+
         handler_class = cls.SUPPORTED_EXTENSIONS.get(file_extension)
 
         if handler_class is None:
@@ -161,4 +185,7 @@ class FileHandlerContext:
                 f"File extension '{file_extension}' is not supported. Supported extensions are: {supported_extensions}"
             )
 
-        return handler_class(filepath=filepath)
+        logger.debug("Selected handler class: %s", handler_class.__name__)
+        handler = handler_class(filepath=filepath)
+        logger.info("Created file handler: %s for %s", handler_class.__name__, filepath)
+        return handler

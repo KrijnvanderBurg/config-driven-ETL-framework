@@ -12,14 +12,18 @@ These models serve as the configuration schema for the Load components
 and provide a type-safe interface between configuration and implementation.
 """
 
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Final, Self
 
 from flint.exceptions import DictKeyError
+from flint.utils.logger import get_logger
 
 from . import Model
+
+logger: logging.Logger = get_logger(__name__)
 
 NAME: Final[str] = "name"
 UPSTREAM_NAME: Final[str] = "upstream_name"
@@ -145,6 +149,8 @@ class LoadModelFile(LoadModel):
         Returns:
             LoadModelFilePyspark: LoadModelFilePyspark object.
         """
+        logger.debug("Creating LoadModelFile from dictionary: %s", dict_)
+
         try:
             name = dict_[NAME]
             upstream_name = dict_[UPSTREAM_NAME]
@@ -154,10 +160,26 @@ class LoadModelFile(LoadModel):
             location = dict_[LOCATION]
             schema_location = dict_.get(SCHEMA_LOCATION, None)
             options = dict_.get(OPTIONS, {})
+
+            logger.debug(
+                "Parsed load model - name: %s, upstream: %s, method: %s, mode: %s",
+                name,
+                upstream_name,
+                method.value,
+                mode.value,
+            )
+            logger.debug("Load details - format: %s, location: %s", data_format.value, location)
+            logger.debug("Load options: %s", options)
+
+            if schema_location:
+                logger.debug("Schema location specified: %s", schema_location)
+            else:
+                logger.debug("No schema location specified")
+
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e
 
-        return cls(
+        model = cls(
             name=name,
             upstream_name=upstream_name,
             method=method,
@@ -167,3 +189,6 @@ class LoadModelFile(LoadModel):
             schema_location=schema_location,
             options=options,
         )
+
+        logger.info("Successfully created LoadModelFile: %s (%s to %s)", name, data_format.value, location)
+        return model

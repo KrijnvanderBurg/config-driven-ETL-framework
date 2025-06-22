@@ -9,6 +9,7 @@ It includes:
     - Support for both batch and streaming extraction
 """
 
+import logging
 from abc import ABC, abstractmethod
 from typing import Any, Final, Generic, Self, TypeVar
 
@@ -16,7 +17,10 @@ from pyspark.sql import DataFrame
 
 from flint.models.model_extract import ExtractFileModel, ExtractFormat, ExtractMethod
 from flint.types import DataFrameRegistry, RegistryDecorator, Singleton
+from flint.utils.logger import get_logger
 from flint.utils.spark import SparkHandler
+
+logger: logging.Logger = get_logger(__name__)
 
 NAME: Final[str] = "name"
 METHOD: Final[str] = "method"
@@ -57,8 +61,10 @@ class Extract(Generic[ExtractModelT], ABC):
         Args:
             model: Configuration model for the extraction
         """
+        logger.debug("Initializing Extract with model: %s", model.name)
         self.model = model
         self.data_registry = DataFrameRegistry()
+        logger.info("Extract initialized successfully for source: %s", model.name)
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -74,18 +80,31 @@ class Extract(Generic[ExtractModelT], ABC):
             DictKeyError: If required keys are missing from the configuration
             NotImplementedError: If the specified extract format is not supported.
         """
+        logger.debug("Creating Extract from dictionary: %s", dict_)
+
         # If called on a concrete class, use that class directly
         if cls is not Extract:
+            logger.debug("Using concrete class: %s", cls.__name__)
             model = cls.model_cls.from_dict(dict_=dict_)
-            return cls(model=model)
+            instance = cls(model=model)
+            logger.info("Successfully created %s instance for: %s", cls.__name__, model.name)
+            return instance
 
-        # If called on the base class, determine the concrete class using the registry
         try:
             data_format = dict_[DATA_FORMAT]
+            logger.debug("Determining extract class for format: %s", data_format)
             extract_format = ExtractFormat(data_format)
             extract_class = ExtractRegistry.get(extract_format)
+            logger.debug("Selected extract class: %s", extract_class.__name__)
             model = extract_class.model_cls.from_dict(dict_=dict_)
-            return extract_class(model=model)
+            instance = extract_class(model=model)
+            logger.info(
+                "Successfully created %s instance for format %s, source: %s",
+                extract_class.__name__,
+                data_format,
+                model.name,
+            )
+            return instance
         except KeyError as e:
             raise NotImplementedError(f"Extract format {dict_.get(DATA_FORMAT, '<missing>')} is not supported.") from e
 
@@ -95,13 +114,20 @@ class Extract(Generic[ExtractModelT], ABC):
         Selects batch or streaming extraction based on the model configuration
         and stores the result in the data registry.
         """
+        logger.info("Starting extraction for source: %s using method: %s", self.model.name, self.model.method.value)
+
         spark_handler: SparkHandler = SparkHandler()
+        logger.debug("Adding Spark configurations: %s", self.model.options)
         spark_handler.add_configs(options=self.model.options)
 
         if self.model.method == ExtractMethod.BATCH:
+            logger.debug("Performing batch extraction for: %s", self.model.name)
             self.data_registry[self.model.name] = self._extract_batch()
+            logger.info("Batch extraction completed successfully for: %s", self.model.name)
         elif self.model.method == ExtractMethod.STREAMING:
+            logger.debug("Performing streaming extraction for: %s", self.model.name)
             self.data_registry[self.model.name] = self._extract_streaming()
+            logger.info("Streaming extraction completed successfully for: %s", self.model.name)
         else:
             raise ValueError("Extraction method %s is not supported for PySpark" % self.model.method)
 
@@ -140,12 +166,19 @@ class ExtractFile(Extract[ExtractFileModel]):
         Returns:
             DataFrame: The extracted data as a DataFrame.
         """
-        return self._spark.session.read.load(
+        logger.debug(
+            "Reading files in batch mode - path: %s, format: %s", self.model.location, self.model.data_format.value
+        )
+
+        dataframe = self._spark.session.read.load(
             path=self.model.location,
             format=self.model.data_format.value,
             schema=self.model.schema,
             **self.model.options,
         )
+        row_count = dataframe.count()
+        logger.info("Batch extraction successful - loaded %d rows from %s", row_count, self.model.location)
+        return dataframe
 
     def _extract_streaming(self) -> DataFrame:
         """Read from file in streaming mode using PySpark.
@@ -153,9 +186,15 @@ class ExtractFile(Extract[ExtractFileModel]):
         Returns:
             DataFrame: The extracted data as a streaming DataFrame.
         """
-        return self._spark.session.readStream.load(
+        logger.debug(
+            "Reading files in streaming mode - path: %s, format: %s", self.model.location, self.model.data_format.value
+        )
+
+        dataframe = self._spark.session.readStream.load(
             path=self.model.location,
             format=self.model.data_format.value,
             schema=self.model.schema,
             **self.model.options,
         )
+        logger.info("Streaming extraction successful for %s", self.model.location)
+        return dataframe
