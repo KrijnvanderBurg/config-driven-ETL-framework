@@ -38,4 +38,4 @@ applyTo: "**/*.py"
 - Use dataclasses or named tuples for data containers
 - Avoid global variables and mutable default arguments
 - Use enumeration for related constants (`from enum import Enum`)
-- Handle exceptions at appropriate levels with specific exception types
+- Handle exceptions at appropriate levels, use built-in exceptions.

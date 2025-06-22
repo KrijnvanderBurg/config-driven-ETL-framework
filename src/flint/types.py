@@ -14,13 +14,14 @@ enabling features like component registration, singleton services, and type safe
 
 import threading
 from collections.abc import Callable, Iterator
-from typing import Any, Generic, TypeVar
+from typing import Any, Generic, TypeVar, Union, cast
 
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming.query import StreamingQuery
 
-K = TypeVar("K")
-V = TypeVar("V")
+# Type variables with more specific constraints
+K = TypeVar("K", bound=Union[str, int])  # Key types typically used in registries
+V = TypeVar("V")  # Value type
 
 
 class Singleton(type):
@@ -43,13 +44,23 @@ class Singleton(type):
         logger1 = Logger()
         logger2 = Logger()
         assert logger1 is logger2
-        ```Z
+        ```
     """
 
-    _instances: dict[Any, Any] = {}
+    _instances: dict[type, Any] = {}
     _lock: threading.Lock = threading.Lock()
 
-    def __call__(cls, *args, **kwargs) -> Any:
+    def __call__(cls, *args: Any, **kwargs: Any) -> Any:
+        """
+        Create or return a singleton instance of the class.
+        
+        Args:
+            *args: Positional arguments to pass to the class constructor.
+            **kwargs: Keyword arguments to pass to the class constructor.
+            
+        Returns:
+            The singleton instance of the class.
+        """
         with cls._lock:
             if cls not in cls._instances:
                 # Assigning super().__call__ to a variable is crucial,

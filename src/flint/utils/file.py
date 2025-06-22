@@ -95,7 +95,7 @@ class FileYamlHandler(FileHandler):
         except PermissionError as e:
             raise PermissionError(f"Permission denied for file '{self.filepath}'.") from e
         except yaml.YAMLError as e:
-            raise yaml.YAMLError(f"Error reading YAML file '{self.filepath}': {e}") from e
+            raise yaml.YAMLError(f"Error in YAML file '{self.filepath}': {e}") from e
 
 
 class FileJsonHandler(FileHandler):
