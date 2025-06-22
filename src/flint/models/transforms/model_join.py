@@ -10,11 +10,15 @@ These models provide a type-safe interface for configuring joins
 from configuration files or dictionaries.
 """
 
+import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.exceptions import DictKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
+from flint.utils.logger import get_logger
+
+logger: logging.Logger = get_logger(__name__)
 
 # Constants for keys in the configuration dictionary
 OTHER_UPSTREAM_NAME: Final[str] = "other_upstream_name"
@@ -64,7 +68,10 @@ class JoinFunctionModel(FunctionModel):
         Raises:
             DictKeyError: If required keys are missing or if values are invalid
             ValueError: If the function name is not 'join'
+            Exception: If there's an unexpected error during model creation
         """
+        logger.debug("Creating JoinFunctionModel from dictionary: %s", dict_)
+
         try:
             function_name = dict_[FUNCTION]
             arguments_dict: dict = dict_[ARGUMENTS]
@@ -73,13 +80,21 @@ class JoinFunctionModel(FunctionModel):
             on = arguments_dict[ON]
             how = arguments_dict[HOW]
 
+            logger.debug(
+                "Parsed join function - name: %s, other_upstream: %s, on: %s, how: %s",
+                function_name,
+                other_upstream_name,
+                on,
+                how,
+            )
+
             arguments = cls.Args(
                 other_upstream_name=other_upstream_name,
                 on=on,
                 how=how,
             )
-
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e
-
-        return cls(function=function_name, arguments=arguments)
+        model = cls(function=function_name, arguments=arguments)
+        logger.info("Successfully created JoinFunctionModel - joining with %s on %s", other_upstream_name, on)
+        return model

@@ -51,13 +51,18 @@ class SparkHandler(metaclass=Singleton):
             app_name: Name of the Spark application, used for tracking and monitoring
             options: Optional dictionary of Spark configuration options as key-value pairs
         """
+        logger.debug("Initializing SparkHandler with app_name: %s", app_name)
+
         builder = SparkSession.Builder().appName(name=app_name)
 
         if options:
             for key, value in options.items():
+                logger.debug("Setting Spark config: %s = %s", key, value)
                 builder = builder.config(key=key, value=value)
 
+        logger.debug("Creating/retrieving SparkSession")
         self.session = builder.getOrCreate()
+        logger.info("SparkHandler initialized successfully with app: %s", app_name)
 
     @property
     def session(self) -> SparkSession:
@@ -69,6 +74,7 @@ class SparkHandler(metaclass=Singleton):
         Returns:
             The current active SparkSession instance
         """
+        logger.debug("Accessing SparkSession instance")
         return self._session
 
     @session.setter
@@ -81,6 +87,9 @@ class SparkHandler(metaclass=Singleton):
         Args:
             session: The SparkSession instance to use
         """
+        logger.debug(
+            "Setting SparkSession instance - app name: %s, version: %s", session.sparkContext.appName, session.version
+        )
         self._session = session
 
     @session.deleter
@@ -93,8 +102,10 @@ class SparkHandler(metaclass=Singleton):
         This should be called when the SparkSession is no longer needed,
         typically at the end of the application lifecycle.
         """
+        logger.info("Stopping SparkSession: %s", self._session.sparkContext.appName)
         self._session.stop()
         del self._session
+        logger.info("SparkSession stopped and cleaned up successfully")
 
     def add_configs(self, options: dict[str, str]) -> None:
         """Add configuration options to the active SparkSession.
@@ -111,5 +122,10 @@ class SparkHandler(metaclass=Singleton):
             and cannot be changed using this method after the SparkSession
             has been created.
         """
+        logger.debug("Adding %d configuration options to SparkSession", len(options))
+
         for key, value in options.items():
+            logger.debug("Setting runtime config: %s = %s", key, value)
             self.session.conf.set(key=key, value=value)
+
+        logger.info("Successfully applied %d configuration options", len(options))

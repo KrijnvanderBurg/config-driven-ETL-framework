@@ -12,6 +12,7 @@ These models serve as the configuration schema for the Extract components
 and provide a type-safe interface between configuration and implementation.
 """
 
+import logging
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
@@ -20,9 +21,12 @@ from typing import Any, Final, Self
 from pyspark.sql.types import StructType
 
 from flint.exceptions import DictKeyError
+from flint.utils.logger import get_logger
 from flint.utils.schema import SchemaFilepathHandler
 
 from . import Model
+
+logger: logging.Logger = get_logger(__name__)
 
 NAME: Final[str] = "name"
 METHOD: Final[str] = "method"
@@ -108,17 +112,29 @@ class ExtractFileModel(ExtractModel):
         Raises:
             DictKeyError: If required keys are missing from the configuration
         """
+        logger.debug("Creating ExtractFileModel from dictionary: %s", dict_)
+
         try:
             name = dict_[NAME]
             method = ExtractMethod(dict_[METHOD])
             data_format = ExtractFormat(dict_[DATA_FORMAT])
             location = dict_[LOCATION]
             options = dict_[OPTIONS]
+
+            logger.debug(
+                "Parsed extract model - name: %s, method: %s, format: %s, location: %s",
+                name,
+                method.value,
+                data_format.value,
+                location,
+            )
+            logger.debug("Extract options: %s", options)
             schema = SchemaFilepathHandler.parse(schema=Path(dict_[SCHEMA]))
+
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e
 
-        return cls(
+        model = cls(
             name=name,
             method=method,
             data_format=data_format,
@@ -126,3 +142,6 @@ class ExtractFileModel(ExtractModel):
             options=options,
             schema=schema,
         )
+
+        logger.info("Successfully created ExtractFileModel: %s (%s from %s)", name, data_format.value, location)
+        return model

@@ -7,12 +7,16 @@ The SelectFunction is registered with the TransformFunctionRegistry under
 the name 'select', making it available for use in configuration files.
 """
 
+import logging
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame
 
 from flint.core.transform import Function, TransformFunctionRegistry
 from flint.models.transforms.model_select import SelectFunctionModel
+from flint.utils.logger import get_logger
+
+logger: logging.Logger = get_logger(__name__)
 
 
 @TransformFunctionRegistry.register("select")
@@ -78,8 +82,17 @@ class SelectFunction(Function[SelectFunctionModel]):
             |-- years_old: integer (nullable = true)
             ```
         """
+        logger.debug("Creating select transform for columns: %s", self.model.arguments.columns)
 
         def __f(df: DataFrame) -> DataFrame:
-            return df.select(*self.model.arguments.columns)
+            logger.debug("Applying select transform - input columns: %s", df.columns)
+            logger.debug("Selecting columns: %s", self.model.arguments.columns)
+
+            result_df = df.select(*self.model.arguments.columns)
+            logger.info(
+                "Select transform completed - selected %d columns from %d", len(result_df.columns), len(df.columns)
+            )
+            logger.debug("Selected columns: %s", result_df.columns)
+            return result_df
 
         return __f

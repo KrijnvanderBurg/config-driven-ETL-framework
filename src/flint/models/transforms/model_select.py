@@ -10,6 +10,7 @@ These models provide a type-safe interface for configuring column selections
 from configuration files or dictionaries.
 """
 
+import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
@@ -17,6 +18,9 @@ from pyspark.sql.column import Column
 
 from flint.exceptions import DictKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
+from flint.utils.logger import get_logger
+
+logger: logging.Logger = get_logger(__name__)
 
 COLUMNS: Final[str] = "columns"
 
@@ -57,14 +61,20 @@ class SelectFunctionModel(FunctionModel):
         Returns:
             An initialized SelectFunctionModel.
         """
+        logger.debug("Creating SelectFunctionModel from dictionary: %s", dict_)
+
         try:
             function_name = dict_[FUNCTION]
             arguments_dict = dict_[ARGUMENTS]
 
             columns = arguments_dict[COLUMNS]
+            logger.debug("Parsed select function - name: %s, columns: %s", function_name, columns)
+
             arguments = cls.Args(columns=columns)
 
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e
 
-        return cls(function=function_name, arguments=arguments)
+        model = cls(function=function_name, arguments=arguments)
+        logger.info("Successfully created SelectFunctionModel with %d columns", len(columns))
+        return model

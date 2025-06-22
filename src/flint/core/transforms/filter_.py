@@ -7,12 +7,16 @@ The FilterFunction is registered with the TransformFunctionRegistry under
 the name 'filter', making it available for use in configuration files.
 """
 
+import logging
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame
 
 from flint.core.transform import Function, TransformFunctionRegistry
 from flint.models.transforms.model_filter import FilterFunctionModel
+from flint.utils.logger import get_logger
+
+logger: logging.Logger = get_logger(__name__)
 
 
 @TransformFunctionRegistry.register("filter")
@@ -88,6 +92,15 @@ class FilterFunction(Function[FilterFunctionModel]):
         """
 
         def __f(df: DataFrame) -> DataFrame:
-            return df.filter(self.model.arguments.condition)
+            logger.debug("Applying filter transform with condition: %s", self.model.arguments.condition)
+            original_count = df.count()
+            logger.debug("Input DataFrame has %d rows", original_count)
+
+            result_df = df.filter(self.model.arguments.condition)
+            filtered_count = result_df.count()
+            filtered_out = original_count - filtered_count
+
+            logger.info("Filter transform completed - kept %d rows, filtered out %d rows", filtered_count, filtered_out)
+            return result_df
 
         return __f

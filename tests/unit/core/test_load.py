@@ -115,6 +115,7 @@ class TestLoad:
         }
 
         mock_model_cls = MagicMock(spec=LoadModelFile)
+        mock_model_cls.name = "test_load"
         mock_from_dict.return_value = mock_model_cls
 
         # Act
@@ -196,7 +197,10 @@ class TestLoad:
         model = MagicMock(spec=LoadModelFile)
         model.name = "test_load"
         model.upstream_name = "source"
-        model.method = "invalid_method"
+        # Create a mock method object that has value attribute but is invalid
+        mock_invalid_method = MagicMock()
+        mock_invalid_method.value = "invalid_method"
+        model.method = mock_invalid_method
         model.options = {}
 
         load = MockLoadClass(model=model)
@@ -256,7 +260,9 @@ class TestLoad:
         """Test Load.from_dict method with a valid format."""
         # Arrange
         mock_load_class = MagicMock(spec=Load)
+        mock_load_class.__name__ = "MockLoadClass"
         mock_model_cls = MagicMock()
+        mock_model_cls.name = "test_load"
         mock_load_class.model_cls = MagicMock()
         mock_load_class.model_cls.from_dict = MagicMock(return_value=mock_model_cls)
         mock_load_class.return_value = MagicMock()
