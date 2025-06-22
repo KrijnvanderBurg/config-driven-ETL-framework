@@ -16,6 +16,7 @@ from typing import Any, Final, Self
 from flint.core.extract import Extract
 from flint.core.load import Load
 from flint.core.transform import Transform
+from flint.core.validation import ValidateModelNamesAreUnique
 from flint.exceptions import DictKeyError
 from flint.utils.file import FileHandlerContext
 from flint.utils.logger import set_logger
@@ -117,6 +118,11 @@ class Job:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(extracts=extracts, transforms=transforms, loads=loads)
+
+    def validate(self) -> None:
+        """Validate the job configuration."""
+        ValidateModelNamesAreUnique(data=self)
+        logger.info("Job configuration validated successfully")
 
     def execute(self) -> None:
         """Execute the complete ETL pipeline.
