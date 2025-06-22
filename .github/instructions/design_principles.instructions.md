@@ -2,33 +2,7 @@
 applyTo: "**/*.py"
 ---
 # Design Principles
-
-## Python-Specific Best Practices
-
-### Python Idioms
-- **Use List/Dict Comprehensions**: For simple transformations, prefer `[x*2 for x in items]` over loops
-- **Context Managers**: Use `with` statements for resource management (files, locks, connections)
-- **Generators**: Use generator expressions for memory efficiency with large datasets
-- **f-strings**: Prefer f-strings for string formatting: `f"{name}: {value:.2f}"`
-- **Enumerate**: Use `enumerate(items)` instead of tracking indexes manually
-- **Unpacking**: Leverage tuple unpacking: `name, age, role = person_data`
-- **Default Dictionaries**: Use `collections.defaultdict` to handle missing keys elegantly
-- **Named Tuples**: Use `collections.namedtuple` or `dataclasses` for lightweight data structures
-
-### Python Type Annotations
-- **Type Hints**: Use type annotations to improve code clarity and enable static analysis
-- **Optional Types**: Mark optional parameters with `Optional[Type]` from `typing`
-- **Union Types**: Use `Union[Type1, Type2]` for variables that can be multiple types
-- **Generic Types**: Use `List[T]`, `Dict[K, V]`, etc. for container type annotations
-- **Protocol Classes**: Prefer `Protocol` over abstract base classes when appropriate
-- **Type Guards**: Implement type guards with `TypeGuard` for runtime type checking
-
-### Python Code Organization
-- **Modules Structure**: Organize related functionality into modules and packages
-- **Imports**: Group imports in the order: standard library, third-party, local application
-- **Dunder Main**: Use `if __name__ == "__main__":` pattern for executable scripts
-- **Package Architecture**: Create `__init__.py` files with meaningful exports
-- **Circular Imports**: Avoid circular imports through careful module organization
+Always apply all design principles, best practices, and patterns to your code. This document outlines the key principles, patterns, and practices to follow when writing code.
 
 ## Code Quality
 

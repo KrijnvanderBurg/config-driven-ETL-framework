@@ -123,80 +123,49 @@ class Job:
 
         Runs the extract, transform, and load phases in sequence.
         This is the main entry point for running a configured job.
-
-        Raises:
-            Exception: If any phase of the ETL process fails.
         """
         start_time = time.time()
         logger.info("Starting job execution")
 
-        try:
-            self._extract()
-            self._transform()
-            self._load()
+        self._extract()
+        self._transform()
+        self._load()
 
-            execution_time = time.time() - start_time
-            logger.info(f"Job completed successfully in {execution_time:.2f} seconds")
-        except Exception as e:
-            execution_time = time.time() - start_time
-            logger.error(f"Job failed after {execution_time:.2f} seconds: {str(e)}")
-            raise
+        execution_time = time.time() - start_time
+        logger.info("Job completed successfully in %.2f seconds", execution_time)
 
     def _extract(self) -> None:
         """Execute the extraction phase of the ETL pipeline.
 
         Calls the extract method on each configured extract component,
         retrieving data from the specified sources.
-
-        Raises:
-            Exception: If any extraction operation fails.
         """
-        logger.info(f"Starting extract phase with {len(self.extracts)} extractors")
+        logger.info("Starting extract phase with %d extractors", len(self.extracts))
 
         for i, extract in enumerate(self.extracts, 1):
-            try:
-                logger.debug(f"Running extractor {i}/{len(self.extracts)}: {extract.model.name}")
-                extract.extract()
-            except Exception as e:
-                logger.error(f"Extract '{extract.model.name}' failed: {str(e)}")
-                raise
+            logger.debug("Running extractor %d/%d: %s", i, len(self.extracts), extract.model.name)
+            extract.extract()
 
     def _transform(self) -> None:
         """Execute the transformation phase of the ETL pipeline.
 
         Copies data from upstream components to the current transform component
         and applies the transformation operations to modify the data.
-
-        Raises:
-            Exception: If any transformation operation fails.
         """
-        logger.info(f"Starting transform phase with {len(self.transforms)} transformers")
+        logger.info("Starting transform phase with %d transformers", len(self.transforms))
 
         for i, transform in enumerate(self.transforms, 1):
-            try:
-                logger.debug(f"Running transformer {i}/{len(self.transforms)}: {transform.model.name}")
-                transform.transform()
-            except Exception as e:
-                logger.error(f"Transform '{transform.model.name}' failed: {str(e)}")
-                raise
+            logger.debug("Running transformer %d/%d: %s", i, len(self.transforms), transform.model.name)
+            transform.transform()
 
     def _load(self) -> None:
         """Execute the loading phase of the ETL pipeline.
 
         Copies data from upstream components to the current load component
         and writes the transformed data to the target destinations.
-
-        Raises:
-            Exception: If any loading operation fails.
         """
-        logger.info(f"Starting load phase with {len(self.loads)} loaders")
+        logger.info("Starting load phase with %d loaders", len(self.loads))
 
         for i, load in enumerate(self.loads, 1):
-            try:
-                logger.debug(f"Running loader {i}/{len(self.loads)}: {load.model.name}")
-                load.load()
-            except Exception as e:
-                logger.error(f"Load '{load.model.name}' failed: {str(e)}")
-                raise
-        for load in self.loads:
+            logger.debug("Running loader %d/%d: %s", i, len(self.loads), load.model.name)
             load.load()

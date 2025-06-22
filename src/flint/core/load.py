@@ -123,7 +123,7 @@ class Load(Generic[LoadModelT], ABC):
 
     def load(self) -> None:
         """
-        load data with PySpark.
+        Load data with PySpark.
         """
         spark_handler: SparkHandler = SparkHandler()
         spark_handler.add_configs(options=self.model.options)
@@ -135,7 +135,7 @@ class Load(Generic[LoadModelT], ABC):
         elif self.model.method == LoadMethod.STREAMING:
             self.streaming_query_registry[self.model.name] = self._load_streaming()
         else:
-            raise ValueError(f"Loading method {self.model.method} is not supported for Pyspark.")
+            raise ValueError("Loading method %s is not supported for PySpark" % self.model.method)
 
         self._load_schema()
 

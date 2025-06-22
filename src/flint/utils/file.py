@@ -85,17 +85,17 @@ class FileYamlHandler(FileHandler):
             yaml.YAMLError: If there is an error reading the YAML file.
         """
         if not self._file_exists():
-            raise FileNotFoundError(f"File '{self.filepath}' not found.")
+            raise FileNotFoundError("File '%s' not found." % self.filepath)
 
         try:
             with open(file=self.filepath, mode="r", encoding="utf-8") as file:
                 return yaml.safe_load(file)
         except FileNotFoundError as e:
-            raise FileNotFoundError(f"File '{self.filepath}' not found.") from e
+            raise FileNotFoundError("File '%s' not found." % self.filepath) from e
         except PermissionError as e:
-            raise PermissionError(f"Permission denied for file '{self.filepath}'.") from e
+            raise PermissionError("Permission denied for file '%s'." % self.filepath) from e
         except yaml.YAMLError as e:
-            raise yaml.YAMLError(f"Error in YAML file '{self.filepath}': {e}") from e
+            raise yaml.YAMLError("Error in YAML file '%s': %s" % (self.filepath, e)) from e
 
 
 class FileJsonHandler(FileHandler):
@@ -115,18 +115,18 @@ class FileJsonHandler(FileHandler):
             ValueError: If JSON cannot be decoded.
         """
         if not self._file_exists():
-            raise FileNotFoundError(f"File '{self.filepath}' not found.")
+            raise FileNotFoundError("File '%s' not found." % self.filepath)
 
         try:
             with open(file=self.filepath, mode="r", encoding="utf-8") as file:
                 return json.load(file)
         except FileNotFoundError as e:
-            raise FileNotFoundError(f"File '{self.filepath}' not found.") from e
+            raise FileNotFoundError("File '%s' not found." % self.filepath) from e
         except PermissionError as e:
-            raise PermissionError(f"Permission denied for file '{self.filepath}'.") from e
+            raise PermissionError("Permission denied for file '%s'." % self.filepath) from e
         except json.JSONDecodeError as e:
             # Using ValueError instead of JSONDecodeError due to complexity in supplying additional arguments.
-            raise ValueError(f"Error decoding JSON file '{self.filepath}': {e}") from e
+            raise ValueError("Error decoding JSON file '%s': %s" % (self.filepath, e)) from e
 
 
 class FileHandlerContext:
@@ -156,6 +156,10 @@ class FileHandlerContext:
         handler_class = cls.SUPPORTED_EXTENSIONS.get(file_extension)
 
         if handler_class is None:
-            raise NotImplementedError(f"File extension '{file_extension}' is not supported.")
+            supported_extensions = ", ".join(cls.SUPPORTED_EXTENSIONS.keys())
+            raise NotImplementedError(
+                f"File extension '{file_extension}' is not supported. "
+                f"Supported extensions are: {supported_extensions}"
+            )
 
         return handler_class(filepath=filepath)
