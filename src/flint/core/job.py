@@ -8,6 +8,7 @@ Jobs can be created from configuration files or dictionaries, with automatic ins
 of the appropriate Extract, Transform, and Load components based on the configuration.
 """
 
+import logging
 import time
 from dataclasses import dataclass
 from pathlib import Path
@@ -19,9 +20,9 @@ from flint.core.transform import Transform
 from flint.core.validation import ValidateModelNamesAreUnique, ValidateUpstreamNamesExist
 from flint.exceptions import DictKeyError
 from flint.utils.file import FileHandlerContext
-from flint.utils.logger import set_logger
+from flint.utils.logger import get_logger
 
-logger = set_logger(__name__)
+logger: logging.Logger = get_logger(__name__)
 
 EXTRACTS: Final[str] = "extracts"
 TRANSFORMS: Final[str] = "transforms"
@@ -75,11 +76,15 @@ class Job:
         Raises:
             NotImplementedError: If the file format is not supported.
         """
+        logger.info("Creating Job from file: %s", filepath)
+
         handler = FileHandlerContext.from_filepath(filepath=filepath)
         file: dict[str, Any] = handler.read()
 
         if Path(filepath).suffix == ".json":
-            return cls.from_dict(dict_=file)
+            job = cls.from_dict(dict_=file)
+            logger.info("Successfully created Job from JSON file: %s", filepath)
+            return job
 
         raise NotImplementedError("No handling options found.")
 
@@ -99,30 +104,59 @@ class Job:
         Raises:
             DictKeyError: If a required key is missing from the dictionary.
         """
+        logger.debug("Creating Job from dictionary with keys: %s", list(dict_.keys()))
+
         try:
             extracts: list[Extract] = []
-            for extract_dict in dict_[EXTRACTS]:
+            extract_configs = dict_[EXTRACTS]
+            logger.debug("Processing %d extract configurations", len(extract_configs))
+
+            for i, extract_dict in enumerate(extract_configs):
+                logger.debug(
+                    "Creating extract %d/%d: %s", i + 1, len(extract_configs), extract_dict.get("name", "unnamed")
+                )
                 extract: Extract = Extract.from_dict(dict_=extract_dict)
                 extracts.append(extract)
 
             transforms: list[Transform] = []
-            for transform_dict in dict_[TRANSFORMS]:
+            transform_configs = dict_[TRANSFORMS]
+            logger.debug("Processing %d transform configurations", len(transform_configs))
+
+            for i, transform_dict in enumerate(transform_configs):
+                logger.debug(
+                    "Creating transform %d/%d: %s", i + 1, len(transform_configs), transform_dict.get("name", "unnamed")
+                )
                 transform: Transform = Transform.from_dict(dict_=transform_dict)
                 transforms.append(transform)
 
             loads: list[Load] = []
-            for load_dict in dict_[LOADS]:
+            load_configs = dict_[LOADS]
+            logger.debug("Processing %d load configurations", len(load_configs))
+
+            for i, load_dict in enumerate(load_configs):
+                logger.debug("Creating load %d/%d: %s", i + 1, len(load_configs), load_dict.get("name", "unnamed"))
                 load: Load = Load.from_dict(dict_=load_dict)
                 loads.append(load)
+
         except KeyError as e:
             raise DictKeyError(key=e.args[0], dict_=dict_) from e
 
-        return cls(extracts=extracts, transforms=transforms, loads=loads)
+        job = cls(extracts=extracts, transforms=transforms, loads=loads)
+        logger.info(
+            "Successfully created Job with %d extracts, %d transforms, %d loads",
+            len(extracts),
+            len(transforms),
+            len(loads),
+        )
+        return job
 
     def validate(self) -> None:
         """Validate the job configuration."""
+        logger.info("Starting job configuration validation")
+
         ValidateModelNamesAreUnique(data=self)
         ValidateUpstreamNamesExist(data=self)
+
         logger.info("Job configuration validated successfully")
 
     def execute(self) -> None:
@@ -132,7 +166,12 @@ class Job:
         This is the main entry point for running a configured job.
         """
         start_time = time.time()
-        logger.info("Starting job execution")
+        logger.info(
+            "Starting job execution with %d extracts, %d transforms, %d loads",
+            len(self.extracts),
+            len(self.transforms),
+            len(self.loads),
+        )
 
         self._extract()
         self._transform()
@@ -148,10 +187,17 @@ class Job:
         retrieving data from the specified sources.
         """
         logger.info("Starting extract phase with %d extractors", len(self.extracts))
+        start_time = time.time()
 
         for i, extract in enumerate(self.extracts, 1):
+            extract_start_time = time.time()
             logger.debug("Running extractor %d/%d: %s", i, len(self.extracts), extract.model.name)
             extract.extract()
+            extract_time = time.time() - extract_start_time
+            logger.debug("Extractor %s completed in %.2f seconds", extract.model.name, extract_time)
+
+        phase_time = time.time() - start_time
+        logger.info("Extract phase completed successfully in %.2f seconds", phase_time)
 
     def _transform(self) -> None:
         """Execute the transformation phase of the ETL pipeline.
@@ -160,10 +206,17 @@ class Job:
         and applies the transformation operations to modify the data.
         """
         logger.info("Starting transform phase with %d transformers", len(self.transforms))
+        start_time = time.time()
 
         for i, transform in enumerate(self.transforms, 1):
+            transform_start_time = time.time()
             logger.debug("Running transformer %d/%d: %s", i, len(self.transforms), transform.model.name)
             transform.transform()
+            transform_time = time.time() - transform_start_time
+            logger.debug("Transformer %s completed in %.2f seconds", transform.model.name, transform_time)
+
+        phase_time = time.time() - start_time
+        logger.info("Transform phase completed successfully in %.2f seconds", phase_time)
 
     def _load(self) -> None:
         """Execute the loading phase of the ETL pipeline.
@@ -172,7 +225,14 @@ class Job:
         and writes the transformed data to the target destinations.
         """
         logger.info("Starting load phase with %d loaders", len(self.loads))
+        start_time = time.time()
 
         for i, load in enumerate(self.loads, 1):
+            load_start_time = time.time()
             logger.debug("Running loader %d/%d: %s", i, len(self.loads), load.model.name)
             load.load()
+            load_time = time.time() - load_start_time
+            logger.debug("Loader %s completed in %.2f seconds", load.model.name, load_time)
+
+        phase_time = time.time() - start_time
+        logger.info("Load phase completed successfully in %.2f seconds", phase_time)

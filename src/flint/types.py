@@ -14,13 +14,13 @@ enabling features like component registration, singleton services, and type safe
 
 import threading
 from collections.abc import Callable, Iterator
-from typing import Any, Generic, TypeVar, Union
+from typing import Any, Generic, TypeVar
 
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming.query import StreamingQuery
 
 # Type variables with more specific constraints
-K = TypeVar("K", bound=Union[str, int])  # Key types typically used in registries
+K = TypeVar("K", bound=str | int)  # Key types typically used in registries
 V = TypeVar("V")  # Value type
 
 
@@ -128,11 +128,11 @@ class RegistryDecorator(Generic[K, V]):
         try:
             registry = cls._registry
             if not registry.get(key):
-                raise KeyError("No implementations registered for key: %s" % key)
+                raise KeyError(f"No implementations registered for key: {key}")
             return registry[key][0]
         except (KeyError, IndexError) as e:
             available_keys = list(cls._registry.keys())
-            raise KeyError("No class registered for key: %s. Available keys: %s" % (key, available_keys)) from e
+            raise KeyError(f"No class registered for key: {key}. Available keys: {available_keys}") from e
 
     @classmethod
     def get_all(cls, key: K) -> list[type[V]]:
@@ -151,11 +151,11 @@ class RegistryDecorator(Generic[K, V]):
         try:
             registry = cls._registry
             if not registry.get(key):
-                raise KeyError("No implementations registered for key: %s" % key)
+                raise KeyError(f"No implementations registered for key: {key}")
             return registry[key][:]  # Return a copy of the list
         except KeyError as e:
             available_keys = list(cls._registry.keys())
-            raise KeyError("No class registered for key: %s. Available keys: %s" % (key, available_keys)) from e
+            raise KeyError(f"No class registered for key: {key}. Available keys: {available_keys}") from e
 
 
 class RegistryInstance(Generic[K, V], metaclass=Singleton):
@@ -202,14 +202,14 @@ class RegistryInstance(Generic[K, V], metaclass=Singleton):
         try:
             return self._items[name]
         except KeyError as e:
-            raise KeyError("Item '%s' not found." % name) from e
+            raise KeyError(f"Item '{name}' not found.") from e
 
     def __delitem__(self, name: K) -> None:
         """Delete an item by its name. Raises KeyError if not found."""
         try:
             del self._items[name]
         except KeyError as e:
-            raise KeyError("Item '%s' not found." % name) from e
+            raise KeyError(f"Item '{name}' not found.") from e
 
     def __contains__(self, name: K) -> bool:
         """Check if an item exists by its name."""
