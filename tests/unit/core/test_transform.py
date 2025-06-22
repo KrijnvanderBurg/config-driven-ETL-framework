@@ -172,13 +172,13 @@ class TestTransform:
         # Create mock function with callable
         function = MockFunction(model=MockFunctionModel())
         function.callable_ = MagicMock()
-        
+
         # Create mock dataframes that have count() method
         mock_input_df = MagicMock()
         mock_input_df.count.return_value = 100
         mock_output_df = MagicMock()
         mock_output_df.count.return_value = 50
-        
+
         function.callable_.return_value = mock_output_df
 
         transform = Transform(model=model, functions=[function])
