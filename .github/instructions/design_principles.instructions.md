@@ -3,6 +3,33 @@ applyTo: "**/*.py"
 ---
 # Design Principles
 
+## Python-Specific Best Practices
+
+### Python Idioms
+- **Use List/Dict Comprehensions**: For simple transformations, prefer `[x*2 for x in items]` over loops
+- **Context Managers**: Use `with` statements for resource management (files, locks, connections)
+- **Generators**: Use generator expressions for memory efficiency with large datasets
+- **f-strings**: Prefer f-strings for string formatting: `f"{name}: {value:.2f}"`
+- **Enumerate**: Use `enumerate(items)` instead of tracking indexes manually
+- **Unpacking**: Leverage tuple unpacking: `name, age, role = person_data`
+- **Default Dictionaries**: Use `collections.defaultdict` to handle missing keys elegantly
+- **Named Tuples**: Use `collections.namedtuple` or `dataclasses` for lightweight data structures
+
+### Python Type Annotations
+- **Type Hints**: Use type annotations to improve code clarity and enable static analysis
+- **Optional Types**: Mark optional parameters with `Optional[Type]` from `typing`
+- **Union Types**: Use `Union[Type1, Type2]` for variables that can be multiple types
+- **Generic Types**: Use `List[T]`, `Dict[K, V]`, etc. for container type annotations
+- **Protocol Classes**: Prefer `Protocol` over abstract base classes when appropriate
+- **Type Guards**: Implement type guards with `TypeGuard` for runtime type checking
+
+### Python Code Organization
+- **Modules Structure**: Organize related functionality into modules and packages
+- **Imports**: Group imports in the order: standard library, third-party, local application
+- **Dunder Main**: Use `if __name__ == "__main__":` pattern for executable scripts
+- **Package Architecture**: Create `__init__.py` files with meaningful exports
+- **Circular Imports**: Avoid circular imports through careful module organization
+
 ## Code Quality
 
 ### Naming and Readability
@@ -36,33 +63,6 @@ applyTo: "**/*.py"
 
 ### GRASP Principles
 - **Information Expert**: Assign responsibility to the class with the necessary information
-- **Creator**: A class should create instances of classes it closely uses
-- **Controller**: Delegate user input to appropriate classes
-- **Low Coupling**: Minimize dependencies between classes
-- **High Cohesion**: Keep related functionality together in well-defined classes
-- **Convention over Configuration**: Use sensible defaults to minimize setup requirements
-
-## Code Structure and Organization
-
-### Function and Method Design
-- **Single Level of Abstraction**: Don't mix low-level details with high-level logic
-- **Function Size**: Keep functions small (20-30 lines) and focused on a single task
-- **Early Returns**: Avoid deep nesting by applying early returns to reduce complexity
-- **Minimize Side Effects**: Functions should avoid modifying global state
-- **Postel's Law**: Be liberal in what you accept, but conservative in what you send
-
-### Class Design
-- **Tell, Don't Ask**: Use polymorphism instead of conditionals for type-specific behavior
-- **Encapsulation**: Hide internal state and require interaction through well-defined interfaces
-- **Composition over Inheritance**: Favor object composition over class inheritance
-- **Law of Demeter**: Methods should only call methods on themselves, parameters, created objects, or directly held references
-
-### Code Organization
-- **Separation of Concerns**: Keep different aspects (business logic, data access, presentation) in separate modules
-- **Code to Interface, Not Implementation**: Use abstractions for flexibility and testability
-- **Principle of Least Privilege**: Code should run with the minimal level of access required
-- **Immutability**: Prefer immutable data structures where possible to avoid side effects
-
 ## Behavioral Design Patterns (Gang of Four + More)
 - **Observer**: Notify subscribers of state changes
 - **Strategy**: Encapsulate interchangeable behavior
