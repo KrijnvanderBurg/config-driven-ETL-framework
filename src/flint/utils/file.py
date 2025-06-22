@@ -158,8 +158,7 @@ class FileHandlerContext:
         if handler_class is None:
             supported_extensions = ", ".join(cls.SUPPORTED_EXTENSIONS.keys())
             raise NotImplementedError(
-                f"File extension '{file_extension}' is not supported. "
-                f"Supported extensions are: {supported_extensions}"
+                f"File extension '{file_extension}' is not supported. Supported extensions are: {supported_extensions}"
             )
 
         return handler_class(filepath=filepath)

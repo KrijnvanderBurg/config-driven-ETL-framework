@@ -12,6 +12,7 @@ applyTo: "**/*.py"
 ## String Formatting
 - Use f-strings for string interpolation: `f"Hello {name}"`
 - Use lazy formatting for logs: `logger.debug("Processing %s items", count)`
+- use f-strings for exceptions messages: `raise ValueError(f"Invalid value: {value}")`
 - Format numbers with precision in f-strings: `f"Value: {value:.2f}"`
 
 ## Docstrings

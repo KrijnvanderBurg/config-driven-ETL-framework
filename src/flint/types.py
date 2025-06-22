@@ -72,22 +72,13 @@ class Singleton(type):
 
 class RegistryDecorator(Generic[K, V]):
     """A registry for classes that can be decorated and registered with a key.
-    
+
     This class implements the decorator pattern for registering classes with specific keys,
     enabling dynamic selection of appropriate implementations at runtime.
-    
+
     Type Parameters:
         K: The type of keys in the registry (typically an enum or string)
         V: The type of values (typically a class type)
-        
-    Example:
-        ```python
-        class FormatRegistry(RegistryDecorator[FileFormat, FileHandler], metaclass=Singleton):
-            pass
-            
-        @FormatRegistry.register(FileFormat.JSON)
-        class JsonHandler(FileHandler):
-            pass
         ```
     """
 
@@ -111,7 +102,7 @@ class RegistryDecorator(Generic[K, V]):
         def decorator(registered_class: type[V]) -> type[V]:
             if key not in cls._registry:
                 cls._registry[key] = []
-                
+
             # Prevent duplicate registration
             if registered_class not in cls._registry[key]:
                 cls._registry[key].append(registered_class)
@@ -142,18 +133,18 @@ class RegistryDecorator(Generic[K, V]):
         except (KeyError, IndexError) as e:
             available_keys = list(cls._registry.keys())
             raise KeyError("No class registered for key: %s. Available keys: %s" % (key, available_keys)) from e
-            
+
     @classmethod
     def get_all(cls, key: K) -> list[type[V]]:
         """
         Get all registered classes for a key.
-        
+
         Args:
             key: The key to look up
-            
+
         Returns:
             List of all registered classes for the key
-            
+
         Raises:
             KeyError: If no class is registered for the given key
         """
@@ -235,78 +226,74 @@ class RegistryInstance(Generic[K, V], metaclass=Singleton):
 
 class DataFrameRegistry(RegistryInstance[str, DataFrame]):
     """A registry for DataFrame objects.
-    
+
     This singleton registry maintains a collection of named DataFrame objects
     that can be shared between components in the ETL pipeline. It provides
     dictionary-like access with proper error messages when frames are not found.
-    
+
     Example:
         ```python
         registry = DataFrameRegistry()
-        
+
         # Store a DataFrame
         registry["customers"] = customers_df
-        
+
         # Access a DataFrame
         transformed_df = transform(registry["customers"])
         ```
     """
-    
+
     def __getitem__(self, name: str) -> DataFrame:
         """Get a DataFrame by name with enhanced error messaging.
-        
+
         Args:
             name: Name of the DataFrame to retrieve
-            
+
         Returns:
             The requested DataFrame
-            
+
         Raises:
             KeyError: If the DataFrame is not found, with a list of available frames
         """
         try:
             return super().__getitem__(name)
-        except KeyError as exc:
+        except KeyError as e:
             available = list(self._items.keys())
-            raise KeyError(
-                f"DataFrame '{name}' not found. Available DataFrames: {available}"
-            ) from exc
+            raise KeyError(f"DataFrame '{name}' not found. Available DataFrames: {available}") from e
 
 
 class StreamingQueryRegistry(RegistryInstance[str, StreamingQuery]):
     """A registry for StreamingQuery objects.
-    
+
     This singleton registry maintains a collection of named StreamingQuery objects
     that can be shared between components in the ETL pipeline, enabling management
     and monitoring of streaming jobs.
-    
+
     Example:
         ```python
         registry = StreamingQueryRegistry()
         registry["customers_stream"] = df.writeStream.start()
-        
+
         # Check if a stream is active
         query = registry["customers_stream"]
         is_active = query.isActive()
         ```
     """
-    
+
     def __getitem__(self, name: str) -> StreamingQuery:
         """Get a StreamingQuery by name with enhanced error messaging.
-        
+
         Args:
             name: Name of the StreamingQuery to retrieve
-            
+
         Returns:
             The requested StreamingQuery
-            
+
         Raises:
             KeyError: If the StreamingQuery is not found, with a list of available queries
         """
         try:
             return super().__getitem__(name)
-        except KeyError as exc:
+        except KeyError as e:
             available = list(self._items.keys())
-            raise KeyError(
-                f"StreamingQuery '{name}' not found. Available queries: {available}"
-            ) from exc
+            raise KeyError(f"StreamingQuery '{name}' not found. Available queries: {available}") from e
