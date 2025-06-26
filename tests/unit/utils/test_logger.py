@@ -46,7 +46,7 @@ class TestLogger:
         # Act
         source_logger = set_logger("test_logger")
         rotating_file_handler = source_logger.handlers[0]  # the first handler must be a rotating file handler
-        expected_log_filename = "ingestion.log"
+        expected_log_filename = "flint.log"
 
         # Assert
         assert rotating_file_handler.baseFilename.endswith(expected_log_filename)  # type: ignore[attr-defined]

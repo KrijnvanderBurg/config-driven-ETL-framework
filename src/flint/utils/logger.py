@@ -13,7 +13,7 @@ from sys import stdout
 FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
 
 
-def set_logger(name: str, filename: str = "ingestion.log") -> logging.Logger:
+def set_logger(name: str, filename: str = "flint.log") -> logging.Logger:
     """Configure and return a logger with file and console handlers.
 
     Creates a logger with the specified name and configures it with both a rotating
