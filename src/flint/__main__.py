@@ -7,10 +7,11 @@ import logging
 from argparse import ArgumentParser
 from importlib.metadata import version
 
-from flint.cli import RunCommand
-from flint.utils.logger import set_logger
+from flint.cli import RunCommand, ValidateCommand
+from flint.utils.logger import get_logger, set_logger
 
-logger: logging.Logger = set_logger(__name__)
+set_logger()  # Configure root logger for all modules
+logger: logging.Logger = get_logger(__name__)
 
 
 def main() -> None:
@@ -19,6 +20,9 @@ def main() -> None:
     Parses arguments, dispatches to the appropriate command, and exits with the correct code.
     """
     parser = ArgumentParser(description="Flint: Configuration-driven PySpark ETL framework.")
+    # parser.add_argument("--log-file", type=str, help="Path to log file (default: flint.log).")
+    # logger.level =
+
     parser.add_argument("-v", "--version", action="version", version=version("flint"))
     parser.add_argument(
         "--log-level",
@@ -26,19 +30,25 @@ def main() -> None:
         type=str.upper,
         help="Set the logging level (default: INFO). Options: DEBUG, INFO, WARNING, ERROR, CRITICAL.",
     )
-    parser.add_argument("--log-file", type=str, help="Path to log file (default: flint.log).")
-    subparsers = parser.add_subparsers(required=True, help="Command to run")
+
+    subparsers = parser.add_subparsers(dest="command", required=True, help="Command to run")
 
     # Register subcommands
-    RunCommand.from_subparser(subparsers=subparsers)
-    # ValidateCommand.from_subparser(subparsers=subparsers)
-
-    print("Parsing command line arguments...")
+    ValidateCommand.add_subparser(subparsers=subparsers)
+    RunCommand.add_subparser(subparsers=subparsers)
     args = parser.parse_args()
-    print("Parsed args:", args)
 
-    print("Calling the handler function for the chosen subcommand...")
-    args.handler(args)  # This runs the appropriate handler based on the command
+    if args.command == "validate":
+        logger.info("Running 'validate' command...")
+        validate_command = ValidateCommand.from_args(args)
+        validate_command.execute()
+
+    if args.command == "run":
+        logger.info("Running 'run' command...")
+        run_command = RunCommand.from_args(args)
+        run_command.execute()
+
+    logger.info("Application finished. Exiting.")
 
 
 if __name__ == "__main__":

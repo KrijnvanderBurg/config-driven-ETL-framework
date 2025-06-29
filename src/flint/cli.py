@@ -17,14 +17,20 @@ logger: logging.Logger = get_logger(__name__)
 class Command(ABC):
     """Abstract base class for CLI commands."""
 
-    @classmethod
+    @staticmethod
     @abstractmethod
-    def from_subparser(cls, subparsers) -> None:
+    def add_subparser(subparsers) -> None:
         """Add this command's subparser and arguments to the CLI.
 
         Args:
             subparsers: The subparsers action from argparse.
         """
+
+    @classmethod
+    @abstractmethod
+    def from_args(cls, args) -> "Command":
+        """Create a Command instance from parsed arguments."""
+        ...
 
     @abstractmethod
     def execute(self) -> None:
@@ -35,14 +41,20 @@ class RunCommand(Command):
     def __init__(self, config_filepath: str) -> None:
         self.config_filepath = config_filepath
 
-    @classmethod
-    def from_subparser(cls, subparsers) -> None:
+    @staticmethod
+    def add_subparser(subparsers) -> None:
+        """Register the 'run' subcommand and its arguments."""
         parser = subparsers.add_parser("run", help="Run the ETL pipeline")
         parser.add_argument("--config-filepath", required=True, type=str, help="Path to config file")
-        parser.set_defaults(command_cls=cls)
+
+    @classmethod
+    def from_args(cls, args) -> "RunCommand":
+        """Create a RunCommand instance from parsed arguments."""
+        return cls(config_filepath=args.config_filepath)
 
     def execute(self) -> None:
         path = Path(self.config_filepath)
+        print(logger.level)
         logger.info("Running ETL pipeline with config: %s", path)
 
         job = Job.from_file(filepath=path)
@@ -55,15 +67,22 @@ class ValidateCommand(Command):
     def __init__(self, config_filepath: str) -> None:
         self.config_filepath = config_filepath
 
-    @classmethod
-    def from_subparser(cls, subparsers) -> None:
-        parser = subparsers.add_parser("validate", help="Validate the job configuration")
+    @staticmethod
+    def add_subparser(subparsers) -> None:
+        """Register the 'validate' subcommand and its arguments."""
+        parser = subparsers.add_parser("validate", help="Validate the ETL pipeline config.")
         parser.add_argument("--config-filepath", required=True, type=str, help="Path to config file")
-        parser.set_defaults(command_cls=cls)
+
+    @classmethod
+    def from_args(cls, args) -> "ValidateCommand":
+        """Create a ValidateCommand instance from parsed arguments."""
+        return cls(config_filepath=args.config_filepath)
 
     def execute(self) -> None:
         path = Path(self.config_filepath)
-        logger.info("Validating job configuration: %s", path)
+        print(logger.level)
+        logger.info("Validating ETL pipeline with config: %s", path)
+
         job = Job.from_file(filepath=path)
         job.validate()
-        logger.info("Validation successful.")
+        logger.info("Validation completed successfully.")
