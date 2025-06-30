@@ -42,9 +42,9 @@ Flint was designed to be **minimal yet powerful** - providing structural foundat
 
 ### Build pipelines that are:
 
-✅ **Maintainable** - Clear separation of application code and business logics.
-✅ **Standardized** - Consistent pipelines and patterns across your organization  
-✅ **Version-controlled** - More easily track changes by inspecting one config file  
+✅ **Maintainable** - Clear separation of application code and business logics.  
+✅ **Standardized** - Consistent pipelines and patterns across your organization.  
+✅ **Version-controlled** - More easily track changes by inspecting one config file.
 
 Flint lets you focus on data transformations while handling the application structure complexities.
 
@@ -66,7 +66,7 @@ poetry install                           # install dependencies
 The included example demonstrates a real-world ETL pipeline:
 
 - 📄 **Config**: `examples/job.json`
-- 🏃 **Execution**: `python -m flint --config-filepath examples/job.json`
+- 🏃 **Execution**: `python -m flint run --config-filepath examples/job.json`
 - 📂 **Output**: `examples/customer_orders/output/`
 
 Running this command executes a complete pipeline that showcases Flint's key capabilities:
