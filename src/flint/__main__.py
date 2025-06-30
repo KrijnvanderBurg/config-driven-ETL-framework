@@ -1,56 +1,54 @@
-"""Command-line interface for the PySpark Ingestion Framework.
+"""Flint module entry point.
 
-This module provides a command-line entry point for executing data ingestion
-jobs defined by configuration files. It parses command-line arguments,
-validates inputs, initializes the job from a configuration file, and
-executes the ETL pipeline.
-
-Example:
-    ```
-    python -m flint --filepath path/to/config.json
-    ```
+Handles CLI argument parsing, command dispatch, and process exit.
 """
 
 import logging
 from argparse import ArgumentParser
-from pathlib import Path
+from importlib.metadata import version
 
-from flint.core.job import Job
-from flint.utils.logger import set_logger
+from flint.cli import RunCommand, ValidateCommand
+from flint.utils.logger import get_logger, set_logger
 
-logger: logging.Logger = set_logger(__name__)
+set_logger()  # Configure root logger for all modules
+logger: logging.Logger = get_logger(__name__)
 
 
 def main() -> None:
+    """Main entry point for Flint CLI (python -m flint).
+
+    Parses arguments, dispatches to the appropriate command, and exits with the correct code.
     """
-    Run the ingestion framework pipeline from command line arguments.
+    parser = ArgumentParser(description="Flint: Configuration-driven PySpark ETL framework.")
+    # parser.add_argument("--log-file", type=str, help="Path to log file (default: flint.log).")
+    # logger.level =
 
-    Parses command line arguments, validates the input filepath,
-    creates a job from the specified configuration file, and
-    executes the ETL pipeline.
+    parser.add_argument("-v", "--version", action="version", version=version("flint"))
+    parser.add_argument(
+        "--log-level",
+        default="INFO",
+        type=str.upper,
+        help="Set the logging level (default: INFO). Options: DEBUG, INFO, WARNING, ERROR, CRITICAL.",
+    )
 
-    Raises:
-        ValueError: If the filepath argument is empty.
-    """
-    logger.info("Starting job.")
+    subparsers = parser.add_subparsers(dest="command", required=True, help="Command to run")
 
-    parser = ArgumentParser(description="config driven etl.")
-    parser.add_argument("--config-filepath", required=True, type=str, help="config filepath")
+    # Register subcommands
+    ValidateCommand.add_subparser(subparsers=subparsers)
+    RunCommand.add_subparser(subparsers=subparsers)
     args = parser.parse_args()
-    logger.debug("Parsed command line arguments: %s", args)
 
-    if args.config_filepath == "":
-        raise ValueError("Config filepath is required.")
+    if args.command == "validate":
+        logger.info("Running 'validate' command...")
+        validate_command = ValidateCommand.from_args(args)
+        validate_command.execute()
 
-    config_filepath: Path = Path(args.config_filepath)
-    logger.info("Using configuration file: %s", config_filepath)
+    if args.command == "run":
+        logger.info("Running 'run' command...")
+        run_command = RunCommand.from_args(args)
+        run_command.execute()
 
-    job = Job.from_file(filepath=config_filepath)
-
-    job.validate()
-    job.execute()
-
-    logger.info("Job completed. Exiting.")
+    logger.info("Application finished. Exiting.")
 
 
 if __name__ == "__main__":

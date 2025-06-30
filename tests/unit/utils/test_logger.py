@@ -1,3 +1,5 @@
+"""unit tests for logging utility functions."""
+
 from logging import DEBUG, WARNING, Logger
 
 from pytest import MonkeyPatch
@@ -36,7 +38,7 @@ class TestLogger:
         assert isinstance(logger, Logger)
         assert logger.name == "test_logger"
 
-    def test_set_logger_file_output(self, tmp_path) -> None:
+    def test_set_logger_file_output(self) -> None:
         """
         Test set_logger writes logs to the specified file.
 
@@ -46,7 +48,7 @@ class TestLogger:
         # Act
         source_logger = set_logger("test_logger")
         rotating_file_handler = source_logger.handlers[0]  # the first handler must be a rotating file handler
-        expected_log_filename = "ingestion.log"
+        expected_log_filename = "flint.log"
 
         # Assert
         assert rotating_file_handler.baseFilename.endswith(expected_log_filename)  # type: ignore[attr-defined]

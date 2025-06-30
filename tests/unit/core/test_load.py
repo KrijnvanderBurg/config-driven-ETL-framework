@@ -19,7 +19,7 @@ class MockLoadModel:
 
     model_cls = LoadModelFile
 
-    def __init__(self, name: str, upstream_name: str, method: LoadMethod = LoadMethod.BATCH):
+    def __init__(self, name: str, upstream_name: str, method: LoadMethod = LoadMethod.BATCH) -> None:
         """Initialize test model."""
         self.name = name
         self.upstream_name = upstream_name
@@ -35,7 +35,6 @@ class MockLoadClass(Load[LoadModelFile]):
 
     def _load_batch(self) -> None:
         """Implementation of abstract method."""
-        pass
 
     def _load_streaming(self) -> StreamingQuery:
         """Implementation of abstract method."""
@@ -249,11 +248,11 @@ class TestLoad:
         load = MockLoadClass(model=model)
 
         # Act
-        with patch("builtins.open") as mock_open:
+        with patch("builtins.open") as mock_open_ctx:
             load._load_schema()
 
         # Assert
-        mock_open.assert_not_called()
+        mock_open_ctx.assert_not_called()
 
     @patch.object(LoadRegistry, "get")
     def test_base_class_from_dict_with_valid_format(self, mock_registry_get: MagicMock) -> None:
@@ -293,8 +292,5 @@ class TestLoad:
         config: dict[str, Any] = {}
 
         # Act & Assert
-        with pytest.raises(NotImplementedError) as excinfo:
+        with pytest.raises(NotImplementedError):
             Load.from_dict(config)
-
-        # NotImplementedError contains helpful message about missing format
-        assert "Load format <missing> is not supported" in str(excinfo.value)

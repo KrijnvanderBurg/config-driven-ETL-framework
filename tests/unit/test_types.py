@@ -1,3 +1,5 @@
+"""Unit tests for types, including Singleton and RegistryDecorator."""
+
 import threading
 from typing import Any
 from unittest.mock import MagicMock
