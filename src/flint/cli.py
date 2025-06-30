@@ -54,7 +54,7 @@ class Command(ABC):
 class RunCommand(Command):
     """Command to run the ETL pipeline using a configuration file."""
 
-    def __init__(self, config_filepath: str) -> None:
+    def __init__(self, config_filepath: Path) -> None:
         """Initialize RunCommand.
 
         Args:
@@ -82,7 +82,7 @@ class RunCommand(Command):
         Returns:
             RunCommand: An instance of RunCommand.
         """
-        return cls(config_filepath=args.config_filepath)
+        return cls(config_filepath=Path(args.config_filepath))
 
     def execute(self) -> None:
         """Execute the ETL pipeline as defined in the configuration file.
@@ -104,7 +104,7 @@ class RunCommand(Command):
 class ValidateCommand(Command):
     """Command to validate the ETL pipeline configuration file."""
 
-    def __init__(self, config_filepath: str) -> None:
+    def __init__(self, config_filepath: Path) -> None:
         """Initialize ValidateCommand.
 
         Args:
@@ -132,7 +132,7 @@ class ValidateCommand(Command):
         Returns:
             ValidateCommand: An instance of ValidateCommand.
         """
-        return cls(config_filepath=args.config_filepath)
+        return cls(config_filepath=Path(args.config_filepath))
 
     def execute(self) -> None:
         """Validate the ETL pipeline configuration file.
