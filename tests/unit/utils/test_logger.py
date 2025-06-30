@@ -1,3 +1,5 @@
+"""unit tests for logging utility functions."""
+
 from logging import DEBUG, WARNING, Logger
 
 from pytest import MonkeyPatch
@@ -36,7 +38,7 @@ class TestLogger:
         assert isinstance(logger, Logger)
         assert logger.name == "test_logger"
 
-    def test_set_logger_file_output(self, tmp_path) -> None:
+    def test_set_logger_file_output(self) -> None:
         """
         Test set_logger writes logs to the specified file.
 
