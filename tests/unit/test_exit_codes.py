@@ -36,7 +36,7 @@ class TestExitCodes(unittest.TestCase):
 
     def test_flint_exception_exit_codes(self):
         """Test that FlintException and derived exceptions have the correct exit codes."""
-        self.assertEqual(FlintException("test").exit_code, ExitCode.GENERAL_ERROR)
+        self.assertEqual(FlintException("test", ExitCode.GENERAL_ERROR).exit_code, ExitCode.GENERAL_ERROR)
         self.assertEqual(ConfigurationError("test").exit_code, ExitCode.CONFIGURATION_ERROR)
         self.assertEqual(ConfigurationKeyError("key", {"other_key": "value"}).exit_code, ExitCode.CONFIGURATION_ERROR)
         self.assertEqual(ValidationError("test").exit_code, ExitCode.VALIDATION_ERROR)
@@ -66,7 +66,7 @@ class TestExitCodes(unittest.TestCase):
             try:
                 raise ValueError("Inner error")
             except ValueError as e:
-                raise FlintException("Outer error") from e
+                raise FlintException("Outer error", ExitCode.GENERAL_ERROR) from e
         except FlintException as e:
             self.assertEqual(str(e), "Outer error")
             self.assertIsNotNone(e.__cause__)
