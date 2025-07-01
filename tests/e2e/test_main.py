@@ -41,7 +41,8 @@ def test__main(tmp_path: Path, job_path: str) -> None:
     SparkHandler()
 
     # Step 5: Use the modified file path for the test
-    args = argparse.Namespace(config_filepath=str(job_tmp_path))
+    # Include the command="run" argument to match the new CLI structure
+    args = argparse.Namespace(config_filepath=str(job_tmp_path), command="run", log_level="INFO")
 
     with mock.patch.object(argparse.ArgumentParser, "parse_args", return_value=args):
         # Act

@@ -15,7 +15,7 @@ from typing import Any, Final, Self
 
 from pyspark.sql.column import Column
 
-from flint.exceptions import DictKeyError
+from flint.exceptions import ConfigurationKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 CONDITION: Final[str] = "condition"
@@ -65,6 +65,6 @@ class FilterFunctionModel(FunctionModel):
             arguments = cls.Args(condition=condition)
 
         except KeyError as e:
-            raise DictKeyError(key=e.args[0], dict_=dict_) from e
+            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(function=function_name, arguments=arguments)

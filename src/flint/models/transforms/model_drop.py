@@ -13,7 +13,7 @@ from configuration files or dictionaries.
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import DictKeyError
+from flint.exceptions import ConfigurationKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 COLUMNS: Final[str] = "columns"
@@ -54,15 +54,19 @@ class DropFunctionModel(FunctionModel):
 
         Returns:
             An initialized DropFunctionModel.
+
+        Raises:
+            ConfigurationKeyError: If required keys are missing from the dictionary
         """
         try:
             function_name = dict_[FUNCTION]
             arguments_dict = dict_[ARGUMENTS]
-
             columns = arguments_dict[COLUMNS]
             arguments = cls.Args(columns=columns)
-
+            return cls(function=function_name, arguments=arguments)
         except KeyError as e:
-            raise DictKeyError(key=e.args[0], dict_=dict_) from e
-
-        return cls(function=function_name, arguments=arguments)
+            key = e.args[0]
+            if key in (FUNCTION, ARGUMENTS):
+                raise ConfigurationKeyError(key=key, dict_=dict_) from e
+            # Must be missing COLUMNS from arguments_dict
+            raise ConfigurationKeyError(key=key, dict_=dict_[ARGUMENTS]) from e

@@ -4,7 +4,8 @@ from typing import Any
 
 import pytest
 
-from flint.models.model_load import DictKeyError, LoadFormat, LoadMethod, LoadMode, LoadModelFile
+from flint.exceptions import ConfigurationKeyError
+from flint.models.model_load import LoadFormat, LoadMethod, LoadMode, LoadModelFile
 
 
 @pytest.fixture
@@ -92,7 +93,7 @@ class TestLoadModelFile:
         del valid_load_dict["name"]
 
         # Execute and Assert
-        with pytest.raises(DictKeyError):
+        with pytest.raises(ConfigurationKeyError):
             LoadModelFile.from_dict(valid_load_dict)
 
     def test_load_model_cls_file_from_dict_invalid_enum(self, valid_load_dict: dict[str, Any]) -> None:

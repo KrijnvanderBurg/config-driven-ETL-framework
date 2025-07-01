@@ -30,10 +30,11 @@ class TestRunCommand:
         cmd = RunCommand.from_args(args)
         mock_job = MagicMock()
         with patch("flint.cli.Job.from_file", return_value=mock_job) as mock_from_file:
-            cmd.execute()
-            mock_from_file.assert_called_once_with(filepath=cmd.config_filepath)
-            mock_job.validate.assert_called_once()
-            mock_job.execute.assert_called_once()
+            with patch("pathlib.Path.exists", return_value=True):
+                cmd.execute()
+                mock_from_file.assert_called_once_with(filepath=cmd.config_filepath)
+                mock_job.validate.assert_called_once()
+                mock_job.execute.assert_called_once()
 
 
 class TestValidateCommand:
@@ -57,8 +58,9 @@ class TestValidateCommand:
         cmd = ValidateCommand.from_args(args)
         mock_job = MagicMock()
         with patch("flint.cli.Job.from_file", return_value=mock_job) as mock_from_file:
-            cmd.execute()
-            mock_from_file.assert_called_once_with(filepath=cmd.config_filepath)
-            mock_job.validate.assert_called_once()
-            # ValidateCommand should not call job.execute
-            assert not mock_job.execute.called
+            with patch("pathlib.Path.exists", return_value=True):
+                cmd.execute()
+                mock_from_file.assert_called_once_with(filepath=cmd.config_filepath)
+                mock_job.validate.assert_called_once()
+                # ValidateCommand should not call job.execute
+                assert not mock_job.execute.called

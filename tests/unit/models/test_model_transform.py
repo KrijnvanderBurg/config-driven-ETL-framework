@@ -6,7 +6,8 @@ from typing import Any, Self
 
 import pytest
 
-from flint.models.model_transform import ArgsModel, DictKeyError, FunctionModel, TransformModel
+from flint.exceptions import ConfigurationKeyError
+from flint.models.model_transform import ArgsModel, FunctionModel, TransformModel
 
 
 # Define some simple concrete implementations for testing abstract classes
@@ -125,5 +126,5 @@ class TestTransformModel:
         del invalid_dict["name"]
 
         # Execute and Assert
-        with pytest.raises(DictKeyError):
+        with pytest.raises(ConfigurationKeyError):
             TransformModel.from_dict(invalid_dict)

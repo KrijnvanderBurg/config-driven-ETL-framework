@@ -20,7 +20,7 @@ from typing import Any, Final, Self
 
 from pyspark.sql.types import StructType
 
-from flint.exceptions import DictKeyError
+from flint.exceptions import ConfigurationKeyError
 from flint.utils.logger import get_logger
 from flint.utils.schema import SchemaFilepathHandler
 
@@ -110,7 +110,7 @@ class ExtractFileModel(ExtractModel):
             An initialized extraction model for file-based sources
 
         Raises:
-            DictKeyError: If required keys are missing from the configuration
+            ConfigurationKeyError: If required keys are missing from the configuration
         """
         logger.debug("Creating ExtractFileModel from dictionary: %s", dict_)
 
@@ -132,7 +132,7 @@ class ExtractFileModel(ExtractModel):
             schema = SchemaFilepathHandler.parse(schema=Path(dict_[SCHEMA]))
 
         except KeyError as e:
-            raise DictKeyError(key=e.args[0], dict_=dict_) from e
+            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         model = cls(
             name=name,

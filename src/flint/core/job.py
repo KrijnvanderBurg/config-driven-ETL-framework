@@ -18,7 +18,7 @@ from flint.core.extract import Extract
 from flint.core.load import Load
 from flint.core.transform import Transform
 from flint.core.validation import ValidateModelNamesAreUnique, ValidateUpstreamNamesExist
-from flint.exceptions import DictKeyError
+from flint.exceptions import ConfigurationKeyError
 from flint.utils.file import FileHandlerContext
 from flint.utils.logger import get_logger
 
@@ -102,7 +102,7 @@ class Job:
             A fully configured Job instance.
 
         Raises:
-            DictKeyError: If a required key is missing from the dictionary.
+            ConfigurationKeyError: If a required key is missing from the dictionary.
         """
         logger.debug("Creating Job from dictionary with keys: %s", list(dict_.keys()))
 
@@ -139,7 +139,7 @@ class Job:
                 loads.append(load)
 
         except KeyError as e:
-            raise DictKeyError(key=e.args[0], dict_=dict_) from e
+            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         job = cls(extracts=extracts, transforms=transforms, loads=loads)
         logger.info(

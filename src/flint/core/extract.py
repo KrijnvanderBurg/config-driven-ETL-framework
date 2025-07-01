@@ -77,7 +77,7 @@ class Extract(Generic[ExtractModelT], ABC):
             An initialized extraction instance of the appropriate type based on data_format
 
         Raises:
-            DictKeyError: If required keys are missing from the configuration
+            ConfigurationKeyError: If required keys are missing from the configuration
             NotImplementedError: If the specified extract format is not supported.
         """
         logger.debug("Creating Extract from dictionary: %s", dict_)

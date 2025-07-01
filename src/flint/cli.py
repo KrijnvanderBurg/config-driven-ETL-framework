@@ -10,6 +10,8 @@ from argparse import Namespace, _SubParsersAction  # type: ignore
 from pathlib import Path
 
 from flint.core.job import Job
+from flint.exceptions import ValidationError
+from flint.types import ExitCode
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -44,10 +46,14 @@ class Command(ABC):
         """
 
     @abstractmethod
-    def execute(self) -> None:
+    def execute(self) -> ExitCode:
         """Execute the command.
 
         Executes the command's main logic. Should be implemented by all subclasses.
+        Should handle all exceptions and return appropriate exit codes.
+
+        Returns:
+            ExitCode: The exit code indicating success or specific failure reason
         """
 
 
@@ -84,21 +90,42 @@ class RunCommand(Command):
         """
         return cls(config_filepath=Path(args.config_filepath))
 
-    def execute(self) -> None:
+    def execute(self) -> ExitCode:
         """Execute the ETL pipeline as defined in the configuration file.
 
         Loads, validates, and runs the ETL job using the provided configuration file.
         Logs progress and completion status.
+
+        Returns:
+            ExitCode: SUCCESS if the job completes without errors, otherwise an appropriate error code
         """
         path = Path(self.config_filepath)
-        # Log the current logger level for debugging purposes
-        print(logger.level)
         logger.info("Running ETL pipeline with config: %s", path)
 
-        job = Job.from_file(filepath=path)
-        job.validate()
-        job.execute()
-        logger.info("Job completed successfully.")
+        if not path.exists():
+            logger.error("Configuration file not found: %s", path)
+            return ExitCode.CONFIGURATION_ERROR
+
+        try:
+            job = Job.from_file(filepath=path)
+            job.validate()
+            job.execute()
+            logger.info("ETL pipeline completed successfully")
+            return ExitCode.SUCCESS
+        except ValidationError as e:
+            # Directly return appropriate exit code for validation errors
+            logger.error("Validation failed: %s", str(e))
+            return ExitCode.VALIDATION_ERROR
+        except RuntimeError as e:
+            # Wrap runtime errors as general errors using exception chaining
+            logger.error("Runtime error: %s", str(e))
+            # No need to raise here, just return the appropriate exit code
+            return ExitCode.GENERAL_ERROR
+        except Exception as e:
+            # Log and return appropriate exit code for unexpected exceptions
+            logger.error("Unexpected exception: %s", str(e))
+            logger.debug("Exception details:", exc_info=e)
+            return ExitCode.UNEXPECTED_ERROR
 
 
 class ValidateCommand(Command):
@@ -134,16 +161,37 @@ class ValidateCommand(Command):
         """
         return cls(config_filepath=Path(args.config_filepath))
 
-    def execute(self) -> None:
+    def execute(self) -> ExitCode:
         """Validate the ETL pipeline configuration file.
 
         Loads and validates the ETL job configuration file. Logs progress and completion status.
+
+        Returns:
+            ExitCode: SUCCESS if the validation completes without errors, otherwise an appropriate error code
         """
         path = Path(self.config_filepath)
-        # Log the current logger level for debugging purposes
-        print(logger.level)
         logger.info("Validating ETL pipeline with config: %s", path)
 
-        job = Job.from_file(filepath=path)
-        job.validate()
-        logger.info("Validation completed successfully.")
+        if not path.exists():
+            logger.error("Configuration file not found: %s", path)
+            return ExitCode.CONFIGURATION_ERROR
+
+        try:
+            job = Job.from_file(filepath=path)
+            job.validate()
+            logger.info("ETL pipeline validation completed successfully")
+            return ExitCode.SUCCESS
+        except ValidationError as e:
+            # Directly return appropriate exit code for validation errors
+            logger.error("Validation failed: %s", str(e))
+            return ExitCode.VALIDATION_ERROR
+        except RuntimeError as e:
+            # Wrap runtime errors as general errors using exception chaining
+            logger.error("Runtime error: %s", str(e))
+            # No need to raise here, just return the appropriate exit code
+            return ExitCode.GENERAL_ERROR
+        except Exception as e:
+            # Log and return appropriate exit code for unexpected exceptions
+            logger.error("Unexpected exception: %s", str(e))
+            logger.debug("Exception details:", exc_info=e)
+            return ExitCode.UNEXPECTED_ERROR

@@ -18,7 +18,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Final, Self
 
-from flint.exceptions import DictKeyError
+from flint.exceptions import ConfigurationKeyError
 from flint.utils.logger import get_logger
 
 from . import Model
@@ -127,7 +127,7 @@ class LoadModel(Model, ABC):
             An initialized loading model
 
         Raises:
-            DictKeyError: If required keys are missing from the configuration
+            ConfigurationKeyError: If required keys are missing from the configuration
         """
 
 
@@ -177,7 +177,7 @@ class LoadModelFile(LoadModel):
                 logger.debug("No schema location specified")
 
         except KeyError as e:
-            raise DictKeyError(key=e.args[0], dict_=dict_) from e
+            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         model = cls(
             name=name,
