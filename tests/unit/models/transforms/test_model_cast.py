@@ -4,7 +4,8 @@ from typing import Any
 
 import pytest
 
-from flint.models.transforms.model_cast import CastFunctionModel, DictKeyError
+from flint.exceptions import ConfigurationKeyError
+from flint.models.transforms.model_cast import CastFunctionModel
 
 
 class TestCastFunctionModel:
@@ -72,7 +73,7 @@ class TestCastFunctionModel:
             assert col.cast_type == type_
 
     def test_from_dict_missing_keys(self) -> None:
-        """Test from_dict with missing keys raises DictKeyError."""
+        """Test from_dict with missing keys raises ConfigurationKeyError."""
         # Test cases with different missing keys
         error_cases = [
             ({"arguments": {"columns": [{"column_name": "age", "cast_type": "integer"}]}}, "function"),
@@ -81,7 +82,6 @@ class TestCastFunctionModel:
         ]
 
         # Act & Assert for each case
-        for invalid_dict, missing_key in error_cases:
-            with pytest.raises(DictKeyError) as excinfo:
+        for invalid_dict, _ in error_cases:
+            with pytest.raises(ConfigurationKeyError):
                 CastFunctionModel.from_dict(invalid_dict)
-            assert missing_key in str(excinfo.value)

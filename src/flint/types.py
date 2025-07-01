@@ -7,11 +7,13 @@ the ingestion framework, including:
 - Singleton metaclass for ensuring only one instance of a class exists
 - Registry decorators for registering and retrieving classes based on keys
 - Type variables and generics for type-safe operations
+- Exit code enum for standardized process exit codes
 
 These types provide the foundation for the ingestion framework's architecture,
 enabling features like component registration, singleton services, and type safety.
 """
 
+import enum
 import threading
 from collections.abc import Callable, Iterator
 from typing import Any, Generic, TypeVar
@@ -22,6 +24,35 @@ from pyspark.sql.streaming.query import StreamingQuery
 # Type variables with more specific constraints
 K = TypeVar("K", bound=str | int)  # Key types typically used in registries
 V = TypeVar("V")  # Value type
+
+
+class ExitCode(enum.IntEnum):
+    """Exit codes for the application.
+
+    These codes follow common Unix/Linux conventions:
+    - 0: Success
+    - 1-63: Application-specific error codes
+    - 64-127: Command-specific error codes
+
+    References:
+        - https://tldp.org/LDP/abs/html/exitcodes.html
+        - https://www.freebsd.org/cgi/man.cgi?query=sysexits&sektion=3
+    """
+
+    SUCCESS = 0
+    GENERAL_ERROR = 1
+    INVALID_ARGUMENTS = 2
+    CONFIGURATION_ERROR = 3
+    VALIDATION_ERROR = 4
+    EXTRACT_ERROR = 10
+    TRANSFORM_ERROR = 11
+    LOAD_ERROR = 12
+    PERMISSION_ERROR = 13
+    IO_ERROR = 20
+    NETWORK_ERROR = 21
+    TIMEOUT_ERROR = 22
+    NOT_IMPLEMENTED = 23
+    UNEXPECTED_ERROR = 99
 
 
 class Singleton(type):
@@ -47,7 +78,7 @@ class Singleton(type):
         ```
     """
 
-    _instances: dict[type, Any] = {}
+    _instances: dict[Any, Any] = {}
     _lock: threading.Lock = threading.Lock()
 
     def __call__(cls, *args: Any, **kwargs: Any) -> Any:

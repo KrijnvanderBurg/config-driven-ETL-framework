@@ -14,7 +14,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import DictKeyError
+from flint.exceptions import ConfigurationKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 from flint.utils.logger import get_logger
 
@@ -66,7 +66,7 @@ class JoinFunctionModel(FunctionModel):
             An initialized JoinFunctionModel instance
 
         Raises:
-            DictKeyError: If required keys are missing or if values are invalid
+            ConfigurationKeyError: If required keys are missing from the dictionary
             ValueError: If the function name is not 'join'
             Exception: If there's an unexpected error during model creation
         """
@@ -75,7 +75,10 @@ class JoinFunctionModel(FunctionModel):
         try:
             function_name = dict_[FUNCTION]
             arguments_dict: dict = dict_[ARGUMENTS]
+        except KeyError as e:
+            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
+        try:
             other_upstream_name = arguments_dict[OTHER_UPSTREAM_NAME]
             on = arguments_dict[ON]
             how = arguments_dict[HOW]
@@ -94,7 +97,8 @@ class JoinFunctionModel(FunctionModel):
                 how=how,
             )
         except KeyError as e:
-            raise DictKeyError(key=e.args[0], dict_=dict_) from e
+            raise ConfigurationKeyError(key=e.args[0], dict_=arguments_dict) from e
+
         model = cls(function=function_name, arguments=arguments)
         logger.info("Successfully created JoinFunctionModel - joining with %s on %s", other_upstream_name, on)
         return model

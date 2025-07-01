@@ -4,24 +4,27 @@ Handles CLI argument parsing, command dispatch, and process exit.
 """
 
 import logging
+import sys
 from argparse import ArgumentParser
 from importlib.metadata import version
 
 from flint.cli import RunCommand, ValidateCommand
+from flint.types import ExitCode
 from flint.utils.logger import get_logger, set_logger
 
 set_logger()  # Configure root logger for all modules
 logger: logging.Logger = get_logger(__name__)
 
 
-def main() -> None:
+def main() -> int:
     """Main entry point for Flint CLI (python -m flint).
 
     Parses arguments, dispatches to the appropriate command, and exits with the correct code.
+
+    Returns:
+        int: The exit code (0 for success, non-zero for errors)
     """
     parser = ArgumentParser(description="Flint: Configuration-driven PySpark ETL framework.")
-    # parser.add_argument("--log-file", type=str, help="Path to log file (default: flint.log).")
-    # logger.level =
 
     parser.add_argument("-v", "--version", action="version", version=version("flint"))
     parser.add_argument(
@@ -38,18 +41,31 @@ def main() -> None:
     RunCommand.add_subparser(subparsers=subparsers)
     args = parser.parse_args()
 
-    if args.command == "validate":
-        logger.info("Running 'validate' command...")
-        validate_command = ValidateCommand.from_args(args)
-        validate_command.execute()
+    exit_code = ExitCode.GENERAL_ERROR  # Default to error until we successfully complete a command
 
-    if args.command == "run":
-        logger.info("Running 'run' command...")
-        run_command = RunCommand.from_args(args)
-        run_command.execute()
+    try:
+        if args.command == "validate":
+            logger.info("Running 'validate' command...")
+            validate_command = ValidateCommand.from_args(args)
+            exit_code = validate_command.execute()
 
-    logger.info("Application finished. Exiting.")
+        elif args.command == "run":
+            logger.info("Running 'run' command...")
+            run_command = RunCommand.from_args(args)
+            exit_code = run_command.execute()
+
+        else:
+            logger.error("Unknown command: %s", args.command)
+            exit_code = ExitCode.INVALID_ARGUMENTS
+
+    except Exception as e:
+        logger.error("Uncaught exception: %s", str(e))
+        logger.debug("Exception details:", exc_info=e)
+        exit_code = ExitCode.UNEXPECTED_ERROR
+
+    logger.info("Application finished with exit code %d (%s). Exiting.", exit_code, exit_code.name)
+    return exit_code
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

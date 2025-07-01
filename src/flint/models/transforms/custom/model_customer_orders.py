@@ -13,7 +13,7 @@ from configuration files or dictionaries.
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import DictKeyError
+from flint.exceptions import ConfigurationKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 AMOUNT_MINIMUM: Final[str] = "amount_minimum"
@@ -64,6 +64,6 @@ class CustomersOrdersFunctionModel(FunctionModel):
             arguments = cls.Args(amount_minimum=amount_minimum)
 
         except KeyError as e:
-            raise DictKeyError(key=e.args[0], dict_=dict_) from e
+            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(function=function_name, arguments=arguments)

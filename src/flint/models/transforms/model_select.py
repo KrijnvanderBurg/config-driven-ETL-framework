@@ -16,7 +16,7 @@ from typing import Any, Final, Self
 
 from pyspark.sql.column import Column
 
-from flint.exceptions import DictKeyError
+from flint.exceptions import ConfigurationKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 from flint.utils.logger import get_logger
 
@@ -60,20 +60,24 @@ class SelectFunctionModel(FunctionModel):
 
         Returns:
             An initialized SelectFunctionModel.
+
+        Raises:
+            ConfigurationKeyError: If required keys are missing from the dictionary
         """
         logger.debug("Creating SelectFunctionModel from dictionary: %s", dict_)
 
         try:
             function_name = dict_[FUNCTION]
             arguments_dict = dict_[ARGUMENTS]
+        except KeyError as e:
+            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
+        try:
             columns = arguments_dict[COLUMNS]
             logger.debug("Parsed select function - name: %s, columns: %s", function_name, columns)
-
             arguments = cls.Args(columns=columns)
-
         except KeyError as e:
-            raise DictKeyError(key=e.args[0], dict_=dict_) from e
+            raise ConfigurationKeyError(key=e.args[0], dict_=arguments_dict) from e
 
         model = cls(function=function_name, arguments=arguments)
         logger.info("Successfully created SelectFunctionModel with %d columns", len(columns))
