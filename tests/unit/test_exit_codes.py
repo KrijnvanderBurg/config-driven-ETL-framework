@@ -1,6 +1,8 @@
 """Unit tests for exit code handling.
 
-Tests the exit code enum and exception handling in CLI commands.
+Tests the exit code enum and exception handling in         cmd = RunCommand(config_filepath=Path("test.json"))
+        exit_code = cmd.execute()
+        self.assertEqual(exit_code, ExitCode.VALIDATION_ERROR) commands.
 """
 
 import unittest
@@ -77,7 +79,7 @@ class TestExitCodes(unittest.TestCase):
         """Test that configuration errors are handled properly."""
         mock_exists.return_value = False
         cmd = RunCommand(config_filepath=Path("nonexistent.json"))
-        exit_code = cmd.safe_execute()
+        exit_code = cmd.execute()
         self.assertEqual(exit_code, ExitCode.CONFIGURATION_ERROR)
 
     @patch("flint.cli.Job")
@@ -89,7 +91,7 @@ class TestExitCodes(unittest.TestCase):
         mock_job.validate.side_effect = ValidationError("Validation failed")
 
         cmd = RunCommand(config_filepath=Path("config.json"))
-        exit_code = cmd.safe_execute()
+        exit_code = cmd.execute()
         self.assertEqual(exit_code, ExitCode.VALIDATION_ERROR)
 
     @patch("flint.cli.Job")
@@ -101,7 +103,7 @@ class TestExitCodes(unittest.TestCase):
         mock_job.validate.side_effect = RuntimeError("Something went wrong")
 
         cmd = RunCommand(config_filepath=Path("config.json"))
-        exit_code = cmd.safe_execute()
+        exit_code = cmd.execute()
         self.assertEqual(exit_code, ExitCode.GENERAL_ERROR)
 
     @patch("flint.cli.Job")
@@ -113,7 +115,7 @@ class TestExitCodes(unittest.TestCase):
         # No side effects for validate or execute means success
 
         cmd = RunCommand(config_filepath=Path("config.json"))
-        exit_code = cmd.safe_execute()
+        exit_code = cmd.execute()
         self.assertEqual(exit_code, ExitCode.SUCCESS)
 
     @patch("flint.cli.Job")
@@ -124,12 +126,12 @@ class TestExitCodes(unittest.TestCase):
         mock_job.from_file.return_value = mock_job
 
         cmd = ValidateCommand(config_filepath=Path("config.json"))
-        exit_code = cmd.safe_execute()
+        exit_code = cmd.execute()
         self.assertEqual(exit_code, ExitCode.SUCCESS)
 
         # Test validation error
         mock_job.validate.side_effect = ValidationError("Validation failed")
-        exit_code = cmd.safe_execute()
+        exit_code = cmd.execute()
         self.assertEqual(exit_code, ExitCode.VALIDATION_ERROR)
 
 

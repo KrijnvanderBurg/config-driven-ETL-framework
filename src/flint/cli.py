@@ -10,11 +10,7 @@ from argparse import Namespace, _SubParsersAction  # type: ignore
 from pathlib import Path
 
 from flint.core.job import Job
-from flint.exceptions import (
-    ConfigurationError,
-    FlintException,
-    ValidationError,
-)
+from flint.exceptions import ValidationError
 from flint.types import ExitCode
 from flint.utils.logger import get_logger
 
@@ -54,31 +50,11 @@ class Command(ABC):
         """Execute the command.
 
         Executes the command's main logic. Should be implemented by all subclasses.
+        Should handle all exceptions and return appropriate exit codes.
 
         Returns:
             ExitCode: The exit code indicating success or specific failure reason
         """
-
-    def safe_execute(self) -> ExitCode:
-        """Execute the command with exception handling.
-
-        Wraps the execute method with standardized exception handling to ensure
-        all commands properly handle exceptions and return appropriate exit codes.
-        Takes advantage of Python's built-in exception chaining to preserve
-        context about the original cause of exceptions.
-
-        Returns:
-            ExitCode: The exit code indicating success or specific failure reason
-        """
-        try:
-            return self.execute()
-        except FlintException as e:
-            logger.error("%s: %s", e.__class__.__name__, str(e))
-            return e.exit_code
-        except Exception as e:
-            logger.error("Unexpected error: %s", str(e))
-            logger.debug("Exception details:", exc_info=e)
-            return ExitCode.UNEXPECTED_ERROR
 
 
 class RunCommand(Command):
@@ -127,7 +103,8 @@ class RunCommand(Command):
         logger.info("Running ETL pipeline with config: %s", path)
 
         if not path.exists():
-            raise ConfigurationError(f"Configuration file not found: {path}")
+            logger.error("Configuration file not found: %s", path)
+            return ExitCode.CONFIGURATION_ERROR
 
         try:
             job = Job.from_file(filepath=path)
@@ -145,12 +122,10 @@ class RunCommand(Command):
             # No need to raise here, just return the appropriate exit code
             return ExitCode.GENERAL_ERROR
         except Exception as e:
-            # Re-raise all other exceptions to be handled by safe_execute
-            # using exception chaining to preserve the original cause
+            # Log and return appropriate exit code for unexpected exceptions
             logger.error("Unexpected exception: %s", str(e))
-            raise FlintException(
-                f"Failed to run ETL pipeline with config {path}", exit_code=ExitCode.UNEXPECTED_ERROR
-            ) from e
+            logger.debug("Exception details:", exc_info=e)
+            return ExitCode.UNEXPECTED_ERROR
 
 
 class ValidateCommand(Command):
@@ -198,7 +173,8 @@ class ValidateCommand(Command):
         logger.info("Validating ETL pipeline with config: %s", path)
 
         if not path.exists():
-            raise ConfigurationError(f"Configuration file not found: {path}")
+            logger.error("Configuration file not found: %s", path)
+            return ExitCode.CONFIGURATION_ERROR
 
         try:
             job = Job.from_file(filepath=path)
@@ -215,7 +191,7 @@ class ValidateCommand(Command):
             # No need to raise here, just return the appropriate exit code
             return ExitCode.GENERAL_ERROR
         except Exception as e:
-            # Re-raise all other exceptions to be handled by safe_execute
-            # using exception chaining to preserve the original cause
+            # Log and return appropriate exit code for unexpected exceptions
             logger.error("Unexpected exception: %s", str(e))
-            raise FlintException(f"Failed to validate config {path}", exit_code=ExitCode.UNEXPECTED_ERROR) from e
+            logger.debug("Exception details:", exc_info=e)
+            return ExitCode.UNEXPECTED_ERROR

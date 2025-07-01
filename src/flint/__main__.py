@@ -47,12 +47,12 @@ def main() -> int:
         if args.command == "validate":
             logger.info("Running 'validate' command...")
             validate_command = ValidateCommand.from_args(args)
-            exit_code = validate_command.safe_execute()
+            exit_code = validate_command.execute()
 
         elif args.command == "run":
             logger.info("Running 'run' command...")
             run_command = RunCommand.from_args(args)
-            exit_code = run_command.safe_execute()
+            exit_code = run_command.execute()
 
         else:
             logger.error("Unknown command: %s", args.command)
