@@ -6,7 +6,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pyspark.sql.column import Column
 
-from flint.models.transforms.model_select import DictKeyError, SelectFunctionModel
+from flint.exceptions import ConfigurationKeyError
+from flint.models.transforms.model_select import SelectFunctionModel
 
 
 class TestSelectFunctionModel:
@@ -67,7 +68,7 @@ class TestSelectFunctionModel:
         del invalid_dict["function"]
 
         # Execute and Assert
-        with pytest.raises(DictKeyError):
+        with pytest.raises(ConfigurationKeyError):
             SelectFunctionModel.from_dict(invalid_dict)
 
     @patch("pyspark.sql.functions.col")
@@ -78,7 +79,7 @@ class TestSelectFunctionModel:
         del invalid_dict["arguments"]
 
         # Execute and Assert
-        with pytest.raises(DictKeyError):
+        with pytest.raises(ConfigurationKeyError):
             SelectFunctionModel.from_dict(invalid_dict)
 
     @patch("pyspark.sql.functions.col")
@@ -89,5 +90,5 @@ class TestSelectFunctionModel:
         invalid_dict["arguments"] = {}  # Empty arguments dict without columns
 
         # Execute and Assert
-        with pytest.raises(DictKeyError):
+        with pytest.raises(ConfigurationKeyError):
             SelectFunctionModel.from_dict(invalid_dict)

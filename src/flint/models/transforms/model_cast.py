@@ -13,7 +13,7 @@ from configuration files or dictionaries.
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import DictKeyError
+from flint.exceptions import ConfigurationKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 COLUMNS: Final[str] = "columns"
@@ -73,18 +73,18 @@ class CastFunctionModel(FunctionModel):
             A new CastFunctionModel instance with the specified configuration
 
         Raises:
-            DictKeyError: If required keys are missing from the dictionary
+            ConfigurationKeyError: If required keys are missing from the dictionary
         """
         try:
             function_name = dict_[FUNCTION]
             arguments_dict = dict_[ARGUMENTS]
         except KeyError as e:
-            raise DictKeyError(key=e.args[0], dict_=dict_) from e
+            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         try:
             columns_data = arguments_dict[COLUMNS]
         except KeyError as e:
-            raise DictKeyError(key=e.args[0], dict_=arguments_dict) from e
+            raise ConfigurationKeyError(key=e.args[0], dict_=arguments_dict) from e
 
         # Process list of column objects
         columns = []
@@ -92,7 +92,7 @@ class CastFunctionModel(FunctionModel):
             try:
                 columns.append(cls.Column(column_name=column_data[COLUMN_NAME], cast_type=column_data[CAST_TYPE]))
             except KeyError as e:
-                raise DictKeyError(key=e.args[0], dict_=column_data) from e
+                raise ConfigurationKeyError(key=e.args[0], dict_=column_data) from e
 
         arguments = cls.Args(columns=columns)
 
