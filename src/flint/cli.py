@@ -148,7 +148,9 @@ class RunCommand(Command):
             # Re-raise all other exceptions to be handled by safe_execute
             # using exception chaining to preserve the original cause
             logger.error("Unexpected exception: %s", str(e))
-            raise FlintException(f"Failed to run ETL pipeline with config {path}") from e
+            raise FlintException(
+                f"Failed to run ETL pipeline with config {path}", exit_code=ExitCode.UNEXPECTED_ERROR
+            ) from e
 
 
 class ValidateCommand(Command):
@@ -216,4 +218,4 @@ class ValidateCommand(Command):
             # Re-raise all other exceptions to be handled by safe_execute
             # using exception chaining to preserve the original cause
             logger.error("Unexpected exception: %s", str(e))
-            raise FlintException(f"Failed to validate ETL pipeline with config {path}") from e
+            raise FlintException(f"Failed to validate config {path}", exit_code=ExitCode.UNEXPECTED_ERROR) from e
