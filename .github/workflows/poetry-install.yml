@@ -1,0 +1,14 @@
+# Reusable workflow for Poetry install only
+name: Poetry Install Only
+
+on:
+  workflow_call:
+
+jobs:
+  poetry-install:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install dependencies
+        run: |
+          poetry install \
+            --no-interaction

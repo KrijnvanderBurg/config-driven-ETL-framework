@@ -22,8 +22,8 @@ jobs:
       - name: Install Poetry
         run: pip install poetry
 
-      - name: Install dependencies
-        run: poetry install --no-interaction --no-root
+      - name: Call poetry-install workflow
+        uses: ./.github/workflows/poetry-install.yml
 
       - name: Lint with Ruff
         run: poetry run ruff src/
