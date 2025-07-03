@@ -1,0 +1,25 @@
+name: 'Python 1st Party Security Scanning'
+description: 'Run security scanners for first-party code'
+inputs:
+  target-path:
+    description: 'Path to scan'
+    required: false
+    default: 'src'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Bandit security scanner
+      uses: ./.github/actions/atomic/bandit
+      with:
+        target-path: ${{ inputs.target-path }}
+    
+    - name: Run Semgrep security scanner
+      uses: ./.github/actions/atomic/semgrep
+      with:
+        target-path: ${{ inputs.target-path }}
+    
+    - name: Run TruffleHog secret scanner
+      uses: ./.github/actions/atomic/trufflehog
+      with:
+        target-path: ${{ inputs.target-path }}

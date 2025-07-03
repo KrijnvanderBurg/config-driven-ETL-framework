@@ -1,0 +1,29 @@
+name: 'Black Formatter'
+description: 'Format code using Black'
+inputs:
+  target-path:
+    description: 'Path to format'
+    required: false
+    default: '.'
+  config-file:
+    description: 'Path to black configuration file'
+    required: false
+    default: '.devcontainer/.dotfiles/python/.black'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Black formatter
+      shell: bash
+      run: |
+        CONFIG_ARG=""
+        if [ -f "${{ inputs.config-file }}" ]; then
+          CONFIG_ARG="--config ${{ inputs.config-file }}"
+        fi
+        
+        poetry run black \
+          --check \
+          --diff \
+          --color \
+          $CONFIG_ARG \
+          ${{ inputs.target-path }}

@@ -1,0 +1,29 @@
+name: 'isort Import Sorter'
+description: 'Sort imports using isort'
+inputs:
+  target-path:
+    description: 'Path to check'
+    required: false
+    default: '.'
+  config-file:
+    description: 'Path to isort configuration file'
+    required: false
+    default: '.devcontainer/.dotfiles/python/.isort.cfg'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run isort
+      shell: bash
+      run: |
+        CONFIG_ARG=""
+        if [ -f "${{ inputs.config-file }}" ]; then
+          CONFIG_ARG="--settings-file ${{ inputs.config-file }}"
+        fi
+        
+        poetry run isort \
+          --check-only \
+          --diff \
+          --color \
+          $CONFIG_ARG \
+          ${{ inputs.target-path }}

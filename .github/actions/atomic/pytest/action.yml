@@ -1,0 +1,52 @@
+name: 'Pytest'
+description: 'Run tests using pytest with coverage'
+inputs:
+  tests-path:
+    description: 'Path to test directory'
+    required: false
+    default: 'tests'
+  coverage-path:
+    description: 'Path to source directory for coverage'
+    required: false
+    default: 'src'
+  pytest-config:
+    description: 'Path to pytest configuration file'
+    required: false
+    default: '.devcontainer/.dotfiles/python/pytest.ini'
+  coverage-config:
+    description: 'Path to coverage configuration file'
+    required: false
+    default: '.devcontainer/.dotfiles/python/.coveragerc'
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run pytest with coverage
+      shell: bash
+      run: |
+        # Install pytest plugins if not already installed
+        if ! python -c "import pytest_cov" 2>/dev/null; then
+          poetry run pip install pytest-cov pytest-xdist
+        fi
+        
+        # Run pytest with coverage
+        poetry run pytest \
+          ${{ inputs.tests-path }} \
+          --cov=${{ inputs.coverage-path }} \
+          --cov-report=xml:coverage.xml \
+          --cov-report=html:htmlcov \
+          --cov-report=term-missing \
+          --junitxml=JUNIT-TEST.xml \
+          --tb=short \
+          -v \
+          $(if [ -f "${{ inputs.pytest-config }}" ]; then echo "--config-file=${{ inputs.pytest-config }}"; fi)
+        
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results
+        path: |
+          JUNIT-TEST.xml
+          coverage.xml
+          htmlcov/
