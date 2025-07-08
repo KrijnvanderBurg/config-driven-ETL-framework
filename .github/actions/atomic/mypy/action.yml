@@ -21,7 +21,7 @@ runs:
           CONFIG_ARG="--config-file ${{ inputs.config-file }}"
         fi
         
-        poetry run mypy \
+        mypy \
           --show-error-codes \
           --show-error-context \
           --pretty \

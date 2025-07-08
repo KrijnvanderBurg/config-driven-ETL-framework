@@ -21,7 +21,7 @@ runs:
           CONFIG_ARG="--rcfile ${{ inputs.config-file }}"
         fi
         
-        poetry run pylint \
+        pylint \
           --output-format=colorized \
           --reports=y \
           $CONFIG_ARG \

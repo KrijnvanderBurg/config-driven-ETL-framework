@@ -21,7 +21,7 @@ runs:
           CONFIG_ARG="--config ${{ inputs.config-file }}"
         fi
         
-        poetry run ruff format \
+        ruff format \
           --check \
           --diff \
           $CONFIG_ARG \

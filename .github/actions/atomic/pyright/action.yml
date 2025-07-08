@@ -28,6 +28,6 @@ runs:
           CONFIG_ARG="--project ${{ inputs.config-file }}"
         fi
         
-        poetry run pyright \
+        pyright \
           $CONFIG_ARG \
           ${{ inputs.target-path }}

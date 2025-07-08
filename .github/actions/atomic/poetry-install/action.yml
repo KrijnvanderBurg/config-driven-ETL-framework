@@ -6,6 +6,7 @@ runs:
     - name: Install dependencies
       shell: bash
       run: |
+        poetry config virtualenvs.create false
         if [ -f "poetry.lock" ]; then
           poetry install --no-interaction --no-ansi
         else

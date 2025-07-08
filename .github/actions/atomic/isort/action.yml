@@ -16,14 +16,19 @@ runs:
     - name: Run isort
       shell: bash
       run: |
-        CONFIG_ARG=""
-        if [ -f "${{ inputs.config-file }}" ]; then
-          CONFIG_ARG="--settings-file ${{ inputs.config-file }}"
-        fi
+        target_path="${{ inputs.target-path }}"
+        config_filepath="${{ inputs.config-file }}"
         
-        poetry run isort \
-          --check-only \
-          --diff \
-          --color \
-          $CONFIG_ARG \
-          ${{ inputs.target-path }}
+        echo "Scanning folder: $target_path"
+        echo "Config file: $config_filepath"
+        
+        # Install isort if not already installed
+        if ! command -v isort &> /dev/null; then
+            echo "Installing isort..."
+            pip install isort --quiet
+        fi
+        echo -n "isort version: " && isort --version
+        
+        isort --check-only "$target_path" \
+          --settings-path "$config_filepath" \
+          --diff

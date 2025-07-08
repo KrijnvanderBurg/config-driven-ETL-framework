@@ -16,28 +16,18 @@ runs:
     - name: Run Bandit
       shell: bash
       run: |
-        CONFIG_ARG=""
-        if [ -f "${{ inputs.config-file }}" ]; then
-          CONFIG_ARG="--configfile ${{ inputs.config-file }}"
+        target_path="${{ inputs.target-path }}"
+        config_filepath="${{ inputs.config-file }}"
+        
+        echo "Scanning folder: $target_path"
+        echo "Config file: $config_filepath"
+        
+        # Install bandit if not already installed
+        if ! command -v bandit &> /dev/null; then
+            echo "Installing bandit..."
+            pip install bandit --quiet
         fi
+        echo -n "bandit version: " && bandit --version
         
-        poetry run bandit \
-          --recursive \
-          --format json \
-          --output bandit-report.json \
-          $CONFIG_ARG \
-          ${{ inputs.target-path }} || true
-        
-        # Also output to console
-        poetry run bandit \
-          --recursive \
-          --format screen \
-          $CONFIG_ARG \
-          ${{ inputs.target-path }}
-    
-    - name: Upload Bandit results
-      uses: actions/upload-artifact@v3
-      if: always()
-      with:
-        name: bandit-results
-        path: bandit-report.json
+        bandit -r "$target_path" \
+          -c "$config_filepath"

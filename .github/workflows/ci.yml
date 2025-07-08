@@ -47,28 +47,25 @@ jobs:
         uses: snok/install-poetry@v1
         with:
           version: latest
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: poetry-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            poetry-${{ runner.os }}-${{ env.PYTHON_VERSION }}-
+          virtualenvs-create: false
 
       - name: Install dependencies
         uses: ./.github/actions/atomic/poetry-install
 
       - name: Run formatters
         uses: ./.github/actions/composite/python-formatters
+        with:
+          target-path: ${{ env.PYTHON_SRC_DIRECTORY }}
 
       - name: Run linters
         uses: ./.github/actions/composite/python-linters
+        with:
+          target-path: ${{ env.PYTHON_SRC_DIRECTORY }}
 
       - name: Run type checkers
         uses: ./.github/actions/composite/python-typechecking
+        with:
+          target-path: ${{ env.PYTHON_SRC_DIRECTORY }}
 
   tests:
     name: Tests
@@ -91,16 +88,7 @@ jobs:
         uses: snok/install-poetry@v1
         with:
           version: latest
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: poetry-${{ runner.os }}-${{ matrix.python-version }}-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            poetry-${{ runner.os }}-${{ matrix.python-version }}-
+          virtualenvs-create: false
 
       - name: Install dependencies
         uses: ./.github/actions/atomic/poetry-install
@@ -138,22 +126,16 @@ jobs:
         uses: snok/install-poetry@v1
         with:
           version: latest
-          virtualenvs-create: true
-          virtualenvs-in-project: true
-
-      - name: Cache Poetry dependencies
-        uses: actions/cache@v3
-        with:
-          path: .venv
-          key: poetry-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('poetry.lock') }}
-          restore-keys: |
-            poetry-${{ runner.os }}-${{ env.PYTHON_VERSION }}-
+          virtualenvs-create: false
 
       - name: Install dependencies
         uses: ./.github/actions/atomic/poetry-install
 
       - name: Run 1st party vulnerability scanning
         uses: ./.github/actions/composite/python-security-1st-party
+        with:
+          python-src-directory: ${{ env.PYTHON_SRC_DIRECTORY }}
+          python-project-directory: .
 
       - name: Run 3rd party vulnerability scanning
         uses: ./.github/actions/composite/python-security-3rd-party
@@ -175,8 +157,7 @@ jobs:
         uses: snok/install-poetry@v1
         with:
           version: latest
-          virtualenvs-create: true
-          virtualenvs-in-project: true
+          virtualenvs-create: false
 
       - name: Install dependencies
         uses: ./.github/actions/atomic/poetry-install

@@ -16,14 +16,22 @@ runs:
     - name: Run Black formatter
       shell: bash
       run: |
-        CONFIG_ARG=""
-        if [ -f "${{ inputs.config-file }}" ]; then
-          CONFIG_ARG="--config ${{ inputs.config-file }}"
-        fi
+        target_path="${{ inputs.target-path }}"
+        config_filepath="${{ inputs.config-file }}"
         
-        poetry run black \
+        echo "Scanning folder: $target_path"
+        echo "Config file: $config_filepath"
+        
+        # Install black if not already installed
+        if ! command -v black &> /dev/null; then
+            echo "Installing black..."
+            pip install black --quiet
+        fi
+        echo -n "black version: " && black --version
+        
+        black "$target_path" \
+          --config "$config_filepath" \
           --check \
           --diff \
           --color \
-          $CONFIG_ARG \
-          ${{ inputs.target-path }}
+          --verbose

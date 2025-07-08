@@ -16,12 +16,21 @@ runs:
     - name: Run Ruff linter
       shell: bash
       run: |
-        CONFIG_ARG=""
-        if [ -f "${{ inputs.config-file }}" ]; then
-          CONFIG_ARG="--config ${{ inputs.config-file }}"
-        fi
+        target_path="${{ inputs.target-path }}"
+        config_filepath="${{ inputs.config-file }}"
         
-        poetry run ruff check \
-          --output-format=github \
-          $CONFIG_ARG \
-          ${{ inputs.target-path }}
+        echo "Scanning folder: $target_path"
+        echo "Config file: $config_filepath"
+        
+        # Install ruff if not already installed
+        if ! command -v ruff &> /dev/null; then
+            echo "Installing ruff..."
+            pip install ruff --quiet
+        fi
+        echo -n "ruff version: " && ruff --version
+        
+        ruff check "$target_path" \
+          --config "$config_filepath" \
+          --no-fix \
+          --diff \
+          --show-files

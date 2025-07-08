@@ -21,7 +21,7 @@ runs:
           CONFIG_ARG="--config ${{ inputs.config-file }}"
         fi
         
-        poetry run flake8 \
+        flake8 \
           --format='%(path)s:%(row)d:%(col)d: %(code)s %(text)s' \
           $CONFIG_ARG \
           ${{ inputs.target-path }}
