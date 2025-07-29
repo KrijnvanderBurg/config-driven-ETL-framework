@@ -30,7 +30,7 @@ class Command(ABC):
         """Add this command's subparser and arguments to the CLI.
 
         Args:
-            subparsers (argparse._SubParsersAction): The subparsers action from argparse.
+            subparsers: The subparsers action from argparse.
         """
 
     @classmethod
@@ -45,15 +45,34 @@ class Command(ABC):
             Command: An instance of the command.
         """
 
-    @abstractmethod
     def execute(self) -> ExitCode:
-        """Execute the command.
+        """Execute the command with standardized exception handling.
 
-        Executes the command's main logic. Should be implemented by all subclasses.
-        Should handle all exceptions and return appropriate exit codes.
+        Template method that provides consistent error handling for system-level exceptions.
+        Subclasses implement _execute() with their specific logic and business exception handling.
 
         Returns:
-            ExitCode: The exit code indicating success or specific failure reason
+            ExitCode: The exit code indicating success or specific failure reason.
+        """
+        try:
+            return self._execute()
+        except KeyboardInterrupt:
+            logger.info("Operation cancelled by user")
+            raise
+        except Exception as e:  # pylint: disable=broad-except
+            logger.error("Unexpected exception %s: %s", type(e).__name__, str(e))
+            logger.debug("Exception details:", exc_info=True)
+            return ExitCode.UNEXPECTED_ERROR
+
+    @abstractmethod
+    def _execute(self) -> ExitCode:
+        """Execute the command's core logic.
+
+        This method should be implemented by subclasses to contain their specific
+        business logic and handle any command-specific exceptions.
+
+        Returns:
+            ExitCode: The exit code indicating success or specific failure reason.
         """
 
 
@@ -88,44 +107,46 @@ class RunCommand(Command):
         Returns:
             RunCommand: An instance of RunCommand.
         """
-        return cls(config_filepath=Path(args.config_filepath))
+        config_filepath = Path(args.config_filepath)
 
-    def execute(self) -> ExitCode:
+        return cls(config_filepath=config_filepath)
+
+    def _execute(self) -> ExitCode:
         """Execute the ETL pipeline as defined in the configuration file.
 
         Loads, validates, and runs the ETL job using the provided configuration file.
         Logs progress and completion status.
 
         Returns:
-            ExitCode: SUCCESS if the job completes without errors, otherwise an appropriate error code
+            ExitCode: SUCCESS if the pipeline completes without errors, otherwise an appropriate error code.
         """
-        path = Path(self.config_filepath)
-        logger.info("Running ETL pipeline with config: %s", path)
+        logger.info("Running ETL pipeline with config: %s", self.config_filepath)
 
-        if not path.exists():
-            logger.error("Configuration file not found: %s", path)
+        if not self.config_filepath.exists():
+            logger.error("Configuration file not found: %s", self.config_filepath)
             return ExitCode.CONFIGURATION_ERROR
 
         try:
-            job = Job.from_file(filepath=path)
+            job = Job.from_file(filepath=self.config_filepath)
             job.validate()
             job.execute()
             logger.info("ETL pipeline completed successfully")
             return ExitCode.SUCCESS
         except ValidationError as e:
-            # Directly return appropriate exit code for validation errors
             logger.error("Validation failed: %s", str(e))
             return ExitCode.VALIDATION_ERROR
-        except RuntimeError as e:
-            # Wrap runtime errors as general errors using exception chaining
-            logger.error("Runtime error: %s", str(e))
-            # No need to raise here, just return the appropriate exit code
+        except FileNotFoundError as e:
+            logger.error("Required file not found: %s", str(e))
+            return ExitCode.CONFIGURATION_ERROR
+        except PermissionError as e:
+            logger.error("Permission denied: %s", str(e))
+            return ExitCode.CONFIGURATION_ERROR
+        except OSError as e:
+            logger.error("I/O error occurred: %s", str(e))
             return ExitCode.GENERAL_ERROR
-        except Exception as e:
-            # Log and return appropriate exit code for unexpected exceptions
-            logger.error("Unexpected exception: %s", str(e))
-            logger.debug("Exception details:", exc_info=e)
-            return ExitCode.UNEXPECTED_ERROR
+        except RuntimeError as e:
+            logger.error("Runtime error: %s", str(e))
+            return ExitCode.GENERAL_ERROR
 
 
 class ValidateCommand(Command):
@@ -159,39 +180,41 @@ class ValidateCommand(Command):
         Returns:
             ValidateCommand: An instance of ValidateCommand.
         """
-        return cls(config_filepath=Path(args.config_filepath))
+        config_filepath = Path(args.config_filepath)
 
-    def execute(self) -> ExitCode:
+        return cls(config_filepath=config_filepath)
+
+    def _execute(self) -> ExitCode:
         """Validate the ETL pipeline configuration file.
 
         Loads and validates the ETL job configuration file. Logs progress and completion status.
 
         Returns:
-            ExitCode: SUCCESS if the validation completes without errors, otherwise an appropriate error code
+            ExitCode: SUCCESS if validation completes without errors, otherwise an appropriate error code.
         """
-        path = Path(self.config_filepath)
-        logger.info("Validating ETL pipeline with config: %s", path)
+        logger.info("Validating ETL pipeline with config: %s", self.config_filepath)
 
-        if not path.exists():
-            logger.error("Configuration file not found: %s", path)
+        if not self.config_filepath.exists():
+            logger.error("Configuration file not found: %s", self.config_filepath)
             return ExitCode.CONFIGURATION_ERROR
 
         try:
-            job = Job.from_file(filepath=path)
+            job = Job.from_file(filepath=self.config_filepath)
             job.validate()
             logger.info("ETL pipeline validation completed successfully")
             return ExitCode.SUCCESS
         except ValidationError as e:
-            # Directly return appropriate exit code for validation errors
             logger.error("Validation failed: %s", str(e))
             return ExitCode.VALIDATION_ERROR
-        except RuntimeError as e:
-            # Wrap runtime errors as general errors using exception chaining
-            logger.error("Runtime error: %s", str(e))
-            # No need to raise here, just return the appropriate exit code
+        except FileNotFoundError as e:
+            logger.error("Required file not found: %s", str(e))
+            return ExitCode.CONFIGURATION_ERROR
+        except PermissionError as e:
+            logger.error("Permission denied: %s", str(e))
+            return ExitCode.CONFIGURATION_ERROR
+        except OSError as e:
+            logger.error("I/O error occurred: %s", str(e))
             return ExitCode.GENERAL_ERROR
-        except Exception as e:
-            # Log and return appropriate exit code for unexpected exceptions
-            logger.error("Unexpected exception: %s", str(e))
-            logger.debug("Exception details:", exc_info=e)
-            return ExitCode.UNEXPECTED_ERROR
+        except RuntimeError as e:
+            logger.error("Runtime error: %s", str(e))
+            return ExitCode.GENERAL_ERROR
