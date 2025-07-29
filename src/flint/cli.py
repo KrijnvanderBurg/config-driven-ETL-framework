@@ -8,6 +8,7 @@ import logging
 from abc import ABC, abstractmethod
 from argparse import Namespace, _SubParsersAction  # type: ignore
 from pathlib import Path
+from typing import Self
 
 from flint.core.job import Job
 from flint.exceptions import ValidationError
@@ -35,7 +36,7 @@ class Command(ABC):
 
     @classmethod
     @abstractmethod
-    def from_args(cls, args: Namespace) -> "Command":
+    def from_args(cls, args: Namespace) -> Self:
         """Create a Command instance from parsed arguments.
 
         Args:
@@ -98,7 +99,7 @@ class RunCommand(Command):
         parser.add_argument("--config-filepath", required=True, type=str, help="Path to config file")
 
     @classmethod
-    def from_args(cls, args: Namespace) -> "RunCommand":
+    def from_args(cls, args: Namespace) -> Self:
         """Create a RunCommand instance from parsed arguments.
 
         Args:
@@ -171,7 +172,7 @@ class ValidateCommand(Command):
         parser.add_argument("--config-filepath", required=True, type=str, help="Path to config file")
 
     @classmethod
-    def from_args(cls, args: Namespace) -> "ValidateCommand":
+    def from_args(cls, args: Namespace) -> Self:
         """Create a ValidateCommand instance from parsed arguments.
 
         Args:
