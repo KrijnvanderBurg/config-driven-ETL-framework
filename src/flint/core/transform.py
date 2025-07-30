@@ -195,7 +195,7 @@ class Transform:
         # Apply transformations
         logger.debug("Applying %d transformation functions", len(self.functions))
         for i, function in enumerate(self.functions):
-            logger.debug("Applying function %d/%d: %s", i + 1, len(self.functions), function.model.function)
+            logger.debug("Applying function %d/%d: %s", i, len(self.functions), function.model.function)
 
             original_count = self.data_registry[self.model.name].count()
             self.data_registry[self.model.name] = function.callable_(df=self.data_registry[self.model.name])
