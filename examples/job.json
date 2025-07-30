@@ -57,7 +57,7 @@
             {
                 "type": "email",
                 "name": "custom-email-alert-name",
-                "config": {
+                "channel": {
                     "smtp_server": "smtp.company.com",
                     "smtp_port": 587,
                     "username": "username",
@@ -66,41 +66,41 @@
                     "to_emails": [
                         "ops@company.com",
                         "data-team@company.com"
-                    ],
-                    "failure_handling": {
-                        "error_on_alert_failure": true,
-                        "retry_attempts": 3,
-                        "retry_delay_seconds": 30
-                    }
+                    ]
+                },
+                "failure_handling": {
+                    "error_on_alert_failure": true,
+                    "retry_attempts": 3,
+                    "retry_delay_seconds": 30
                 }
             },
             {
                 "type": "http",
                 "name": "a-http-post-alert-name",
-                "config": {
+                "channel": {
                     "url": "https://hooks.slack.com",
                     "method": "POST",
                     "headers": {
                         "Content-Type": "application/json"
                     },
-                    "timeout": 30,
-                    "failure_handling": {
-                        "error_on_alert_failure": false,
-                        "retry_attempts": 2,
-                        "retry_delay_seconds": 15
-                    }
+                    "timeout": 30
+                },
+                "failure_handling": {
+                    "error_on_alert_failure": false,
+                    "retry_attempts": 2,
+                    "retry_delay_seconds": 15
                 }
             },
             {
                 "type": "file",
                 "name": "custom-file-alert-name",
-                "config": {
-                    "file_path": "alerts.log",
-                    "failure_handling": {
-                        "error_on_alert_failure": false,
-                        "retry_attempts": 0,
-                        "retry_delay_seconds": 0
-                    }
+                "channel": {
+                    "file_path": "alerts.log"
+                },
+                "failure_handling": {
+                    "error_on_alert_failure": false,
+                    "retry_attempts": 0,
+                    "retry_delay_seconds": 0
                 }
             }
         ],

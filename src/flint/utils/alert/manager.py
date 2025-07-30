@@ -26,6 +26,10 @@ logger: logging.Logger = get_logger(__name__)
 TEMPLATES: Final[str] = "templates"
 CHANNELS: Final[str] = "channels"
 ROUTING_RULES: Final[str] = "routing_rules"
+TYPE: Final[str] = "type"
+NAME: Final[str] = "name"
+CHANNEL: Final[str] = "channel"
+FAILURE_HANDLING: Final[str] = "failure_handling"
 
 
 @dataclass
@@ -37,52 +41,47 @@ class Channels(Model):
     channel instances of each type and handles their configuration from dictionary data.
 
     Attributes:
-        channels: Dictionary mapping channel names to channel instances
+        channels: Dictionary mapping channel names to their instances
     """
 
     channels: dict[str, BaseChannel]
 
     @classmethod
-    def from_dict(cls, dict_: Any) -> Self:
-        """Create a ChannelManager instance from a dictionary or list configuration.
+    def from_dict(cls, dict_: list[dict[str, Any]]) -> Self:
+        """Create a Channels instance from a list of channel configurations.
 
         Args:
-            dict_: Either a dictionary containing a list of channel configurations under 'channels' key,
-                  or directly a list of channel configurations.
-                  Each channel has 'type', 'name', and 'config' fields:
-                  [
-                      {"type": "email", "name": "ops-email", "config": {...}},
-                      {"type": "http", "name": "slack-webhook", "config": {...}},
-                      {"type": "file", "name": "error-log", "config": {...}}
-                  ]
+            dict_: List of channel configuration dicts. Each channel has 'type', 'name', and 'channel' fields:
+                [
+                    {"type": "email", "name": "ops-email", "channel": {...}},
+                    {"type": "http", "name": "slack-webhook", "channel": {...}},
+                    {"type": "file", "name": "error-log", "channel": {...}}
+                ]
 
         Returns:
-            A ChannelManager instance configured from the dictionary
+            A Channels instance configured from the list
         """
-        logger.debug("Creating ChannelManager from configuration")
+        logger.debug("Creating Channels from configuration list")
 
         channels: dict[str, BaseChannel] = {}
+        for channel_config in dict_:
+            channel_type = channel_config[TYPE]
+            channel_name = channel_config[NAME]
+            channel_config_dict = channel_config[CHANNEL]
 
-        # Handle both direct list and dictionary with 'channels' key
-        channels_list = dict_["channels"] if "channels" in dict_ else dict_
-
-        for channel_config in channels_list:
-            channel_type = channel_config["type"]
-            channel_name = channel_config["name"]
-            config = channel_config["config"]
-
+            # Create the appropriate channel instance
             channel: BaseChannel
             if channel_type == "email":
-                channel = EmailChannel.from_dict(config)
+                channel = EmailChannel.from_dict(channel_config_dict)
             elif channel_type == "http":
-                channel = HttpChannel.from_dict(config)
+                channel = HttpChannel.from_dict(channel_config_dict)
             elif channel_type == "file":
-                channel = FileChannel.from_dict(config)
+                channel = FileChannel.from_dict(channel_config_dict)
             else:
-                raise ValueError(f"Unknown channel type: {channel_type} in channel config: {channel_config}")
+                raise ValueError(f"Unknown channel type: {channel_type}")
 
             channels[channel_name] = channel
-            logger.debug("Created %s channel '%s' from configuration", channel_type, channel_name)
+            logger.debug("Added %s channel '%s' to configuration", channel_type, channel_name)
 
         return cls(channels=channels)
 
@@ -136,3 +135,19 @@ class AlertManager(Model):
         routing_rules = RoutingRules.from_dict(dict_[ROUTING_RULES])
 
         return cls(templates=templates, channels=channels, routing_rules=routing_rules)
+
+    def send_alert(self, message: str, title: str | None = None) -> None:
+        """Send an alert to all channels as defined by enabled routing rules.
+
+        Args:
+            message: The alert message to send.
+            title: Optional alert title.
+        """
+        for rule in self.routing_rules.rules:
+            if not rule.enabled:
+                continue
+            for channel_name in rule.channel_names:
+                # Find the channel by name
+                if channel_name in self.channels.channels:
+                    # Send alert through the channel instance
+                    self.channels.channels[channel_name].send_alert(message, title)

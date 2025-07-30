@@ -13,14 +13,13 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.exceptions import ConfigurationKeyError
-from flint.utils.alert.channels.base import BaseChannel, FailureHandling
+from flint.utils.alert.channels.base import BaseChannel
 from flint.utils.logger import get_logger
 
 URL: Final[str] = "url"
 METHOD: Final[str] = "method"
 HEADERS: Final[str] = "headers"
 TIMEOUT: Final[str] = "timeout"
-FAILURE_HANDLING: Final[str] = "failure_handling"
 
 logger: logging.Logger = get_logger(__name__)
 
@@ -38,14 +37,12 @@ class HttpChannel(BaseChannel):
         method: HTTP method to use (GET, POST, PUT, etc.)
         headers: Dictionary of HTTP headers to include in requests
         timeout: Request timeout in seconds
-        failure_handling: Configuration for failure handling and retries
     """
 
     url: str
     method: str
     headers: dict[str, str]
     timeout: int
-    failure_handling: FailureHandling
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -57,7 +54,6 @@ class HttpChannel(BaseChannel):
                   - method: HTTP method (POST, GET, etc.)
                   - headers: Dictionary of HTTP headers
                   - timeout: Request timeout in seconds
-                  - failure_handling: Failure handling configuration
 
         Returns:
             An HttpChannel instance configured from the dictionary
@@ -67,8 +63,7 @@ class HttpChannel(BaseChannel):
             ...     "url": "${SLACK_WEBHOOK_URL}",
             ...     "method": "POST",
             ...     "headers": {"Content-Type": "application/json"},
-            ...     "timeout": 30,
-            ...     "failure_handling": {...}
+            ...     "timeout": 30
             ... }
             >>> http_channel = HttpChannel.from_dict(config)
         """
@@ -78,7 +73,6 @@ class HttpChannel(BaseChannel):
             method = dict_[METHOD]
             headers = dict_[HEADERS]
             timeout = dict_[TIMEOUT]
-            failure_handling = FailureHandling.from_dict(dict_[FAILURE_HANDLING])
         except KeyError as e:
             raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
@@ -87,5 +81,8 @@ class HttpChannel(BaseChannel):
             method=method,
             headers=headers,
             timeout=timeout,
-            failure_handling=failure_handling,
         )
+
+    def send_alert(self, message: str, title: str | None = None) -> None:
+        """Send an alert message via HTTP (not implemented yet)."""
+        raise NotImplementedError("send_alert not implemented for HttpChannel.")

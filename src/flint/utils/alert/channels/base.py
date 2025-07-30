@@ -86,8 +86,6 @@ class BaseChannel(Model, ABC):
         failure_handling: Configuration for failure handling and retries
     """
 
-    failure_handling: FailureHandling
-
     @classmethod
     @abstractmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -103,3 +101,16 @@ class BaseChannel(Model, ABC):
             NotImplementedError: When not implemented by subclasses
         """
         raise NotImplementedError
+
+    @abstractmethod
+    def send_alert(self, message: str, title: str | None = None) -> None:
+        """Send an alert message through this channel.
+
+        Args:
+            message: The alert message to send.
+            title: Optional alert title.
+
+        Raises:
+            NotImplementedError: Must be implemented by subclasses.
+        """
+        raise NotImplementedError("send_alert must be implemented by subclasses.")

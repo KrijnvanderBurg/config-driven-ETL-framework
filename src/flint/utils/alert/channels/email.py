@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.exceptions import ConfigurationKeyError
-from flint.utils.alert.channels.base import BaseChannel, FailureHandling
+from flint.utils.alert.channels.base import BaseChannel
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -24,7 +24,6 @@ USERNAME: Final[str] = "username"
 PASSWORD: Final[str] = "password"
 FROM_EMAIL: Final[str] = "from_email"
 TO_EMAILS: Final[str] = "to_emails"
-FAILURE_HANDLING: Final[str] = "failure_handling"
 
 
 @dataclass
@@ -42,7 +41,6 @@ class EmailChannel(BaseChannel):
         password: SMTP authentication password
         from_email: Email address to send alerts from
         to_emails: List of recipient email addresses
-        failure_handling: Configuration for failure handling and retries
     """
 
     smtp_server: str
@@ -51,7 +49,6 @@ class EmailChannel(BaseChannel):
     password: str
     from_email: str
     to_emails: list[str]
-    failure_handling: FailureHandling
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -65,7 +62,6 @@ class EmailChannel(BaseChannel):
                   - password: SMTP authentication password
                   - from_email: Sender email address
                   - to_emails: List of recipient email addresses
-                  - failure_handling: Failure handling configuration
 
         Returns:
             An EmailChannel instance configured from the dictionary
@@ -77,8 +73,7 @@ class EmailChannel(BaseChannel):
             ...     "username": "${SMTP_USER}",
             ...     "password": "${SMTP_PASSWORD}",
             ...     "from_email": "etl-alerts@company.com",
-            ...     "to_emails": ["ops@company.com", "data-team@company.com"],
-            ...     "failure_handling": {...}
+            ...     "to_emails": ["ops@company.com", "data-team@company.com"]
             ... }
             >>> email_channel = EmailChannel.from_dict(config)
         """
@@ -90,7 +85,6 @@ class EmailChannel(BaseChannel):
             password = dict_[PASSWORD]
             from_email = dict_[FROM_EMAIL]
             to_emails = dict_[TO_EMAILS]
-            failure_handling = FailureHandling.from_dict(dict_[FAILURE_HANDLING])
         except KeyError as e:
             raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
@@ -101,5 +95,8 @@ class EmailChannel(BaseChannel):
             password=password,
             from_email=from_email,
             to_emails=to_emails,
-            failure_handling=failure_handling,
         )
+
+    def send_alert(self, message: str, title: str | None = None) -> None:
+        """Send an alert message via email (not implemented yet)."""
+        raise NotImplementedError("send_alert not implemented for EmailChannel.")
