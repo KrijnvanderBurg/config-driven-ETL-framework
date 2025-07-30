@@ -37,9 +37,11 @@ class TestJob:
         # Arrange
         mock_file_handler = MagicMock()
         mock_file_handler.read.return_value = {
-            "extracts": [{"name": "test_extract"}],
-            "transforms": [{"name": "test_transform", "upstream_name": "test_extract"}],
-            "loads": [{"name": "test_load", "upstream_name": "test_transform"}],
+            "job": {
+                "extracts": [{"name": "test_extract"}],
+                "transforms": [{"name": "test_transform", "upstream_name": "test_extract"}],
+                "loads": [{"name": "test_load", "upstream_name": "test_transform"}],
+            }
         }
         mock_from_filepath.return_value = mock_file_handler
 
@@ -88,9 +90,11 @@ class TestJob:
         """Test creating a Job from a configuration dictionary."""
         # Arrange
         job_dict: dict = {
-            "extracts": [{"name": "test_extract"}],
-            "transforms": [{"name": "test_transform", "upstream_name": "test_extract"}],
-            "loads": [{"name": "test_load", "upstream_name": "test_transform"}],
+            "job": {
+                "extracts": [{"name": "test_extract"}],
+                "transforms": [{"name": "test_transform", "upstream_name": "test_extract"}],
+                "loads": [{"name": "test_load", "upstream_name": "test_transform"}],
+            }
         }
 
         # Mock the from_dict methods

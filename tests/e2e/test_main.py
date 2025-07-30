@@ -13,7 +13,7 @@ from pyspark.sql.types import StructType
 from pyspark.testing import assertDataFrameEqual
 
 from flint.__main__ import main
-from flint.core.job import LOADS
+from flint.core.job import JOB, LOADS
 from flint.core.load import DATA_FORMAT, LOCATION, SCHEMA_LOCATION
 from flint.utils.spark import SparkHandler
 
@@ -29,7 +29,7 @@ def test__main(tmp_path: Path, job_path: str) -> None:
         data: dict = json.load(file)
 
     # Step 2: Prepend the load location filepath with tmp_path to write results to temporary directory
-    for load in data[LOADS]:
+    for load in data[JOB][LOADS]:
         load[LOCATION] = str(Path(tmp_path, load[LOCATION]))
         load[SCHEMA_LOCATION] = str(Path(tmp_path, load[SCHEMA_LOCATION]))
 
@@ -49,7 +49,7 @@ def test__main(tmp_path: Path, job_path: str) -> None:
         main()
 
         # Assert
-        for load in data[LOADS]:
+        for load in data[JOB][LOADS]:
             test_output_path_relative = Path(load[LOCATION]).relative_to(tmp_path)
 
             load_output_actual = Path(load[LOCATION])

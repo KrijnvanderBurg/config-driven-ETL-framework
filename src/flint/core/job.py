@@ -24,6 +24,7 @@ from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
+JOB: Final[str] = "job"
 EXTRACTS: Final[str] = "extracts"
 TRANSFORMS: Final[str] = "transforms"
 LOADS: Final[str] = "loads"
@@ -107,34 +108,35 @@ class Job:
         logger.debug("Creating Job from dictionary with keys: %s", list(dict_.keys()))
 
         try:
+            job_config = dict_[JOB]
+            logger.debug("Processing job configuration with keys: %s", list(job_config.keys()))
+
             extracts: list[Extract] = []
-            extract_configs = dict_[EXTRACTS]
+            extract_configs = job_config[EXTRACTS]
             logger.debug("Processing %d extract configurations", len(extract_configs))
 
             for i, extract_dict in enumerate(extract_configs):
-                logger.debug(
-                    "Creating extract %d/%d: %s", i + 1, len(extract_configs), extract_dict.get("name", "unnamed")
-                )
+                logger.debug("Creating extract %d/%d: %s", i, len(extract_configs), extract_dict.get("name", "unnamed"))
                 extract: Extract = Extract.from_dict(dict_=extract_dict)
                 extracts.append(extract)
 
             transforms: list[Transform] = []
-            transform_configs = dict_[TRANSFORMS]
+            transform_configs = job_config[TRANSFORMS]
             logger.debug("Processing %d transform configurations", len(transform_configs))
 
             for i, transform_dict in enumerate(transform_configs):
                 logger.debug(
-                    "Creating transform %d/%d: %s", i + 1, len(transform_configs), transform_dict.get("name", "unnamed")
+                    "Creating transform %d/%d: %s", i, len(transform_configs), transform_dict.get("name", "unnamed")
                 )
                 transform: Transform = Transform.from_dict(dict_=transform_dict)
                 transforms.append(transform)
 
             loads: list[Load] = []
-            load_configs = dict_[LOADS]
+            load_configs = job_config[LOADS]
             logger.debug("Processing %d load configurations", len(load_configs))
 
             for i, load_dict in enumerate(load_configs):
-                logger.debug("Creating load %d/%d: %s", i + 1, len(load_configs), load_dict.get("name", "unnamed"))
+                logger.debug("Creating load %d/%d: %s", i, len(load_configs), load_dict.get("name", "unnamed"))
                 load: Load = Load.from_dict(dict_=load_dict)
                 loads.append(load)
 

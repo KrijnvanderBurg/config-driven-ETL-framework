@@ -1,48 +1,50 @@
 {
-    "extracts": [
-        {
-            "name": "extract-test",
-            "data_format": "csv",
-            "location": "tests/e2e/cast/input_data.csv",
-            "method": "batch",
-            "options": {
-                "delimiter": ",",
-                "header": true,
-                "inferSchema": false
-            },
-            "schema": "tests/e2e/cast/input_schema.json"
-        }
-    ],
-    "transforms": [
-        {
-            "name": "transform-test",
-            "upstream_name": "extract-test",
-            "functions": [
-                { "function": "cast", "arguments": { 
-                        "columns": [
-                            {"column_name": "id", "cast_type": "integer"},
-                            {"column_name": "age", "cast_type": "integer"},
-                            {"column_name": "price", "cast_type": "decimal(5,2)"},
-                            {"column_name": "is_active", "cast_type": "boolean"},
-                            {"column_name": "join_date", "cast_type": "date"}
-                        ]
+    "job": {
+        "extracts": [
+            {
+                "name": "extract-test",
+                "data_format": "csv",
+                "location": "tests/e2e/cast/input_data.csv",
+                "method": "batch",
+                "options": {
+                    "delimiter": ",",
+                    "header": true,
+                    "inferSchema": false
+                },
+                "schema": "tests/e2e/cast/input_schema.json"
+            }
+        ],
+        "transforms": [
+            {
+                "name": "transform-test",
+                "upstream_name": "extract-test",
+                "functions": [
+                    { "function": "cast", "arguments": { 
+                            "columns": [
+                                {"column_name": "id", "cast_type": "integer"},
+                                {"column_name": "age", "cast_type": "integer"},
+                                {"column_name": "price", "cast_type": "decimal(5,2)"},
+                                {"column_name": "is_active", "cast_type": "boolean"},
+                                {"column_name": "join_date", "cast_type": "date"}
+                            ]
+                        }
                     }
-                }
-            ]
-        }
-    ],
-    "loads": [
-        {
-            "name": "load-test",
-            "upstream_name": "transform-test",
-            "data_format": "csv",
-            "location": "tests/e2e/cast/load-test",
-            "method": "batch",
-            "mode": "overwrite",
-            "options": {
-                "header": true
-            },
-            "schema_location": "tests/e2e/cast/schema_output.json"
-        }
-    ]
+                ]
+            }
+        ],
+        "loads": [
+            {
+                "name": "load-test",
+                "upstream_name": "transform-test",
+                "data_format": "csv",
+                "location": "tests/e2e/cast/load-test",
+                "method": "batch",
+                "mode": "overwrite",
+                "options": {
+                    "header": true
+                },
+                "schema_location": "tests/e2e/cast/schema_output.json"
+            }
+        ]
+    }
 }
