@@ -1,11 +1,11 @@
-"""Routing rules for alert channel selection and filtering.
+"""Trigger rules for alert channel selection and filtering.
 
-This module defines the routing rules system that determines which channels
+This module defines the trigger rules system that determines which channels
 should receive specific alerts based on conditions like log level, message
 content, and environment variables.
 
-The routing system supports flexible condition matching with various criteria
-to enable sophisticated alert routing logic.
+The trigger system supports flexible condition matching with various criteria
+to enable sophisticated alert trigger logic.
 """
 
 import logging
@@ -29,13 +29,13 @@ ENABLED: Final[str] = "enabled"
 CHANNEL_NAMES: Final[str] = "channel_names"
 CONDITIONS: Final[str] = "conditions"
 
-# RoutingRules constants
+# Triggers constants
 RULES: Final[str] = "rules"
 
 
 @dataclass
 class Conditions(Model):
-    """Conditions for determining when a routing rule should apply.
+    """Conditions for determining when a trigger rule should apply.
 
     This class defines the various conditions that can be used to filter
     and route alerts to appropriate channels based on alert characteristics.
@@ -89,13 +89,13 @@ class Conditions(Model):
 
 @dataclass
 class RoutingRule(Model):
-    """Individual routing rule for alert channel selection.
+    """Individual trigger rule for alert channel selection.
 
-    This class represents a single routing rule that defines conditions
+    This class represents a single trigger rule that defines conditions
     for when alerts should be sent to specific channel_names.
 
     Attributes:
-        name: Unique name for the routing rule
+        name: Unique name for the trigger rule
         enabled: Whether this rule is currently active
         channel_names: List of channel names that should receive alerts matching this rule
         conditions: Conditions that must be met for this rule to apply
@@ -111,7 +111,7 @@ class RoutingRule(Model):
         """Create a RoutingRule instance from a dictionary configuration.
 
         Args:
-            dict_: Dictionary containing routing rule configuration with keys:
+            dict_: Dictionary containing trigger rule configuration with keys:
                   - name: Unique name for the rule
                   - enabled: Whether the rule is active
                   - channel_names: List of channel names
@@ -148,10 +148,10 @@ class RoutingRule(Model):
 
 
 @dataclass
-class RoutingRules(Model):
-    """Collection of routing rules for alert processing.
+class Triggers(Model):
+    """Collection of trigger rules for alert processing.
 
-    This class manages a collection of routing rules that determine
+    This class manages a collection of trigger rules that determine
     which channels should receive specific alerts based on their conditions.
 
     Attributes:
@@ -162,23 +162,23 @@ class RoutingRules(Model):
 
     @classmethod
     def from_dict(cls, dict_: Any) -> Self:
-        """Create a RoutingRules instance from a dictionary or list configuration.
+        """Create a Triggers instance from a dictionary or list configuration.
 
         Args:
-            dict_: List of dictionaries containing routing rule configurations,
+            dict_: List of dictionaries containing trigger rule configurations,
                   or a dictionary with a 'rules' key containing the list
 
         Returns:
-            A RoutingRules instance configured from the dictionary
+            A Triggers instance configured from the dictionary
 
         Examples:
             >>> config = [
             ...     {"name": "rule1", "enabled": True, ...},
             ...     {"name": "rule2", "enabled": False, ...}
             ... ]
-            >>> routing_rules = RoutingRules.from_dict(config)
+            >>> triggers = Triggers.from_dict(config)
         """
-        logger.debug("Creating RoutingRules from configuration")
+        logger.debug("Creating Triggers from configuration")
 
         try:
             rules_config = dict_

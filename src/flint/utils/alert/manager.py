@@ -1,8 +1,8 @@
-"""Alert manager for handling notification configurations and routing.
+"""Alert manager for handling notification configurations and trigger.
 
 This module provides the main AlertManager class that orchestrates alert
-processing and routing based on configuration. It serves as the root object
-for the alert system, managing templates, channels, and routing rules.
+processing and trigger based on configuration. It serves as the root object
+for the alert system, managing templates, channels, and trigger rules.
 
 The AlertManager uses the from_dict classmethod pattern consistent with other
 components in the Flint framework to create instances from configuration data.
@@ -17,15 +17,15 @@ from flint.utils.alert.channels.base import BaseChannel
 from flint.utils.alert.channels.email import EmailChannel
 from flint.utils.alert.channels.file import FileChannel
 from flint.utils.alert.channels.http import HttpChannel
-from flint.utils.alert.routing_rules import RoutingRules
 from flint.utils.alert.template import Templates
+from flint.utils.alert.triggers import Triggers
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
 TEMPLATES: Final[str] = "templates"
 CHANNELS: Final[str] = "channels"
-ROUTING_RULES: Final[str] = "routing_rules"
+triggers: Final[str] = "triggers"
 TYPE: Final[str] = "type"
 NAME: Final[str] = "name"
 CHANNEL: Final[str] = "channel"
@@ -33,7 +33,7 @@ FAILURE_HANDLING: Final[str] = "failure_handling"
 
 
 @dataclass
-class Channels(Model):
+class Channel(Model):
     """Manager for alert channel configurations and coordination.
 
     This class manages all configured alert channels and provides a unified
@@ -43,8 +43,6 @@ class Channels(Model):
     Attributes:
         channels: Dictionary mapping channel names to their instances
     """
-
-    channels: dict[str, BaseChannel]
 
     @classmethod
     def from_dict(cls, dict_: list[dict[str, Any]]) -> Self:
@@ -65,44 +63,44 @@ class Channels(Model):
 
         channels: dict[str, BaseChannel] = {}
         for channel_config in dict_:
-            channel_type = channel_config[TYPE]
-            channel_name = channel_config[NAME]
-            channel_config_dict = channel_config[CHANNEL]
+            type = channel_config[TYPE]
+            name = channel_config[NAME]
+            channel_dict = channel_config[CHANNEL]
 
             # Create the appropriate channel instance
             channel: BaseChannel
-            if channel_type == "email":
-                channel = EmailChannel.from_dict(channel_config_dict)
-            elif channel_type == "http":
-                channel = HttpChannel.from_dict(channel_config_dict)
-            elif channel_type == "file":
-                channel = FileChannel.from_dict(channel_config_dict)
+            if type == "email":
+                channel = EmailChannel.from_dict(channel_dict)
+            elif type == "http":
+                channel = HttpChannel.from_dict(channel_dict)
+            elif type == "file":
+                channel = FileChannel.from_dict(channel_dict)
             else:
-                raise ValueError(f"Unknown channel type: {channel_type}")
+                raise ValueError(f"Unknown channel type: {type}")
 
-            channels[channel_name] = channel
-            logger.debug("Added %s channel '%s' to configuration", channel_type, channel_name)
+            channels[name] = channel
+            logger.debug("Added %s channel '%s' to configuration", type, name)
 
         return cls(channels=channels)
 
 
 @dataclass
 class AlertManager(Model):
-    """Main alert manager that coordinates alert processing and routing.
+    """Main alert manager that coordinates alert processing and trigger.
 
     This class serves as the root object for the alert system, managing the
-    configuration and coordination of templates, channels, and routing rules.
+    configuration and coordination of templates, channels, and trigger rules.
     It implements the Model interface to support configuration-driven initialization.
 
     Attributes:
         templates: Template configuration for formatting alert messages
         channels: Channel manager for handling different notification channels
-        routing_rules: Rules for determining which channels to use for specific alerts
+        triggers: Rules for determining which channels to use for specific alerts
     """
 
     templates: Templates
-    channels: Channels
-    routing_rules: RoutingRules
+    channels: Channel
+    triggers: Triggers
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -112,7 +110,7 @@ class AlertManager(Model):
             dict_: Dictionary containing alert configuration with keys:
                   - templates: Template configuration for message formatting
                   - channels: Channel configurations for notifications
-                  - routing_rules: Rules for alert routing
+                  - triggers: Rules for alert trigger
 
         Returns:
             An AlertManager instance configured from the dictionary
@@ -124,26 +122,26 @@ class AlertManager(Model):
             >>> config = {
             ...     "templates": {...},
             ...     "channels": {...},
-            ...     "routing_rules": [...]
+            ...     "triggers": [...]
             ... }
             >>> manager = AlertManager.from_dict(config)
         """
         logger.debug("Creating AlertManager from configuration dictionary")
 
         templates = Templates.from_dict(dict_[TEMPLATES])
-        channels = Channels.from_dict(dict_[CHANNELS])
-        routing_rules = RoutingRules.from_dict(dict_[ROUTING_RULES])
+        channels = Channel.from_dict(dict_[CHANNELS])
+        triggers = Triggers.from_dict(dict_[triggers])
 
-        return cls(templates=templates, channels=channels, routing_rules=routing_rules)
+        return cls(templates=templates, channels=channels, triggers=triggers)
 
     def send_alert(self, message: str, title: str | None = None) -> None:
-        """Send an alert to all channels as defined by enabled routing rules.
+        """Send an alert to all channels as defined by enabled trigger rules.
 
         Args:
             message: The alert message to send.
             title: Optional alert title.
         """
-        for rule in self.routing_rules.rules:
+        for rule in self.triggers.rules:
             if not rule.enabled:
                 continue
             for channel_name in rule.channel_names:

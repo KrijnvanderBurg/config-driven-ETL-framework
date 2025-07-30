@@ -35,6 +35,7 @@ class EmailChannel(BaseChannel):
     failure handling with retry logic.
 
     Attributes:
+        name: The unique name of this channel instance
         smtp_server: SMTP server hostname or IP address
         smtp_port: SMTP server port number
         username: SMTP authentication username

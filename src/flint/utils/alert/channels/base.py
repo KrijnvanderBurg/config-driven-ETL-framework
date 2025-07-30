@@ -81,9 +81,6 @@ class BaseChannel(Model, ABC):
     This class provides the common interface and shared functionality
     for all types of alert channels. Concrete channel implementations
     must inherit from this class and implement the abstract methods.
-
-    Attributes:
-        failure_handling: Configuration for failure handling and retries
     """
 
     @classmethod
