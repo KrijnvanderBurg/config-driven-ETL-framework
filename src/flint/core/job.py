@@ -191,7 +191,7 @@ class Job:
         logger.info("Starting extract phase with %d extractors", len(self.extracts))
         start_time = time.time()
 
-        for i, extract in enumerate(self.extracts, 1):
+        for i, extract in enumerate(self.extracts):
             extract_start_time = time.time()
             logger.debug("Running extractor %d/%d: %s", i, len(self.extracts), extract.model.name)
             extract.extract()
@@ -210,7 +210,7 @@ class Job:
         logger.info("Starting transform phase with %d transformers", len(self.transforms))
         start_time = time.time()
 
-        for i, transform in enumerate(self.transforms, 1):
+        for i, transform in enumerate(self.transforms):
             transform_start_time = time.time()
             logger.debug("Running transformer %d/%d: %s", i, len(self.transforms), transform.model.name)
             transform.transform()
@@ -229,7 +229,7 @@ class Job:
         logger.info("Starting load phase with %d loaders", len(self.loads))
         start_time = time.time()
 
-        for i, load in enumerate(self.loads, 1):
+        for i, load in enumerate(self.loads):
             load_start_time = time.time()
             logger.debug("Running loader %d/%d: %s", i, len(self.loads), load.model.name)
             load.load()
