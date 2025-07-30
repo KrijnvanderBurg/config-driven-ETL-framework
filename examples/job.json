@@ -45,5 +45,102 @@
                 }
             }
         ]
+    },
+    "alert": {
+        "templates": {
+            "prepend_title": "ETL Pipeline Alert",
+            "append_title": "Alert Notification",
+            "prepend_message": "Attention: ETL Pipeline Alert",
+            "append_message": "Please take necessary actions."
+        },
+        "channels": [
+            {
+                "type": "email",
+                "name": "custom-email-alert-name",
+                "config": {
+                    "smtp_server": "smtp.company.com",
+                    "smtp_port": 587,
+                    "username": "username",
+                    "password": "password",
+                    "from_email": "etl-alerts@company.com",
+                    "to_emails": [
+                        "ops@company.com",
+                        "data-team@company.com"
+                    ],
+                    "failure_handling": {
+                        "error_on_alert_failure": true,
+                        "retry_attempts": 3,
+                        "retry_delay_seconds": 30
+                    }
+                }
+            },
+            {
+                "type": "http",
+                "name": "a-http-post-alert-name",
+                "config": {
+                    "url": "https://hooks.slack.com",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "timeout": 30,
+                    "failure_handling": {
+                        "error_on_alert_failure": false,
+                        "retry_attempts": 2,
+                        "retry_delay_seconds": 15
+                    }
+                }
+            },
+            {
+                "type": "file",
+                "name": "custom-file-alert-name",
+                "config": {
+                    "file_path": "alerts.log",
+                    "failure_handling": {
+                        "error_on_alert_failure": false,
+                        "retry_attempts": 0,
+                        "retry_delay_seconds": 0
+                    }
+                }
+            }
+        ],
+        "routing_rules": [
+            {
+                "name": "production_critical_errors",
+                "enabled": true,
+                "channel_names": ["custom-email-alert-name", "a-http-post-alert-name"],
+                "conditions": {
+                    "exception_contains": ["database", "connection", "timeout"],
+                    "exception_regex": "",
+                    "env_vars_matches": {
+                        "ENVIRONMENT": ["production", "prod"],
+                        "DEPLOYMENT_STAGE": ["live", "production"]
+                    }
+                }
+            },
+            {
+                "name": "staging_warnings",
+                "enabled": true,
+                "channel_names": ["custom-file-alert-name"],
+                "conditions": {
+                    "exception_contains": [],
+                    "exception_regex": ".*connection.*failed.*|.*timeout.*error.*",
+                    "env_vars_matches": {
+                        "ENVIRONMENT": ["staging", "test"],
+                        "APP_MODE": ["debug"]
+                    }
+                }
+            },
+            {
+                "name": "team_specific_alerts",
+                "enabled": true,
+                "channel_names": ["a-http-post-alert-name"],
+                "conditions": {
+                    "exception_contains": ["database", "connection", "timeout"],
+                    "exception_regex": "",
+                    "env_vars_matches": {}
+                }
+            }
+        ]
     }
 }
