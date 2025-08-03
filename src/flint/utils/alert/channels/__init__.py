@@ -1,18 +1,50 @@
-"""Alert channels for the Flint ETL framework.
+"""Alert Configs for the Flint ETL framework.
 
-This package provides different notification channels for the alert system,
-including email, HTTP webhooks, and file-based notifications. Each channel
+This package provides different notification Configs for the alert system,
+including email, HTTP webhooks, and file-based notifications. Each Config
 implements a common interface for consistent configuration and usage.
 
-Available channels:
-- EmailChannel: SMTP-based email notifications
-- HttpChannel: HTTP webhook notifications
-- FileChannel: File-based logging notifications
+Available Configs:
+- EmailConfig: SMTP-based email notifications
+- HttpConfig: HTTP webhook notifications
+- FileConfig: File-based logging notifications
 """
 
-from flint.utils.alert.channels.base import BaseChannel, FailureHandling
-from flint.utils.alert.channels.email import EmailChannel
-from flint.utils.alert.channels.file import FileChannel
-from flint.utils.alert.channels.http import HttpChannel
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from typing import Any, Self
 
-__all__ = ["BaseChannel", "FailureHandling", "EmailChannel", "HttpChannel", "FileChannel"]
+from flint.models import Model
+from flint.utils.alert.channels.email import EmailConfig
+from flint.utils.alert.channels.file import FileConfig
+from flint.utils.alert.channels.http import HttpConfig
+
+__all__ = ["EmailConfig", "HttpConfig", "FileConfig", "BaseConfig"]
+
+
+@dataclass
+class BaseConfig(Model, ABC):
+    """Base configuration for alert channels.
+
+    This class serves as a base for all channel configurations, providing
+    common attributes and methods for channel implementations.
+    """
+
+    @abstractmethod
+    @classmethod
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
+        """Create a channel configuration instance from a dictionary."""
+        raise NotImplementedError("Subclasses must implement from_dict method")
+
+    @abstractmethod
+    def send_alert(self, message: str, title: str) -> None:
+        """Send an alert message through this channel.
+
+        Args:
+            message: The alert message to send.
+            title: Optional alert title.
+
+        Raises:
+            NotImplementedError: Must be implemented by subclasses.
+        """
+        raise NotImplementedError("send_alert must be implemented by subclasses.")

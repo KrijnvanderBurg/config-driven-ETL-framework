@@ -13,10 +13,7 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.models import Model
-from flint.utils.alert.channels.base import BaseChannel
-from flint.utils.alert.channels.email import EmailChannel
-from flint.utils.alert.channels.file import FileChannel
-from flint.utils.alert.channels.http import HttpChannel
+from flint.utils.alert.channel import Channel
 from flint.utils.alert.template import Templates
 from flint.utils.alert.triggers import Triggers
 from flint.utils.logger import get_logger
@@ -25,63 +22,7 @@ logger: logging.Logger = get_logger(__name__)
 
 TEMPLATES: Final[str] = "templates"
 CHANNELS: Final[str] = "channels"
-triggers: Final[str] = "triggers"
-TYPE: Final[str] = "type"
-NAME: Final[str] = "name"
-CHANNEL: Final[str] = "channel"
-FAILURE_HANDLING: Final[str] = "failure_handling"
-
-
-@dataclass
-class Channel(Model):
-    """Manager for alert channel configurations and coordination.
-
-    This class manages all configured alert channels and provides a unified
-    interface for channel initialization and access. It supports multiple
-    channel instances of each type and handles their configuration from dictionary data.
-
-    Attributes:
-        channels: Dictionary mapping channel names to their instances
-    """
-
-    @classmethod
-    def from_dict(cls, dict_: list[dict[str, Any]]) -> Self:
-        """Create a Channels instance from a list of channel configurations.
-
-        Args:
-            dict_: List of channel configuration dicts. Each channel has 'type', 'name', and 'channel' fields:
-                [
-                    {"type": "email", "name": "ops-email", "channel": {...}},
-                    {"type": "http", "name": "slack-webhook", "channel": {...}},
-                    {"type": "file", "name": "error-log", "channel": {...}}
-                ]
-
-        Returns:
-            A Channels instance configured from the list
-        """
-        logger.debug("Creating Channels from configuration list")
-
-        channels: dict[str, BaseChannel] = {}
-        for channel_config in dict_:
-            type = channel_config[TYPE]
-            name = channel_config[NAME]
-            channel_dict = channel_config[CHANNEL]
-
-            # Create the appropriate channel instance
-            channel: BaseChannel
-            if type == "email":
-                channel = EmailChannel.from_dict(channel_dict)
-            elif type == "http":
-                channel = HttpChannel.from_dict(channel_dict)
-            elif type == "file":
-                channel = FileChannel.from_dict(channel_dict)
-            else:
-                raise ValueError(f"Unknown channel type: {type}")
-
-            channels[name] = channel
-            logger.debug("Added %s channel '%s' to configuration", type, name)
-
-        return cls(channels=channels)
+TRIGGERS: Final[str] = "triggers"
 
 
 @dataclass
@@ -99,7 +40,7 @@ class AlertManager(Model):
     """
 
     templates: Templates
-    channels: Channel
+    channels: list[Channel]
     triggers: Triggers
 
     @classmethod
@@ -117,6 +58,7 @@ class AlertManager(Model):
 
         Raises:
             ConfigurationKeyError: If required configuration keys are missing
+            ValueError: If an unknown channel type is specified
 
         Examples:
             >>> config = {
@@ -129,8 +71,14 @@ class AlertManager(Model):
         logger.debug("Creating AlertManager from configuration dictionary")
 
         templates = Templates.from_dict(dict_[TEMPLATES])
-        channels = Channel.from_dict(dict_[CHANNELS])
-        triggers = Triggers.from_dict(dict_[triggers])
+
+        channels: list[Channel] = []
+        for channel_config in dict_[CHANNELS]:
+            channel = Channel.from_dict(channel_config)
+            channels.append(channel)
+            logger.debug("Added %s channel '%s' to configuration", channel.type, channel.name)
+
+        triggers = Triggers.from_dict(dict_[TRIGGERS])
 
         return cls(templates=templates, channels=channels, triggers=triggers)
 
@@ -146,6 +94,8 @@ class AlertManager(Model):
                 continue
             for channel_name in rule.channel_names:
                 # Find the channel by name
-                if channel_name in self.channels.channels:
-                    # Send alert through the channel instance
-                    self.channels.channels[channel_name].send_alert(message, title)
+                for channel in self.channels:
+                    if channel.name == channel_name:
+                        # Send alert through the channel instance
+                        channel.send_alert(message, title)
+                        break

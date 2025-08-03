@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.exceptions import ConfigurationKeyError
-from flint.utils.alert.channels.base import BaseChannel
+from flint.utils.alert.channels import BaseConfig
 from flint.utils.logger import get_logger
 
 URL: Final[str] = "url"
@@ -25,8 +25,8 @@ logger: logging.Logger = get_logger(__name__)
 
 
 @dataclass
-class HttpChannel(BaseChannel):
-    """HTTP alert channel for webhook-based notifications.
+class HttpConfig(BaseConfig):
+    """HTTP config for webhook-based notifications.
 
     This class implements HTTP alerting functionality for sending notifications
     to webhooks or HTTP endpoints. It supports custom headers, different HTTP
@@ -37,6 +37,7 @@ class HttpChannel(BaseChannel):
         method: HTTP method to use (GET, POST, PUT, etc.)
         headers: Dictionary of HTTP headers to include in requests
         timeout: Request timeout in seconds
+        failure_handling: Configuration for handling channel failures and retries
     """
 
     url: str
@@ -54,6 +55,7 @@ class HttpChannel(BaseChannel):
                   - method: HTTP method (POST, GET, etc.)
                   - headers: Dictionary of HTTP headers
                   - timeout: Request timeout in seconds
+                  - failure_handling: Failure handling configuration
 
         Returns:
             An HttpChannel instance configured from the dictionary
@@ -63,7 +65,8 @@ class HttpChannel(BaseChannel):
             ...     "url": "${SLACK_WEBHOOK_URL}",
             ...     "method": "POST",
             ...     "headers": {"Content-Type": "application/json"},
-            ...     "timeout": 30
+            ...     "timeout": 30,
+            ...     "failure_handling": {...}
             ... }
             >>> http_channel = HttpChannel.from_dict(config)
         """
@@ -83,6 +86,6 @@ class HttpChannel(BaseChannel):
             timeout=timeout,
         )
 
-    def send_alert(self, message: str, title: str | None = None) -> None:
+    def send_alert(self, message: str, title: str) -> None:
         """Send an alert message via HTTP (not implemented yet)."""
         raise NotImplementedError("send_alert not implemented for HttpChannel.")

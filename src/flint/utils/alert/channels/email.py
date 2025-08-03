@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.exceptions import ConfigurationKeyError
-from flint.utils.alert.channels.base import BaseChannel
+from flint.utils.alert.channels import BaseConfig
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -27,21 +27,21 @@ TO_EMAILS: Final[str] = "to_emails"
 
 
 @dataclass
-class EmailChannel(BaseChannel):
-    """Email alert channel for SMTP-based notifications.
+class EmailConfig(BaseConfig):
+    """Email config for SMTP-based notifications.
 
     This class implements email alerting functionality using SMTP servers.
     It supports authentication, multiple recipients, and configurable
     failure handling with retry logic.
 
     Attributes:
-        name: The unique name of this channel instance
         smtp_server: SMTP server hostname or IP address
         smtp_port: SMTP server port number
         username: SMTP authentication username
         password: SMTP authentication password
         from_email: Email address to send alerts from
         to_emails: List of recipient email addresses
+        failure_handling: Configuration for handling channel failures and retries
     """
 
     smtp_server: str
@@ -63,6 +63,7 @@ class EmailChannel(BaseChannel):
                   - password: SMTP authentication password
                   - from_email: Sender email address
                   - to_emails: List of recipient email addresses
+                  - failure_handling: Failure handling configuration
 
         Returns:
             An EmailChannel instance configured from the dictionary
@@ -74,7 +75,8 @@ class EmailChannel(BaseChannel):
             ...     "username": "${SMTP_USER}",
             ...     "password": "${SMTP_PASSWORD}",
             ...     "from_email": "etl-alerts@company.com",
-            ...     "to_emails": ["ops@company.com", "data-team@company.com"]
+            ...     "to_emails": ["ops@company.com", "data-team@company.com"],
+            ...     "failure_handling": {...}
             ... }
             >>> email_channel = EmailChannel.from_dict(config)
         """
@@ -98,6 +100,6 @@ class EmailChannel(BaseChannel):
             to_emails=to_emails,
         )
 
-    def send_alert(self, message: str, title: str | None = None) -> None:
+    def send_alert(self, message: str, title: str) -> None:
         """Send an alert message via email (not implemented yet)."""
         raise NotImplementedError("send_alert not implemented for EmailChannel.")
