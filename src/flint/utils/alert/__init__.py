@@ -11,22 +11,20 @@ Key components:
 - Triggers: Defines rules for trigger alerts to channels
 """
 
-from flint.utils.alert.channel import Channel
-from flint.utils.alert.channels import Channel, EmailChannel, FailureHandling, FileChannel, HttpChannel
+from flint.utils.alert.channel import Channel, FailureHandling
+from flint.utils.alert.channels import BaseConfig, EmailConfig, FileConfig, HttpConfig
 from flint.utils.alert.manager import AlertManager
-from flint.utils.alert.template import Templates
-from flint.utils.alert.triggers import Conditions, RoutingRule, Triggers
+from flint.utils.alert.trigger import Conditions, Trigger
 
 __all__ = [
     "Channel",
     "AlertManager",
-    "Templates",
-    "Triggers",
-    "RoutingRule",
+    "Trigger",
+    "Trigger",
     "Conditions",
-    "Channel",
     "FailureHandling",
-    "EmailChannel",
-    "HttpChannel",
-    "FileChannel",
+    "BaseConfig",
+    "EmailConfig",
+    "HttpConfig",
+    "FileConfig",
 ]

@@ -47,12 +47,6 @@
         ]
     },
     "alert": {
-        "templates": {
-            "prepend_title": "ETL Pipeline Alert",
-            "append_title": "Alert Notification",
-            "prepend_message": "Attention: ETL Pipeline Alert",
-            "append_message": "Please take necessary actions."
-        },
         "channels": [
             {
                 "type": "email",
@@ -109,6 +103,12 @@
                 "name": "production_critical_errors",
                 "enabled": true,
                 "channel_names": ["custom-email-alert-name", "a-http-post-alert-name"],
+                "templates": {
+                    "prepend_title": "ETL Pipeline Alert",
+                    "append_title": "Alert Notification",
+                    "prepend_message": "Attention: ETL Pipeline Alert",
+                    "append_message": "Please take necessary actions."
+                },
                 "conditions": {
                     "exception_contains": ["database", "connection", "timeout"],
                     "exception_regex": "",
@@ -122,6 +122,12 @@
                 "name": "staging_warnings",
                 "enabled": true,
                 "channel_names": ["custom-file-alert-name"],
+                "templates": {
+                    "prepend_title": "ETL Pipeline Alert",
+                    "append_title": "Alert Notification",
+                    "prepend_message": "Attention: ETL Pipeline Alert",
+                    "append_message": "Please take necessary actions."
+                },
                 "conditions": {
                     "exception_contains": [],
                     "exception_regex": ".*connection.*failed.*|.*timeout.*error.*",
@@ -135,6 +141,12 @@
                 "name": "team_specific_alerts",
                 "enabled": true,
                 "channel_names": ["a-http-post-alert-name"],
+                "templates": {
+                    "prepend_title": "ETL Pipeline Alert",
+                    "append_title": "Alert Notification",
+                    "prepend_message": "Attention: ETL Pipeline Alert",
+                    "append_message": "Please take necessary actions."
+                },
                 "conditions": {
                     "exception_contains": ["database", "connection", "timeout"],
                     "exception_regex": "",

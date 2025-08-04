@@ -21,7 +21,6 @@ NAME: Final[str] = "name"
 CONFIG: Final[str] = "config"
 FAILURE_HANDLING: Final[str] = "failure_handling"
 
-
 ERROR_ON_ALERT_FAILURE: Final[str] = "error_on_alert_failure"
 RETRY_ATTEMPTS: Final[str] = "retry_attempts"
 RETRY_DELAY_SECONDS: Final[str] = "retry_delay_seconds"

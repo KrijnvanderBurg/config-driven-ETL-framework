@@ -14,8 +14,7 @@ from typing import Any, Final, Self
 
 from flint.models import Model
 from flint.utils.alert.channel import Channel
-from flint.utils.alert.template import Templates
-from flint.utils.alert.triggers import Triggers
+from flint.utils.alert.trigger import Trigger
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -39,9 +38,8 @@ class AlertManager(Model):
         triggers: Rules for determining which channels to use for specific alerts
     """
 
-    templates: Templates
     channels: list[Channel]
-    triggers: Triggers
+    triggers: list[Trigger]
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -70,32 +68,40 @@ class AlertManager(Model):
         """
         logger.debug("Creating AlertManager from configuration dictionary")
 
-        templates = Templates.from_dict(dict_[TEMPLATES])
-
         channels: list[Channel] = []
         for channel_config in dict_[CHANNELS]:
             channel = Channel.from_dict(channel_config)
             channels.append(channel)
             logger.debug("Added %s channel '%s' to configuration", channel.type, channel.name)
 
-        triggers = Triggers.from_dict(dict_[TRIGGERS])
+        triggers: list[Trigger] = []
+        for trigger_dict in dict_[TRIGGERS]:
+            trigger = Trigger.from_dict(trigger_dict)
+            triggers.append(trigger)
 
-        return cls(templates=templates, channels=channels, triggers=triggers)
+        return cls(channels=channels, triggers=triggers)
 
-    def send_alert(self, message: str, title: str | None = None) -> None:
+    def send_alert(self, message: str, title: str, exception: Exception) -> None:
         """Send an alert to all channels as defined by enabled trigger rules.
 
         Args:
             message: The alert message to send.
-            title: Optional alert title.
+            title: The alert title.
+            exception: The exception that triggered the alert.
         """
-        for rule in self.triggers.rules:
-            if not rule.enabled:
-                continue
-            for channel_name in rule.channel_names:
-                # Find the channel by name
-                for channel in self.channels:
-                    if channel.name == channel_name:
-                        # Send alert through the channel instance
-                        channel.send_alert(message, title)
-                        break
+
+        for trigger in self.triggers:
+            if trigger.is_fire(exception=exception):
+                logger.debug("Trigger '%s' conditions met; processing alert", trigger.name)
+
+                formatted_message = trigger.template.format_message(message)
+                formatted_title = trigger.template.format_title(title)
+
+                for channel_name in trigger.channel_names:
+                    # Find the channel by name
+                    for channel in self.channels:
+                        if channel.name == channel_name:
+                            # Send alert through the channel instance
+                            channel.send_alert(message=formatted_message, title=formatted_title)
+                            logger.debug("Sent alert to channel '%s'", channel.name)
+                            break
