@@ -100,6 +100,6 @@ class EmailConfig(BaseConfig):
             to_emails=to_emails,
         )
 
-    def send_alert(self, message: str, title: str) -> None:
+    def alert(self, message: str, title: str) -> None:
         """Send an alert message via email (not implemented yet)."""
         raise NotImplementedError("send_alert not implemented for EmailChannel.")

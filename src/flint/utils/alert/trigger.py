@@ -346,4 +346,5 @@ class Trigger(Model):
             logger.debug("Conditions for trigger '%s' are not met; skipping fire check.", self.name)
             return False
 
+        logger.debug("Trigger '%s' conditions met", self.name)
         return True

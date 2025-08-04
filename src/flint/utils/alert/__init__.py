@@ -11,7 +11,7 @@ Key components:
 - Triggers: Defines rules for trigger alerts to channels
 """
 
-from flint.utils.alert.channel import Channel, FailureHandling
+from flint.utils.alert.channel import Channel, Retry
 from flint.utils.alert.channels import BaseConfig, EmailConfig, FileConfig, HttpConfig
 from flint.utils.alert.manager import AlertManager
 from flint.utils.alert.trigger import Conditions, Trigger
@@ -22,7 +22,7 @@ __all__ = [
     "Trigger",
     "Trigger",
     "Conditions",
-    "FailureHandling",
+    "Retry",
     "BaseConfig",
     "EmailConfig",
     "HttpConfig",

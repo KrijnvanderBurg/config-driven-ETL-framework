@@ -63,6 +63,22 @@ class FileConfig(BaseConfig):
 
         return cls(file_path=file_path)
 
-    def send_alert(self, message: str, title: str) -> None:
-        """Send an alert message to a file (not implemented yet)."""
-        raise NotImplementedError("send_alert not implemented for FileChannel.")
+    def alert(self, message: str, title: str) -> None:
+        """Send an alert message to a file.
+
+        Appends the alert to the configured file, creating it if it does not exist.
+
+        Args:
+            message: The alert message content.
+            title: The alert title.
+
+        Raises:
+            OSError: If writing to the file fails.
+        """
+        try:
+            with open(self.file_path, "a", encoding="utf-8") as file:
+                file.write(f"{title}{message}\n")
+            logger.info("Alert written to file: %s", self.file_path)
+        except OSError as exc:
+            logger.error("Failed to write alert to file %s: %s", self.file_path, exc)
+            raise

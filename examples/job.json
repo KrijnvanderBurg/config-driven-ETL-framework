@@ -61,11 +61,6 @@
                         "ops@company.com",
                         "data-team@company.com"
                     ]
-                },
-                "failure_handling": {
-                    "error_on_alert_failure": true,
-                    "retry_attempts": 3,
-                    "retry_delay_seconds": 30
                 }
             },
             {
@@ -77,12 +72,12 @@
                     "headers": {
                         "Content-Type": "application/json"
                     },
-                    "timeout": 30
-                },
-                "failure_handling": {
-                    "error_on_alert_failure": false,
-                    "retry_attempts": 2,
-                    "retry_delay_seconds": 15
+                    "timeout": 30,
+                    "retry": {
+                        "error_on_alert_failure": true,
+                        "attempts": 3,
+                        "delay_in_seconds": 30
+                    }
                 }
             },
             {
@@ -90,11 +85,6 @@
                 "name": "custom-file-alert-name",
                 "config": {
                     "file_path": "alerts.log"
-                },
-                "failure_handling": {
-                    "error_on_alert_failure": false,
-                    "retry_attempts": 0,
-                    "retry_delay_seconds": 0
                 }
             }
         ],

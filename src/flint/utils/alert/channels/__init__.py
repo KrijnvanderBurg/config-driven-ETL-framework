@@ -10,6 +10,7 @@ Available Configs:
 - FileConfig: File-based logging notifications
 """
 
+import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
@@ -17,8 +18,10 @@ from flint.models import Model
 from flint.utils.alert.channels.email import EmailConfig
 from flint.utils.alert.channels.file import FileConfig
 from flint.utils.alert.channels.http import HttpConfig
+from flint.utils.logger import get_logger
 
 __all__ = ["EmailConfig", "HttpConfig", "FileConfig", "BaseConfig"]
+logger: logging.Logger = get_logger(__name__)
 
 
 @dataclass
@@ -29,8 +32,7 @@ class BaseConfig(Model, ABC):
     common attributes and methods for channel implementations.
     """
 
-    @abstractmethod
-    def send_alert(self, message: str, title: str) -> None:
+    def alert(self, message: str, title: str) -> None:
         """Send an alert message through this channel.
 
         Args:
@@ -40,4 +42,19 @@ class BaseConfig(Model, ABC):
         Raises:
             NotImplementedError: Must be implemented by subclasses.
         """
-        raise NotImplementedError("send_alert must be implemented by subclasses.")
+        logger.debug("Sending alert through channel: %s", self.__class__.__name__)
+        self._alert(message=message, title=title)
+        logger.info("Alert sent through %s channel", self.__class__.__name__)
+
+    @abstractmethod
+    def _alert(self, message: str, title: str) -> None:
+        """Internal method to handle alert sending logic.
+
+        This method should implement the actual logic for sending alerts
+        through the channel. It is expected to be implemented by subclasses.
+
+        Args:
+            message: The alert message to send.
+            title: Optional alert title.
+        """
+        raise NotImplementedError("_alert must be implemented by subclasses.")
