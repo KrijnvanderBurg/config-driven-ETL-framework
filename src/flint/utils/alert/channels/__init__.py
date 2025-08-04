@@ -12,7 +12,6 @@ Available Configs:
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Self
 
 from flint.models import Model
 from flint.utils.alert.channels.email import EmailConfig
