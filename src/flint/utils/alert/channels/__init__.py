@@ -31,12 +31,6 @@ class BaseConfig(Model, ABC):
     """
 
     @abstractmethod
-    @classmethod
-    def from_dict(cls, dict_: dict[str, Any]) -> Self:
-        """Create a channel configuration instance from a dictionary."""
-        raise NotImplementedError("Subclasses must implement from_dict method")
-
-    @abstractmethod
     def send_alert(self, message: str, title: str) -> None:
         """Send an alert message through this channel.
 
