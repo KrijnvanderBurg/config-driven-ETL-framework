@@ -25,7 +25,7 @@ TRIGGERS: Final[str] = "triggers"
 
 
 @dataclass
-class AlertManager(Model):
+class Alert(Model):
     """Main alert manager that coordinates alert processing and trigger.
 
     This class serves as the root object for the alert system, managing the
@@ -81,7 +81,7 @@ class AlertManager(Model):
 
         return cls(channels=channels, triggers=triggers)
 
-    def send_alert(self, message: str, title: str, exception: Exception) -> None:
+    def send(self, message: str, title: str, exception: Exception) -> None:
         """Send an alert to all channels as defined by enabled trigger rules.
 
         Args:

@@ -13,12 +13,12 @@ Key components:
 
 from flint.utils.alert.channel import AlertChannel, Retry
 from flint.utils.alert.channels import BaseConfig, EmailConfig, FileConfig, HttpConfig
-from flint.utils.alert.manager import AlertManager
+from flint.utils.alert.manager import Alert
 from flint.utils.alert.trigger import AlertConditions, AlertTrigger
 
 __all__ = [
     "AlertChannel",
-    "AlertManager",
+    "Alert",
     "AlertTrigger",
     "AlertTrigger",
     "AlertConditions",
