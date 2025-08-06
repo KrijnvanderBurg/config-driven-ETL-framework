@@ -57,7 +57,9 @@ class Command(ABC):
             ExitCode: The exit code indicating success or specific failure reason.
         """
         try:
-            return self._execute()
+            exit_code = self._execute()
+            logger.info("Command executed successfully with exit code %d (%s).", exit_code, exit_code.name)
+            return exit_code
         except KeyboardInterrupt:
             logger.info("Operation cancelled by user")
             raise
@@ -139,10 +141,8 @@ class RunCommand(Command):
             job = Job.from_file(filepath=self.config_filepath)
             job.validate()
             job.execute()
-            exit_code = ExitCode.SUCCESS
             logger.info("ETL pipeline completed successfully")
-            logger.info("Application finished with exit code %d (%s). Exiting.", exit_code, exit_code.name)
-            return exit_code
+            return ExitCode.SUCCESS
         except ValidationError as e:
             alert.trigger_if_conditions_met(
                 body="Validation failed", title="ETL Pipeline Validation Error", exception=e
@@ -200,30 +200,25 @@ class ValidateCommand(Command):
         """
         logger.info("Validating ETL pipeline with config: %s", self.config_filepath)
 
-        if not self.config_filepath.exists():
-            logger.error("Configuration file not found: %s", self.config_filepath)
+        try:
+            alert = Alert.from_file(filepath=self.config_filepath)
+        except NotImplementedError:
+            return ExitCode.INVALID_ARGUMENTS
+        except FileNotFoundError:
+            return ExitCode.CONFIGURATION_ERROR
+        except PermissionError:
+            return ExitCode.CONFIGURATION_ERROR
+        except OSError:
             return ExitCode.CONFIGURATION_ERROR
 
         try:
             job = Job.from_file(filepath=self.config_filepath)
-            alert = Alert.from_file(filepath=self.config_filepath)
             job.validate()
-            exit_code = ExitCode.SUCCESS
+            job.execute()
             logger.info("ETL pipeline validation completed successfully")
-            logger.info("Application finished with exit code %d (%s). Exiting.", exit_code, exit_code.name)
-            return exit_code
+            return ExitCode.SUCCESS
         except ValidationError as e:
-            logger.error("Validation failed: %s", str(e))
+            alert.trigger_if_conditions_met(
+                body="Validation failed", title="ETL Pipeline Validation Error", exception=e
+            )
             return ExitCode.VALIDATION_ERROR
-        except FileNotFoundError as e:
-            logger.error("Required file not found: %s", str(e))
-            return ExitCode.CONFIGURATION_ERROR
-        except PermissionError as e:
-            logger.error("Permission denied: %s", str(e))
-            return ExitCode.GENERAL_ERROR
-        except OSError as e:
-            logger.error("I/O error occurred: %s", str(e))
-            return ExitCode.GENERAL_ERROR
-        except RuntimeError as e:
-            logger.error("Runtime error: %s", str(e))
-            return ExitCode.GENERAL_ERROR

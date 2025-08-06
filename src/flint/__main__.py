@@ -54,4 +54,6 @@ def main() -> int:
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    exit_code = main()
+    logger.info("Application finished with exit code %d. Exiting.", exit_code)
+    sys.exit(exit_code)
