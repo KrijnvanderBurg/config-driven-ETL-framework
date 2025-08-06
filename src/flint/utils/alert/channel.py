@@ -22,7 +22,7 @@ CONFIG: Final[str] = "config"
 
 
 @dataclass
-class Channel(Model):
+class AlertChannel(Model):
     """Channel configuration wrapper that maps directly to JSON structure.
 
     This class represents a complete channel configuration including the
@@ -99,5 +99,6 @@ class Channel(Model):
             message: The alert message to send.
             title: The alert title.
         """
-
+        logger.debug("Sending alert through channel: %s", self.name)
         self.config.alert(message=message, title=title)
+        logger.info("Alert sent through %s channel", self.name)

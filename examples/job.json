@@ -96,8 +96,8 @@
                 "templates": {
                     "prepend_title": "ETL Pipeline Alert",
                     "append_title": "Alert Notification",
-                    "prepend_message": "Attention: ETL Pipeline Alert",
-                    "append_message": "Please take necessary actions."
+                    "prepend_body": "Attention: ETL Pipeline Alert",
+                    "append_body": "Please take necessary actions."
                 },
                 "conditions": {
                     "exception_contains": ["database", "connection", "timeout"],
@@ -115,8 +115,8 @@
                 "templates": {
                     "prepend_title": "ETL Pipeline Alert",
                     "append_title": "Alert Notification",
-                    "prepend_message": "Attention: ETL Pipeline Alert",
-                    "append_message": "Please take necessary actions."
+                    "prepend_body": "Attention: ETL Pipeline Alert",
+                    "append_body": "Please take necessary actions."
                 },
                 "conditions": {
                     "exception_contains": [],
@@ -134,8 +134,8 @@
                 "templates": {
                     "prepend_title": "ETL Pipeline Alert",
                     "append_title": "Alert Notification",
-                    "prepend_message": "Attention: ETL Pipeline Alert",
-                    "append_message": "Please take necessary actions."
+                    "prepend_body": "Attention: ETL Pipeline Alert",
+                    "append_body": "Please take necessary actions."
                 },
                 "conditions": {
                     "exception_contains": ["database", "connection", "timeout"],

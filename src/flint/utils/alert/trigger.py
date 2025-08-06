@@ -20,27 +20,16 @@ from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
-# RoutingRule constants
-NAME: Final[str] = "name"
-ENABLED: Final[str] = "enabled"
-CHANNEL_NAMES: Final[str] = "channel_names"
-TEMPLATE: Final[str] = "Template"
-CONDITIONS: Final[str] = "conditions"
 
 # Template constants
 PREPEND_TITLE: Final[str] = "prepend_title"
 APPEND_TITLE: Final[str] = "append_title"
-PREPEND_MESSAGE: Final[str] = "prepend_message"
-APPEND_MESSAGE: Final[str] = "append_message"
-
-# Conditions constants
-EXCEPTION_CONTAINS: Final[str] = "exception_contains"
-EXCEPTION_REGEX: Final[str] = "exception_regex"
-ENV_VARS_MATCHES: Final[str] = "env_vars_matches"
+PREPEND_BODY: Final[str] = "prepend_body"
+APPEND_BODY: Final[str] = "append_body"
 
 
 @dataclass
-class Template(Model):
+class AlertTemplate(Model):
     """Configuration for alert message templates and formatting.
 
     This class manages the template configuration for formatting alert messages,
@@ -49,14 +38,14 @@ class Template(Model):
     Attributes:
         prepend_title: Text to prepend to alert titles
         append_title: Text to append to alert titles
-        prepend_message: Text to prepend to alert messages
-        append_message: Text to append to alert messages
+        prepend_body: Text to prepend to alert messages
+        append_body: Text to append to alert messages
     """
 
     prepend_title: str
     append_title: str
-    prepend_message: str
-    append_message: str
+    prepend_body: str
+    append_body: str
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -66,8 +55,8 @@ class Template(Model):
             dict_: Dictionary containing template configuration with keys:
                   - prepend_title: Text to prepend to alert titles
                   - append_title: Text to append to alert titles
-                  - prepend_message: Text to prepend to alert messages
-                  - append_message: Text to append to alert messages
+                  - prepend_body: Text to prepend to alert messages
+                  - append_body: Text to append to alert messages
 
         Returns:
             A Templates instance configured from the dictionary
@@ -79,8 +68,8 @@ class Template(Model):
             >>> config = {
             ...     "prepend_title": "ETL Pipeline Alert",
             ...     "append_title": "Alert Notification",
-            ...     "prepend_message": "Attention: ETL Pipeline Alert",
-            ...     "append_message": "Please take necessary actions."
+            ...     "prepend_body": "Attention: ETL Pipeline Alert",
+            ...     "append_body": "Please take necessary actions."
             ... }
             >>> templates = Templates.from_dict(config)
         """
@@ -89,16 +78,16 @@ class Template(Model):
         try:
             prepend_title = dict_[PREPEND_TITLE]
             append_title = dict_[APPEND_TITLE]
-            prepend_message = dict_[PREPEND_MESSAGE]
-            append_message = dict_[APPEND_MESSAGE]
+            prepend_body = dict_[PREPEND_BODY]
+            append_body = dict_[APPEND_BODY]
         except KeyError as e:
             raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(
             prepend_title=prepend_title,
             append_title=append_title,
-            prepend_message=prepend_message,
-            append_message=append_message,
+            prepend_body=prepend_body,
+            append_body=append_body,
         )
 
     def format_message(self, message: str) -> str:
@@ -110,7 +99,7 @@ class Template(Model):
         Returns:
             The formatted message with templates applied
         """
-        return f"{self.prepend_message}{message}{self.append_message}"
+        return f"{self.prepend_body}{message}{self.append_body}"
 
     def format_title(self, title: str) -> str:
         """Format a title with prepend and append templates.
@@ -124,8 +113,14 @@ class Template(Model):
         return f"{self.prepend_title}{title}{self.append_title}"
 
 
+# Conditions constants
+EXCEPTION_CONTAINS: Final[str] = "exception_contains"
+EXCEPTION_REGEX: Final[str] = "exception_regex"
+ENV_VARS_MATCHES: Final[str] = "env_vars_matches"
+
+
 @dataclass
-class Conditions(Model):
+class AlertConditions(Model):
     """Conditions for determining when a trigger rule should apply.
 
     This class defines the various conditions that can be used to filter
@@ -253,24 +248,30 @@ class Conditions(Model):
         logger.debug("No environment variable conditions are satisfied.")
         return False
 
-    def is_all_conditions_met(self, exception: Exception) -> bool:
-        """Check if all conditions are met for the given exception and environment variables.
+    def is_any_condition_met(self, exception: Exception) -> bool:
+        """Check if any conditions are met for the given exception and environment variables.
 
         Args:
             exception: The exception or message to evaluate
 
         Returns:
-            True if all conditions are satisfied, False otherwise
+            True if any conditions are satisfied, False otherwise
         """
         return (
-            self._is_exception_contains(exception)
-            and self._is_exception_regex(exception)
-            and self._is_env_vars_matches()
+            self._is_exception_contains(exception) or self._is_exception_regex(exception) or self._is_env_vars_matches()
         )
 
 
+# Trigger constants
+NAME: Final[str] = "name"
+ENABLED: Final[str] = "enabled"
+CHANNEL_NAMES: Final[str] = "channel_names"
+TEMPLATE: Final[str] = "Template"
+CONDITIONS: Final[str] = "conditions"
+
+
 @dataclass
-class Trigger(Model):
+class AlertTrigger(Model):
     """Individual trigger rule for alert channel selection.
 
     This class represents a single trigger rule that defines conditions
@@ -286,8 +287,8 @@ class Trigger(Model):
     name: str
     enabled: bool
     channel_names: list[str]
-    template: Template
-    conditions: Conditions
+    template: AlertTemplate
+    conditions: AlertConditions
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -318,8 +319,8 @@ class Trigger(Model):
             name = dict_[NAME]
             enabled = dict_[ENABLED]
             channel_names = dict_[CHANNEL_NAMES]
-            conditions = Conditions.from_dict(dict_[CONDITIONS])
-            template = Template.from_dict(dict_[TEMPLATE])
+            conditions = AlertConditions.from_dict(dict_[CONDITIONS])
+            template = AlertTemplate.from_dict(dict_[TEMPLATE])
         except KeyError as e:
             raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
@@ -342,7 +343,7 @@ class Trigger(Model):
             logger.debug("Trigger '%s' is disabled; skipping fire check.", self.name)
             return False
 
-        if not self.conditions.is_all_conditions_met(exception):
+        if not self.conditions.is_any_condition_met(exception):
             logger.debug("Conditions for trigger '%s' are not met; skipping fire check.", self.name)
             return False
 

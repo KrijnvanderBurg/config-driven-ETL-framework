@@ -13,8 +13,8 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.models import Model
-from flint.utils.alert.channel import Channel
-from flint.utils.alert.trigger import Trigger
+from flint.utils.alert.channel import AlertChannel
+from flint.utils.alert.trigger import AlertTrigger
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -38,8 +38,8 @@ class AlertManager(Model):
         triggers: Rules for determining which channels to use for specific alerts
     """
 
-    channels: list[Channel]
-    triggers: list[Trigger]
+    channels: list[AlertChannel]
+    triggers: list[AlertTrigger]
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -68,15 +68,15 @@ class AlertManager(Model):
         """
         logger.debug("Creating AlertManager from configuration dictionary")
 
-        channels: list[Channel] = []
+        channels: list[AlertChannel] = []
         for channel_config in dict_[CHANNELS]:
-            channel = Channel.from_dict(channel_config)
+            channel = AlertChannel.from_dict(channel_config)
             channels.append(channel)
             logger.debug("Added %s channel '%s' to configuration", channel.type, channel.name)
 
-        triggers: list[Trigger] = []
+        triggers: list[AlertTrigger] = []
         for trigger_dict in dict_[TRIGGERS]:
-            trigger = Trigger.from_dict(trigger_dict)
+            trigger = AlertTrigger.from_dict(trigger_dict)
             triggers.append(trigger)
 
         return cls(channels=channels, triggers=triggers)
