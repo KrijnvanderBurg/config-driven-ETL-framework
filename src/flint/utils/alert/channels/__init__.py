@@ -32,22 +32,22 @@ class BaseConfig(Model, ABC):
     common attributes and methods for channel implementations.
     """
 
-    def alert(self, message: str, title: str) -> None:
+    def alert(self, title: str, body: str) -> None:
         """Send an alert message through this channel.
 
         Args:
-            message: The alert message to send.
             title: Optional alert title.
+            body: The alert message to send.
 
         Raises:
             NotImplementedError: Must be implemented by subclasses.
         """
         logger.debug("Sending alert through channel: %s", self.__class__.__name__)
-        self._alert(message=message, title=title)
+        self._alert(title=title, body=body)
         logger.info("Alert sent through %s channel", self.__class__.__name__)
 
     @abstractmethod
-    def _alert(self, message: str, title: str) -> None:
+    def _alert(self, title: str, body: str) -> None:
         """Internal method to handle alert sending logic.
 
         This method should implement the actual logic for sending alerts

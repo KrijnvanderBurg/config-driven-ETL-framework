@@ -10,11 +10,13 @@ components in the Flint framework to create instances from configuration data.
 
 import logging
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any, Final, Self
 
 from flint.models import Model
 from flint.utils.alert.channel import AlertChannel
 from flint.utils.alert.trigger import AlertTrigger
+from flint.utils.file import FileHandlerContext
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -40,6 +42,27 @@ class Alert(Model):
 
     channels: list[AlertChannel]
     triggers: list[AlertTrigger]
+
+    @classmethod
+    def from_file(cls, filepath: Path) -> Self:
+        """Create a Alert instance from a configuration file.
+
+        Loads and parses a configuration file to create a Alert instance.
+
+        Args:
+            filepath: Path to the configuration file.
+
+        Returns:
+            A fully configured Alert instance.
+        """
+        logger.info("Creating Alert from file: %s", filepath)
+
+        handler = FileHandlerContext.from_filepath(filepath=filepath)
+        file: dict[str, Any] = handler.read()
+
+        alert = cls.from_dict(dict_=file)
+        logger.info("Successfully created Alert from JSON file: %s", filepath)
+        return alert
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -81,12 +104,12 @@ class Alert(Model):
 
         return cls(channels=channels, triggers=triggers)
 
-    def send(self, message: str, title: str, exception: Exception) -> None:
+    def trigger_if_conditions_met(self, title: str, body: str, exception: Exception) -> None:
         """Send an alert to all channels as defined by enabled trigger rules.
 
         Args:
-            message: The alert message to send.
             title: The alert title.
+            body: The alert message to send.
             exception: The exception that triggered the alert.
         """
 
@@ -94,14 +117,14 @@ class Alert(Model):
             if trigger.is_fire(exception=exception):
                 logger.debug("Trigger '%s' conditions met; processing alert", trigger.name)
 
-                formatted_message = trigger.template.format_message(message)
                 formatted_title = trigger.template.format_title(title)
+                formatted_body = trigger.template.format_body(body)
 
                 for channel_name in trigger.channel_names:
                     # Find the channel by name
                     for channel in self.channels:
                         if channel.name == channel_name:
                             # Send alert through the channel instance
-                            channel.send_alert(message=formatted_message, title=formatted_title)
+                            channel.send_alert(title=formatted_title, body=formatted_body)
                             logger.debug("Sent alert to channel '%s'", channel.name)
                             break

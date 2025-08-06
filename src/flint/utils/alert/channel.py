@@ -92,13 +92,13 @@ class AlertChannel(Model):
             config=config,
         )
 
-    def send_alert(self, message: str, title: str) -> None:
+    def send_alert(self, title: str, body: str) -> None:
         """Send an alert message through this channel.
 
         Args:
-            message: The alert message to send.
             title: The alert title.
+            body: The alert message to send.
         """
         logger.debug("Sending alert through channel: %s", self.name)
-        self.config.alert(message=message, title=title)
+        self.config.alert(title=title, body=body)
         logger.info("Alert sent through %s channel", self.name)

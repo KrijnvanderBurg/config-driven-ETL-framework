@@ -90,7 +90,7 @@ class AlertTemplate(Model):
             append_body=append_body,
         )
 
-    def format_message(self, message: str) -> str:
+    def format_body(self, message: str) -> str:
         """Format a message with prepend and append templates.
 
         Args:

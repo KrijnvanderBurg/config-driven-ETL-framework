@@ -73,21 +73,15 @@ class Job:
 
         Returns:
             A fully configured Job instance.
-
-        Raises:
-            NotImplementedError: If the file format is not supported.
         """
         logger.info("Creating Job from file: %s", filepath)
 
         handler = FileHandlerContext.from_filepath(filepath=filepath)
         file: dict[str, Any] = handler.read()
 
-        if Path(filepath).suffix == ".json":
-            job = cls.from_dict(dict_=file)
-            logger.info("Successfully created Job from JSON file: %s", filepath)
-            return job
-
-        raise NotImplementedError("No handling options found.")
+        job = cls.from_dict(dict_=file)
+        logger.info("Successfully created Job from JSON file: %s", filepath)
+        return job
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -112,7 +106,7 @@ class Job:
             logger.debug("Processing job configuration with keys: %s", list(job_config.keys()))
 
             extracts: list[Extract] = []
-            extract_configs = job_config[EXTRACTS]
+            extract_configs: list[dict] = job_config[EXTRACTS]
             logger.debug("Processing %d extract configurations", len(extract_configs))
 
             for i, extract_dict in enumerate(extract_configs):
@@ -121,7 +115,7 @@ class Job:
                 extracts.append(extract)
 
             transforms: list[Transform] = []
-            transform_configs = job_config[TRANSFORMS]
+            transform_configs: list[dict] = job_config[TRANSFORMS]
             logger.debug("Processing %d transform configurations", len(transform_configs))
 
             for i, transform_dict in enumerate(transform_configs):
@@ -132,7 +126,7 @@ class Job:
                 transforms.append(transform)
 
             loads: list[Load] = []
-            load_configs = job_config[LOADS]
+            load_configs: list[dict] = job_config[LOADS]
             logger.debug("Processing %d load configurations", len(load_configs))
 
             for i, load_dict in enumerate(load_configs):

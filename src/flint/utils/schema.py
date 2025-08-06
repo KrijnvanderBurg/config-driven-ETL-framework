@@ -190,7 +190,7 @@ class SchemaFilepathHandler(SchemaHandler):
             file_handler: FileHandler = FileHandlerContext.from_filepath(filepath=schema)
 
             logger.debug("Reading schema file content")
-            file_content = file_handler.read()
+            file_content = file_handler._read()
 
             logger.debug("Converting file content to schema")
             result = SchemaDictHandler.parse(schema=file_content)

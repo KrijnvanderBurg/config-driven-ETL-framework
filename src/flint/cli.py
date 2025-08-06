@@ -13,6 +13,7 @@ from typing import Self
 from flint.core.job import Job
 from flint.exceptions import ValidationError
 from flint.types import ExitCode
+from flint.utils.alert import Alert
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -123,31 +124,35 @@ class RunCommand(Command):
         """
         logger.info("Running ETL pipeline with config: %s", self.config_filepath)
 
-        if not self.config_filepath.exists():
-            logger.error("Configuration file not found: %s", self.config_filepath)
+        try:
+            alert = Alert.from_file(filepath=self.config_filepath)
+        except NotImplementedError:
+            return ExitCode.INVALID_ARGUMENTS
+        except FileNotFoundError:
+            return ExitCode.CONFIGURATION_ERROR
+        except PermissionError:
+            return ExitCode.CONFIGURATION_ERROR
+        except OSError:
             return ExitCode.CONFIGURATION_ERROR
 
         try:
             job = Job.from_file(filepath=self.config_filepath)
             job.validate()
             job.execute()
+            exit_code = ExitCode.SUCCESS
             logger.info("ETL pipeline completed successfully")
-            return ExitCode.SUCCESS
+            logger.info("Application finished with exit code %d (%s). Exiting.", exit_code, exit_code.name)
+            return exit_code
         except ValidationError as e:
-            logger.error("Validation failed: %s", str(e))
+            alert.trigger_if_conditions_met(
+                body="Validation failed", title="ETL Pipeline Validation Error", exception=e
+            )
             return ExitCode.VALIDATION_ERROR
-        except FileNotFoundError as e:
-            logger.error("Required file not found: %s", str(e))
-            return ExitCode.CONFIGURATION_ERROR
-        except PermissionError as e:
-            logger.error("Permission denied: %s", str(e))
-            return ExitCode.CONFIGURATION_ERROR
-        except OSError as e:
-            logger.error("I/O error occurred: %s", str(e))
-            return ExitCode.GENERAL_ERROR
         except RuntimeError as e:
-            logger.error("Runtime error: %s", str(e))
-            return ExitCode.GENERAL_ERROR
+            alert.trigger_if_conditions_met(
+                body="Runtime error occurred", title="ETL Pipeline Runtime Error", exception=e
+            )
+            return ExitCode.RUNTIME_ERROR
 
 
 class ValidateCommand(Command):
@@ -201,9 +206,12 @@ class ValidateCommand(Command):
 
         try:
             job = Job.from_file(filepath=self.config_filepath)
+            alert = Alert.from_file(filepath=self.config_filepath)
             job.validate()
+            exit_code = ExitCode.SUCCESS
             logger.info("ETL pipeline validation completed successfully")
-            return ExitCode.SUCCESS
+            logger.info("Application finished with exit code %d (%s). Exiting.", exit_code, exit_code.name)
+            return exit_code
         except ValidationError as e:
             logger.error("Validation failed: %s", str(e))
             return ExitCode.VALIDATION_ERROR
@@ -212,7 +220,7 @@ class ValidateCommand(Command):
             return ExitCode.CONFIGURATION_ERROR
         except PermissionError as e:
             logger.error("Permission denied: %s", str(e))
-            return ExitCode.CONFIGURATION_ERROR
+            return ExitCode.GENERAL_ERROR
         except OSError as e:
             logger.error("I/O error occurred: %s", str(e))
             return ExitCode.GENERAL_ERROR

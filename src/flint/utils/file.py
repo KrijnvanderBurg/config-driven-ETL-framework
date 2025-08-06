@@ -39,6 +39,11 @@ class FileHandler(ABC):
         filepath: Path to the file being handled
     """
 
+    # Class constants for validation limits
+    DEFAULT_MAX_SIZE: int = 10 * 1024 * 1024  # 10 MB
+    MIN_SIZE: int = 1  # 1 byte minimum
+    ENCODING: str = "utf-8"
+
     def __init__(self, filepath: Path) -> None:
         """Initialize the file handler with a file path.
 
@@ -53,35 +58,142 @@ class FileHandler(ABC):
         self.filepath = filepath
         logger.debug("FileHandler initialized for: %s", filepath)
 
-    def _file_exists(self) -> bool:
+    def _file_exists(self) -> None:
+        """Validate that the file exists.
+
+        Raises:
+            FileNotFoundError: If the file does not exist.
+            OSError: If there's a system-level error checking file existence.
         """
-        Check if the file exists.
+        if not self.filepath.exists():
+            raise FileNotFoundError(f"File not found: {self.filepath}")
+        logger.debug("File existence validated: %s", self.filepath)
+
+    def _is_file(self) -> None:
+        """Validate that the path is a regular file.
+
+        Raises:
+            IsADirectoryError: If the path is a directory.
+            OSError: If the path is not a regular file or there's a system-level error.
+        """
+        if not self.filepath.is_file():
+            if self.filepath.is_dir():
+                raise IsADirectoryError(f"Path is a directory, not a file: {self.filepath}")
+            if self.filepath.is_symlink():
+                raise OSError(f"Path is a symbolic link: {self.filepath}")
+            raise OSError(f"Path is not a regular file: {self.filepath}")
+        logger.debug("File type validated: %s", self.filepath)
+
+    def _read_permission(self) -> None:
+        """Validate that the file has read permissions.
+
+        Raises:
+            PermissionError: If the file is not readable.
+            OSError: If there's a system-level error checking permissions.
+        """
+        if not os.access(self.filepath, os.R_OK):
+            raise PermissionError(f"Read permission denied for file: {self.filepath}")
+        logger.debug("Read permission validated: %s", self.filepath)
+
+    def _file_not_empty(self) -> None:
+        """Validate that the file is not empty.
+
+        Raises:
+            OSError: If the file is empty or there's a system-level error accessing file metadata.
+        """
+        file_size = self.filepath.stat().st_size
+        if file_size == 0:
+            raise OSError(f"File is empty: {self.filepath}")
+        logger.debug("File not empty validated: %s (size: %d bytes)", self.filepath, file_size)
+
+    def _file_size_limits(self, max_size: int = DEFAULT_MAX_SIZE, min_size: int = MIN_SIZE) -> None:
+        """Validate that the file size is within specified limits.
+
+        Args:
+            max_size: Maximum allowed file size in bytes.
+            min_size: Minimum allowed file size in bytes.
+
+        Raises:
+            OSError: If the file size is outside the specified limits or there's a system-level error.
+        """
+        file_size = self.filepath.stat().st_size
+
+        if file_size < min_size:
+            raise OSError(f"File is too small: {self.filepath} (size: {file_size} bytes, minimum: {min_size} bytes)")
+
+        if file_size > max_size:
+            raise OSError(f"File is too large: {self.filepath} (size: {file_size} bytes, maximum: {max_size} bytes)")
+
+        logger.debug(
+            "File size validated: %s (size: %d, min: %d, max: %d)", self.filepath, file_size, min_size, max_size
+        )
+
+    def _text_file(self) -> None:
+        """Validate that the file is a readable text file.
+
+        Raises:
+            OSError: If the file contains binary content or has encoding/access issues.
+            PermissionError: If permission is denied reading the file.
+        """
+        try:
+            with self.filepath.open("r", encoding=self.ENCODING) as file:
+                # Read first 512 bytes to check for binary content
+                sample = file.read(512)
+                if "\x00" in sample:
+                    raise OSError(f"File appears to contain binary content: {self.filepath}")
+                logger.debug("Text file validation passed: %s", self.filepath)
+        except UnicodeDecodeError as e:
+            raise OSError(f"File encoding error (not valid UTF-8): {self.filepath}") from e
+
+    def read(self) -> dict[str, Any]:
+        """Read the file and return its contents as a dictionary.
+
+        This method should be implemented by subclasses to handle specific file formats.
 
         Returns:
-            bool: True if the file exists, False otherwise.
+            dict[str, Any]: The contents of the file as a dictionary.
+
+        Raises:
+            FileNotFoundError: If the file does not exist.
+            PermissionError: If permission is denied for accessing the file.
+            OSError: If the file has invalid properties (empty, too large, wrong type, etc.).
+            NotImplementedError: If the file extension is not supported.
         """
-        exists = self.filepath.exists()
-        logger.debug("File existence check for %s: %s", self.filepath, exists)
-        return exists
+        logger.debug("Validating file: %s", self.filepath)
+        self._file_exists()
+        self._is_file()
+        self._read_permission()
+        self._file_not_empty()
+        logger.info("Validation successful for file: %s", self.filepath)
+
+        logger.debug("Reading file: %s", self.filepath)
+        data = self._read()
+        logger.info("File read successfully: %s", self.filepath)
+        return data
 
     @abstractmethod
-    def read(self) -> dict[str, Any]:
-        """
-        Read the file and return its contents as a dictionary.
-        This method should be overridden by subclasses.
+    def _read(self) -> dict[str, Any]:
+        """Read the file and return its contents as a dictionary.
+
+        This method should be overridden by subclasses to implement
+        format-specific reading logic.
 
         Returns:
             dict[str, Any]: The contents of the file as a dictionary.
 
         Raises:
             NotImplementedError: If the method is not implemented by a subclass.
+            FileNotFoundError: If the file does not exist.
+            PermissionError: If permission is denied for accessing the file.
+            ValueError: If the file content cannot be parsed.
+            OSError: If there's a system-level error accessing the file.
         """
 
 
 class FileYamlHandler(FileHandler):
     """Handles YAML files."""
 
-    def read(self) -> dict[str, Any]:
+    def _read(self) -> dict[str, Any]:
         """
         Read the YAML file and return its contents as a dictionary.
 
@@ -95,21 +207,12 @@ class FileYamlHandler(FileHandler):
         """
         logger.info("Reading YAML file: %s", self.filepath)
 
-        if not self._file_exists():
-            error_msg = f"File '{self.filepath}' not found."
-            logger.error("YAML file not found: %s", self.filepath)
-            raise FileNotFoundError(error_msg)
-
         try:
             logger.debug("Opening YAML file for reading: %s", self.filepath)
             with open(file=self.filepath, mode="r", encoding="utf-8") as file:
                 data = yaml.safe_load(file)
                 logger.info("Successfully read YAML file: %s", self.filepath)
                 return data
-        except FileNotFoundError as e:
-            raise FileNotFoundError(f"File '{self.filepath}' not found.") from e
-        except PermissionError as e:
-            raise PermissionError(f"Permission denied for file '{self.filepath}'.") from e
         except yaml.YAMLError as e:
             raise yaml.YAMLError(f"Error in YAML file '{self.filepath}': {e}") from e
 
@@ -117,7 +220,7 @@ class FileYamlHandler(FileHandler):
 class FileJsonHandler(FileHandler):
     """Handles JSON files."""
 
-    def read(self) -> dict[str, Any]:
+    def _read(self) -> dict[str, Any]:
         """
         Read the JSON file and return its contents as a dictionary.
 
@@ -132,22 +235,14 @@ class FileJsonHandler(FileHandler):
         """
         logger.info("Reading JSON file: %s", self.filepath)
 
-        if not self._file_exists():
-            raise FileNotFoundError(f"File '{self.filepath}' not found.")
-
         try:
             logger.debug("Opening JSON file for reading: %s", self.filepath)
             with open(file=self.filepath, mode="r", encoding="utf-8") as file:
                 data = json.load(file)
                 logger.info("Successfully read JSON file: %s", self.filepath)
                 return data
-        except FileNotFoundError as e:
-            raise FileNotFoundError(f"File '{self.filepath}' not found.") from e
-        except PermissionError as e:
-            raise PermissionError(f"Permission denied for file '{self.filepath}'.") from e
         except json.JSONDecodeError as e:
-            # Using ValueError instead of JSONDecodeError due to complexity in supplying additional arguments.
-            raise ValueError(f"Error decoding JSON file '{self.filepath}': {e}") from e
+            raise e
 
 
 class FileHandlerContext:
@@ -175,7 +270,6 @@ class FileHandlerContext:
         """
         logger.debug("Creating file handler for path: %s", filepath)
         _, file_extension = os.path.splitext(filepath)
-        logger.debug("Detected file extension: %s", file_extension)
 
         handler_class = cls.SUPPORTED_EXTENSIONS.get(file_extension)
 
