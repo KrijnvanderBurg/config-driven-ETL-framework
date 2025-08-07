@@ -147,11 +147,11 @@ class HttpConfig(BaseConfig):
             retry=retry,
         )
 
-    def _alert(self, message: str, title: str) -> None:
+    def _alert(self, title: str, body: str) -> None:
         """Send an alert message via HTTP.
 
         Args:
-            message: The alert message to send.
+            body: The alert message to send.
             title: The alert title.
 
         Raises:
