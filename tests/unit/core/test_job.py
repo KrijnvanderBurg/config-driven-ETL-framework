@@ -11,7 +11,7 @@ The tests verify various aspects of Job functionality including:
 """
 
 from pathlib import Path
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -72,19 +72,11 @@ class TestJob:
             assert job.transforms[0] == mock_transform
             assert job.loads[0] == mock_load
 
-    @patch("pathlib.Path.suffix", new_callable=PropertyMock)
-    @patch("flint.utils.file.FileHandlerContext.from_filepath")
-    def test_from_file_unsupported_format(self, mock_from_filepath: MagicMock, mock_suffix: PropertyMock) -> None:
+    def test_from_file_unsupported_format(self) -> None:
         """Test that using an unsupported file format raises NotImplementedError."""
-        # Arrange
-        mock_suffix.return_value = ".yaml"
-        mock_handler = MagicMock()
-        mock_from_filepath.return_value = mock_handler
-        mock_handler.read.return_value = {}
-
         # Act & Assert
         with pytest.raises(NotImplementedError):
-            Job.from_file(Path("test.yaml"))
+            Job.from_file(Path("test.txt"))
 
     def test_from_dict(self) -> None:
         """Test creating a Job from a configuration dictionary."""
