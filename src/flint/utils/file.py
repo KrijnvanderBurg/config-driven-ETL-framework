@@ -77,11 +77,7 @@ class FileHandler(ABC):
             OSError: If the path is not a regular file or there's a system-level error.
         """
         if not self.filepath.is_file():
-            if self.filepath.is_dir():
-                raise IsADirectoryError(f"Path is a directory, not a file: {self.filepath}")
-            if self.filepath.is_symlink():
-                raise OSError(f"Path is a symbolic link: {self.filepath}")
-            raise OSError(f"Path is not a regular file: {self.filepath}")
+            raise OSError(f"Path is not a file: {self.filepath}")
         logger.debug("File type validated: %s", self.filepath)
 
     def _read_permission(self) -> None:

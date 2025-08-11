@@ -9,8 +9,10 @@ The tests verify that:
 - The factory pattern correctly selects the appropriate handler for each file type
 """
 
+import json
+import tempfile
 from pathlib import Path
-from unittest.mock import mock_open, patch
+from unittest.mock import patch
 
 import pytest
 import yaml
@@ -27,28 +29,23 @@ class TestYamlHandler:
         - Error handling for invalid YAML content
     """
 
-    def test_read(self) -> None:
+    @pytest.fixture
+    def temp_yaml_file(self) -> Path:
+        """Create a temporary YAML file with valid content."""
+        yaml_content = "key: value"
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as temp_file:
+            temp_file.write(yaml_content)
+            temp_file.flush()
+            return Path(temp_file.name)
+
+    def test_read(self, temp_yaml_file: Path) -> None:
         """Test reading YAML data from a file."""
-        # Arrange
-        with (
-            patch("builtins.open", mock_open(read_data="key: value")),
-            patch.object(FileYamlHandler, "_file_exists", return_value=True),
-        ):
-            # Act
-            handler = FileYamlHandler(filepath=Path("test.yaml"))
-            data = handler.read()
+        # Act
+        handler = FileYamlHandler(filepath=temp_yaml_file)
+        data = handler.read()
 
-            # Assert
-            assert data == {"key": "value"}
-
-    def test_read__file_not_exists(self) -> None:
-        """Test reading YAML file raises FileNotFoundError when file does not exist."""
-        # Arrange
-        with patch("builtins.open", side_effect=FileNotFoundError):
-            with pytest.raises(FileNotFoundError):  # Assert
-                # Act
-                handler = FileYamlHandler(filepath=Path("test.yaml"))
-                handler.read()
+        # Assert
+        assert data == {"key": "value"}
 
     def test_read__file_not_found_error(self) -> None:
         """
@@ -56,106 +53,95 @@ class TestYamlHandler:
             when file does not exist while `self._file_exists() returns true.
         """
         # Arrange
-        with patch("builtins.open", side_effect=FileNotFoundError):
-            with pytest.raises(FileNotFoundError):  # Assert
-                # Act
-                handler = FileYamlHandler(filepath=Path("test.yaml"))
-                handler.read()
+        non_existent_path = Path("non_existent_file.yaml")
 
-    def test_read__file_permission_error(self) -> None:
+        # Act & Assert
+        handler = FileYamlHandler(filepath=non_existent_path)
+        with pytest.raises(FileNotFoundError):
+            handler.read()
+
+    def test_read__file_permission_error(self, temp_yaml_file: Path) -> None:
         """Test reading YAML file raises `PermissionError` when `builtins.open()` raises `PermissionError`."""
-        # Arrange
-        with (
-            patch("builtins.open", side_effect=PermissionError),
-            patch.object(FileYamlHandler, "_file_exists", return_value=True),
-        ):
-            with pytest.raises(PermissionError):  # Assert
-                # Act
-                handler = FileYamlHandler(filepath=Path("test.yaml"))
+        with patch("builtins.open", side_effect=PermissionError):
+            # Act & Assert
+            handler = FileYamlHandler(filepath=temp_yaml_file)
+            with pytest.raises(PermissionError):
                 handler.read()
 
     def test_read__invalid_yaml(self) -> None:
         """Test reading invalid YAML content raises yaml.YAMLError."""
         # Arrange
         invalid_yaml = "key: value:"  # colon `:` after value: is invalid yaml.
-        with (
-            patch("builtins.open", mock_open(read_data=invalid_yaml)),
-            patch.object(FileYamlHandler, "_file_exists", return_value=True),
-        ):
-            with pytest.raises(yaml.YAMLError):  # Assert
-                # Act
-                handler = FileYamlHandler(filepath=Path("test.yaml"))
-                handler.read()
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as temp_file:
+            temp_file.write(invalid_yaml)
+            temp_file.flush()
+            temp_path = Path(temp_file.name)
+
+        # Act & Assert
+        handler = FileYamlHandler(filepath=temp_path)
+        with pytest.raises(yaml.YAMLError):
+            handler.read()
 
 
 class TestJsonHandler:
     """Tests for FileJsonHandler class."""
 
-    def test_read(self) -> None:
-        """Test reading JSON data from a file."""
-        # Arrange
-        with (
-            patch("builtins.open", mock_open(read_data='{"key": "value"}')),
-            patch.object(FileJsonHandler, "_file_exists", return_value=True),
-        ):
-            # Act
-            handler = FileJsonHandler(filepath=Path("test.json"))
-            data = handler.read()
+    @pytest.fixture
+    def temp_json_file(self) -> Path:
+        """Create a temporary JSON file with valid content."""
+        json_content = {"key": "value"}
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as temp_file:
+            json.dump(json_content, temp_file)
+            temp_file.flush()
+            return Path(temp_file.name)
 
-            # Assert
-            assert data == {"key": "value"}
+    def test_read(self, temp_json_file: Path) -> None:
+        """Test reading JSON data from a file."""
+        # Act
+        handler = FileJsonHandler(filepath=temp_json_file)
+        data = handler.read()
+
+        # Assert
+        assert data == {"key": "value"}
 
     def test_read__file_not_exists(self) -> None:
         """Test reading JSON file raises `FileNotFoundError` when `self._file_exists()` returns false."""
-        # Arrange
-        with (
-            patch("builtins.open", side_effect=FileNotFoundError),
-            patch.object(FileJsonHandler, "_file_exists", return_value=False),
-        ):
-            with pytest.raises(FileNotFoundError):  # Assert
-                # Act
-                handler = FileJsonHandler(filepath=Path("test.json"))
-                handler.read()
+        with pytest.raises(FileNotFoundError):  # Assert
+            # Act
+            handler = FileJsonHandler(filepath=Path("non_existent.json"))
+            handler.read()
 
     def test_read__file_not_found_error(self) -> None:
         """
         Test reading JSON file raises `FileNotFoundError`
             when file does not exist while `self._file_exists() returns true.
         """
-        # Arrange
-        with (
-            patch("builtins.open", side_effect=FileNotFoundError),
-            patch.object(FileJsonHandler, "_file_exists", return_value=True),
-        ):
-            with pytest.raises(FileNotFoundError):  # Assert
-                # Act
-                handler = FileJsonHandler(filepath=Path("test.json"))
-                handler.read()
+        with pytest.raises(FileNotFoundError):  # Assert
+            # Act
+            handler = FileJsonHandler(filepath=Path("test.json"))
+            handler.read()
 
-    def test_read__file_permission_error(self) -> None:
+    def test_read__file_permission_error(self, temp_json_file: Path) -> None:
         """Test reading JSON file raises `PermissionError` when `builtins.open()` raises `PermissionError`."""
-        # Arrange
-        with (
-            patch("builtins.open", side_effect=PermissionError),
-            patch.object(FileJsonHandler, "_file_exists", return_value=True),
-        ):
+        with patch("builtins.open", side_effect=PermissionError):
             with pytest.raises(PermissionError):  # Assert
                 # Act
-                handler = FileJsonHandler(filepath=Path("test.json"))
+                handler = FileJsonHandler(filepath=temp_json_file)
                 handler.read()
 
     def test_read__json_decode_error(self) -> None:
-        """Test reading JSON file raises `JSONDecodeError` when file contains invalid JSON."""
+        """Test reading invalid JSON content raises json.JSONDecodeError."""
         # Arrange
         invalid_json = '{"name": "John" "age": 30}'  # Missing comma makes it invalid JSON.
-        with (
-            patch("builtins.open", mock_open(read_data=invalid_json)),
-            patch.object(FileJsonHandler, "_file_exists", return_value=True),
-        ):
-            with pytest.raises(ValueError):  # Assert
-                # Act
-                handler = FileJsonHandler(filepath=Path("test.json"))
-                handler.read()
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as temp_file:
+            temp_file.write(invalid_json)
+            temp_file.flush()
+            temp_path = Path(temp_file.name)
+
+        # Act & Assert
+        handler = FileJsonHandler(filepath=temp_path)
+        with pytest.raises(json.JSONDecodeError):
+            handler.read()
 
 
 class TestFileHandlerFactory:
