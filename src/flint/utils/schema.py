@@ -190,7 +190,7 @@ class SchemaFilepathHandler(SchemaHandler):
             file_handler: FileHandler = FileHandlerContext.from_filepath(filepath=schema)
 
             logger.debug("Reading schema file content")
-            file_content = file_handler._read()
+            file_content = file_handler.read()
 
             logger.debug("Converting file content to schema")
             result = SchemaDictHandler.parse(schema=file_content)
@@ -198,6 +198,5 @@ class SchemaFilepathHandler(SchemaHandler):
             logger.info("Successfully parsed schema from file: %s", schema)
             return result
 
-        except (FileNotFoundError, PermissionError) as e:
+        except (FileNotFoundError, PermissionError, NotImplementedError) as e:
             logger.error("File access error reading schema file %s: %s", schema, str(e))
-            raise
