@@ -146,7 +146,7 @@ class TestSchemaHandlers:
             schema_json_file: Path to the JSON file containing the schema.
         """
         # Arrange - Read the JSON file content to get expected schema
-        with open(schema_json_file, "r") as f:
+        with open(file=schema_json_file, mode="r", encoding="utf-8") as f:
             schema_json_str = f.read()
         expected_schema_dict = json.loads(schema_json_str)
 
@@ -162,12 +162,9 @@ class TestSchemaHandlers:
 
         Verifies that exceptions from file handling are properly propagated.
         """
-        # Arrange
-        file_path = Path("nonexistent.json")
-
         # Act & Assert
         with pytest.raises(FileNotFoundError):
-            SchemaFilepathHandler.parse(schema=file_path)
+            SchemaFilepathHandler.parse(schema=Path("nonexistent.json"))
 
     def test_schema_filepath_handler_permission_error(self, schema_json_file: Path) -> None:
         """
