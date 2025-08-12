@@ -200,3 +200,4 @@ class SchemaFilepathHandler(SchemaHandler):
 
         except (FileNotFoundError, PermissionError, NotImplementedError) as e:
             logger.error("File access error reading schema file %s: %s", schema, str(e))
+            raise e
