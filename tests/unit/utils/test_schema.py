@@ -10,6 +10,8 @@ The tests verify that:
 - The conversion between formats preserves schema structure and field definitions
 """
 
+import json
+import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
@@ -44,6 +46,23 @@ class TestSchemaHandlers:
                 StructField("job_title", StringType(), True),
             ]
         )
+
+    @pytest.fixture
+    def schema_json_file(self, schema_struct: StructType) -> Path:
+        """
+        Create a temporary named JSON file containing the schema definition.
+
+        Args:
+            schema_struct: The StructType schema from the schema_struct fixture.
+
+        Returns:
+            Path: Path to a temporary named JSON file containing schema definition.
+        """
+
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            f.write(schema_struct.json())
+            f.flush()
+            return Path(f.name)
 
     @pytest.fixture
     def schema_dict(self, schema_struct: StructType) -> dict:
@@ -121,25 +140,23 @@ class TestSchemaHandlers:
         with pytest.raises(ValueError):
             SchemaStringHandler.parse(schema=invalid_json)
 
-    def test_schema_filepath_handler_parse(self, schema_dict: dict) -> None:
+    def test_schema_filepath_handler_parse(self, schema_json_file: Path) -> None:
         """
         Test SchemaFilepathHandler loads schema from a file.
 
         Args:
-            schema_dict: Dictionary representation of the schema.
+            schema_json_file: Path to the JSON file containing the schema.
         """
-        # Arrange
-        file_path = Path("schema.json")
-        with patch.object(FileHandlerContext, "from_filepath", autospec=True) as mock_file_handler_context:
-            mock_file_handler = mock_file_handler_context.return_value
-            mock_file_handler.read.return_value = schema_dict
+        # Arrange - Read the JSON file content to get expected schema
+        with open(schema_json_file, "r") as f:
+            schema_json_str = f.read()
+        expected_schema_dict = json.loads(schema_json_str)
 
-            schema = SchemaFilepathHandler.parse(schema=file_path)
+        # Act
+        schema = SchemaFilepathHandler.parse(schema=schema_json_file)
 
-            # Assert
-            mock_file_handler_context.assert_called_once_with(filepath=file_path)
-            # mock_file_handler.read.assert_called_once()
-            assert schema.jsonValue() == schema_dict
+        # Assert
+        assert schema.jsonValue() == expected_schema_dict
 
     def test_schema_filepath_handler_file_not_found(self) -> None:
         """
@@ -160,14 +177,17 @@ class TestSchemaHandlers:
 
         Verifies that permission errors during file access are properly propagated.
         """
-        # Arrange
-        file_path = Path("protected.json")
-        with patch.object(FileHandlerContext, "from_filepath", autospec=True) as mock_file_handler_context:
-            mock_file_handler = mock_file_handler_context.return_value
-            mock_file_handler.read.side_effect = PermissionError()
+        # Arrange - Create a temporary file and remove read permissions
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            f.write('{"invalid": "schema"}')
+            restricted_file = Path(f.name)
 
-            with pytest.raises(PermissionError):
-                SchemaFilepathHandler.parse(schema=file_path)
+        # Remove read permissions to trigger PermissionError
+        restricted_file.chmod(0o000)
+
+        # Act & Assert
+        with pytest.raises(PermissionError):
+            SchemaFilepathHandler.parse(schema=restricted_file)
 
     def test_schema_filepath_handler_invalid_json(self) -> None:
         """
