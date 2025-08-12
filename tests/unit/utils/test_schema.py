@@ -13,12 +13,10 @@ The tests verify that:
 import json
 import tempfile
 from pathlib import Path
-from unittest.mock import patch
 
 import pytest
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 
-from flint.utils.file import FileHandlerContext
 from flint.utils.schema import SchemaDictHandler, SchemaFilepathHandler, SchemaStringHandler
 
 
@@ -171,23 +169,21 @@ class TestSchemaHandlers:
         with pytest.raises(FileNotFoundError):
             SchemaFilepathHandler.parse(schema=file_path)
 
-    def test_schema_filepath_handler_permission_error(self) -> None:
+    def test_schema_filepath_handler_permission_error(self, schema_json_file: Path) -> None:
         """
         Test SchemaFilepathHandler propagates PermissionError.
 
         Verifies that permission errors during file access are properly propagated.
-        """
-        # Arrange - Create a temporary file and remove read permissions
-        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
-            f.write('{"invalid": "schema"}')
-            restricted_file = Path(f.name)
 
+        Args:
+            schema_json_file: Path to the JSON file containing the schema.
+        """
         # Remove read permissions to trigger PermissionError
-        restricted_file.chmod(0o000)
+        schema_json_file.chmod(0o000)
 
         # Act & Assert
         with pytest.raises(PermissionError):
-            SchemaFilepathHandler.parse(schema=restricted_file)
+            SchemaFilepathHandler.parse(schema=schema_json_file)
 
     def test_schema_filepath_handler_invalid_json(self) -> None:
         """
@@ -196,11 +192,10 @@ class TestSchemaHandlers:
         Verifies that schema validation occurs after successfully reading a file.
         """
         # Arrange
-        file_path = Path("invalid_schema.json")
-        with patch.object(FileHandlerContext, "from_filepath", autospec=True) as mock_file_handler_context:
-            mock_file_handler = mock_file_handler_context.return_value
-            mock_file_handler.read.return_value = {"invalid": "schema"}
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            f.write('{"invalid": "schema"}')
+            file_path = Path(f.name)
 
-            # Act & Assert
-            with pytest.raises(ValueError):
-                SchemaFilepathHandler.parse(schema=file_path)
+        # Act & Assert
+        with pytest.raises(ValueError):
+            SchemaFilepathHandler.parse(schema=file_path)
