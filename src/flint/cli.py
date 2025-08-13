@@ -62,7 +62,8 @@ class Command(ABC):
             return exit_code
         except KeyboardInterrupt:
             logger.info("Operation cancelled by user")
-            raise
+            logger.debug("Exception details:", exc_info=True)
+            return ExitCode.KEYBOARD_INTERRUPT
         except Exception as e:  # pylint: disable=broad-except
             logger.error("Unexpected exception %s: %s", type(e).__name__, str(e))
             logger.debug("Exception details:", exc_info=True)

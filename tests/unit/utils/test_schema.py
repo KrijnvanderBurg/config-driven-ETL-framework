@@ -164,7 +164,8 @@ class TestSchemaHandlers:
         """
         # Act & Assert
         with pytest.raises(FileNotFoundError):
-            SchemaFilepathHandler.parse(schema=Path("nonexistent.json"))
+            ap = SchemaFilepathHandler.parse(schema=Path("nonexistent.json"))
+            print(ap)
 
     def test_schema_filepath_handler_permission_error(self, schema_json_file: Path) -> None:
         """
