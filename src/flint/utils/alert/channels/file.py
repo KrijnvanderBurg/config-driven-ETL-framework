@@ -13,7 +13,7 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.exceptions import ConfigurationKeyError
-from flint.utils.alert.channels import BaseConfig
+from flint.utils.alert.channels.base import BaseConfig
 from flint.utils.logger import get_logger
 
 FILE_PATH: Final[str] = "file_path"
