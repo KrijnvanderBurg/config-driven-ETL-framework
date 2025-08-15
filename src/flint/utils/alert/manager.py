@@ -21,7 +21,7 @@ from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
-TEMPLATES: Final[str] = "templates"
+ALERT: Final[str] = "alert"
 CHANNELS: Final[str] = "channels"
 TRIGGERS: Final[str] = "triggers"
 
@@ -35,7 +35,6 @@ class Alert(Model):
     It implements the Model interface to support configuration-driven initialization.
 
     Attributes:
-        templates: Template configuration for formatting alert messages
         channels: Channel manager for handling different notification channels
         triggers: Rules for determining which channels to use for specific alerts
     """
@@ -58,9 +57,9 @@ class Alert(Model):
         logger.info("Creating Alert from file: %s", filepath)
 
         handler = FileHandlerContext.from_filepath(filepath=filepath)
-        file: dict[str, Any] = handler.read()
+        dict_: dict[str, Any] = handler.read()
 
-        alert = cls.from_dict(dict_=file)
+        alert = cls.from_dict(dict_=dict_)
         logger.info("Successfully created Alert from JSON file: %s", filepath)
         return alert
 
@@ -70,7 +69,6 @@ class Alert(Model):
 
         Args:
             dict_: Dictionary containing alert configuration with keys:
-                  - templates: Template configuration for message formatting
                   - channels: Channel configurations for notifications
                   - triggers: Rules for alert trigger
 
@@ -83,22 +81,22 @@ class Alert(Model):
 
         Examples:
             >>> config = {
-            ...     "templates": {...},
             ...     "channels": {...},
             ...     "triggers": [...]
             ... }
             >>> manager = AlertManager.from_dict(config)
         """
         logger.debug("Creating AlertManager from configuration dictionary")
+        alert_dict = dict_[ALERT]
 
         channels: list[AlertChannel] = []
-        for channel_config in dict_[CHANNELS]:
+        for channel_config in alert_dict[CHANNELS]:
             channel = AlertChannel.from_dict(channel_config)
             channels.append(channel)
             logger.debug("Added %s channel '%s' to configuration", channel.type, channel.name)
 
         triggers: list[AlertTrigger] = []
-        for trigger_dict in dict_[TRIGGERS]:
+        for trigger_dict in alert_dict[TRIGGERS]:
             trigger = AlertTrigger.from_dict(trigger_dict)
             triggers.append(trigger)
 

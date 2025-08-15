@@ -46,5 +46,9 @@
                 "schema_location": "tests/e2e/withcolumn/schema_output.json"
             }
         ]
+    },
+    "alert": {
+        "channels": [],
+        "triggers": []
     }
 }

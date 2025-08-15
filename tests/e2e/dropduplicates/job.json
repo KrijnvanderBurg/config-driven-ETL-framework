@@ -40,5 +40,9 @@
                 "schema_location": "tests/e2e/dropduplicates/schema_output.json"
             }
         ]
+    },
+    "alert": {
+        "channels": [],
+        "triggers": []
     }
 }

@@ -22,7 +22,7 @@ from flint.utils.spark import SparkHandler
 def test__main(tmp_path: Path, job_path: str) -> None:
     """Test main function with different configurations."""
     # Arrange
-    job_tmp_path = Path(tmp_path, "job_cast.json")
+    job_tmp_path = Path(tmp_path, "job.json")
 
     # Step 1: Read the original JSON file
     with open(file=job_path, mode="r", encoding="utf-8") as file:
