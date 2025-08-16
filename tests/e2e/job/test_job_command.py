@@ -37,10 +37,7 @@ def test_job_command(tmp_path: Path, job_path: str) -> None:
     with open(file=job_tmp_path, mode="w", encoding="utf-8") as file:
         json.dump(data, file)
 
-    # Step 4: Create a Spark session, only needed for reading output files to assert equal
-    SparkHandler()
-
-    # Step 5: Use the modified file path for the test
+    # Step 4: Use the modified file path for the test
     # Include the command="run" argument to match the new CLI structure
     args = argparse.Namespace(config_filepath=str(job_tmp_path), command="run", log_level="INFO")
 
@@ -57,7 +54,7 @@ def test_job_command(tmp_path: Path, job_path: str) -> None:
                 f".{load[DATA_FORMAT]}"
             )
 
-            # Step 6: Read the content of both files into DataFrames
+            # Step 5: Read the content of both files into DataFrames
             schema_path_actual = Path(load[SCHEMA_LOCATION])
             with open(schema_path_actual, "r", encoding="utf-8") as file:
                 json_content = json.load(fp=file)
@@ -68,7 +65,7 @@ def test_job_command(tmp_path: Path, job_path: str) -> None:
                 json_content = json.load(fp=file)
             schema_expected = StructType.fromJson(json=json_content)
 
-            # Step 7: Compare actual and expected DataFrames
+            # Step 6: Compare actual and expected DataFrames
             df_actual = (
                 SparkHandler()
                 .session.read.format(load[DATA_FORMAT])
