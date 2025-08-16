@@ -62,7 +62,7 @@ class AlertTemplate(Model):
             A Templates instance configured from the dictionary
 
         Raises:
-            ConfigurationKeyError: If a required key is missing.
+            FlintConfigurationKeyError: If a required key is missing.
 
         Examples:
             >>> config = {

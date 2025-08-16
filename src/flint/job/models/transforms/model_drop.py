@@ -56,7 +56,7 @@ class DropFunctionModel(FunctionModel):
             An initialized DropFunctionModel.
 
         Raises:
-            ConfigurationKeyError: If required keys are missing from the dictionary
+            FlintConfigurationKeyError: If required keys are missing from the dictionary
         """
         try:
             function_name = dict_[FUNCTION]

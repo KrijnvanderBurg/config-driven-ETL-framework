@@ -62,7 +62,7 @@ class SelectFunctionModel(FunctionModel):
             An initialized SelectFunctionModel.
 
         Raises:
-            ConfigurationKeyError: If required keys are missing from the dictionary
+            FlintConfigurationKeyError: If required keys are missing from the dictionary
         """
         logger.debug("Creating SelectFunctionModel from dictionary: %s", dict_)
 

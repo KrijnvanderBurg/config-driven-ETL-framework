@@ -93,7 +93,7 @@ class Function(Generic[FunctionModelT_co], ABC):
             A new function instance configured according to the provided parameters.
 
         Raises:
-            ConfigurationKeyError: If required keys are missing from the configuration.
+            FlintConfigurationKeyError: If required keys are missing from the configuration.
         """
         logger.debug("Creating Function from dictionary: %s", dict_)
         model = cls.model_cls.from_dict(dict_=dict_)
@@ -146,7 +146,7 @@ class Transform:
             A new instance of the transformation class.
 
         Raises:
-            ConfigurationKeyError: If required keys are missing from the configuration.
+            FlintConfigurationKeyError: If required keys are missing from the configuration.
             NotImplementedError: If a specified function is not supported.
             Exception: If there's an unexpected error during Transform creation.
         """

@@ -73,7 +73,7 @@ class CastFunctionModel(FunctionModel):
             A new CastFunctionModel instance with the specified configuration
 
         Raises:
-            ConfigurationKeyError: If required keys are missing from the dictionary
+            FlintConfigurationKeyError: If required keys are missing from the dictionary
         """
         try:
             function_name = dict_[FUNCTION]

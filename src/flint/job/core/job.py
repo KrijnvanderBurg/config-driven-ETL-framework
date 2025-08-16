@@ -97,7 +97,7 @@ class Job:
             A fully configured Job instance.
 
         Raises:
-            ConfigurationKeyError: If a required key is missing from the dictionary.
+            FlintConfigurationKeyError: If a required key is missing from the dictionary.
         """
         logger.debug("Creating Job from dictionary with keys: %s", list(dict_.keys()))
 

@@ -66,7 +66,7 @@ class JoinFunctionModel(FunctionModel):
             An initialized JoinFunctionModel instance
 
         Raises:
-            ConfigurationKeyError: If required keys are missing from the dictionary
+            FlintConfigurationKeyError: If required keys are missing from the dictionary
             ValueError: If the function name is not 'join'
             Exception: If there's an unexpected error during model creation
         """

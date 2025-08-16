@@ -84,7 +84,7 @@ class Load(Generic[LoadModelT], ABC):
             An initialized loading instance of the appropriate type based on data_format
 
         Raises:
-            ConfigurationKeyError: If required keys are missing from the configuration
+            FlintConfigurationKeyError: If required keys are missing from the configuration
             NotImplementedError: If the specified load format is not supported
         """
         logger.debug("Creating Load from dictionary: %s", dict_)

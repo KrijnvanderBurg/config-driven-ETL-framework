@@ -55,7 +55,7 @@ class AlertChannel(Model):
             A Channel instance configured from the dictionary
 
         Raises:
-            ConfigurationKeyError: If required configuration keys are missing
+            FlintConfigurationKeyError: If required configuration keys are missing
             ValueError: If an unknown channel type is specified
 
         Examples:

@@ -127,7 +127,7 @@ class LoadModel(Model, ABC):
             An initialized loading model
 
         Raises:
-            ConfigurationKeyError: If required keys are missing from the configuration
+            FlintConfigurationKeyError: If required keys are missing from the configuration
         """
 
 

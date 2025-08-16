@@ -73,7 +73,7 @@ class FunctionModel(Model, Generic[ArgsT], ABC):
                 - 'arguments': The arguments specification for the function
 
         Raises:
-            ConfigurationKeyError: If required keys are missing from the configuration.
+            FlintConfigurationKeyError: If required keys are missing from the configuration.
             NotImplementedError: If the subclass doesn't override this method.
         """
 

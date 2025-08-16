@@ -110,7 +110,7 @@ class ExtractFileModel(ExtractModel):
             An initialized extraction model for file-based sources
 
         Raises:
-            ConfigurationKeyError: If required keys are missing from the configuration
+            FlintConfigurationKeyError: If required keys are missing from the configuration
         """
         logger.debug("Creating ExtractFileModel from dictionary: %s", dict_)
 
