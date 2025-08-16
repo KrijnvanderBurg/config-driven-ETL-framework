@@ -8,35 +8,9 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pyspark.sql import DataFrame
 
-from flint.job.core.extract import DATA_FORMAT, Extract, ExtractFormat, ExtractRegistry
+from flint.job.core.extract import DATA_FORMAT, Extract, ExtractFile, ExtractFormat, ExtractRegistry
 from flint.job.models.model_extract import ExtractFileModel, ExtractMethod
 from flint.types import DataFrameRegistry
-
-
-class MockExtractModel:
-    """Dummy model for testing Extract class."""
-
-    model_cls = ExtractFileModel
-
-    def __init__(self, name: str, method: ExtractMethod = ExtractMethod.BATCH):
-        """Initialize test model."""
-        self.name = name
-        self.method = method
-        self.options = {}
-
-
-class MockExtractClass(Extract[ExtractFileModel]):
-    """Test implementation of Extract abstract class."""
-
-    model_cls = ExtractFileModel
-
-    def _extract_batch(self) -> DataFrame:
-        """Implementation of abstract method."""
-        return MagicMock(spec=DataFrame)
-
-    def _extract_streaming(self) -> DataFrame:
-        """Implementation of abstract method."""
-        return MagicMock(spec=DataFrame)
 
 
 class TestExtractRegistry:
@@ -88,8 +62,8 @@ class TestExtract:
         model = MagicMock(spec=ExtractFileModel)
         model.name = "test_extract"
 
-        # Act
-        extract = MockExtractClass(model=model)
+        # Act - Use ExtractFile directly instead of mock class
+        extract = ExtractFile(model=model)
 
         # Assert
         assert extract.model == model
@@ -113,7 +87,7 @@ class TestExtract:
         mock_from_dict.return_value = mock_model_cls
 
         # Act
-        extract = MockExtractClass.from_dict(extract_dict)
+        extract = ExtractFile.from_dict(extract_dict)
 
         # Assert
         assert extract.model == mock_model_cls
@@ -131,15 +105,15 @@ class TestExtract:
         model.method = ExtractMethod.BATCH
         model.options = {"option1": "value1"}
 
-        extract = MockExtractClass(model=model)
+        extract = ExtractFile(model=model)
         mock_df = MagicMock(spec=DataFrame)
 
-        # Use patch to mock the protected method and SparkHandler
-        with patch.object(MockExtractClass, "_extract_batch", return_value=mock_df):
+        # Mock the _extract_batch method directly
+        with patch.object(extract, "_extract_batch", return_value=mock_df):
             # Act
             extract.extract()
 
-            # Assert - removed assertion for add_configs which isn't actually called in our test
+            # Assert
             assert extract.data_registry["test_extract"] == mock_df
 
     @patch("flint.utils.spark.SparkHandler")
@@ -154,15 +128,15 @@ class TestExtract:
         model.method = ExtractMethod.STREAMING
         model.options = {"option1": "value1"}
 
-        extract = MockExtractClass(model=model)
+        extract = ExtractFile(model=model)
         mock_df = MagicMock(spec=DataFrame)
 
-        # Use patch to mock the protected method
-        with patch.object(MockExtractClass, "_extract_streaming", return_value=mock_df):
+        # Mock the _extract_streaming method directly
+        with patch.object(extract, "_extract_streaming", return_value=mock_df):
             # Act
             extract.extract()
 
-            # Assert - removed assertion for add_configs which isn't actually called in our test
+            # Assert
             assert extract.data_registry["test_extract"] == mock_df
 
     @patch("flint.utils.spark.SparkHandler")
@@ -174,13 +148,11 @@ class TestExtract:
 
         model = MagicMock(spec=ExtractFileModel)
         model.name = "test_extract"
-        # Create a mock method object that has value attribute but is invalid
-        mock_invalid_method = MagicMock()
-        mock_invalid_method.value = "invalid_method"
-        model.method = mock_invalid_method
+        model.method = MagicMock()
+        model.method.value = "invalid_method"
         model.options = {"option1": "value1"}
 
-        extract = MockExtractClass(model=model)
+        extract = ExtractFile(model=model)
 
         # Act & Assert
         with pytest.raises(ValueError):
@@ -228,3 +200,75 @@ class TestExtract:
             Extract.from_dict(config)
 
         assert "Extract format <missing> is not supported" in str(excinfo.value)
+
+
+class TestExtractFile:
+    """Unit tests for the ExtractFile concrete implementation."""
+
+    @patch("flint.utils.spark.SparkHandler")
+    def test_extract_batch_file_operations(self, mock_spark_handler_class: MagicMock) -> None:
+        """Test the _extract_batch method with actual PySpark operations."""
+        # Arrange
+        mock_spark_handler = MagicMock()
+        mock_session = MagicMock()
+        mock_dataframe = MagicMock(spec=DataFrame)
+        mock_read = MagicMock()
+        mock_read.load.return_value = mock_dataframe
+        mock_session.read = mock_read
+        mock_dataframe.count.return_value = 100
+
+        # Setup the class-level _spark attribute
+        ExtractFile._spark = mock_spark_handler
+        mock_spark_handler.session = mock_session
+
+        # Create model
+        model = MagicMock(spec=ExtractFileModel)
+        model.name = "test_extract"
+        model.location = "/path/to/data.csv"
+        model.data_format = ExtractFormat.CSV
+        model.schema = None
+        model.options = {"header": "true"}
+
+        extract_file = ExtractFile(model=model)
+
+        # Act
+        result = extract_file._extract_batch()
+
+        # Assert
+        mock_read.load.assert_called_once_with(path="/path/to/data.csv", format="csv", schema=None, header="true")
+        mock_dataframe.count.assert_called_once()
+        assert result == mock_dataframe
+
+    @patch("flint.utils.spark.SparkHandler")
+    def test_extract_streaming_file_operations(self, mock_spark_handler_class: MagicMock) -> None:
+        """Test the _extract_streaming method with actual PySpark operations."""
+        # Arrange
+        mock_spark_handler = MagicMock()
+        mock_session = MagicMock()
+        mock_dataframe = MagicMock(spec=DataFrame)
+        mock_read_stream = MagicMock()
+        mock_read_stream.load.return_value = mock_dataframe
+        mock_session.readStream = mock_read_stream
+
+        # Setup the class-level _spark attribute
+        ExtractFile._spark = mock_spark_handler
+        mock_spark_handler.session = mock_session
+
+        # Create model
+        model = MagicMock(spec=ExtractFileModel)
+        model.name = "test_extract"
+        model.location = "/path/to/data.json"
+        model.data_format = ExtractFormat.JSON
+        model.schema = None
+        model.options = {"multiLine": "true"}
+
+        extract_file = ExtractFile(model=model)
+
+        # Act
+        result = extract_file._extract_streaming()
+
+        # Assert
+        mock_read_stream.load.assert_called_once_with(
+            path="/path/to/data.json", format="json", schema=None, multiLine="true"
+        )
+        assert result == mock_dataframe

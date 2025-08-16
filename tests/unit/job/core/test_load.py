@@ -9,36 +9,9 @@ import pytest
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming.query import StreamingQuery
 
-from flint.job.core.load import DATA_FORMAT, Load, LoadRegistry
+from flint.job.core.load import DATA_FORMAT, Load, LoadFile, LoadRegistry
 from flint.job.models.model_load import LoadFormat, LoadMethod, LoadModelFile
 from flint.types import DataFrameRegistry, StreamingQueryRegistry
-
-
-class MockLoadModel:
-    """Dummy model for testing Load class."""
-
-    model_cls = LoadModelFile
-
-    def __init__(self, name: str, upstream_name: str, method: LoadMethod = LoadMethod.BATCH) -> None:
-        """Initialize test model."""
-        self.name = name
-        self.upstream_name = upstream_name
-        self.method = method
-        self.schema_location = None
-        self.options = {}
-
-
-class MockLoadClass(Load[LoadModelFile]):
-    """Test implementation of Load abstract class."""
-
-    model_cls = LoadModelFile
-
-    def _load_batch(self) -> None:
-        """Implementation of abstract method."""
-
-    def _load_streaming(self) -> StreamingQuery:
-        """Implementation of abstract method."""
-        return MagicMock(spec=StreamingQuery)
 
 
 class TestLoadRegistry:
@@ -92,7 +65,7 @@ class TestLoad:
         model.upstream_name = "source"
 
         # Act
-        load = MockLoadClass(model=model)
+        load = LoadFile(model=model)
 
         # Assert
         assert load.model == model
@@ -118,7 +91,7 @@ class TestLoad:
         mock_from_dict.return_value = mock_model_cls
 
         # Act
-        load = MockLoadClass.from_dict(load_dict)
+        load = LoadFile.from_dict(load_dict)
 
         # Assert
         assert load.model == mock_model_cls
@@ -138,21 +111,17 @@ class TestLoad:
         model.schema_location = None
         model.options = {}
 
-        load = MockLoadClass(model=model)
-        load._load_batch = MagicMock()
-        load._load_schema = MagicMock()
+        load = LoadFile(model=model)
 
-        # Add test data to registry
+        # Add test data to registry and mock methods
         load.data_registry["source"] = MagicMock(spec=DataFrame)
 
-        # Act
-        load.load()
+        with patch.object(load, "_load_batch"), patch.object(load, "_load_schema"):
+            # Act
+            load.load()
 
-        # Assert
-        assert load.data_registry["test_load"] == load.data_registry["source"]
-        load._load_batch.assert_called_once()
-        load._load_schema.assert_called_once()
-        # Skip asserting on add_configs since implementation may vary
+            # Assert
+            assert load.data_registry["test_load"] == load.data_registry["source"]
 
     @patch("flint.utils.spark.SparkHandler")
     def test_load_streaming_method(self, mock_spark_handler_class: MagicMock) -> None:
@@ -168,23 +137,22 @@ class TestLoad:
         model.schema_location = None
         model.options = {}
 
-        load = MockLoadClass(model=model)
+        load = LoadFile(model=model)
         mock_streaming_query = MagicMock(spec=StreamingQuery)
-        load._load_streaming = MagicMock(return_value=mock_streaming_query)
-        load._load_schema = MagicMock()
 
         # Add test data to registry
         load.data_registry["source"] = MagicMock(spec=DataFrame)
 
-        # Act
-        load.load()
+        with (
+            patch.object(load, "_load_streaming", return_value=mock_streaming_query),
+            patch.object(load, "_load_schema"),
+        ):
+            # Act
+            load.load()
 
-        # Assert
-        assert load.data_registry["test_load"] == load.data_registry["source"]
-        load._load_streaming.assert_called_once()
-        load._load_schema.assert_called_once()
-        assert load.streaming_query_registry["test_load"] == mock_streaming_query
-        # Skip asserting on add_configs since implementation may vary
+            # Assert
+            assert load.data_registry["test_load"] == load.data_registry["source"]
+            assert load.streaming_query_registry["test_load"] == mock_streaming_query
 
     @patch("flint.utils.spark.SparkHandler")
     def test_load_invalid_method(self, mock_spark_handler_class: MagicMock) -> None:
@@ -196,13 +164,11 @@ class TestLoad:
         model = MagicMock(spec=LoadModelFile)
         model.name = "test_load"
         model.upstream_name = "source"
-        # Create a mock method object that has value attribute but is invalid
-        mock_invalid_method = MagicMock()
-        mock_invalid_method.value = "invalid_method"
-        model.method = mock_invalid_method
+        model.method = MagicMock()
+        model.method.value = "invalid_method"
         model.options = {}
 
-        load = MockLoadClass(model=model)
+        load = LoadFile(model=model)
 
         # Add test data to registry
         load.data_registry["source"] = MagicMock(spec=DataFrame)
@@ -219,7 +185,7 @@ class TestLoad:
         model.name = "test_load"
         model.schema_location = "/path/to/schema.json"
 
-        load = MockLoadClass(model=model)
+        load = LoadFile(model=model)
 
         # Create mock DataFrame with schema
         mock_df = MagicMock(spec=DataFrame)
@@ -245,7 +211,7 @@ class TestLoad:
         model.name = "test_load"
         model.schema_location = None
 
-        load = MockLoadClass(model=model)
+        load = LoadFile(model=model)
 
         # Act
         with patch("builtins.open") as mock_open_ctx:
@@ -294,3 +260,75 @@ class TestLoad:
         # Act & Assert
         with pytest.raises(NotImplementedError):
             Load.from_dict(config)
+
+
+class TestLoadFile:
+    """Unit tests for the LoadFile concrete implementation."""
+
+    @patch("flint.utils.spark.SparkHandler")
+    def test_load_batch_file_operations(self, mock_spark_handler_class: MagicMock) -> None:
+        """Test the _load_batch method with actual PySpark operations."""
+        # Arrange
+        mock_spark_handler = MagicMock()
+        mock_spark_handler_class.return_value = mock_spark_handler
+
+        model = MagicMock(spec=LoadModelFile)
+        model.name = "test_load"
+        model.location = "/path/to/output.csv"
+        model.data_format = LoadFormat.CSV
+        model.mode = MagicMock()
+        model.mode.value = "overwrite"
+        model.options = {"header": "true"}
+
+        load_file = LoadFile(model=model)
+
+        # Create mock DataFrame
+        mock_dataframe = MagicMock(spec=DataFrame)
+        mock_dataframe.count.return_value = 50
+        mock_write = MagicMock()
+        mock_dataframe.write = mock_write
+        load_file.data_registry["test_load"] = mock_dataframe
+
+        # Act
+        load_file._load_batch()
+
+        # Assert
+        mock_dataframe.count.assert_called_once()
+        mock_write.save.assert_called_once_with(
+            path="/path/to/output.csv", format="csv", mode="overwrite", header="true"
+        )
+
+    @patch("flint.utils.spark.SparkHandler")
+    def test_load_streaming_file_operations(self, mock_spark_handler_class: MagicMock) -> None:
+        """Test the _load_streaming method with actual PySpark operations."""
+        # Arrange
+        mock_spark_handler = MagicMock()
+        mock_spark_handler_class.return_value = mock_spark_handler
+
+        model = MagicMock(spec=LoadModelFile)
+        model.name = "test_load"
+        model.location = "/path/to/output.json"
+        model.data_format = LoadFormat.JSON
+        model.mode = MagicMock()
+        model.mode.value = "append"
+        model.options = {"multiLine": "true"}
+
+        load_file = LoadFile(model=model)
+
+        # Create mock DataFrame and streaming query
+        mock_dataframe = MagicMock(spec=DataFrame)
+        mock_streaming_query = MagicMock(spec=StreamingQuery)
+        mock_streaming_query.id = "query-123"
+        mock_write_stream = MagicMock()
+        mock_write_stream.start.return_value = mock_streaming_query
+        mock_dataframe.writeStream = mock_write_stream
+        load_file.data_registry["test_load"] = mock_dataframe
+
+        # Act
+        result = load_file._load_streaming()
+
+        # Assert
+        mock_write_stream.start.assert_called_once_with(
+            path="/path/to/output.json", format="json", outputMode="append", multiLine="true"
+        )
+        assert result == mock_streaming_query

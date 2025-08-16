@@ -15,6 +15,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from flint.exceptions import FlintConfigurationKeyError
 from flint.job.core.extract import Extract
 from flint.job.core.job import Job
 from flint.job.core.load import Load
@@ -115,3 +116,106 @@ class TestJob:
             assert job.extracts[0] == mock_extract
             assert job.transforms[0] == mock_transform
             assert job.loads[0] == mock_load
+
+    def test_from_dict_missing_key_error(self) -> None:
+        """Test that missing required keys raise FlintConfigurationKeyError."""
+        # Arrange
+        job_dict: dict = {"invalid": "structure"}
+
+        # Act & Assert
+        with pytest.raises(FlintConfigurationKeyError):
+            Job.from_dict(job_dict)
+
+    @patch("flint.job.core.job.ValidateModelNamesAreUnique")
+    @patch("flint.job.core.job.ValidateUpstreamNamesExist")
+    def test_validate(self, mock_validate_upstream: MagicMock, mock_validate_unique: MagicMock) -> None:
+        """Test job validation calls validation functions."""
+        # Arrange
+        job = Job(extracts=[], transforms=[], loads=[])
+
+        # Act
+        job.validate()
+
+        # Assert
+        mock_validate_unique.assert_called_once_with(data=job)
+        mock_validate_upstream.assert_called_once_with(data=job)
+
+    def test_execute(self) -> None:
+        """Test job execution calls all phases."""
+        # Arrange
+        mock_extract = MagicMock(spec=Extract)
+        mock_extract.model = MagicMock()
+        mock_extract.model.name = "test_extract"
+        mock_transform = MagicMock(spec=Transform)
+        mock_transform.model = MagicMock()
+        mock_transform.model.name = "test_transform"
+        mock_load = MagicMock(spec=Load)
+        mock_load.model = MagicMock()
+        mock_load.model.name = "test_load"
+
+        job = Job(extracts=[mock_extract], transforms=[mock_transform], loads=[mock_load])
+
+        # Act
+        job.execute()
+
+        # Assert
+        mock_extract.extract.assert_called_once()
+        mock_transform.transform.assert_called_once()
+        mock_load.load.assert_called_once()
+
+    def test_extract_phase(self) -> None:
+        """Test the _extract method calls extract on all extractors."""
+        # Arrange
+        mock_extract1 = MagicMock(spec=Extract)
+        mock_extract1.model = MagicMock()
+        mock_extract1.model.name = "extract1"
+        mock_extract2 = MagicMock(spec=Extract)
+        mock_extract2.model = MagicMock()
+        mock_extract2.model.name = "extract2"
+
+        job = Job(extracts=[mock_extract1, mock_extract2], transforms=[], loads=[])
+
+        # Act
+        job._extract()
+
+        # Assert
+        mock_extract1.extract.assert_called_once()
+        mock_extract2.extract.assert_called_once()
+
+    def test_transform_phase(self) -> None:
+        """Test the _transform method calls transform on all transformers."""
+        # Arrange
+        mock_transform1 = MagicMock(spec=Transform)
+        mock_transform1.model = MagicMock()
+        mock_transform1.model.name = "transform1"
+        mock_transform2 = MagicMock(spec=Transform)
+        mock_transform2.model = MagicMock()
+        mock_transform2.model.name = "transform2"
+
+        job = Job(extracts=[], transforms=[mock_transform1, mock_transform2], loads=[])
+
+        # Act
+        job._transform()
+
+        # Assert
+        mock_transform1.transform.assert_called_once()
+        mock_transform2.transform.assert_called_once()
+
+    def test_load_phase(self) -> None:
+        """Test the _load method calls load on all loaders."""
+        # Arrange
+        mock_load1 = MagicMock(spec=Load)
+        mock_load1.model = MagicMock()
+        mock_load1.model.name = "load1"
+        mock_load2 = MagicMock(spec=Load)
+        mock_load2.model = MagicMock()
+        mock_load2.model.name = "load2"
+
+        job = Job(extracts=[], transforms=[], loads=[mock_load1, mock_load2])
+
+        # Act
+        job._load()
+
+        # Assert
+        mock_load1.load.assert_called_once()
+        mock_load2.load.assert_called_once()
