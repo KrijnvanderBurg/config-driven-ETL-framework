@@ -4,14 +4,14 @@
             {
                 "name": "extract-test",
                 "data_format": "csv",
-                "location": "tests/e2e/cast/input_data.csv",
+                "location": "tests/e2e/job/cast/input_data.csv",
                 "method": "batch",
                 "options": {
                     "delimiter": ",",
                     "header": true,
                     "inferSchema": false
                 },
-                "schema": "tests/e2e/cast/input_schema.json"
+                "schema": "tests/e2e/job/cast/input_schema.json"
             }
         ],
         "transforms": [
@@ -37,13 +37,13 @@
                 "name": "load-test",
                 "upstream_name": "transform-test",
                 "data_format": "csv",
-                "location": "tests/e2e/cast/load-test",
+                "location": "tests/e2e/job/cast/load-test",
                 "method": "batch",
                 "mode": "overwrite",
                 "options": {
                     "header": true
                 },
-                "schema_location": "tests/e2e/cast/schema_output.json"
+                "schema_location": "tests/e2e/job/cast/schema_output.json"
             }
         ]
     },

@@ -18,8 +18,8 @@ from flint.job.core.load import DATA_FORMAT, LOCATION, SCHEMA_LOCATION
 from flint.utils.spark import SparkHandler
 
 
-@pytest.mark.parametrize("job_path", glob.glob("tests/e2e/**/job.json", recursive=True))
-def test__main(tmp_path: Path, job_path: str) -> None:
+@pytest.mark.parametrize("job_path", glob.glob("tests/e2e/job/**/job.json", recursive=True))
+def test_job_command(tmp_path: Path, job_path: str) -> None:
     """Test main function with different configurations."""
     # Arrange
     job_tmp_path = Path(tmp_path, "job.json")

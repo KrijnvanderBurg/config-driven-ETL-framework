@@ -3,7 +3,7 @@
         "extracts": [
             {
                 "data_format": "csv",
-                "location": "tests/e2e/join/left_data.csv",
+                "location": "tests/e2e/job/join/left_data.csv",
                 "method": "batch",
                 "name": "extract-left",
                 "options": {
@@ -11,11 +11,11 @@
                     "header": true,
                     "inferSchema": false
                 },
-                "schema": "tests/e2e/join/left_schema.json"
+                "schema": "tests/e2e/job/join/left_schema.json"
             },
             {
                 "data_format": "csv",
-                "location": "tests/e2e/join/right_data.csv",
+                "location": "tests/e2e/job/join/right_data.csv",
                 "method": "batch",
                 "name": "extract-right",
                 "options": {
@@ -23,7 +23,7 @@
                     "header": true,
                     "inferSchema": false
                 },
-                "schema": "tests/e2e/join/right_schema.json"
+                "schema": "tests/e2e/job/join/right_schema.json"
             }
         ],
         "transforms": [
@@ -53,8 +53,8 @@
                 "name": "load-test",
                 "upstream_name": "transform-join",
                 "data_format": "csv",
-                "location": "tests/e2e/join/load-test",
-                "schema_location": "tests/e2e/join/schema_output.json",
+                "location": "tests/e2e/job/join/load-test",
+                "schema_location": "tests/e2e/job/join/schema_output.json",
                 "method": "batch",
                 "mode": "overwrite",
                 "options": {

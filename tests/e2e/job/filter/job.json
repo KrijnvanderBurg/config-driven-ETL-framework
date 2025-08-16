@@ -4,14 +4,14 @@
             {
                 "name": "extract-filter-test",
                 "data_format": "csv",
-                "location": "tests/e2e/filter/input_data.csv",
+                "location": "tests/e2e/job/filter/input_data.csv",
                 "method": "batch",
                 "options": {
                     "delimiter": ",",
                     "header": true,
                     "inferSchema": false
                 },
-                "schema": "tests/e2e/filter/input_schema.json"
+                "schema": "tests/e2e/job/filter/input_schema.json"
             }
         ],
         "transforms": [
@@ -31,13 +31,13 @@
                 "name": "load-test",
                 "upstream_name": "transform-filter-test",
                 "data_format": "csv",
-                "location": "tests/e2e/filter/load-test",
+                "location": "tests/e2e/job/filter/load-test",
                 "method": "batch",
                 "mode": "overwrite",
                 "options": {
                     "header": true
                 },
-                "schema_location": "tests/e2e/filter/schema_output.json"
+                "schema_location": "tests/e2e/job/filter/schema_output.json"
             }
         ]
     },
