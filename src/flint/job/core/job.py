@@ -18,7 +18,7 @@ from flint.core.extract import Extract
 from flint.core.load import Load
 from flint.core.transform import Transform
 from flint.core.validation import ValidateModelNamesAreUnique, ValidateUpstreamNamesExist
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.utils.file import FileHandlerContext
 from flint.utils.logger import get_logger
 
@@ -137,7 +137,7 @@ class Job:
                 loads.append(load)
 
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         job = cls(extracts=extracts, transforms=transforms, loads=loads)
         logger.info(

@@ -12,7 +12,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.models import Model
 from flint.utils.alert.channels.base import BaseConfig
 from flint.utils.logger import get_logger
@@ -71,7 +71,7 @@ class Retry(Model):
             attempts = dict_[ATTEMPTS]
             delay_in_seconds = dict_[DELAY_IN_SECONDS]
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(
             error_on_alert_failure=error_on_alert_failure,
@@ -135,7 +135,7 @@ class HttpConfig(BaseConfig):
             timeout = dict_[TIMEOUT]
             retry_dict = dict_[RETRY]
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         retry = Retry.from_dict(retry_dict)
 

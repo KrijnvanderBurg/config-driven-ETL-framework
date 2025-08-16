@@ -3,30 +3,24 @@
 This module defines the data models used to configure column selection
 transformations in the ingestion framework. It includes:
 
-- SelectFunctionModel: Main configuration model for select operations
+- CustomersOrdersFunctionModel: Main configuration model for select operations
 - Args nested class: Container for the selection parameters
 
 These models provide a type-safe interface for configuring column selections
 from configuration files or dictionaries.
 """
 
-import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from pyspark.sql.column import Column
-
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
-from flint.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
-
-COLUMNS: Final[str] = "columns"
+AMOUNT_MINIMUM: Final[str] = "amount_minimum"
 
 
 @dataclass
-class SelectFunctionModel(FunctionModel):
+class CustomersOrdersFunctionModel(FunctionModel):
     """Configuration model for column selection transform operations.
 
     This model defines the structure for configuring a column selection
@@ -38,7 +32,7 @@ class SelectFunctionModel(FunctionModel):
     """
 
     function: str
-    arguments: "SelectFunctionModel.Args"
+    arguments: "CustomersOrdersFunctionModel.Args"
 
     @dataclass
     class Args:
@@ -48,37 +42,28 @@ class SelectFunctionModel(FunctionModel):
             columns: List of column names to select from the DataFrame
         """
 
-        columns: list[Column]
+        amount_minimum: int
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
         """
-        Create a SelectFunctionModel from a dictionary.
+        Create a CustomersOrdersFunctionModel from a dictionary.
 
         Args:
             dict_: The configuration dictionary.
 
         Returns:
-            An initialized SelectFunctionModel.
-
-        Raises:
-            ConfigurationKeyError: If required keys are missing from the dictionary
+            An initialized CustomersOrdersFunctionModel.
         """
-        logger.debug("Creating SelectFunctionModel from dictionary: %s", dict_)
-
         try:
             function_name = dict_[FUNCTION]
             arguments_dict = dict_[ARGUMENTS]
-        except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
-        try:
-            columns = arguments_dict[COLUMNS]
-            logger.debug("Parsed select function - name: %s, columns: %s", function_name, columns)
-            arguments = cls.Args(columns=columns)
-        except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=arguments_dict) from e
+            # Process the arguments
+            amount_minimum = arguments_dict[AMOUNT_MINIMUM]
+            arguments = cls.Args(amount_minimum=amount_minimum)
 
-        model = cls(function=function_name, arguments=arguments)
-        logger.info("Successfully created SelectFunctionModel with %d columns", len(columns))
-        return model
+        except KeyError as e:
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+
+        return cls(function=function_name, arguments=arguments)

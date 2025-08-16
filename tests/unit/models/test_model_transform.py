@@ -6,7 +6,7 @@ from typing import Any, Self
 
 import pytest
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.models.model_transform import ArgsModel, FunctionModel, TransformModel
 
 
@@ -126,5 +126,5 @@ class TestTransformModel:
         del invalid_dict["name"]
 
         # Execute and Assert
-        with pytest.raises(ConfigurationKeyError):
+        with pytest.raises(FlintConfigurationKeyError):
             TransformModel.from_dict(invalid_dict)

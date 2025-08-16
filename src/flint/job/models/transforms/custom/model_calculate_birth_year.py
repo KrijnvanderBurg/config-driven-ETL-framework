@@ -13,7 +13,7 @@ from configuration files or dictionaries.
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 CURRENT_YEAR: Final[str] = "current_year"
@@ -74,6 +74,6 @@ class CalculateBirthYearFunctionModel(FunctionModel):
             arguments = cls.Args(current_year=current_year, age_column=age_column, birth_year_column=birth_year_column)
 
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(function=function_name, arguments=arguments)

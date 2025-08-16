@@ -14,7 +14,7 @@ import re
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.models import Model
 from flint.utils.logger import get_logger
 
@@ -81,7 +81,7 @@ class AlertTemplate(Model):
             prepend_body = dict_[PREPEND_BODY]
             append_body = dict_[APPEND_BODY]
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(
             prepend_title=prepend_title,
@@ -164,7 +164,7 @@ class AlertConditions(Model):
             exception_regex = dict_[EXCEPTION_REGEX]
             env_vars_matches = dict_[ENV_VARS_MATCHES]
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(
             exception_contains=exception_contains,
@@ -322,7 +322,7 @@ class AlertTrigger(Model):
             conditions = AlertConditions.from_dict(dict_[CONDITIONS])
             template = AlertTemplate.from_dict(dict_[TEMPLATE])
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(
             name=name,

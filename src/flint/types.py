@@ -13,7 +13,6 @@ These types provide the foundation for the ingestion framework's architecture,
 enabling features like component registration, singleton services, and type safety.
 """
 
-import enum
 import threading
 from collections.abc import Callable, Iterator
 from typing import Any, Generic, TypeVar
@@ -24,28 +23,6 @@ from pyspark.sql.streaming.query import StreamingQuery
 # Type variables with more specific constraints
 K = TypeVar("K", bound=str | int)  # Key types typically used in registries
 V = TypeVar("V")  # Value type
-
-
-class ExitCode(enum.IntEnum):
-    """Exit codes for the application.
-
-    These codes follow common Unix/Linux conventions:
-    - 0: Success
-    - 1-63: Application-specific error codes
-    - 64-127: Command-specific error codes
-
-    References:
-        - https://tldp.org/LDP/abs/html/exitcodes.html
-        - https://www.freebsd.org/cgi/man.cgi?query=sysexits&sektion=3
-    """
-
-    SUCCESS = 0
-    INVALID_ARGUMENTS = 10
-    CONFIGURATION_ERROR = 20
-    VALIDATION_ERROR = 30
-    RUNTIME_ERROR = 40
-    KEYBOARD_INTERRUPT = 98
-    UNEXPECTED_ERROR = 99
 
 
 class Singleton(type):

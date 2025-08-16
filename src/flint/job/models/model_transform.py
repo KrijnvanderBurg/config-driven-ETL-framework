@@ -17,7 +17,7 @@ from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from typing import Any, Final, Generic, Self, TypeVar
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.utils.logger import get_logger
 
 from . import Model
@@ -129,7 +129,7 @@ class TransformModel(Model):
             upstream_name = dict_[UPSTREAM_NAME]
             logger.debug("Parsed transform model - name: %s, upstream: %s", name, upstream_name)
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         model = cls(name=name, upstream_name=upstream_name)
         logger.info("Successfully created TransformModel: %s", name)

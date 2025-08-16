@@ -11,8 +11,7 @@ from pathlib import Path
 from typing import Self
 
 from flint.core.job import Job
-from flint.exceptions import ValidationError
-from flint.types import ExitCode
+from flint.exceptions import ExitCode, FlintConfigurationError, FlintIOError, FlintJobError, FlintValidationError
 from flint.utils.alert import Alert
 from flint.utils.logger import get_logger
 
@@ -60,12 +59,13 @@ class Command(ABC):
             exit_code = self._execute()
             logger.info("Command executed successfully with exit code %d (%s).", exit_code, exit_code.name)
             return exit_code
+        except NotImplementedError:
+            return ExitCode.UNEXPECTED_ERROR
         except KeyboardInterrupt:
-            logger.error("Operation cancelled by user")
-            logger.error("Exception details:", exc_info=True)
+            logger.error("Operation cancelled by user", exc_info=True)
             return ExitCode.KEYBOARD_INTERRUPT
         except Exception as e:  # pylint: disable=broad-except
-            logger.error("Unexpected exception %s: %s", type(e).__name__, str(e), exc_info=True)
+            logger.error("Unexpected exception %s: %s", type(e).__name__, str(e))
             logger.error("Exception details:", exc_info=True)
             return ExitCode.UNEXPECTED_ERROR
 
@@ -79,81 +79,6 @@ class Command(ABC):
         Returns:
             ExitCode: The exit code indicating success or specific failure reason.
         """
-
-
-class RunCommand(Command):
-    """Command to run the ETL pipeline using a configuration file."""
-
-    def __init__(self, config_filepath: Path) -> None:
-        """Initialize RunCommand.
-
-        Args:
-            config_filepath: Path to the ETL pipeline configuration file.
-        """
-        self.config_filepath = config_filepath
-
-    @staticmethod
-    def add_subparser(subparsers: _SubParsersAction) -> None:
-        """Register the 'run' subcommand and its arguments.
-
-        Args:
-            subparsers: The subparsers action from argparse.
-        """
-        parser = subparsers.add_parser("run", help="Run the ETL pipeline")
-        parser.add_argument("--config-filepath", required=True, type=str, help="Path to config file")
-
-    @classmethod
-    def from_args(cls, args: Namespace) -> Self:
-        """Create a RunCommand instance from parsed arguments.
-
-        Args:
-            args: Parsed CLI arguments.
-
-        Returns:
-            RunCommand: An instance of RunCommand.
-        """
-        config_filepath = Path(args.config_filepath)
-
-        return cls(config_filepath=config_filepath)
-
-    def _execute(self) -> ExitCode:
-        """Execute the ETL pipeline as defined in the configuration file.
-
-        Loads, validates, and runs the ETL job using the provided configuration file.
-        Logs progress and completion status.
-
-        Returns:
-            ExitCode: SUCCESS if the pipeline completes without errors, otherwise an appropriate error code.
-        """
-        logger.info("Running ETL pipeline with config: %s", self.config_filepath)
-
-        try:
-            alert = Alert.from_file(filepath=self.config_filepath)
-        except NotImplementedError:
-            return ExitCode.INVALID_ARGUMENTS
-        except FileNotFoundError:
-            return ExitCode.CONFIGURATION_ERROR
-        except PermissionError:
-            return ExitCode.CONFIGURATION_ERROR
-        except OSError:
-            return ExitCode.CONFIGURATION_ERROR
-
-        try:
-            job = Job.from_file(filepath=self.config_filepath)
-            job.validate()
-            job.execute()
-            logger.info("ETL pipeline completed successfully")
-            return ExitCode.SUCCESS
-        except ValidationError as e:
-            alert.trigger_if_conditions_met(
-                body="Validation failed", title="ETL Pipeline Validation Error", exception=e
-            )
-            return ExitCode.VALIDATION_ERROR
-        except RuntimeError as e:
-            alert.trigger_if_conditions_met(
-                body="Runtime error occurred", title="ETL Pipeline Runtime Error", exception=e
-            )
-            return ExitCode.RUNTIME_ERROR
 
 
 class ValidateCommand(Command):
@@ -203,14 +128,9 @@ class ValidateCommand(Command):
 
         try:
             alert = Alert.from_file(filepath=self.config_filepath)
-        except NotImplementedError:
-            return ExitCode.INVALID_ARGUMENTS
-        except FileNotFoundError:
-            return ExitCode.CONFIGURATION_ERROR
-        except PermissionError:
-            return ExitCode.CONFIGURATION_ERROR
-        except OSError:
-            return ExitCode.CONFIGURATION_ERROR
+        except FlintIOError as e:
+            logger.error("Failed to read alert configuration: %s", e)
+            return e.exit_code
 
         try:
             job = Job.from_file(filepath=self.config_filepath)
@@ -218,8 +138,94 @@ class ValidateCommand(Command):
             job.execute()
             logger.info("ETL pipeline validation completed successfully")
             return ExitCode.SUCCESS
-        except ValidationError as e:
+        except FlintIOError as e:
+            logger.error("Failed to read job configuration: %s", e)
+            return e.exit_code
+        except FlintConfigurationError as e:
+            alert.trigger_if_conditions_met(
+                body="Configuration error occurred", title="ETL Pipeline Configuration Error", exception=e
+            )
+            return e.exit_code
+        except FlintValidationError as e:
             alert.trigger_if_conditions_met(
                 body="Validation failed", title="ETL Pipeline Validation Error", exception=e
             )
-            return ExitCode.VALIDATION_ERROR
+            return e.exit_code
+
+
+class JobCommand(Command):
+    """Command to run the ETL pipeline using a configuration file."""
+
+    def __init__(self, config_filepath: Path) -> None:
+        """Initialize JobCommand.
+
+        Args:
+            config_filepath: Path to the ETL pipeline configuration file.
+        """
+        self.config_filepath = config_filepath
+
+    @staticmethod
+    def add_subparser(subparsers: _SubParsersAction) -> None:
+        """Register the 'run' subcommand and its arguments.
+
+        Args:
+            subparsers: The subparsers action from argparse.
+        """
+        parser = subparsers.add_parser("run", help="Run the ETL pipeline")
+        parser.add_argument("--config-filepath", required=True, type=str, help="Path to config file")
+
+    @classmethod
+    def from_args(cls, args: Namespace) -> Self:
+        """Create a RunCommand instance from parsed arguments.
+
+        Args:
+            args: Parsed CLI arguments.
+
+        Returns:
+            RunCommand: An instance of RunCommand.
+        """
+        config_filepath = Path(args.config_filepath)
+
+        return cls(config_filepath=config_filepath)
+
+    def _execute(self) -> ExitCode:
+        """Execute the ETL pipeline as defined in the configuration file.
+
+        Loads, validates, and runs the ETL job using the provided configuration file.
+        Logs progress and completion status.
+
+        Returns:
+            ExitCode: SUCCESS if the pipeline completes without errors, otherwise an appropriate error code.
+        """
+        logger.info("Running ETL pipeline with config: %s", self.config_filepath)
+
+        try:
+            alert = Alert.from_file(filepath=self.config_filepath)
+        except FlintIOError as e:
+            logger.error("Failed to read alert configuration: %s", e)
+            return e.exit_code
+
+        try:
+            job = Job.from_file(filepath=self.config_filepath)
+            job.validate()
+            job.execute()
+            logger.info("ETL pipeline completed successfully")
+            return ExitCode.SUCCESS
+        except FlintIOError as e:
+            logger.error("Failed to read job configuration: %s", e)
+            return e.exit_code
+        except FlintConfigurationError as e:
+            alert.trigger_if_conditions_met(
+                body="Configuration error occurred", title="ETL Pipeline Configuration Error", exception=e
+            )
+            return e.exit_code
+        except FlintValidationError as e:
+            alert.trigger_if_conditions_met(
+                body="Validation failed", title="ETL Pipeline Validation Error", exception=e
+            )
+            return e.exit_code
+        except FlintJobError as e:
+            alert.trigger_if_conditions_met(
+                body="Runtime error occurred", title="ETL Pipeline Runtime Error", exception=e
+            )
+            return e.exit_code

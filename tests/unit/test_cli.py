@@ -5,7 +5,7 @@ Unit tests for Flint CLI commands.
 from argparse import Namespace
 from pathlib import Path
 
-from flint.cli import RunCommand, ValidateCommand
+from flint.cli import JobCommand, ValidateCommand
 
 
 class TestRunCommand:
@@ -13,14 +13,14 @@ class TestRunCommand:
 
     def test_init_sets_config_filepath(self) -> None:
         """Test config_filepath is set on init."""
-        cmd = RunCommand(config_filepath=Path("/tmp/test.json"))
+        cmd = JobCommand(config_filepath=Path("/tmp/test.json"))
         assert cmd.config_filepath == Path("/tmp/test.json")
 
     def test_from_args_sets_config_filepath(self) -> None:
         """Test from_args sets config_filepath."""
         args = Namespace(config_filepath=Path("/tmp/args.json"))
-        cmd = RunCommand.from_args(args)
-        assert isinstance(cmd, RunCommand)
+        cmd = JobCommand.from_args(args)
+        assert isinstance(cmd, JobCommand)
         assert cmd.config_filepath == Path("/tmp/args.json")
 
 

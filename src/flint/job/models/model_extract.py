@@ -20,7 +20,7 @@ from typing import Any, Final, Self
 
 from pyspark.sql.types import StructType
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.utils.logger import get_logger
 from flint.utils.schema import SchemaFilepathHandler
 
@@ -132,7 +132,7 @@ class ExtractFileModel(ExtractModel):
             schema = SchemaFilepathHandler.parse(schema=Path(dict_[SCHEMA]))
 
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         model = cls(
             name=name,

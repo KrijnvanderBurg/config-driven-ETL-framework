@@ -12,7 +12,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.utils.alert.channels.base import BaseConfig
 from flint.utils.logger import get_logger
 
@@ -59,7 +59,7 @@ class FileConfig(BaseConfig):
         try:
             file_path = dict_[FILE_PATH]
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(file_path=file_path)
 

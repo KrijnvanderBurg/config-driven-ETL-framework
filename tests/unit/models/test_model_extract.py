@@ -7,7 +7,7 @@ from unittest.mock import patch
 import pytest
 from pyspark.sql.types import StringType, StructField, StructType
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.models.model_extract import ExtractFileModel, ExtractFormat, ExtractMethod
 from flint.utils.schema import SchemaFilepathHandler
 
@@ -81,7 +81,7 @@ class TestExtractFileModel:
         del invalid_dict["name"]
 
         # Execute and Assert
-        with pytest.raises(ConfigurationKeyError):
+        with pytest.raises(FlintConfigurationKeyError):
             ExtractFileModel.from_dict(invalid_dict)
 
     def test_from_dict_invalid_enum(self, valid_extract_dict) -> None:

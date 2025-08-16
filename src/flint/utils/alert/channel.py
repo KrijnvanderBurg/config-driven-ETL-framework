@@ -9,7 +9,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.models import Model
 from flint.utils.alert.channels import EmailConfig, FileConfig, HttpConfig
 from flint.utils.alert.channels.base import BaseConfig
@@ -74,7 +74,7 @@ class AlertChannel(Model):
             name = dict_[NAME]
             config_dict = dict_[CONFIG]
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         # Create the appropriate channel instance
         config: BaseConfig

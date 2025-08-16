@@ -13,7 +13,7 @@ from configuration files or dictionaries.
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 COLUMNS: Final[str] = "columns"
@@ -68,6 +68,6 @@ class DropDuplicatesFunctionModel(FunctionModel):
             arguments = cls.Args(columns=columns)
 
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(function=function_name, arguments=arguments)

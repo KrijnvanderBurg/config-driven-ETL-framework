@@ -13,7 +13,7 @@ or replacement from configuration files or dictionaries.
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 COL_NAME: Final[str] = "col_name"
@@ -65,13 +65,13 @@ class WithColumnFunctionModel(FunctionModel):
             function_name = dict_[FUNCTION]
             arguments_dict = dict_[ARGUMENTS]
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         try:
             col_name = arguments_dict[COL_NAME]
             col_expr = arguments_dict[COL_EXPR]
             arguments = cls.Args(col_name=col_name, col_expr=col_expr)
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=arguments_dict) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=arguments_dict) from e
 
         return cls(function=function_name, arguments=arguments)

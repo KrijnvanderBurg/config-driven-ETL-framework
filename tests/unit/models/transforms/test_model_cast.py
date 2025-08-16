@@ -4,7 +4,7 @@ from typing import Any
 
 import pytest
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.models.transforms.model_cast import CastFunctionModel
 
 
@@ -83,5 +83,5 @@ class TestCastFunctionModel:
 
         # Act & Assert for each case
         for invalid_dict, _ in error_cases:
-            with pytest.raises(ConfigurationKeyError):
+            with pytest.raises(FlintConfigurationKeyError):
                 CastFunctionModel.from_dict(invalid_dict)

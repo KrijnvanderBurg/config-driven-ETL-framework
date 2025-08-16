@@ -13,7 +13,7 @@ from configuration files or dictionaries.
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 COLUMNS: Final[str] = "columns"
@@ -67,6 +67,6 @@ class DropFunctionModel(FunctionModel):
         except KeyError as e:
             key = e.args[0]
             if key in (FUNCTION, ARGUMENTS):
-                raise ConfigurationKeyError(key=key, dict_=dict_) from e
+                raise FlintConfigurationKeyError(key=key, dict_=dict_) from e
             # Must be missing COLUMNS from arguments_dict
-            raise ConfigurationKeyError(key=key, dict_=dict_[ARGUMENTS]) from e
+            raise FlintConfigurationKeyError(key=key, dict_=dict_[ARGUMENTS]) from e

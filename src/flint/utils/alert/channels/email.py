@@ -12,7 +12,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.utils.alert.channels.base import BaseConfig
 from flint.utils.logger import get_logger
 
@@ -89,7 +89,7 @@ class EmailConfig(BaseConfig):
             from_email = dict_[FROM_EMAIL]
             to_emails = dict_[TO_EMAILS]
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(
             smtp_server=smtp_server,

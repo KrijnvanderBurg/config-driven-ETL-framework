@@ -14,7 +14,7 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.exceptions import ConfigurationKeyError
+from flint.exceptions import FlintConfigurationKeyError
 from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 from flint.utils.logger import get_logger
 
@@ -76,7 +76,7 @@ class JoinFunctionModel(FunctionModel):
             function_name = dict_[FUNCTION]
             arguments_dict: dict = dict_[ARGUMENTS]
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         try:
             other_upstream_name = arguments_dict[OTHER_UPSTREAM_NAME]
@@ -97,7 +97,7 @@ class JoinFunctionModel(FunctionModel):
                 how=how,
             )
         except KeyError as e:
-            raise ConfigurationKeyError(key=e.args[0], dict_=arguments_dict) from e
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=arguments_dict) from e
 
         model = cls(function=function_name, arguments=arguments)
         logger.info("Successfully created JoinFunctionModel - joining with %s on %s", other_upstream_name, on)
