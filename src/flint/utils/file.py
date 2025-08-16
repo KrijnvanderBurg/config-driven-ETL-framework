@@ -41,7 +41,6 @@ class FileHandler(ABC):
 
     # Class constants for validation limits
     DEFAULT_MAX_SIZE: int = 10 * 1024 * 1024  # 10 MB
-    MIN_SIZE: int = 1  # 1 byte minimum
     ENCODING: str = "utf-8"
 
     def __init__(self, filepath: Path) -> None:
@@ -102,27 +101,21 @@ class FileHandler(ABC):
             raise OSError(f"File is empty: {self.filepath}")
         logger.debug("File not empty validated: %s (size: %d bytes)", self.filepath, file_size)
 
-    def _file_size_limits(self, max_size: int = DEFAULT_MAX_SIZE, min_size: int = MIN_SIZE) -> None:
+    def _file_size_limits(self, max_size: int = DEFAULT_MAX_SIZE) -> None:
         """Validate that the file size is within specified limits.
 
         Args:
             max_size: Maximum allowed file size in bytes.
-            min_size: Minimum allowed file size in bytes.
 
         Raises:
-            OSError: If the file size is outside the specified limits or there's a system-level error.
+            OSError: If the file size is too large or there's a system-level error.
         """
         file_size = self.filepath.stat().st_size
-
-        if file_size < min_size:
-            raise OSError(f"File is too small: {self.filepath} (size: {file_size} bytes, minimum: {min_size} bytes)")
 
         if file_size > max_size:
             raise OSError(f"File is too large: {self.filepath} (size: {file_size} bytes, maximum: {max_size} bytes)")
 
-        logger.debug(
-            "File size validated: %s (size: %d, min: %d, max: %d)", self.filepath, file_size, min_size, max_size
-        )
+        logger.debug("File size validated: %s (size: %d, max: %d)", self.filepath, file_size, max_size)
 
     def _text_file(self) -> None:
         """Validate that the file is a readable text file.
@@ -160,6 +153,8 @@ class FileHandler(ABC):
         self._is_file()
         self._read_permission()
         self._file_not_empty()
+        self._file_size_limits()
+        self._text_file()
         logger.info("Validation successful for file: %s", self.filepath)
 
         logger.debug("Reading file: %s", self.filepath)

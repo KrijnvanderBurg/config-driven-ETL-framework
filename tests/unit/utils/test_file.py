@@ -7,6 +7,7 @@ The tests verify that:
 - Files in different formats can be correctly read and parsed
 - Error conditions like missing files are properly handled
 - The factory pattern correctly selects the appropriate handler for each file type
+- File validation methods work correctly for various edge cases
 """
 
 import json
@@ -20,14 +21,84 @@ import yaml
 from flint.utils.file import FileHandlerContext, FileJsonHandler, FileYamlHandler
 
 
-class TestYamlHandler:
-    """Unit tests for FileYamlHandler.
+class TestFileValidation:
+    """Unit tests for file validation through public interface."""
 
-    Tests cover:
-        - Reading YAML data from files
-        - Handling missing files
-        - Error handling for invalid YAML content
-    """
+    @pytest.fixture
+    def temp_empty_file(self) -> Path:
+        """Create a temporary empty file."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as temp_file:
+            temp_file.flush()
+            return Path(temp_file.name)
+
+    @pytest.fixture
+    def temp_directory(self) -> Path:
+        """Create a temporary directory."""
+        temp_dir = tempfile.mkdtemp()
+        return Path(temp_dir)
+
+    def test_read_directory_raises_error(self, temp_directory: Path) -> None:
+        """Test reading a directory raises OSError."""
+        handler = FileJsonHandler(filepath=temp_directory)
+        with pytest.raises(OSError, match="Path is not a file"):
+            handler.read()
+
+    def test_read_empty_file_raises_error(self, temp_empty_file: Path) -> None:
+        """Test reading empty file raises OSError."""
+        handler = FileJsonHandler(filepath=temp_empty_file)
+        with pytest.raises(OSError, match="File is empty"):
+            handler.read()
+
+    def test_read_permission_denied(self) -> None:
+        """Test reading file with no read permissions raises PermissionError."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as temp_file:
+            json.dump({"key": "value"}, temp_file)
+            temp_file.flush()
+            temp_path = Path(temp_file.name)
+
+        handler = FileJsonHandler(filepath=temp_path)
+        with patch("os.access", return_value=False):
+            with pytest.raises(PermissionError, match="Read permission denied"):
+                handler.read()
+
+    def test_binary_file_with_null_bytes(self) -> None:
+        """Test that files with null bytes are detected as binary."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False, encoding="utf-8") as temp_file:
+            temp_file.write('{"key": "value"}\x00')  # Valid JSON with null byte
+            temp_file.flush()
+            temp_path = Path(temp_file.name)
+
+        handler = FileJsonHandler(filepath=temp_path)
+        with pytest.raises(OSError, match="File appears to contain binary content"):
+            handler.read()
+
+    def test_encoding_error_file(self) -> None:
+        """Test that files with encoding errors are caught."""
+        with tempfile.NamedTemporaryFile(mode="wb", suffix=".json", delete=False) as temp_file:
+            temp_file.write(b"\xff\xfe\x00\x00")  # Invalid UTF-8
+            temp_file.flush()
+            temp_path = Path(temp_file.name)
+
+        handler = FileJsonHandler(filepath=temp_path)
+        with pytest.raises(OSError, match="File encoding error"):
+            handler.read()
+
+    def test_file_too_large(self) -> None:
+        """Test that files larger than 10MB are rejected."""
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as temp_file:
+            # Write more than 10MB of data (10MB = 10 * 1024 * 1024 bytes)
+            large_data = "x" * (11 * 1024 * 1024)  # 11MB of data
+            temp_file.write(large_data)
+            temp_file.flush()
+            temp_path = Path(temp_file.name)
+
+        handler = FileJsonHandler(filepath=temp_path)
+        with pytest.raises(OSError, match="File is too large"):
+            handler.read()
+
+
+class TestYamlHandler:
+    """Unit tests for FileYamlHandler."""
 
     @pytest.fixture
     def temp_yaml_file(self) -> Path:
@@ -38,53 +109,40 @@ class TestYamlHandler:
             temp_file.flush()
             return Path(temp_file.name)
 
-    def test_read(self, temp_yaml_file: Path) -> None:
+    def test_read_success(self, temp_yaml_file: Path) -> None:
         """Test reading YAML data from a file."""
-        # Act
         handler = FileYamlHandler(filepath=temp_yaml_file)
         data = handler.read()
-
-        # Assert
         assert data == {"key": "value"}
 
-    def test_read__file_not_found_error(self) -> None:
-        """
-        Test reading YAML file raises `FileNotFoundError`
-            when file does not exist while `self._file_exists() returns true.
-        """
-        # Arrange
-        non_existent_path = Path("non_existent_file.yaml")
-
-        # Act & Assert
-        handler = FileYamlHandler(filepath=non_existent_path)
+    def test_read_file_not_found(self) -> None:
+        """Test reading non-existent YAML file raises FileNotFoundError."""
+        handler = FileYamlHandler(filepath=Path("non_existent_file.yaml"))
         with pytest.raises(FileNotFoundError):
             handler.read()
 
-    def test_read__file_permission_error(self, temp_yaml_file: Path) -> None:
-        """Test reading YAML file raises `PermissionError` when `builtins.open()` raises `PermissionError`."""
+    def test_read_permission_error_in_open(self, temp_yaml_file: Path) -> None:
+        """Test reading YAML file with permission error during open."""
         with patch("builtins.open", side_effect=PermissionError):
-            # Act & Assert
             handler = FileYamlHandler(filepath=temp_yaml_file)
             with pytest.raises(PermissionError):
                 handler.read()
 
-    def test_read__invalid_yaml(self) -> None:
+    def test_read_invalid_yaml(self) -> None:
         """Test reading invalid YAML content raises yaml.YAMLError."""
-        # Arrange
-        invalid_yaml = "key: value:"  # colon `:` after value: is invalid yaml.
+        invalid_yaml = "key: value:"  # Invalid YAML syntax
         with tempfile.NamedTemporaryFile(mode="w", suffix=".yaml", delete=False) as temp_file:
             temp_file.write(invalid_yaml)
             temp_file.flush()
             temp_path = Path(temp_file.name)
 
-        # Act & Assert
         handler = FileYamlHandler(filepath=temp_path)
         with pytest.raises(yaml.YAMLError):
             handler.read()
 
 
 class TestJsonHandler:
-    """Tests for FileJsonHandler class."""
+    """Unit tests for FileJsonHandler."""
 
     @pytest.fixture
     def temp_json_file(self) -> Path:
@@ -95,57 +153,40 @@ class TestJsonHandler:
             temp_file.flush()
             return Path(temp_file.name)
 
-    def test_read(self, temp_json_file: Path) -> None:
+    def test_read_success(self, temp_json_file: Path) -> None:
         """Test reading JSON data from a file."""
-        # Act
         handler = FileJsonHandler(filepath=temp_json_file)
         data = handler.read()
-
-        # Assert
         assert data == {"key": "value"}
 
-    def test_read__file_not_exists(self) -> None:
-        """Test reading JSON file raises `FileNotFoundError` when `self._file_exists()` returns false."""
-        with pytest.raises(FileNotFoundError):  # Assert
-            # Act
-            handler = FileJsonHandler(filepath=Path("non_existent.json"))
+    def test_read_file_not_found(self) -> None:
+        """Test reading non-existent JSON file raises FileNotFoundError."""
+        handler = FileJsonHandler(filepath=Path("non_existent.json"))
+        with pytest.raises(FileNotFoundError):
             handler.read()
 
-    def test_read__file_not_found_error(self) -> None:
-        """
-        Test reading JSON file raises `FileNotFoundError`
-            when file does not exist while `self._file_exists() returns true.
-        """
-        with pytest.raises(FileNotFoundError):  # Assert
-            # Act
-            handler = FileJsonHandler(filepath=Path("test.json"))
-            handler.read()
-
-    def test_read__file_permission_error(self, temp_json_file: Path) -> None:
-        """Test reading JSON file raises `PermissionError` when `builtins.open()` raises `PermissionError`."""
+    def test_read_permission_error_in_open(self, temp_json_file: Path) -> None:
+        """Test reading JSON file with permission error during open."""
         with patch("builtins.open", side_effect=PermissionError):
-            with pytest.raises(PermissionError):  # Assert
-                # Act
-                handler = FileJsonHandler(filepath=temp_json_file)
+            handler = FileJsonHandler(filepath=temp_json_file)
+            with pytest.raises(PermissionError):
                 handler.read()
 
-    def test_read__json_decode_error(self) -> None:
+    def test_read_json_decode_error(self) -> None:
         """Test reading invalid JSON content raises json.JSONDecodeError."""
-        # Arrange
-        invalid_json = '{"name": "John" "age": 30}'  # Missing comma makes it invalid JSON.
+        invalid_json = '{"name": "John" "age": 30}'  # Missing comma
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as temp_file:
             temp_file.write(invalid_json)
             temp_file.flush()
             temp_path = Path(temp_file.name)
 
-        # Act & Assert
         handler = FileJsonHandler(filepath=temp_path)
         with pytest.raises(json.JSONDecodeError):
             handler.read()
 
 
-class TestFileHandlerFactory:
-    """Tests for FileHandlerFactory class."""
+class TestFileHandlerContext:
+    """Unit tests for FileHandlerContext factory."""
 
     @pytest.mark.parametrize(
         "filepath, expected_handler_class",
@@ -155,15 +196,12 @@ class TestFileHandlerFactory:
             (Path("test.json"), FileJsonHandler),
         ],
     )
-    def test_create_handler(self, filepath: Path, expected_handler_class: type) -> None:
-        """Test `create_handler` returns the correct handler for given file extension."""
-        # Act
+    def test_from_filepath_success(self, filepath: Path, expected_handler_class: type) -> None:
+        """Test from_filepath returns correct handler for supported extensions."""
         handler = FileHandlerContext.from_filepath(filepath=filepath)
-
-        # Assert
         assert isinstance(handler, expected_handler_class)
 
-    def test_create_handler__unsupported_extension__raises_not_implemented_error(self) -> None:
-        """Test `create_handler` raises `NotImplementedError` for unsupported file extension."""
-        with pytest.raises(NotImplementedError):  # Assert
-            FileHandlerContext.from_filepath(Path("path/fail.testfile"))  # Act
+    def test_from_filepath_unsupported_extension(self) -> None:
+        """Test from_filepath raises NotImplementedError for unsupported extension."""
+        with pytest.raises(NotImplementedError, match="File extension '.txt' is not supported"):
+            FileHandlerContext.from_filepath(Path("test.txt"))
