@@ -4,8 +4,8 @@ from unittest.mock import MagicMock, patch
 
 from pyspark.sql import SparkSession
 
-from flint.core.transform import TransformFunctionRegistry
-from flint.core.transforms.filter_ import FilterFunction
+from flint.job.core.transform import TransformFunctionRegistry
+from flint.job.core.transforms.filter_ import FilterFunction
 
 
 class TestFilterFunction:
@@ -34,7 +34,7 @@ class TestFilterFunction:
         dict_ = {"function": "filter", "arguments": {"condition": "age > 18"}}
 
         # Execute
-        with patch("flint.models.transforms.model_filter.FilterFunctionModel.from_dict") as mock_from_dict:
+        with patch("flint.job.models.transforms.model_filter.FilterFunctionModel.from_dict") as mock_from_dict:
             mock_from_dict.return_value.arguments.condition = "age > 18"
             function = FilterFunction.from_dict(dict_=dict_)
 

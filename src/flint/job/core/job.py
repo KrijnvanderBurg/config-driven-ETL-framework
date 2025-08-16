@@ -14,11 +14,11 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final, Self
 
-from flint.core.extract import Extract
-from flint.core.load import Load
-from flint.core.transform import Transform
-from flint.core.validation import ValidateModelNamesAreUnique, ValidateUpstreamNamesExist
 from flint.exceptions import FlintConfigurationKeyError
+from flint.job.core.extract import Extract
+from flint.job.core.load import Load
+from flint.job.core.transform import Transform
+from flint.job.core.validation import ValidateModelNamesAreUnique, ValidateUpstreamNamesExist
 from flint.utils.file import FileHandlerContext
 from flint.utils.logger import get_logger
 
@@ -47,7 +47,7 @@ class Job:
     Example:
         ```python
         from pathlib import Path
-        from flint.core.job import Job
+        from flint.job.core.job import Job
 
         # Create from a configuration file
         job = Job.from_file(Path("config.json"))

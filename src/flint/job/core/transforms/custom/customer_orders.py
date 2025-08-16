@@ -9,8 +9,8 @@ from collections.abc import Callable
 from pyspark.sql import DataFrame
 from pyspark.sql import functions as F
 
-from flint.core.transform import Function, TransformFunctionRegistry
-from flint.models.transforms.custom.model_customer_orders import CustomersOrdersFunctionModel
+from flint.job.core.transform import Function, TransformFunctionRegistry
+from flint.job.models.transforms.custom.model_customer_orders import CustomersOrdersFunctionModel
 
 
 @TransformFunctionRegistry.register("customers_orders")

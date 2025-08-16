@@ -8,7 +8,7 @@ import pytest
 from pyspark.sql.types import StringType, StructField, StructType
 
 from flint.exceptions import FlintConfigurationKeyError
-from flint.models.model_extract import ExtractFileModel, ExtractFormat, ExtractMethod
+from flint.job.models.model_extract import ExtractFileModel, ExtractFormat, ExtractMethod
 from flint.utils.schema import SchemaFilepathHandler
 
 

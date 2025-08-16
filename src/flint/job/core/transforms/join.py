@@ -12,8 +12,8 @@ from collections.abc import Callable
 
 from pyspark.sql import DataFrame
 
-from flint.core.transform import Function, TransformFunctionRegistry
-from flint.models.transforms.model_join import JoinFunctionModel
+from flint.job.core.transform import Function, TransformFunctionRegistry
+from flint.job.models.transforms.model_join import JoinFunctionModel
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)

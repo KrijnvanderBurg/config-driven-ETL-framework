@@ -6,9 +6,9 @@ from unittest.mock import MagicMock, patch
 
 from pyspark.sql import DataFrame
 
-from flint.core.transform import TransformFunctionRegistry
-from flint.core.transforms.select import SelectFunction
-from flint.models.transforms.model_select import SelectFunctionModel
+from flint.job.core.transform import TransformFunctionRegistry
+from flint.job.core.transforms.select import SelectFunction
+from flint.job.models.transforms.model_select import SelectFunctionModel
 from flint.types import DataFrameRegistry
 
 

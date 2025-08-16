@@ -10,8 +10,8 @@ from collections.abc import Callable
 from pyspark.sql.dataframe import DataFrame
 from pyspark.sql.functions import col, lit
 
-from flint.core.transform import Function, TransformFunctionRegistry
-from flint.models.transforms.custom.model_calculate_birth_year import CalculateBirthYearFunctionModel
+from flint.job.core.transform import Function, TransformFunctionRegistry
+from flint.job.models.transforms.custom.model_calculate_birth_year import CalculateBirthYearFunctionModel
 
 
 @TransformFunctionRegistry.register("calculate_birth_year")

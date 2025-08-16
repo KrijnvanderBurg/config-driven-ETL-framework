@@ -5,8 +5,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pyspark.sql import DataFrame
 
-from flint.core.transforms.cast import CastFunction
-from flint.models.transforms.model_cast import CastFunctionModel
+from flint.job.core.transforms.cast import CastFunction
+from flint.job.models.transforms.model_cast import CastFunctionModel
 
 
 class TestCastFunction:
@@ -41,7 +41,7 @@ class TestCastFunction:
         mock_cast.return_value = mock_col_instance
 
         # Mock the col function and withColumn method
-        with patch("flint.core.transforms.cast.col", return_value=MagicMock()) as mock_col:
+        with patch("flint.job.core.transforms.cast.col", return_value=MagicMock()) as mock_col:
             mock_df.withColumn.return_value = mock_df
 
             # Act

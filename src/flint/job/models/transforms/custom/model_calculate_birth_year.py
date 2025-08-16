@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.exceptions import FlintConfigurationKeyError
-from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
+from flint.job.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 CURRENT_YEAR: Final[str] = "current_year"
 AGE_COLUMN: Final[str] = "age_column"

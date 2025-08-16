@@ -20,7 +20,7 @@ from typing import Any, Final, Generic, Self, TypeVar
 
 from pyspark.sql.streaming.query import StreamingQuery
 
-from flint.models.model_load import LoadFormat, LoadMethod, LoadModel, LoadModelFile
+from flint.job.models.model_load import LoadFormat, LoadMethod, LoadModel, LoadModelFile
 from flint.types import DataFrameRegistry, RegistryDecorator, Singleton, StreamingQueryRegistry
 from flint.utils.logger import get_logger
 from flint.utils.spark import SparkHandler

@@ -15,7 +15,7 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.exceptions import FlintConfigurationKeyError
-from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
+from flint.job.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)

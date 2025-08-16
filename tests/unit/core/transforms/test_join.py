@@ -5,8 +5,8 @@ from unittest.mock import MagicMock
 import pytest
 from pyspark.sql import DataFrame
 
-from flint.core.transforms.join import JoinFunction
-from flint.models.transforms.model_join import JoinFunctionModel
+from flint.job.core.transforms.join import JoinFunction
+from flint.job.models.transforms.model_join import JoinFunctionModel
 from flint.types import DataFrameRegistry
 
 

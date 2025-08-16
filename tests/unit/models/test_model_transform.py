@@ -7,7 +7,7 @@ from typing import Any, Self
 import pytest
 
 from flint.exceptions import FlintConfigurationKeyError
-from flint.models.model_transform import ArgsModel, FunctionModel, TransformModel
+from flint.job.models.model_transform import ArgsModel, FunctionModel, TransformModel
 
 
 # Define some simple concrete implementations for testing abstract classes

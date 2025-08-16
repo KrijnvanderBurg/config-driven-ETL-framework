@@ -11,8 +11,8 @@ from collections.abc import Callable
 
 from pyspark.sql import DataFrame
 
-from flint.core.transform import Function, TransformFunctionRegistry
-from flint.models.transforms.model_dropduplicates import DropDuplicatesFunctionModel
+from flint.job.core.transform import Function, TransformFunctionRegistry
+from flint.job.models.transforms.model_dropduplicates import DropDuplicatesFunctionModel
 
 
 @TransformFunctionRegistry.register("dropDuplicates")

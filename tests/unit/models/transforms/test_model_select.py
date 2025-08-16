@@ -7,7 +7,7 @@ import pytest
 from pyspark.sql.column import Column
 
 from flint.exceptions import FlintConfigurationKeyError
-from flint.models.transforms.model_select import SelectFunctionModel
+from flint.job.models.transforms.model_select import SelectFunctionModel
 
 
 class TestSelectFunctionModel:

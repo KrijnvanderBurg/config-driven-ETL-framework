@@ -9,8 +9,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pyspark.sql import DataFrame
 
-from flint.core.transform import Function, Transform, TransformFunctionRegistry
-from flint.models.model_transform import ArgsModel, FunctionModel, TransformModel
+from flint.job.core.transform import Function, Transform, TransformFunctionRegistry
+from flint.job.models.model_transform import ArgsModel, FunctionModel, TransformModel
 from flint.types import DataFrameRegistry
 
 

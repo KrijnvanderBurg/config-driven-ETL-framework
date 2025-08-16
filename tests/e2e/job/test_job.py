@@ -13,8 +13,8 @@ from pyspark.sql.types import StructType
 from pyspark.testing import assertDataFrameEqual
 
 from flint.__main__ import main
-from flint.core.job import JOB, LOADS
-from flint.core.load import DATA_FORMAT, LOCATION, SCHEMA_LOCATION
+from flint.job.core.job import JOB, LOADS
+from flint.job.core.load import DATA_FORMAT, LOCATION, SCHEMA_LOCATION
 from flint.utils.spark import SparkHandler
 
 

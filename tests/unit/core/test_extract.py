@@ -8,8 +8,8 @@ from unittest.mock import MagicMock, patch
 import pytest
 from pyspark.sql import DataFrame
 
-from flint.core.extract import DATA_FORMAT, Extract, ExtractFormat, ExtractRegistry
-from flint.models.model_extract import ExtractFileModel, ExtractMethod
+from flint.job.core.extract import DATA_FORMAT, Extract, ExtractFormat, ExtractRegistry
+from flint.job.models.model_extract import ExtractFileModel, ExtractMethod
 from flint.types import DataFrameRegistry
 
 

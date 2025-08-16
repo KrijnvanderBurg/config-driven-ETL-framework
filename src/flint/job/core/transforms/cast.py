@@ -12,8 +12,8 @@ from collections.abc import Callable
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
 
-from flint.core.transform import Function, TransformFunctionRegistry
-from flint.models.transforms.model_cast import CastFunctionModel
+from flint.job.core.transform import Function, TransformFunctionRegistry
+from flint.job.models.transforms.model_cast import CastFunctionModel
 
 
 @TransformFunctionRegistry.register("cast")

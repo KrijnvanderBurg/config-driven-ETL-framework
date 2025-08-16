@@ -11,8 +11,8 @@ from collections.abc import Callable
 
 from pyspark.sql import DataFrame
 
-from flint.core.transform import Function, TransformFunctionRegistry
-from flint.models.transforms.model_drop import DropFunctionModel
+from flint.job.core.transform import Function, TransformFunctionRegistry
+from flint.job.models.transforms.model_drop import DropFunctionModel
 
 
 @TransformFunctionRegistry.register("drop")

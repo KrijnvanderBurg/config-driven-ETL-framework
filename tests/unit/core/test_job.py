@@ -15,10 +15,10 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from flint.core.extract import Extract
-from flint.core.job import Job
-from flint.core.load import Load
-from flint.core.transform import Transform
+from flint.job.core.extract import Extract
+from flint.job.core.job import Job
+from flint.job.core.load import Load
+from flint.job.core.transform import Transform
 
 
 class TestJob:

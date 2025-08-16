@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 
 from flint.exceptions import FlintConfigurationKeyError
-from flint.models.model_load import LoadFormat, LoadMethod, LoadMode, LoadModelFile
+from flint.job.models.model_load import LoadFormat, LoadMethod, LoadMode, LoadModelFile
 
 
 @pytest.fixture

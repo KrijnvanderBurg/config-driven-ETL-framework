@@ -17,7 +17,7 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import Any, Final, Generic, Self, TypeVar
 
-from flint.models.model_transform import FunctionModel, TransformModel
+from flint.job.models.model_transform import FunctionModel, TransformModel
 from flint.types import DataFrameRegistry, RegistryDecorator, Singleton
 from flint.utils.logger import get_logger
 

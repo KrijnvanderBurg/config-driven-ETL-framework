@@ -14,7 +14,7 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.exceptions import FlintConfigurationKeyError
-from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
+from flint.job.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 COL_NAME: Final[str] = "col_name"
 COL_EXPR: Final[str] = "col_expr"

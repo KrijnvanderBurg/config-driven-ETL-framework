@@ -16,7 +16,7 @@ from typing import Any, Final, Self
 from pyspark.sql.column import Column
 
 from flint.exceptions import FlintConfigurationKeyError
-from flint.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
+from flint.job.models.model_transform import ARGUMENTS, FUNCTION, FunctionModel
 
 CONDITION: Final[str] = "condition"
 

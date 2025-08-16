@@ -9,8 +9,8 @@ import pytest
 from pyspark.sql import DataFrame
 from pyspark.sql.streaming.query import StreamingQuery
 
-from flint.core.load import DATA_FORMAT, Load, LoadRegistry
-from flint.models.model_load import LoadFormat, LoadMethod, LoadModelFile
+from flint.job.core.load import DATA_FORMAT, Load, LoadRegistry
+from flint.job.models.model_load import LoadFormat, LoadMethod, LoadModelFile
 from flint.types import DataFrameRegistry, StreamingQueryRegistry
 
 

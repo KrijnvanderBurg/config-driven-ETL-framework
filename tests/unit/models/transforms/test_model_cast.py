@@ -5,7 +5,7 @@ from typing import Any
 import pytest
 
 from flint.exceptions import FlintConfigurationKeyError
-from flint.models.transforms.model_cast import CastFunctionModel
+from flint.job.models.transforms.model_cast import CastFunctionModel
 
 
 class TestCastFunctionModel:
