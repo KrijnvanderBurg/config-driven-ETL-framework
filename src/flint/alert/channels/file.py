@@ -12,8 +12,8 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
+from flint.alert.channels.base import BaseConfig
 from flint.exceptions import FlintConfigurationKeyError
-from flint.utils.alert.channels.base import BaseConfig
 from flint.utils.logger import get_logger
 
 FILE_PATH: Final[str] = "file_path"

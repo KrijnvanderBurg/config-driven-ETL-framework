@@ -12,9 +12,9 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
+from flint.alert.channels.base import BaseConfig
 from flint.exceptions import FlintConfigurationKeyError
 from flint.job.models import Model
-from flint.utils.alert.channels.base import BaseConfig
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)

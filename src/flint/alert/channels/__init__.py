@@ -10,8 +10,8 @@ Available Configs:
 - FileConfig: File-based logging notifications
 """
 
-from flint.utils.alert.channels.email import EmailConfig
-from flint.utils.alert.channels.file import FileConfig
-from flint.utils.alert.channels.http import HttpConfig
+from flint.alert.channels.email import EmailConfig
+from flint.alert.channels.file import FileConfig
+from flint.alert.channels.http import HttpConfig
 
 __all__ = ["EmailConfig", "HttpConfig", "FileConfig"]

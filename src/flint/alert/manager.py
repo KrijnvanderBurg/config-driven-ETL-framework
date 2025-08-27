@@ -13,9 +13,9 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final, Self
 
+from flint.alert.channel import AlertChannel
+from flint.alert.trigger import AlertTrigger
 from flint.job.models import Model
-from flint.utils.alert.channel import AlertChannel
-from flint.utils.alert.trigger import AlertTrigger
 from flint.utils.file import FileHandlerContext
 from flint.utils.logger import get_logger
 
