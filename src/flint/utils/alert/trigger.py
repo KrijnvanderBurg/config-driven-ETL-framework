@@ -10,10 +10,9 @@ to enable sophisticated alert trigger logic.
 
 import logging
 import os
+import re
 from dataclasses import dataclass
 from typing import Any, Final, Self
-
-import re
 
 from flint.exceptions import FlintConfigurationKeyError
 from flint.job.models import Model
@@ -214,7 +213,7 @@ class AlertConditions(Model):
             logger.debug("No exception_regex configured; skipping regex check.")
             return True
 
-        if re2.search(self.exception_regex, message):
+        if re.search(self.exception_regex, message):
             logger.debug("Exception message matches regex: '%s'", self.exception_regex)
             return True
 
