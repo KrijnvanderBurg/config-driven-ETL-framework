@@ -10,6 +10,7 @@ from argparse import Namespace, _SubParsersAction  # type: ignore
 from pathlib import Path
 from typing import Self
 
+from flint.alert import Alert
 from flint.exceptions import ExitCode, FlintConfigurationError, FlintIOError, FlintJobError, FlintValidationError
 from flint.job.core.job import Job
 from flint.utils.logger import get_logger
