@@ -9,8 +9,8 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.alert.channels import EmailConfig, FileConfig, HttpConfig
-from flint.alert.channels.base import BaseConfig
+from flint.alert.channels import EmailAlertChannel, FileAlertChannel, HttpAlertChannel
+from flint.alert.channels.base import BaseAlertChannel
 from flint.exceptions import FlintConfigurationKeyError
 from flint.job.models import Model
 from flint.utils.logger import get_logger
@@ -38,7 +38,7 @@ class AlertChannel(Model):
 
     type: str
     name: str
-    config: BaseConfig
+    config: BaseAlertChannel
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -77,13 +77,13 @@ class AlertChannel(Model):
             raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         # Create the appropriate channel instance
-        config: BaseConfig
+        config: BaseAlertChannel
         if type_ == "email":
-            config = EmailConfig.from_dict(config_dict)
+            config = EmailAlertChannel.from_dict(config_dict)
         elif type_ == "http":
-            config = HttpConfig.from_dict(config_dict)
+            config = HttpAlertChannel.from_dict(config_dict)
         elif type_ == "file":
-            config = FileConfig.from_dict(config_dict)
+            config = FileAlertChannel.from_dict(config_dict)
         else:
             raise ValueError(f"Unknown channel type: {type_}")
 

@@ -12,16 +12,16 @@ Key components:
 """
 
 from flint.alert.channel import AlertChannel
-from flint.alert.channels import EmailConfig, FileConfig, HttpConfig
-from flint.alert.manager import Alert
+from flint.alert.channels import EmailAlertChannel, FileAlertChannel, HttpAlertChannel
+from flint.alert.manager import AlertManager
 from flint.alert.trigger import AlertConditions, AlertTrigger
 
 __all__ = [
-    "Alert",
+    "AlertManager",
     "AlertChannel",
     "AlertTrigger",
     "AlertConditions",
-    "EmailConfig",
-    "HttpConfig",
-    "FileConfig",
+    "EmailAlertChannel",
+    "HttpAlertChannel",
+    "FileAlertChannel",
 ]

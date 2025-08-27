@@ -332,19 +332,25 @@ class AlertTrigger(Model):
             conditions=conditions,
         )
 
-    def is_fire(self, exception: Exception) -> bool:
+    def should_trigger(self, exception: Exception) -> bool:
         """Check if the conditions are met for triggering an alert.
 
         This method evaluates the conditions against the current alert context
         to determine if the trigger should be activated.
+
+        Args:
+            exception: The exception to evaluate against trigger conditions.
+
+        Returns:
+            True if the trigger should be activated, False otherwise.
         """
 
         if not self.enabled:
-            logger.debug("Trigger '%s' is disabled; skipping fire check.", self.name)
+            logger.debug("Trigger '%s' is disabled; skipping trigger check.", self.name)
             return False
 
         if not self.conditions.is_any_condition_met(exception):
-            logger.debug("Conditions for trigger '%s' are not met; skipping fire check.", self.name)
+            logger.debug("Conditions for trigger '%s' are not met; skipping trigger check.", self.name)
             return False
 
         logger.debug("Trigger '%s' conditions met", self.name)

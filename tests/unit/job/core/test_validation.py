@@ -14,7 +14,7 @@ from unittest.mock import MagicMock
 import pytest
 
 from flint.job.core.job import Job
-from flint.job.core.validate import ValidateModelNamesAreUnique, ValidateUpstreamNamesExist
+from flint.job.models.validate import ValidateModelNamesAreUnique, ValidateUpstreamNamesExist
 
 
 class TestValidateModelNamesAreUnique:

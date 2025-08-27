@@ -27,15 +27,15 @@ TRIGGERS: Final[str] = "triggers"
 
 
 @dataclass
-class Alert(Model):
-    """Main alert manager that coordinates alert processing and trigger.
+class AlertManager(Model):
+    """Main alert manager that coordinates alert processing and triggering.
 
     This class serves as the root object for the alert system, managing the
     configuration and coordination of templates, channels, and trigger rules.
     It implements the Model interface to support configuration-driven initialization.
 
     Attributes:
-        channels: Channel manager for handling different notification channels
+        channels: List of alert channels for handling different alert destinations
         triggers: Rules for determining which channels to use for specific alerts
     """
 
@@ -44,23 +44,23 @@ class Alert(Model):
 
     @classmethod
     def from_file(cls, filepath: Path) -> Self:
-        """Create a Alert instance from a configuration file.
+        """Create an AlertManager instance from a configuration file.
 
-        Loads and parses a configuration file to create a Alert instance.
+        Loads and parses a configuration file to create an AlertManager instance.
 
         Args:
             filepath: Path to the configuration file.
 
         Returns:
-            A fully configured Alert instance.
+            A fully configured AlertManager instance.
         """
-        logger.info("Creating Alert from file: %s", filepath)
+        logger.info("Creating AlertManager from file: %s", filepath)
 
         handler = FileHandlerContext.from_filepath(filepath=filepath)
         dict_: dict[str, Any] = handler.read()
 
         alert = cls.from_dict(dict_=dict_)
-        logger.info("Successfully created Alert from JSON file: %s", filepath)
+        logger.info("Successfully created AlertManager from JSON file: %s", filepath)
         return alert
 
     @classmethod
@@ -102,8 +102,8 @@ class Alert(Model):
 
         return cls(channels=channels, triggers=triggers)
 
-    def trigger_if_conditions_met(self, title: str, body: str, exception: Exception) -> None:
-        """Send an alert to all channels as defined by enabled trigger rules.
+    def process_alert(self, title: str, body: str, exception: Exception) -> None:
+        """Process and send an alert to all channels as defined by enabled trigger rules.
 
         Args:
             title: The alert title.
@@ -112,7 +112,7 @@ class Alert(Model):
         """
 
         for trigger in self.triggers:
-            if trigger.is_fire(exception=exception):
+            if trigger.should_trigger(exception=exception):
                 logger.debug("Trigger '%s' conditions met; processing alert", trigger.name)
 
                 formatted_title = trigger.template.format_title(title)

@@ -1,18 +1,18 @@
-"""File channel for writing alert notifications to files.
+"""File channel for writing alert messages to files.
 
-This module implements the file alert channel that writes notifications
+This module implements the file alert channel that writes alerts
 to log files or other file destinations. It supports configurable file
 paths and failure handling for file system operations.
 
-The FileChannel follows the Flint framework patterns for configuration-driven
-initialization and implements the BaseChannel interface.
+The FileAlertChannel follows the Flint framework patterns for configuration-driven
+initialization and implements the BaseAlertChannel interface.
 """
 
 import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.alert.channels.base import BaseConfig
+from flint.alert.channels.base import BaseAlertChannel
 from flint.exceptions import FlintConfigurationKeyError
 from flint.utils.logger import get_logger
 
@@ -22,10 +22,10 @@ logger: logging.Logger = get_logger(__name__)
 
 
 @dataclass
-class FileConfig(BaseConfig):
-    """File config for file-based notifications.
+class FileAlertChannel(BaseAlertChannel):
+    """File alert channel for file-based alerts.
 
-    This class implements file alerting functionality for writing notifications
+    This class implements file alerting functionality for writing alerts
     to log files or other file destinations. It supports configurable file
     paths and handles file system errors appropriately.
 

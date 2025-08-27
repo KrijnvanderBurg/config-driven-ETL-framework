@@ -10,7 +10,7 @@ from argparse import Namespace, _SubParsersAction  # type: ignore
 from pathlib import Path
 from typing import Self
 
-from flint.alert import Alert
+from flint.alert import AlertManager
 from flint.exceptions import ExitCode, FlintConfigurationError, FlintIOError, FlintJobError, FlintValidationError
 from flint.job.core.job import Job
 from flint.utils.logger import get_logger
@@ -127,7 +127,7 @@ class ValidateCommand(Command):
         logger.info("Validating ETL pipeline with config: %s", self.config_filepath)
 
         try:
-            alert = Alert.from_file(filepath=self.config_filepath)
+            alert = AlertManager.from_file(filepath=self.config_filepath)
         except FlintIOError as e:
             logger.error("Failed to read alert configuration: %s", e)
             return e.exit_code
@@ -142,12 +142,12 @@ class ValidateCommand(Command):
             logger.error("Failed to read job configuration: %s", e)
             return e.exit_code
         except FlintConfigurationError as e:
-            alert.trigger_if_conditions_met(
+            alert.process_alert(
                 body="Configuration error occurred", title="ETL Pipeline Configuration Error", exception=e
             )
             return e.exit_code
         except FlintValidationError as e:
-            alert.trigger_if_conditions_met(
+            alert.process_alert(
                 body="Validation failed", title="ETL Pipeline Validation Error", exception=e
             )
             return e.exit_code
@@ -200,7 +200,7 @@ class JobCommand(Command):
         logger.info("Running ETL pipeline with config: %s", self.config_filepath)
 
         try:
-            alert = Alert.from_file(filepath=self.config_filepath)
+            alert = AlertManager.from_file(filepath=self.config_filepath)
         except FlintIOError as e:
             logger.error("Failed to read alert configuration: %s", e)
             return e.exit_code
@@ -215,17 +215,17 @@ class JobCommand(Command):
             logger.error("Failed to read job configuration: %s", e)
             return e.exit_code
         except FlintConfigurationError as e:
-            alert.trigger_if_conditions_met(
+            alert.process_alert(
                 body="Configuration error occurred", title="ETL Pipeline Configuration Error", exception=e
             )
             return e.exit_code
         except FlintValidationError as e:
-            alert.trigger_if_conditions_met(
+            alert.process_alert(
                 body="Validation failed", title="ETL Pipeline Validation Error", exception=e
             )
             return e.exit_code
         except FlintJobError as e:
-            alert.trigger_if_conditions_met(
+            alert.process_alert(
                 body="Runtime error occurred", title="ETL Pipeline Runtime Error", exception=e
             )
             return e.exit_code

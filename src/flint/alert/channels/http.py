@@ -1,18 +1,18 @@
-"""HTTP channel for sending alert notifications via HTTP requests.
+"""HTTP channel for sending alert messages via HTTP requests.
 
-This module implements the HTTP alert channel that sends notifications
+This module implements the HTTP alert channel that sends alerts
 through HTTP endpoints like webhooks. It supports custom headers, different
 HTTP methods, and configurable timeouts and failure handling.
 
-The HttpChannel follows the Flint framework patterns for configuration-driven
-initialization and implements the BaseChannel interface.
+The HttpAlertChannel follows the Flint framework patterns for configuration-driven
+initialization and implements the BaseAlertChannel interface.
 """
 
 import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.alert.channels.base import BaseConfig
+from flint.alert.channels.base import BaseAlertChannel
 from flint.exceptions import FlintConfigurationKeyError
 from flint.job.models import Model
 from flint.utils.logger import get_logger
@@ -81,10 +81,10 @@ class Retry(Model):
 
 
 @dataclass
-class HttpConfig(BaseConfig):
-    """HTTP config for webhook-based notifications.
+class HttpAlertChannel(BaseAlertChannel):
+    """HTTP alert channel for webhook-based alerts.
 
-    This class implements HTTP alerting functionality for sending notifications
+    This class implements HTTP alerting functionality for sending alerts
     to webhooks or HTTP endpoints. It supports custom headers, different HTTP
     methods, and configurable timeouts.
 

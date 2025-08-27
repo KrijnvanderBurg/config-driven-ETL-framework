@@ -1,18 +1,18 @@
-"""Email channel for sending alert notifications via SMTP.
+"""Email channel for sending alert messages via SMTP.
 
-This module implements the email alert channel that sends notifications
+This module implements the email alert channel that sends alerts
 through SMTP servers. It supports authentication, multiple recipients,
 and configurable failure handling.
 
-The EmailChannel follows the Flint framework patterns for configuration-driven
-initialization and implements the BaseChannel interface.
+The EmailAlertChannel follows the Flint framework patterns for configuration-driven
+initialization and implements the BaseAlertChannel interface.
 """
 
 import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-from flint.alert.channels.base import BaseConfig
+from flint.alert.channels.base import BaseAlertChannel
 from flint.exceptions import FlintConfigurationKeyError
 from flint.utils.logger import get_logger
 
@@ -27,8 +27,8 @@ TO_EMAILS: Final[str] = "to_emails"
 
 
 @dataclass
-class EmailConfig(BaseConfig):
-    """Email config for SMTP-based notifications.
+class EmailAlertChannel(BaseAlertChannel):
+    """Email alert channel for SMTP-based alerts.
 
     This class implements email alerting functionality using SMTP servers.
     It supports authentication, multiple recipients, and configurable
