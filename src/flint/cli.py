@@ -12,7 +12,6 @@ from typing import Self
 
 from flint.exceptions import ExitCode, FlintConfigurationError, FlintIOError, FlintJobError, FlintValidationError
 from flint.job.core.job import Job
-from flint.alert. import Alert
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
