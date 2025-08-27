@@ -22,7 +22,7 @@ logger: logging.Logger = get_logger(__name__)
 T = TypeVar("T")
 
 
-class ValidationBase(ABC, Generic[T]):
+class ValidateBase(ABC, Generic[T]):
     """Abstract base class for validation operations."""
 
     @abstractmethod
@@ -37,7 +37,7 @@ class ValidationBase(ABC, Generic[T]):
         """
 
 
-class ValidateModelNamesAreUnique(ValidationBase["Job"]):
+class ValidateModelNamesAreUnique(ValidateBase["Job"]):
     """Validator to ensure all model names within a job are unique."""
 
     def __init__(self, data: "Job") -> None:
@@ -95,7 +95,7 @@ class ValidateModelNamesAreUnique(ValidationBase["Job"]):
         )
 
 
-class ValidateUpstreamNamesExist(ValidationBase["Job"]):
+class ValidateUpstreamNamesExist(ValidateBase["Job"]):
     """Validator to ensure all upstream names in transforms and loads actually exist."""
 
     def __init__(self, data: "Job") -> None:
