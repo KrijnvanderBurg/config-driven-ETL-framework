@@ -93,7 +93,7 @@
                 "name": "production_critical_errors",
                 "enabled": true,
                 "channel_names": ["custom-email-alert-name", "a-http-post-alert-name"],
-                "templates": {
+                "template": {
                     "prepend_title": "ETL Pipeline Alert",
                     "append_title": "Alert Notification",
                     "prepend_body": "Attention: ETL Pipeline Alert",
@@ -112,7 +112,7 @@
                 "name": "staging_warnings",
                 "enabled": true,
                 "channel_names": ["custom-file-alert-name"],
-                "templates": {
+                "template": {
                     "prepend_title": "ETL Pipeline Alert",
                     "append_title": "Alert Notification",
                     "prepend_body": "Attention: ETL Pipeline Alert",
@@ -131,7 +131,7 @@
                 "name": "team_specific_alerts",
                 "enabled": true,
                 "channel_names": ["a-http-post-alert-name"],
-                "templates": {
+                "template": {
                     "prepend_title": "ETL Pipeline Alert",
                     "append_title": "Alert Notification",
                     "prepend_body": "Attention: ETL Pipeline Alert",
