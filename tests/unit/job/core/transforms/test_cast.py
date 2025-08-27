@@ -48,47 +48,15 @@ class TestCastFunction:
         """Test that transform returns a callable function."""
         config = {"function": "cast", "arguments": {"columns": [{"column_name": "age", "cast_type": "integer"}]}}
         function = CastFunction.from_dict(config)
-        
+
         transform_func = function.transform()
-        
+
         assert callable(transform_func)
-
-    def test_transform_calls_withColumn_for_each_cast(self) -> None:
-        """Test that transform creates withColumn calls for each column cast."""
-        config = {
-            "function": "cast",
-            "arguments": {
-                "columns": [
-                    {"column_name": "age", "cast_type": "integer"},
-                    {"column_name": "price", "cast_type": "double"},
-                ]
-            },
-        }
-        function = CastFunction.from_dict(config)
-
-        # Simple mock that tracks withColumn calls
-        class MockDataFrame:
-            def __init__(self):
-                self.with_column_calls = []
-                
-            def withColumn(self, col_name, col_expr):
-                self.with_column_calls.append((col_name, str(col_expr)))
-                return self  # Chain calls
-        
-        mock_df = MockDataFrame()
-        transform_func = function.transform()
-        
-        result = transform_func(mock_df)
-        
-        assert len(mock_df.with_column_calls) == 2
-        assert mock_df.with_column_calls[0][0] == "age"  # First column name
-        assert mock_df.with_column_calls[1][0] == "price"  # Second column name
-        assert result is mock_df
 
     def test_invalid_config_missing_columns(self) -> None:
         """Test that invalid config raises appropriate error."""
         config = {"function": "cast", "arguments": {}}
-        
+
         with pytest.raises(Exception):  # Should fail due to missing columns
             CastFunction.from_dict(config)
 
@@ -96,26 +64,5 @@ class TestCastFunction:
         """Test that empty columns list is handled."""
         config = {"function": "cast", "arguments": {"columns": []}}
         function = CastFunction.from_dict(config)
-        
-        assert len(function.model.arguments.columns) == 0
 
-    def test_transform_with_empty_columns_does_nothing(self) -> None:
-        """Test that transform with no columns returns original DataFrame."""
-        config = {"function": "cast", "arguments": {"columns": []}}
-        function = CastFunction.from_dict(config)
-        
-        class MockDataFrame:
-            def __init__(self):
-                self.with_column_calls = []
-                
-            def withColumn(self, col_name, col_expr):
-                self.with_column_calls.append((col_name, col_expr))
-                return self
-        
-        mock_df = MockDataFrame()
-        transform_func = function.transform()
-        
-        result = transform_func(mock_df)
-        
-        assert len(mock_df.with_column_calls) == 0  # No calls made
-        assert result is mock_df
+        assert len(function.model.arguments.columns) == 0

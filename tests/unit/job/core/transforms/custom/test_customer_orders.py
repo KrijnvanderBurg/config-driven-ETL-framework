@@ -67,5 +67,5 @@ class TestCustomersOrdersBronzeFunction:
         # Test that data_registry attribute exists and can be set
         registry = DataFrameRegistry()
         function.data_registry = registry
-        
+
         assert function.data_registry is registry
