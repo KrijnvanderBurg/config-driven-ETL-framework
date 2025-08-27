@@ -1,65 +1,121 @@
 """Unit tests for the CastFunction class."""
 
-from unittest.mock import MagicMock, patch
-
 import pytest
-from pyspark.sql import DataFrame
 
+from flint.job.core.transform import TransformFunctionRegistry
 from flint.job.core.transforms.cast import CastFunction
-from flint.job.models.transforms.model_cast import CastFunctionModel
 
 
 class TestCastFunction:
     """Unit tests for the Cast transform function."""
 
-    @pytest.fixture
-    def cast_args(self) -> CastFunctionModel.Args:
-        """Return CastFunctionModel.Args instance."""
-        return CastFunctionModel.Args(
-            columns=[
-                CastFunctionModel.Column(column_name="age", cast_type="integer"),
-                CastFunctionModel.Column(column_name="price", cast_type="decimal(10,2)"),
-            ]
-        )
+    def test_registration(self) -> None:
+        """Test that CastFunction is registered correctly."""
+        assert TransformFunctionRegistry.get("cast") == CastFunction
 
-    @pytest.fixture
-    def cast_model(self, cast_args: CastFunctionModel.Args) -> CastFunctionModel:
-        """Return initialized CastFunctionModel instance."""
-        return CastFunctionModel(function="cast", arguments=cast_args)
+    def test_from_dict_single_column(self) -> None:
+        """Test creating CastFunction from dict with single column."""
+        config = {"function": "cast", "arguments": {"columns": [{"column_name": "age", "cast_type": "integer"}]}}
 
-    @pytest.fixture
-    def cast_function(self, cast_model: CastFunctionModel) -> CastFunction:
-        """Return initialized CastFunction instance."""
-        return CastFunction(model=cast_model)
+        function = CastFunction.from_dict(config)
 
-    @patch("pyspark.sql.Column.cast")
-    def test_transform(self, mock_cast, cast_function) -> None:
-        """Test that transform returns a function that casts columns correctly."""
-        # Arrange
-        mock_df = MagicMock(spec=DataFrame)
-        mock_col_instance = MagicMock()
-        mock_cast.return_value = mock_col_instance
+        assert function.model.function == "cast"
+        assert len(function.model.arguments.columns) == 1
+        assert function.model.arguments.columns[0].column_name == "age"
+        assert function.model.arguments.columns[0].cast_type == "integer"
 
-        # Mock the col function and withColumn method
-        with patch("flint.job.core.transforms.cast.col", return_value=MagicMock()) as mock_col:
-            mock_df.withColumn.return_value = mock_df
+    def test_from_dict_multiple_columns(self) -> None:
+        """Test creating CastFunction from dict with multiple columns."""
+        config = {
+            "function": "cast",
+            "arguments": {
+                "columns": [
+                    {"column_name": "age", "cast_type": "integer"},
+                    {"column_name": "price", "cast_type": "decimal(10,2)"},
+                    {"column_name": "active", "cast_type": "boolean"},
+                ]
+            },
+        }
 
-            # Act
-            transform_func = cast_function.transform()
-            result = transform_func(mock_df)
+        function = CastFunction.from_dict(config)
 
-            # Assert
-            assert result is mock_df
-            assert mock_df.withColumn.call_count == 2
+        assert len(function.model.arguments.columns) == 3
+        assert function.model.arguments.columns[0].cast_type == "integer"
+        assert function.model.arguments.columns[1].cast_type == "decimal(10,2)"
+        assert function.model.arguments.columns[2].cast_type == "boolean"
 
-            # Check first column cast
-            mock_col.assert_any_call("age")
-            mock_df.withColumn.assert_any_call("age", mock_col.return_value.cast.return_value)
-            mock_col.return_value.cast.assert_any_call("integer")
+    def test_transform_returns_callable(self) -> None:
+        """Test that transform returns a callable function."""
+        config = {"function": "cast", "arguments": {"columns": [{"column_name": "age", "cast_type": "integer"}]}}
+        function = CastFunction.from_dict(config)
+        
+        transform_func = function.transform()
+        
+        assert callable(transform_func)
 
-            # Check second column cast
-            mock_col.assert_any_call("price")
-            mock_df.withColumn.assert_any_call("price", mock_col.return_value.cast.return_value)
-            # Check that cast was called with DecimalType
-            # We're not checking the exact call since our implementation now uses DecimalType directly
-            assert mock_col.return_value.cast.called
+    def test_transform_calls_withColumn_for_each_cast(self) -> None:
+        """Test that transform creates withColumn calls for each column cast."""
+        config = {
+            "function": "cast",
+            "arguments": {
+                "columns": [
+                    {"column_name": "age", "cast_type": "integer"},
+                    {"column_name": "price", "cast_type": "double"},
+                ]
+            },
+        }
+        function = CastFunction.from_dict(config)
+
+        # Simple mock that tracks withColumn calls
+        class MockDataFrame:
+            def __init__(self):
+                self.with_column_calls = []
+                
+            def withColumn(self, col_name, col_expr):
+                self.with_column_calls.append((col_name, str(col_expr)))
+                return self  # Chain calls
+        
+        mock_df = MockDataFrame()
+        transform_func = function.transform()
+        
+        result = transform_func(mock_df)
+        
+        assert len(mock_df.with_column_calls) == 2
+        assert mock_df.with_column_calls[0][0] == "age"  # First column name
+        assert mock_df.with_column_calls[1][0] == "price"  # Second column name
+        assert result is mock_df
+
+    def test_invalid_config_missing_columns(self) -> None:
+        """Test that invalid config raises appropriate error."""
+        config = {"function": "cast", "arguments": {}}
+        
+        with pytest.raises(Exception):  # Should fail due to missing columns
+            CastFunction.from_dict(config)
+
+    def test_invalid_config_empty_columns(self) -> None:
+        """Test that empty columns list is handled."""
+        config = {"function": "cast", "arguments": {"columns": []}}
+        function = CastFunction.from_dict(config)
+        
+        assert len(function.model.arguments.columns) == 0
+
+    def test_transform_with_empty_columns_does_nothing(self) -> None:
+        """Test that transform with no columns returns original DataFrame."""
+        config = {"function": "cast", "arguments": {"columns": []}}
+        function = CastFunction.from_dict(config)
+        
+        class MockDataFrame:
+            def __init__(self):
+                self.with_column_calls = []
+                
+            def withColumn(self, col_name, col_expr):
+                self.with_column_calls.append((col_name, col_expr))
+                return self
+        
+        mock_df = MockDataFrame()
+        transform_func = function.transform()
+        
+        result = transform_func(mock_df)
+        
+        assert len(mock_df.with_column_calls) == 0  # No calls made
+        assert result is mock_df

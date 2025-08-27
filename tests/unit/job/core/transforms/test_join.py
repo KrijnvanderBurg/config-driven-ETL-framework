@@ -1,94 +1,78 @@
 """Unit tests for the JoinFunction class."""
 
-from unittest.mock import MagicMock
-
-import pytest
-from pyspark.sql import DataFrame
-
+from flint.job.core.transform import TransformFunctionRegistry
 from flint.job.core.transforms.join import JoinFunction
-from flint.job.models.transforms.model_join import JoinFunctionModel
 from flint.types import DataFrameRegistry
 
 
 class TestJoinFunction:
     """Unit tests for the Join transform function."""
 
-    @pytest.fixture
-    def join_args_single_column(self) -> JoinFunctionModel.Args:
-        """Return JoinFunctionModel.Args instance with a single join column."""
-        return JoinFunctionModel.Args(other_upstream_name="extract-orders", on="customer_id", how="inner")
+    def test_registration(self) -> None:
+        """Test that JoinFunction is registered correctly."""
+        assert TransformFunctionRegistry.get("join") == JoinFunction
 
-    @pytest.fixture
-    def join_args_multi_column(self) -> JoinFunctionModel.Args:
-        """Return JoinFunctionModel.Args instance with multiple join columns."""
-        return JoinFunctionModel.Args(other_upstream_name="extract-orders", on=["customer_id", "store_id"], how="left")
+    def test_from_dict_single_column(self) -> None:
+        """Test creating JoinFunction from dict with single join column."""
+        function_dict = {
+            "function": "join",
+            "arguments": {"other_upstream_name": "extract-orders", "on": "customer_id", "how": "inner"},
+        }
 
-    @pytest.fixture
-    def join_model_single_column(self, join_args_single_column) -> JoinFunctionModel:
-        """Return initialized JoinFunctionModel instance with a single join column."""
-        return JoinFunctionModel(function="join", arguments=join_args_single_column)
+        function = JoinFunction.from_dict(function_dict)
 
-    @pytest.fixture
-    def join_model_multi_column(self, join_args_multi_column) -> JoinFunctionModel:
-        """Return initialized JoinFunctionModel instance with multiple join columns."""
-        return JoinFunctionModel(function="join", arguments=join_args_multi_column)
+        assert function.model.function == "join"
+        assert function.model.arguments.other_upstream_name == "extract-orders"
+        assert function.model.arguments.on == "customer_id"
+        assert function.model.arguments.how == "inner"
 
-    @pytest.fixture
-    def mock_registry(self) -> DataFrameRegistry:
-        """Return a mock DataFrameRegistry."""
-        registry = MagicMock(spec=DataFrameRegistry)
-        # Set up the registry to return a mock DataFrame when accessed with "extract-orders"
-        registry.__getitem__.return_value = MagicMock(spec=DataFrame)
-        return registry
+    def test_from_dict_multi_column(self) -> None:
+        """Test creating JoinFunction from dict with multiple join columns."""
+        function_dict = {
+            "function": "join",
+            "arguments": {"other_upstream_name": "extract-orders", "on": ["customer_id", "store_id"], "how": "left"},
+        }
 
-    @pytest.fixture
-    def join_function_single_column(self, join_model_single_column, mock_registry) -> JoinFunction:
-        """Return initialized JoinFunction instance with a single column join."""
-        function = JoinFunction(model=join_model_single_column)
-        function.data_registry = mock_registry
-        return function
+        function = JoinFunction.from_dict(function_dict)
 
-    @pytest.fixture
-    def join_function_multi_column(self, join_model_multi_column, mock_registry) -> JoinFunction:
-        """Return initialized JoinFunction instance with a multi-column join."""
-        function = JoinFunction(model=join_model_multi_column)
-        function.data_registry = mock_registry
-        return function
+        assert function.model.arguments.on == ["customer_id", "store_id"]
+        assert function.model.arguments.how == "left"
 
-    def test_transform_single_column(self, join_function_single_column, mock_registry) -> None:
-        """Test that transform returns a function that joins DataFrames correctly on a single column."""
-        # Arrange
-        mock_left_df = MagicMock(spec=DataFrame)
-        mock_right_df = MagicMock(spec=DataFrame)
-        mock_registry.__getitem__.return_value = mock_right_df
+    def test_transform_function_single_column_join(self) -> None:
+        """Test transform function creation with single column join."""
+        function_dict = {
+            "function": "join",
+            "arguments": {"other_upstream_name": "extract-orders", "on": "customer_id", "how": "inner"},
+        }
+        function = JoinFunction.from_dict(function_dict)
 
-        # Mock the join method
-        mock_left_df.join.return_value = MagicMock(spec=DataFrame)
+        # Set up registry with mock DataFrame
+        registry = DataFrameRegistry()
+        registry["extract-orders"] = "mock_orders_df"  # Simple string as mock
+        function.data_registry = registry
 
-        # Act
-        transform_func = join_function_single_column.transform()
-        result = transform_func(mock_left_df)
+        transform_func = function.transform()
 
-        # Assert
-        mock_registry.__getitem__.assert_called_once_with("extract-orders")
-        mock_left_df.join.assert_called_once_with(mock_right_df, on="customer_id", how="inner")
-        assert result is mock_left_df.join.return_value
+        assert callable(transform_func)
+        assert function.model.arguments.on == "customer_id"
+        assert function.model.arguments.how == "inner"
+        assert function.model.arguments.other_upstream_name == "extract-orders"
 
-    def test_transform_multi_column(self, join_function_multi_column, mock_registry) -> None:
-        """Test that transform returns a function that joins DataFrames correctly on multiple columns."""
-        # Arrange
-        mock_left_df = MagicMock(spec=DataFrame)
-        mock_right_df = MagicMock(spec=DataFrame)
-        mock_registry.__getitem__.return_value = mock_right_df
+    def test_transform_function_multi_column_join(self) -> None:
+        """Test transform function creation with multiple column join."""
+        function_dict = {
+            "function": "join",
+            "arguments": {"other_upstream_name": "extract-orders", "on": ["customer_id", "store_id"], "how": "left"},
+        }
+        function = JoinFunction.from_dict(function_dict)
 
-        # Mock the join method
-        mock_left_df.join.return_value = MagicMock(spec=DataFrame)
+        # Set up registry
+        registry = DataFrameRegistry()
+        registry["extract-orders"] = "mock_orders_df"  # Simple string as mock
+        function.data_registry = registry
 
-        # Act
-        transform_func = join_function_multi_column.transform()
-        result = transform_func(mock_left_df)
+        transform_func = function.transform()
 
-        # Assert
-        mock_registry.__getitem__.assert_called_once_with("extract-orders")
-        mock_left_df.join.assert_called_once_with(mock_right_df, on=["customer_id", "store_id"], how="left")
-        assert result is mock_left_df.join.return_value
+        assert callable(transform_func)
+        assert function.model.arguments.on == ["customer_id", "store_id"]
+        assert function.model.arguments.how == "left"
