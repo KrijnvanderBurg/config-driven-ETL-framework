@@ -13,7 +13,7 @@ import os
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
-import re2
+import re
 
 from flint.exceptions import FlintConfigurationKeyError
 from flint.job.models import Model
