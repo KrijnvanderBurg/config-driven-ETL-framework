@@ -40,7 +40,7 @@ class TestAlertTemplate:
         assert template.prepend_body == "Alert Details:\n"
         assert template.append_body == "\n\nPlease investigate."
 
-    def test_from_dict_raises_error_for_missing_keys(self):
+    def test_from_dict_raises_error_for_missing_keys(self) -> None:
         """Test that from_dict raises error when required keys are missing."""
         incomplete_config = {
             "prepend_title": "[ALERT] ",

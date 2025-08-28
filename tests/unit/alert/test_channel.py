@@ -145,7 +145,7 @@ class TestAlertChannel:
         channel = AlertChannel.from_dict(http_channel_config)
 
         # Verify all configuration is preserved (cast to specific type for testing)
-        http_config = channel.config
+        http_config: HttpAlertChannel = channel.config
         assert isinstance(http_config, HttpAlertChannel)
         assert http_config.headers == {"Content-Type": "application/json"}
         assert http_config.retry.attempts == 3
