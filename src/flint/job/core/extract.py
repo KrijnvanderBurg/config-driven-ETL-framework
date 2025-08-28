@@ -15,7 +15,7 @@ from typing import Any, Final, Generic, Self, TypeVar
 
 from pyspark.sql import DataFrame
 
-from flint.job.models.model_extract import ExtractFileModel, ExtractFormat, ExtractMethod
+from flint.job.models.model_extract import ExtractFileModel, ExtractFormat, ExtractMethod, ExtractModel
 from flint.types import DataFrameRegistry, RegistryDecorator, Singleton
 from flint.utils.logger import get_logger
 from flint.utils.spark import SparkHandler
@@ -29,7 +29,7 @@ LOCATION: Final[str] = "location"
 SCHEMA: Final[str] = "schema"
 OPTIONS: Final[str] = "options"
 
-ExtractModelT = TypeVar("ExtractModelT", bound=ExtractFileModel)
+ExtractModelT = TypeVar("ExtractModelT", bound=ExtractModel)
 
 
 class ExtractRegistry(RegistryDecorator, metaclass=Singleton):

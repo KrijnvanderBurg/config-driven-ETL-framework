@@ -8,9 +8,13 @@ The HttpAlertChannel follows the Flint framework patterns for configuration-driv
 initialization and implements the BaseAlertChannel interface.
 """
 
+import json
 import logging
+import time
 from dataclasses import dataclass
 from typing import Any, Final, Self
+
+import requests
 
 from flint.alert.channels.base import BaseAlertChannel
 from flint.exceptions import FlintConfigurationKeyError
@@ -129,32 +133,48 @@ class HttpAlertChannel(BaseAlertChannel):
         """
         logger.debug("Creating HttpChannel from configuration dictionary")
         try:
-            url = dict_[URL]
-            method = dict_[METHOD]
-            headers = dict_[HEADERS]
-            timeout = dict_[TIMEOUT]
-            retry_dict = dict_[RETRY]
+            return cls(
+                url=dict_[URL],
+                method=dict_[METHOD],
+                headers=dict_[HEADERS],
+                timeout=dict_[TIMEOUT],
+                retry=Retry.from_dict(dict_[RETRY]),
+            )
         except KeyError as e:
             raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
-
-        retry = Retry.from_dict(retry_dict)
-
-        return cls(
-            url=url,
-            method=method,
-            headers=headers,
-            timeout=timeout,
-            retry=retry,
-        )
 
     def _alert(self, title: str, body: str) -> None:
         """Send an alert message via HTTP.
 
         Args:
-            body: The alert message to send.
             title: The alert title.
+            body: The alert message to send.
 
         Raises:
-            NotImplementedError: HTTP sending is not yet implemented.
+            requests.RequestException: If the HTTP request fails after all retries.
         """
-        raise NotImplementedError("HTTP sending not yet implemented")
+        payload = json.dumps({"title": title, "message": body})
+
+        for attempt in range(self.retry.attempts + 1):
+            try:
+                response = requests.request(
+                    method=self.method, url=self.url, headers=self.headers, data=payload, timeout=self.timeout
+                )
+                response.raise_for_status()
+                logger.info("HTTP alert sent successfully to %s", self.url)
+                return
+
+            except requests.RequestException as exc:
+                if attempt < self.retry.attempts:
+                    logger.warning(
+                        "HTTP alert attempt %d failed: %s. Retrying in %d seconds...",
+                        attempt + 1,
+                        exc,
+                        self.retry.delay_in_seconds,
+                    )
+                    time.sleep(self.retry.delay_in_seconds)
+                else:
+                    logger.error("HTTP alert failed after %d attempts: %s", self.retry.attempts + 1, exc)
+                    if self.retry.error_on_alert_failure:
+                        raise
+                    return

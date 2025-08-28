@@ -9,7 +9,9 @@ initialization and implements the BaseAlertChannel interface.
 """
 
 import logging
+import smtplib
 from dataclasses import dataclass
+from email.mime.text import MIMEText
 from typing import Any, Final, Self
 
 from flint.alert.channels.base import BaseAlertChannel
@@ -82,24 +84,43 @@ class EmailAlertChannel(BaseAlertChannel):
         """
         logger.debug("Creating EmailChannel from configuration dictionary")
         try:
-            smtp_server = dict_[SMTP_SERVER]
-            smtp_port = dict_[SMTP_PORT]
-            username = dict_[USERNAME]
-            password = dict_[PASSWORD]
-            from_email = dict_[FROM_EMAIL]
-            to_emails = dict_[TO_EMAILS]
+            return cls(
+                smtp_server=dict_[SMTP_SERVER],
+                smtp_port=dict_[SMTP_PORT],
+                username=dict_[USERNAME],
+                password=dict_[PASSWORD],
+                from_email=dict_[FROM_EMAIL],
+                to_emails=dict_[TO_EMAILS],
+            )
         except KeyError as e:
             raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
-        return cls(
-            smtp_server=smtp_server,
-            smtp_port=smtp_port,
-            username=username,
-            password=password,
-            from_email=from_email,
-            to_emails=to_emails,
-        )
-
     def _alert(self, title: str, body: str) -> None:
-        """Send an alert message via email (not implemented yet)."""
-        raise NotImplementedError("send_alert not implemented for EmailChannel.")
+        """Send an alert message via email.
+
+        Args:
+            title: The alert title (used as email subject).
+            body: The alert message content (used as email body).
+
+        Raises:
+            smtplib.SMTPException: If email sending fails.
+        """
+        # Create simple text message
+        msg = MIMEText(body, "plain")
+        msg["From"] = self.from_email
+        msg["To"] = ", ".join(self.to_emails)
+        msg["Subject"] = title
+
+        try:
+            # Create SMTP session
+            with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
+                server.starttls()  # Enable security
+                server.login(self.username, self.password)
+                # Send email
+                server.sendmail(self.from_email, self.to_emails, msg.as_string())
+
+            logger.info("Email alert sent successfully to %s", ", ".join(self.to_emails))
+
+        except smtplib.SMTPException as exc:
+            logger.error("Failed to send email alert: %s", exc)
+            raise

@@ -16,9 +16,9 @@ from flint.alert.channels.base import BaseAlertChannel
 from flint.exceptions import FlintConfigurationKeyError
 from flint.utils.logger import get_logger
 
-FILE_PATH: Final[str] = "file_path"
-
 logger: logging.Logger = get_logger(__name__)
+
+FILE_PATH: Final[str] = "file_path"
 
 
 @dataclass
@@ -57,27 +57,25 @@ class FileAlertChannel(BaseAlertChannel):
         """
         logger.debug("Creating FileChannel from configuration dictionary")
         try:
-            file_path = dict_[FILE_PATH]
+            return cls(file_path=dict_[FILE_PATH])
         except KeyError as e:
             raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
-
-        return cls(file_path=file_path)
 
     def _alert(self, title: str, body: str) -> None:
         """Send an alert message to a file.
 
-        Appends the alert to the configured file, creating it if it does not exist.
+        Appends the alert to the configured file with timestamp, creating it if it does not exist.
 
         Args:
-            body: The alert message content.
             title: The alert title.
+            body: The alert message content.
 
         Raises:
             OSError: If writing to the file fails.
         """
         try:
             with open(self.file_path, "a", encoding="utf-8") as file:
-                file.write(f"{title} - {body}\n")
+                file.write(f"{title}: {body}\n")
             logger.info("Alert written to file: %s", self.file_path)
         except OSError as exc:
             logger.error("Failed to write alert to file %s: %s", self.file_path, exc)
