@@ -24,7 +24,7 @@ TRIGGER_ACTIONS: Final[str] = "trigger_actions"
 
 
 @dataclass
-class Watcher(Model):
+class SensorWatcher(Model):
     """Base configuration for sensor watchers.
 
     This class manages watcher configuration for sensors, supporting

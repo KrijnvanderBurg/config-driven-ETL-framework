@@ -21,7 +21,7 @@ TIMEZONE: Final[str] = "timezone"
 
 
 @dataclass
-class Schedule(Model):
+class SensorSchedule(Model):
     """Configuration for sensor scheduling.
 
     This class manages the schedule configuration for sensors using cron-like
