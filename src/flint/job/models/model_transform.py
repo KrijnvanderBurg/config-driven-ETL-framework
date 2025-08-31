@@ -18,9 +18,8 @@ from dataclasses import dataclass
 from typing import Any, Final, Generic, Self, TypeVar
 
 from flint.exceptions import FlintConfigurationKeyError
+from flint.job.models import Model
 from flint.utils.logger import get_logger
-
-from . import Model
 
 logger: logging.Logger = get_logger(__name__)
 

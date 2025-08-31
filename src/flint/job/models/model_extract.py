@@ -21,10 +21,9 @@ from typing import Any, Final, Self
 from pyspark.sql.types import StructType
 
 from flint.exceptions import FlintConfigurationKeyError
+from flint.job.models import Model
 from flint.utils.logger import get_logger
 from flint.utils.schema import SchemaFilepathHandler
-
-from . import Model
 
 logger: logging.Logger = get_logger(__name__)
 
