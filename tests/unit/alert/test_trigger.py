@@ -167,8 +167,26 @@ class TestAlertConditions:
 
         assert result is False
 
+    def test_exception_regex_logs_match_found(self) -> None:
+        """Test that exception_regex logs when pattern matches and covers debug lines."""
+        conditions = AlertConditions(exception_contains=[], exception_regex=".*critical.*", env_vars_matches={})
+        exception = ValueError("This is a critical system failure")
+
+        result = conditions._is_exception_regex(exception)
+
+        assert result is True
+
     def test_exception_regex_empty_returns_true(self) -> None:
         """Test that empty exception_regex returns True."""
+        conditions = AlertConditions(exception_contains=[], exception_regex="", env_vars_matches={})
+        exception = ValueError("Any error")
+
+        result = conditions._is_exception_regex(exception)
+
+        assert result is True
+
+    def test_exception_regex_none_returns_true(self) -> None:
+        """Test that None exception_regex returns True."""
         conditions = AlertConditions(exception_contains=[], exception_regex="", env_vars_matches={})
         exception = ValueError("Any error")
 

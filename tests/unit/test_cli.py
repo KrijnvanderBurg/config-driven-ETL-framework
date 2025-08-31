@@ -14,13 +14,7 @@ import pytest
 
 from flint.__main__ import main
 from flint.cli import Command, JobCommand, ValidateCommand
-from flint.exceptions import (
-    ExitCode,
-    FlintConfigurationError,
-    FlintIOError,
-    FlintJobError,
-    FlintValidationError,
-)
+from flint.exceptions import ExitCode, FlintConfigurationError, FlintIOError, FlintJobError, FlintValidationError
 
 
 # Test fixtures to reduce duplication
@@ -199,6 +193,35 @@ class TestJobCommand(TestCommandBase):
             if exception_type != FlintIOError:
                 mock_alert_manager.process_alert.assert_called_once()
 
+    def test_execute_handles_job_io_error_after_alert_manager_success(
+        self, mock_config_path: Path, mock_alert_manager: Mock
+    ) -> None:
+        """Test JobCommand handles Job IO error when AlertManager succeeds."""
+        # Mock Job.from_file to raise FlintIOError
+        with patch("flint.cli.Job.from_file") as mock_job_from_file:
+            mock_job_from_file.side_effect = FlintIOError("Failed to read job config")
+            cmd = JobCommand(config_filepath=mock_config_path)
+            result = cmd._execute()
+
+            assert result == ExitCode.IO_ERROR
+            # AlertManager should not process alert for IO errors
+            mock_alert_manager.process_alert.assert_not_called()
+
+    def test_execute_handles_configuration_error_with_alert(
+        self, mock_config_path: Path, mock_alert_manager: Mock, mock_job: Mock
+    ) -> None:
+        """Test JobCommand handles configuration error and processes alert."""
+        mock_job.validate.side_effect = FlintConfigurationError("Configuration error")
+        cmd = JobCommand(config_filepath=mock_config_path)
+        result = cmd._execute()
+
+        assert result == ExitCode.CONFIGURATION_ERROR
+        mock_alert_manager.process_alert.assert_called_once_with(
+            body="Configuration error occurred",
+            title="ETL Pipeline Configuration Error",
+            exception=mock_job.validate.side_effect,
+        )
+
 
 class TestValidateCommand(TestCommandBase):
     """Unit tests for ValidateCommand."""
@@ -278,6 +301,35 @@ class TestValidateCommand(TestCommandBase):
             # Verify alert was processed for non-IO errors
             if exception_type != FlintIOError:
                 mock_alert_manager.process_alert.assert_called_once()
+
+    def test_execute_handles_job_io_error_after_alert_manager_success(
+        self, mock_config_path: Path, mock_alert_manager: Mock
+    ) -> None:
+        """Test ValidateCommand handles Job IO error when AlertManager succeeds."""
+        # Mock Job.from_file to raise FlintIOError
+        with patch("flint.cli.Job.from_file") as mock_job_from_file:
+            mock_job_from_file.side_effect = FlintIOError("Failed to read job config")
+            cmd = ValidateCommand(config_filepath=mock_config_path)
+            result = cmd._execute()
+
+            assert result == ExitCode.IO_ERROR
+            # AlertManager should not process alert for IO errors
+            mock_alert_manager.process_alert.assert_not_called()
+
+    def test_execute_handles_configuration_error_with_alert(
+        self, mock_config_path: Path, mock_alert_manager: Mock, mock_job: Mock
+    ) -> None:
+        """Test ValidateCommand handles configuration error and processes alert."""
+        mock_job.validate.side_effect = FlintConfigurationError("Configuration error")
+        cmd = ValidateCommand(config_filepath=mock_config_path)
+        result = cmd._execute()
+
+        assert result == ExitCode.CONFIGURATION_ERROR
+        mock_alert_manager.process_alert.assert_called_once_with(
+            body="Configuration error occurred",
+            title="ETL Pipeline Configuration Error",
+            exception=mock_job.validate.side_effect,
+        )
 
 
 class TestMainFunction:

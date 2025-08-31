@@ -209,10 +209,6 @@ class AlertConditions(Model):
 
         message = str(exception)
 
-        if not self.exception_regex:
-            logger.debug("No exception_regex configured; skipping regex check.")
-            return True
-
         if re.search(self.exception_regex, message):
             logger.debug("Exception message matches regex: '%s'", self.exception_regex)
             return True
