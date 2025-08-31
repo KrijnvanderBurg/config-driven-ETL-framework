@@ -102,7 +102,7 @@ class AlertManager(Model):
 
         return cls(channels=channels, triggers=triggers)
 
-    def process_alert(self, title: str, body: str, exception: Exception) -> None:
+    def evaluate_trigger_and_alert(self, title: str, body: str, exception: Exception) -> None:
         """Process and send an alert to all channels as defined by enabled trigger rules.
 
         Args:
@@ -112,7 +112,7 @@ class AlertManager(Model):
         """
 
         for trigger in self.triggers:
-            if trigger.should_trigger(exception=exception):
+            if trigger.should_fire(exception=exception):
                 logger.debug("Trigger '%s' conditions met; processing alert", trigger.name)
 
                 formatted_title = trigger.template.format_title(title)
@@ -122,7 +122,10 @@ class AlertManager(Model):
                     # Find the channel by name
                     for channel in self.channels:
                         if channel.name == channel_name:
+                            formatted_title = trigger.template.format_title(title)
+                            formatted_body = trigger.template.format_body(body)
+
                             # Send alert through the channel instance
-                            channel.send_alert(title=formatted_title, body=formatted_body)
+                            channel.trigger(title=formatted_title, body=formatted_body)
                             logger.debug("Sent alert to channel '%s'", channel.name)
                             break

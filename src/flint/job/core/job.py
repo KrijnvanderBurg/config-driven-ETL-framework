@@ -18,7 +18,7 @@ from flint.exceptions import FlintConfigurationKeyError
 from flint.job.core.extract import Extract
 from flint.job.core.load import Load
 from flint.job.core.transform import Transform
-from flint.job.models.validate import ValidateModelNamesAreUnique, ValidateUpstreamNamesExist
+from flint.job.core.validate import ValidateModelNamesAreUnique, ValidateUpstreamNamesExist
 from flint.utils.file import FileHandlerContext
 from flint.utils.logger import get_logger
 

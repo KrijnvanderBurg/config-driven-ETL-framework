@@ -315,7 +315,7 @@ class TestAlertTrigger:
         """Test that should_trigger returns True when enabled and conditions are met."""
         exception = ValueError("Database error occurred")
 
-        result = trigger.should_trigger(exception)
+        result = trigger.should_fire(exception)
 
         assert result is True
 
@@ -326,7 +326,7 @@ class TestAlertTrigger:
 
         exception = ValueError("Database error occurred")
 
-        result = trigger.should_trigger(exception)
+        result = trigger.should_fire(exception)
 
         assert result is False
 
@@ -335,7 +335,7 @@ class TestAlertTrigger:
         exception = ValueError("Network issue")  # Doesn't contain "error" or match regex
 
         with patch.dict(os.environ, {"ENV": "development"}, clear=True):
-            result = trigger.should_trigger(exception)
+            result = trigger.should_fire(exception)
 
             assert result is False
 
@@ -343,13 +343,13 @@ class TestAlertTrigger:
         """Test should_trigger with complex condition combinations."""
         # Test with regex match
         exception1 = ValueError("This is a critical system failure")
-        result1 = trigger.should_trigger(exception1)
+        result1 = trigger.should_fire(exception1)
         assert result1 is True
 
         # Test with environment variable match
         exception2 = ValueError("Some other issue")
         with patch.dict(os.environ, {"ENV": "production"}, clear=True):
-            result2 = trigger.should_trigger(exception2)
+            result2 = trigger.should_fire(exception2)
             assert result2 is True
 
     def test_trigger_preserves_all_configuration(self, trigger: AlertTrigger) -> None:

@@ -328,7 +328,7 @@ class AlertTrigger(Model):
             conditions=conditions,
         )
 
-    def should_trigger(self, exception: Exception) -> bool:
+    def should_fire(self, exception: Exception) -> bool:
         """Check if the conditions are met for triggering an alert.
 
         This method evaluates the conditions against the current alert context

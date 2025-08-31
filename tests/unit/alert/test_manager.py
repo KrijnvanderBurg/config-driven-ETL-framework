@@ -119,53 +119,53 @@ class TestAlertManager:
         finally:
             temp_file_path.unlink()
 
-    def test_process_alert_sends_to_matching_channels(self, alert_manager: AlertManager) -> None:
-        """Test that process_alert sends alerts to channels when trigger conditions are met."""
+    def test_evaluate_trigger_and_alert_sends_to_matching_channels(self, alert_manager: AlertManager) -> None:
+        """Test that evaluate_trigger_and_alert sends alerts to channels when trigger conditions are met."""
         # Mock the channel send_alert methods
         for channel in alert_manager.channels:
-            channel.send_alert = MagicMock()
+            channel.trigger = MagicMock()
 
         # Create an exception that should trigger the alert
         test_exception = ValueError("critical error occurred")
 
         # Process the alert
-        alert_manager.process_alert("Test Alert", "Test message", test_exception)
+        alert_manager.evaluate_trigger_and_alert("Test Alert", "Test message", test_exception)
 
         # Verify alerts were sent to both channels
         file_channel = next(ch for ch in alert_manager.channels if ch.name == "test-file")
         webhook_channel = next(ch for ch in alert_manager.channels if ch.name == "test-webhook")
 
-        file_channel.send_alert.assert_called_once()
-        webhook_channel.send_alert.assert_called_once()
+        file_channel.trigger.assert_called_once()
+        webhook_channel.trigger.assert_called_once()
 
         # Verify the formatted messages
-        args, kwargs = file_channel.send_alert.call_args
+        args, kwargs = file_channel.trigger.call_args
         expected_title = "[ALERT] Test Alert - ETL Pipeline"
         expected_body = "Alert Details:\nTest message\n\nPlease investigate."
 
         assert kwargs["title"] == expected_title
         assert kwargs["body"] == expected_body
 
-    def test_process_alert_skips_disabled_triggers(self, sample_alert_config) -> None:
-        """Test that process_alert skips disabled triggers."""
+    def test_evaluate_trigger_and_alert_skips_disabled_triggers(self, sample_alert_config) -> None:
+        """Test that evaluate_trigger_and_alert skips disabled triggers."""
         # Disable the trigger
         sample_alert_config["alert"]["triggers"][0]["enabled"] = False
         manager = AlertManager.from_dict(sample_alert_config)
 
         # Mock the channel send_alert methods
         for channel in manager.channels:
-            channel.send_alert = MagicMock()
+            channel.trigger = MagicMock()
 
         # Process an alert
         test_exception = ValueError("critical error occurred")
-        manager.process_alert("Test Alert", "Test message", test_exception)
+        manager.evaluate_trigger_and_alert("Test Alert", "Test message", test_exception)
 
         # Verify no alerts were sent
         for channel in manager.channels:
-            channel.send_alert.assert_not_called()
+            channel.trigger.assert_not_called()
 
-    def test_process_alert_skips_non_matching_conditions(self, sample_alert_config) -> None:
-        """Test that process_alert skips triggers when conditions don't match."""
+    def test_evaluate_trigger_and_alert_skips_non_matching_conditions(self, sample_alert_config) -> None:
+        """Test that evaluate_trigger_and_alert skips triggers when conditions don't match."""
         # Change conditions so they won't match
         sample_alert_config["alert"]["triggers"][0]["conditions"] = {
             "exception_contains": ["database"],
@@ -176,18 +176,18 @@ class TestAlertManager:
 
         # Mock the channel send_alert methods
         for channel in manager.channels:
-            channel.send_alert = MagicMock()
+            channel.trigger = MagicMock()
 
         # Process an alert with non-matching exception
         test_exception = ValueError("network error")
-        manager.process_alert("Test Alert", "Test message", test_exception)
+        manager.evaluate_trigger_and_alert("Test Alert", "Test message", test_exception)
 
         # Verify no alerts were sent
         for channel in manager.channels:
-            channel.send_alert.assert_not_called()
+            channel.trigger.assert_not_called()
 
-    def test_process_alert_handles_missing_channel(self, sample_alert_config) -> None:
-        """Test that process_alert handles gracefully when referenced channel doesn't exist."""
+    def test_evaluate_trigger_and_alert_handles_missing_channel(self, sample_alert_config) -> None:
+        """Test that evaluate_trigger_and_alert handles gracefully when referenced channel doesn't exist."""
         # Add a trigger that references a non-existent channel
         sample_alert_config["alert"]["triggers"][0]["channel_names"] = ["non-existent-channel"]
         manager = AlertManager.from_dict(sample_alert_config)
@@ -196,7 +196,7 @@ class TestAlertManager:
         test_exception = ValueError("critical error occurred")
 
         # Should not raise an exception
-        manager.process_alert("Test Alert", "Test message", test_exception)
+        manager.evaluate_trigger_and_alert("Test Alert", "Test message", test_exception)
 
     def test_multiple_triggers_can_fire(self, sample_alert_config) -> None:
         """Test that multiple triggers can fire for the same alert."""
@@ -220,12 +220,12 @@ class TestAlertManager:
 
         # Mock the channel send_alert methods
         for channel in manager.channels:
-            channel.send_alert = MagicMock()
+            channel.trigger = MagicMock()
 
         # Process an alert that should trigger both triggers
         test_exception = ValueError("critical error occurred")
-        manager.process_alert("Test Alert", "Test message", test_exception)
+        manager.evaluate_trigger_and_alert("Test Alert", "Test message", test_exception)
 
         # File channel should receive alerts from both triggers
         file_channel = next(ch for ch in manager.channels if ch.name == "test-file")
-        assert file_channel.send_alert.call_count == 2
+        assert file_channel.trigger.call_count == 2

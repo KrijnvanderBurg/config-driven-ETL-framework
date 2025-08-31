@@ -191,7 +191,7 @@ class TestJobCommand(TestCommandBase):
 
             # Verify alert was processed for non-IO errors
             if exception_type != FlintIOError:
-                mock_alert_manager.process_alert.assert_called_once()
+                mock_alert_manager.evaluate_trigger_and_alert.assert_called_once()
 
     def test_execute_handles_job_io_error_after_alert_manager_success(
         self, mock_config_path: Path, mock_alert_manager: Mock
@@ -205,7 +205,7 @@ class TestJobCommand(TestCommandBase):
 
             assert result == ExitCode.IO_ERROR
             # AlertManager should not process alert for IO errors
-            mock_alert_manager.process_alert.assert_not_called()
+            mock_alert_manager.evaluate_trigger_and_alert.assert_not_called()
 
     def test_execute_handles_configuration_error_with_alert(
         self, mock_config_path: Path, mock_alert_manager: Mock, mock_job: Mock
@@ -216,7 +216,7 @@ class TestJobCommand(TestCommandBase):
         result = cmd._execute()
 
         assert result == ExitCode.CONFIGURATION_ERROR
-        mock_alert_manager.process_alert.assert_called_once_with(
+        mock_alert_manager.evaluate_trigger_and_alert.assert_called_once_with(
             body="Configuration error occurred",
             title="ETL Pipeline Configuration Error",
             exception=mock_job.validate.side_effect,
@@ -300,7 +300,7 @@ class TestValidateCommand(TestCommandBase):
 
             # Verify alert was processed for non-IO errors
             if exception_type != FlintIOError:
-                mock_alert_manager.process_alert.assert_called_once()
+                mock_alert_manager.evaluate_trigger_and_alert.assert_called_once()
 
     def test_execute_handles_job_io_error_after_alert_manager_success(
         self, mock_config_path: Path, mock_alert_manager: Mock
@@ -314,7 +314,7 @@ class TestValidateCommand(TestCommandBase):
 
             assert result == ExitCode.IO_ERROR
             # AlertManager should not process alert for IO errors
-            mock_alert_manager.process_alert.assert_not_called()
+            mock_alert_manager.evaluate_trigger_and_alert.assert_not_called()
 
     def test_execute_handles_configuration_error_with_alert(
         self, mock_config_path: Path, mock_alert_manager: Mock, mock_job: Mock
@@ -325,7 +325,7 @@ class TestValidateCommand(TestCommandBase):
         result = cmd._execute()
 
         assert result == ExitCode.CONFIGURATION_ERROR
-        mock_alert_manager.process_alert.assert_called_once_with(
+        mock_alert_manager.evaluate_trigger_and_alert.assert_called_once_with(
             body="Configuration error occurred",
             title="ETL Pipeline Configuration Error",
             exception=mock_job.validate.side_effect,

@@ -122,7 +122,7 @@ class TestAlertChannel:
         channel.config.alert = MagicMock()
 
         # Send an alert
-        channel.send_alert("Test Title", "Test Body")
+        channel.trigger("Test Title", "Test Body")
 
         # Verify delegation
         channel.config.alert.assert_called_once_with(title="Test Title", body="Test Body")
@@ -135,7 +135,7 @@ class TestAlertChannel:
         channel.config.alert = MagicMock()
 
         # Send an alert with empty strings
-        channel.send_alert("", "")
+        channel.trigger("", "")
 
         # Verify delegation
         channel.config.alert.assert_called_once_with(title="", body="")
@@ -162,8 +162,8 @@ class TestAlertChannel:
         http_channel.config.alert = MagicMock()
 
         # Send alerts to both
-        file_channel.send_alert("File Alert", "File message")
-        http_channel.send_alert("HTTP Alert", "HTTP message")
+        file_channel.trigger("File Alert", "File message")
+        http_channel.trigger("HTTP Alert", "HTTP message")
 
         # Verify each was called correctly
         file_channel.config.alert.assert_called_once_with(title="File Alert", body="File message")

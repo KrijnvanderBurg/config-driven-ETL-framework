@@ -93,7 +93,7 @@ class AlertChannel(Model):
             config=config,
         )
 
-    def send_alert(self, title: str, body: str) -> None:
+    def trigger(self, title: str, body: str) -> None:
         """Send an alert message through this channel.
 
         Args:
