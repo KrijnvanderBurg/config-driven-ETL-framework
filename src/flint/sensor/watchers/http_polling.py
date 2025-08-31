@@ -11,6 +11,7 @@ from typing import Any, Final, Self
 
 from flint.exceptions import FlintConfigurationKeyError
 from flint.job.models import Model
+from flint.sensor.watchers.base import BaseWatcher
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -274,7 +275,7 @@ TRIGGER_CONDITIONS: Final[str] = "trigger_conditions"
 
 
 @dataclass
-class HttpPollingWatcher(Model):
+class HttpPollingWatcher(BaseWatcher):
     """Configuration for HTTP polling watchers.
 
     This class manages complete HTTP polling watcher configuration including

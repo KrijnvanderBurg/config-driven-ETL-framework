@@ -11,6 +11,7 @@ from typing import Any, Final, Self
 
 from flint.exceptions import FlintConfigurationKeyError
 from flint.job.models import Model
+from flint.sensor.actions.base import BaseAction
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -87,7 +88,7 @@ RETRY: Final[str] = "retry"
 
 
 @dataclass
-class HttpPostAction(Model):
+class HttpPostAction(BaseAction):
     """Configuration for HTTP POST actions.
 
     This class manages HTTP POST action configuration including
@@ -153,3 +154,12 @@ class HttpPostAction(Model):
             timeout=timeout,
             retry=retry,
         )
+
+    def _execute(self) -> None:
+        """Execute the HTTP POST action.
+
+        This method would implement the actual HTTP POST request logic.
+        """
+        # Implementation would make the actual HTTP POST request
+        # This is just a placeholder for the actual implementation
+        logger.debug("Executing HTTP POST action to %s", self.url)

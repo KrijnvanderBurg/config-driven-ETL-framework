@@ -11,6 +11,7 @@ from typing import Any, Final, Self
 
 from flint.exceptions import FlintConfigurationKeyError
 from flint.job.models import Model
+from flint.sensor.watchers.base import BaseWatcher
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -197,7 +198,7 @@ TRIGGER_CONDITIONS: Final[str] = "trigger_conditions"
 
 
 @dataclass
-class FileSystemWatcher(Model):
+class FileSystemWatcher(BaseWatcher):
     """Configuration for file system watchers.
 
     This class manages complete file system watcher configuration including

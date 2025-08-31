@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from typing import Any, Final, Self
 
 from flint.exceptions import FlintConfigurationKeyError
-from flint.job.models import Model
+from flint.sensor.actions.base import BaseAction
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -19,7 +19,7 @@ JOB_NAME: Final[str] = "job_name"
 
 
 @dataclass
-class TriggerJobAction(Model):
+class TriggerJobAction(BaseAction):
     """Configuration for job triggering actions.
 
     This class manages job triggering action configuration,
@@ -61,3 +61,12 @@ class TriggerJobAction(Model):
         return cls(
             job_name=job_name,
         )
+
+    def _execute(self) -> None:
+        """Execute the job triggering action.
+
+        This method would implement the actual job triggering logic.
+        """
+        # Implementation would trigger the specified job
+        # This is just a placeholder for the actual implementation
+        logger.debug("Triggering job: %s", self.job_name)
