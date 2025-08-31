@@ -102,16 +102,14 @@ class SensorAction(Model):
         except KeyError as e:
             raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
-        # Import here to avoid circular imports
-        from flint.sensor.actions.http_post import HttpPostAction
-        from flint.sensor.actions.trigger_job import TriggerJobAction
-
         # Create the appropriate action instance
         config: BaseAction
         if type_ == "http_post":
+            from flint.sensor.actions.http_post import HttpPostAction
             config = HttpPostAction.from_dict(config_dict)
         elif type_ == "trigger_job":
-            config = TriggerJobAction.from_dict(config_dict)
+            from flint.sensor.actions.etl_in_sensor import EtlInSensor
+            config = EtlInSensor.from_dict(config_dict)
         else:
             raise ValueError(f"Unknown action type: {type_}")
 

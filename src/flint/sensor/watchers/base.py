@@ -121,15 +121,13 @@ class Watcher(Model):
         except KeyError as e:
             raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
-        # Import here to avoid circular imports
-        from flint.sensor.watchers.file_system import FileSystemWatcher
-        from flint.sensor.watchers.http_polling import HttpPollingWatcher
-
         # Create the appropriate watcher instance
         config: BaseWatcher
         if type_ == "file_system":
+            from flint.sensor.watchers.file_system import FileSystemWatcher
             config = FileSystemWatcher.from_dict(config_dict)
         elif type_ == "http_polling":
+            from flint.sensor.watchers.http_polling import HttpPollingWatcher
             config = HttpPollingWatcher.from_dict(config_dict)
         else:
             raise ValueError(f"Unknown watcher type: {type_}")
