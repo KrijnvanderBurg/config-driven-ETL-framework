@@ -137,7 +137,7 @@ class TestTransform:
             "name": "test_transform",
             "upstream_name": "source",
             "functions": [{"function": "test_function", "arguments": {"key": "value"}}],
-            "options": {}
+            "options": {},
         }
 
         # Act
