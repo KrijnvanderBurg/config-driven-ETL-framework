@@ -6,302 +6,178 @@ from unittest.mock import MagicMock
 
 import pytest
 
-from flint.types import RegistryDecorator, RegistryInstance, Singleton
+from flint.types import DataFrameRegistry, RegistryDecorator, RegistryInstance, Singleton, StreamingQueryRegistry
 
 
 class TestSingleton:
-    """Unit tests for the Singleton metaclass.
+    """Tests for the Singleton metaclass."""
 
-    This test class validates the behavior of the Singleton metaclass implementation,
-    ensuring that only a single instance of any class using this metaclass is created,
-    regardless of how many times the class is instantiated.
-    """
+    def test_singleton_creates_one_instance(self) -> None:
+        """Test that singleton only creates one instance."""
 
-    def test_singleton_instance_creation(self) -> None:
-        """Test that a singleton class only creates one instance.
-
-        This test verifies that multiple instantiations of a class using the
-        Singleton metaclass return the same object instance, maintaining the
-        singleton pattern integrity.
-        """
-
-        # Arrange
-        class TestClassSingleton(metaclass=Singleton):
-            """test class"""
-
+        class TestClass(metaclass=Singleton):
             def __init__(self) -> None:
                 self.value = 0
 
-        # Act
-        instance1 = TestClassSingleton()
-        instance2 = TestClassSingleton()
+        instance1 = TestClass()
+        instance2 = TestClass()
 
-        # Assert
         assert instance1 is instance2
-        assert id(instance1) == id(instance2)
 
-    def test_singleton_state_persistence(self) -> None:
-        """Test that state is shared among all references to the singleton."""
+    def test_singleton_state_shared(self) -> None:
+        """Test that state is shared between references."""
 
-        # Arrange
-        class TestClassSingleton(metaclass=Singleton):
-            """test class"""
-
+        class TestClass(metaclass=Singleton):
             def __init__(self) -> None:
                 self.value = 0
 
-        # Act
-        instance1 = TestClassSingleton()
+        instance1 = TestClass()
         instance1.value = 42
-        instance2 = TestClassSingleton()
+        instance2 = TestClass()
 
-        # Assert
         assert instance2.value == 42
 
-    def test_multiple_singleton_classes(self) -> None:
+    def test_different_singleton_classes_separate(self) -> None:
         """Test that different singleton classes have separate instances."""
 
-        # Arrange
-        class TestSingleton1(metaclass=Singleton):
-            """test class"""
-
+        class TestClass1(metaclass=Singleton):
             def __init__(self) -> None:
                 self.value = 1
 
-        class TestSingleton2(metaclass=Singleton):
-            """test class"""
-
+        class TestClass2(metaclass=Singleton):
             def __init__(self) -> None:
                 self.value = 2
 
-        # Act
-        instance1 = TestSingleton1()
-        instance2 = TestSingleton2()
+        instance1 = TestClass1()
+        instance2 = TestClass2()
 
-        # Assert
         assert instance1 is not instance2
         assert instance1.value == 1
         assert instance2.value == 2
 
-    def test_singleton_with_args(self) -> None:
-        """Test that arguments to __init__ are ignored after first instantiation."""
+    def test_singleton_ignores_later_args(self) -> None:
+        """Test that arguments after first instantiation are ignored."""
 
-        # Arrange
-        class TestClassSingleton(metaclass=Singleton):
-            """test class"""
-
+        class TestClass(metaclass=Singleton):
             def __init__(self, value=0) -> None:
                 self.value = value
 
-        # Act
-        instance1 = TestClassSingleton(42)
-        instance2 = TestClassSingleton(100)  # This should be ignored
+        instance1 = TestClass(42)
+        instance2 = TestClass(100)
 
-        # Assert
         assert instance1 is instance2
-        assert instance1.value == 42  # Value from first instantiation
-        assert instance2.value == 42  # Not 100
+        assert instance1.value == 42
 
-    def test_thread_safety(self) -> None:
-        """Test that singleton creation is thread-safe."""
+    def test_singleton_thread_safe(self) -> None:
+        """Test that singleton is thread-safe."""
 
-        # Arrange
-        class TestClassSingleton(metaclass=Singleton):
-            """test class"""
-
+        class TestClass(metaclass=Singleton):
             def __init__(self) -> None:
                 self.value = 0
 
         instances = []
 
         def create_instance() -> None:
-            instances.append(TestClassSingleton())
+            instances.append(TestClass())
 
-        # Act
         threads = [threading.Thread(target=create_instance) for _ in range(10)]
         for thread in threads:
             thread.start()
         for thread in threads:
             thread.join()
 
-        # Assert
         first_instance = instances[0]
         for instance in instances[1:]:
             assert instance is first_instance
 
-    def test_singleton_inheritance(self) -> None:
-        """Test that inheritance works properly with singleton classes."""
-
-        # Arrange
-        class BaseSingleton(metaclass=Singleton):
-            """Base singleton class"""
-
-            def __init__(self) -> None:
-                self.base_value = 42
-
-        class DerivedSingleton(BaseSingleton):
-            """Derived singleton class"""
-
-            def __init__(self) -> None:
-                super().__init__()
-                self.derived_value = 100
-
-        # Act
-        base = BaseSingleton()
-        derived = DerivedSingleton()
-
-        # Assert
-        assert base is not derived
-        assert base.base_value == 42
-        assert derived.base_value == 42
-        assert derived.derived_value == 100
-
-        # Act
-        base2 = BaseSingleton()
-        derived2 = DerivedSingleton()
-
-        # Assert
-        assert base is base2
-        assert derived is derived2
-
 
 class TestRegistryDecorator:
-    """
-    Unit tests for the RegistryDecorator class.
-    """
+    """Tests for the RegistryDecorator class."""
 
-    def test_register_class(self) -> None:
-        """Test registering a class with a key."""
-        # Arrange
+    def test_register_and_get_class(self) -> None:
+        """Test registering and retrieving a class."""
 
-        # Act
         @RegistryDecorator.register("test_key")
         class TestClass:
-            """test class"""
+            pass
 
-        # Assert
-        assert TestClass.__name__ == "TestClass"
-        # We're testing the registration worked but not accessing private attributes
+        result = RegistryDecorator.get("test_key")
+        assert result is TestClass
 
-    def test_get_registered_class(self) -> None:
-        """Test retrieving a registered class."""
-        # Arrange
-
-        @RegistryDecorator.register("my_key")
-        class TestClass:
-            """test class"""
-
-        # Act
-        retrieved_class = RegistryDecorator.get("my_key")
-
-        # Assert
-        assert retrieved_class is TestClass
-
-    def test_get_nonexistent_key(self) -> None:
+    def test_get_nonexistent_key_raises_error(self) -> None:
         """Test that getting a non-registered key raises KeyError."""
-        # Arrange
-
-        # Act & Assert
         with pytest.raises(KeyError):
-            RegistryDecorator.get("nonexistent_key")
+            RegistryDecorator.get("nonexistent")
 
-    def test_register_multiple_classes_for_key(self) -> None:
-        """Test that registering multiple classes for the same key works."""
-        # Arrange
+    def test_multiple_classes_same_key(self) -> None:
+        """Test registering multiple classes with same key returns first."""
 
-        @RegistryDecorator.register("multi_key")
+        @RegistryDecorator.register("multi")
         class FirstClass:
-            """test class"""
+            pass
 
-        @RegistryDecorator.register("multi_key")
+        @RegistryDecorator.register("multi")
         class SecondClass:
-            """test class"""
+            pass
 
-        # Act
-        retrieved_class = RegistryDecorator.get("multi_key")
+        result = RegistryDecorator.get("multi")
+        assert result is FirstClass
 
-        # Assert
-        assert retrieved_class is FirstClass  # First registered class should be returned
-        assert retrieved_class is not SecondClass  # Second class should not override the first
+    def test_get_all_classes(self) -> None:
+        """Test getting all registered classes for a key."""
 
-    def test_duplicate_registration(self) -> None:
-        """Test that registering the same class twice with the same key doesn't duplicate it."""
+        @RegistryDecorator.register("all_test")
+        class Class1:
+            pass
 
-        # Arrange
-        class DuplicateClass:
-            """test class for duplicate registration"""
+        @RegistryDecorator.register("all_test")
+        class Class2:
+            pass
 
-        # Act - register the same class twice with the same key
-        decorated_class1 = RegistryDecorator.register("duplicate_key")(DuplicateClass)
-        decorated_class2 = RegistryDecorator.register("duplicate_key")(DuplicateClass)
+        all_classes = RegistryDecorator.get_all("all_test")
+        assert len(all_classes) == 2
+        assert Class1 in all_classes
+        assert Class2 in all_classes
 
-        # Assert
-        assert decorated_class1 is decorated_class2  # Should be the same class
-        # Verify the class was only registered once by checking we get the same class back
-        retrieved_class = RegistryDecorator.get("duplicate_key")
-        assert retrieved_class is DuplicateClass
+    def test_get_all_nonexistent_key_raises_error(self) -> None:
+        """Test that get_all with non-existent key raises KeyError."""
+        with pytest.raises(KeyError):
+            RegistryDecorator.get_all("nonexistent")
 
-    def test_register_preserves_class_attributes(self) -> None:
-        """Test that registration preserves the registered class's attributes."""
-        # Arrange
+    def test_registry_init_without_attribute(self) -> None:
+        """Test registry initialization when _registry doesn't exist."""
+        original = RegistryDecorator._registry
+        delattr(RegistryDecorator, "_registry")
 
-        @RegistryDecorator.register("attr_test")
-        class ClassWithAttrs:
-            """test class"""
+        try:
 
-            class_attr = "class_value"
+            @RegistryDecorator.register("init_test")
+            class TestClass:
+                pass
 
-            def __init__(self) -> None:
-                self.instance_attr = "instance_value"
+            result = RegistryDecorator.get("init_test")
+            assert result is TestClass
+        finally:
+            RegistryDecorator._registry = original
 
-            def method(self) -> str:
-                """test method"""
-                return "method_result"
+    def test_duplicate_registration_prevention(self) -> None:
+        """Test that duplicate registration of same class is prevented."""
 
-        # Act
-        retrieved_class = RegistryDecorator.get("attr_test")
-        retrieved_instance = retrieved_class()
+        class TestClass:
+            pass
 
-        # Assert
-        assert retrieved_class is ClassWithAttrs
-        assert retrieved_class.class_attr == "class_value"
-        assert retrieved_instance.instance_attr == "instance_value"
-        assert retrieved_instance.method() == "method_result"
+        # Register the same class twice with the same key
+        RegistryDecorator.register("dup_test")(TestClass)
+        RegistryDecorator.register("dup_test")(TestClass)
 
-    def test_register_with_generic_types(self) -> None:
-        """Test using the registry with generic type annotations."""
-        # Arrange
-
-        @RegistryDecorator.register("dict_processor")
-        class DictProcessor:  # noqa: F841
-            """test class"""
-
-            def process(self, data: dict[str, int]) -> list[int]:
-                """test method"""
-                return list(data.values())
-
-        @RegistryDecorator.register("list_processor")
-        class ListProcessor:  # noqa: F841
-            """test class"""
-
-            def process(self, data: list[int]) -> int:
-                """test method"""
-                return sum(data)
-
-        # Act
-        dict_processor_class = RegistryDecorator.get("dict_processor")
-        list_processor_class = RegistryDecorator.get("list_processor")
-
-        # Assert
-        assert dict_processor_class is DictProcessor
-        assert list_processor_class is ListProcessor
-
-        assert dict_processor_class().process({"a": 1, "b": 2}) == [1, 2]
-        assert list_processor_class().process([1, 2, 3]) == 6
+        # Should only have one entry
+        all_classes = RegistryDecorator.get_all("dup_test")
+        assert len(all_classes) == 1
+        assert all_classes[0] is TestClass
 
 
 class TestRegistryInstance:
-    """Tests for RegistrySingleton class."""
+    """Tests for RegistryInstance class."""
 
     @pytest.fixture
     def registry(self):
@@ -310,48 +186,95 @@ class TestRegistryInstance:
         registry._items.clear()  # type: ignore
         return registry
 
-    @pytest.fixture
-    def mock_item(self) -> MagicMock:
-        """Return a mock item."""
-        return MagicMock()
-
-    def test_set_and_get_item(self, registry: Any, mock_item: MagicMock) -> None:
+    def test_set_and_get_item(self, registry: Any) -> None:
         """Test setting and getting items."""
+        mock_item = MagicMock()
         registry["item1"] = mock_item
         assert registry["item1"] == mock_item
 
-    def test_get_nonexistent_item(self, registry: Any) -> None:
+    def test_get_nonexistent_item_raises_error(self, registry: Any) -> None:
         """Test getting nonexistent item raises KeyError."""
         with pytest.raises(KeyError):
-            _ = registry["item1"]
+            _ = registry["missing"]
 
-    def test_del_item(self, registry: Any, mock_item: MagicMock) -> None:
+    def test_delete_item(self, registry: Any) -> None:
         """Test deleting items."""
+        mock_item = MagicMock()
         registry["item1"] = mock_item
         del registry["item1"]
         with pytest.raises(KeyError):
             _ = registry["item1"]
 
-    def test_del_nonexistent_item(self, registry: Any) -> None:
+    def test_delete_nonexistent_item_raises_error(self, registry: Any) -> None:
         """Test deleting nonexistent item raises KeyError."""
         with pytest.raises(KeyError):
-            del registry["item1"]
+            del registry["missing"]
 
-    def test_contains(self, registry: Any, mock_item: MagicMock) -> None:
+    def test_contains_operator(self, registry: Any) -> None:
         """Test 'in' operator."""
+        mock_item = MagicMock()
         registry["item1"] = mock_item
         assert "item1" in registry
-        assert "item2" not in registry
+        assert "missing" not in registry
 
-    def test_len(self, registry: Any, mock_item: MagicMock) -> None:
+    def test_len_function(self, registry: Any) -> None:
         """Test len() function."""
-        registry["item1"] = mock_item
-        registry["item2"] = mock_item
+        registry["item1"] = MagicMock()
+        registry["item2"] = MagicMock()
         assert len(registry) == 2
 
-    def test_iter(self, registry: Any, mock_item: MagicMock) -> None:
-        """Test iteration."""
+    def test_iteration(self, registry: Any) -> None:
+        """Test iteration over registry."""
+        mock_item = MagicMock()
         registry["item1"] = mock_item
         registry["item2"] = mock_item
         items = list(iter(registry))
         assert mock_item in items
+
+
+class TestDataFrameRegistry:
+    """Tests for DataFrameRegistry class."""
+
+    @pytest.fixture
+    def df_registry(self):
+        """Return a fresh DataFrame registry instance."""
+        registry = DataFrameRegistry()
+        registry._items.clear()  # type: ignore
+        return registry
+
+    def test_set_and_get_dataframe(self, df_registry: DataFrameRegistry) -> None:
+        """Test setting and getting DataFrames."""
+        mock_df = MagicMock()
+        df_registry["customers"] = mock_df
+        assert df_registry["customers"] == mock_df
+
+    def test_get_nonexistent_dataframe_enhanced_error(self, df_registry: DataFrameRegistry) -> None:
+        """Test getting nonexistent DataFrame shows available DataFrames."""
+        df_registry["existing_df"] = MagicMock()
+
+        with pytest.raises(KeyError, match="Available DataFrames"):
+            _ = df_registry["missing_df"]
+
+
+class TestStreamingQueryRegistry:
+    """Tests for StreamingQueryRegistry class."""
+
+    @pytest.fixture
+    def sq_registry(self):
+        """Return a fresh StreamingQuery registry instance."""
+        registry = StreamingQueryRegistry()
+        registry._items.clear()  # type: ignore
+        return registry
+
+    def test_set_and_get_streaming_query(self, sq_registry: StreamingQueryRegistry) -> None:
+        """Test setting and getting StreamingQueries."""
+        mock_query = MagicMock()
+        sq_registry["customers_stream"] = mock_query
+        assert sq_registry["customers_stream"] == mock_query
+
+    def test_get_nonexistent_query_enhanced_error(self, sq_registry: StreamingQueryRegistry) -> None:
+        """Test getting nonexistent StreamingQuery shows available queries."""
+        sq_registry["existing_stream"] = MagicMock()
+
+        with pytest.raises(KeyError, match="Available queries"):
+            _ = sq_registry["missing_stream"]

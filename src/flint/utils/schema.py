@@ -198,6 +198,6 @@ class SchemaFilepathHandler(SchemaHandler):
             logger.info("Successfully parsed schema from file: %s", schema)
             return result
 
-        except (FileNotFoundError, PermissionError) as e:
+        except (FileNotFoundError, PermissionError, NotImplementedError) as e:
             logger.error("File access error reading schema file %s: %s", schema, str(e))
-            raise
+            raise e

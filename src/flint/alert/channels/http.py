@@ -1,0 +1,180 @@
+"""HTTP channel for sending alert messages via HTTP requests.
+
+This module implements the HTTP alert channel that sends alerts
+through HTTP endpoints like webhooks. It supports custom headers, different
+HTTP methods, and configurable timeouts and failure handling.
+
+The HttpAlertChannel follows the Flint framework patterns for configuration-driven
+initialization and implements the BaseAlertChannel interface.
+"""
+
+import json
+import logging
+import time
+from dataclasses import dataclass
+from typing import Any, Final, Self
+
+import requests
+
+from flint.alert.channels.base import BaseAlertChannel
+from flint.exceptions import FlintConfigurationKeyError
+from flint.job.models import Model
+from flint.utils.logger import get_logger
+
+logger: logging.Logger = get_logger(__name__)
+
+URL: Final[str] = "url"
+METHOD: Final[str] = "method"
+HEADERS: Final[str] = "headers"
+TIMEOUT: Final[str] = "timeout"
+RETRY: Final[str] = "retry"
+
+ERROR_ON_ALERT_FAILURE: Final[str] = "error_on_alert_failure"
+ATTEMPTS: Final[str] = "attempts"
+DELAY_IN_SECONDS: Final[str] = "delay_in_seconds"
+
+
+@dataclass
+class Retry(Model):
+    """Configuration for handling channel failures and retries.
+
+    This class defines how alert channels should behave when failures occur,
+    including retry logic and error escalation settings.
+
+    Attributes:
+        error_on_alert_failure: Whether to raise errors when alert sending fails
+        retry_attempts: Number of retry attempts for failed alerts
+        retry_delay_seconds: Delay between retry attempts in seconds
+    """
+
+    error_on_alert_failure: bool
+    attempts: int
+    delay_in_seconds: int
+
+    @classmethod
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
+        """Create a FailureHandling instance from a dictionary configuration.
+
+        Args:
+            dict_: Dictionary containing failure handling configuration
+
+        Returns:
+            A FailureHandling instance configured from the dictionary
+
+        Examples:
+            >>> config = {
+            ...     "error_on_alert_failure": True,
+            ...     "attempts": 3,
+            ...     "delay_in_seconds": 30
+            ... }
+            >>> retry = FailureHandling.from_dict(config)
+        """
+        logger.debug("Creating FailureHandling from configuration dictionary")
+        try:
+            error_on_alert_failure = dict_[ERROR_ON_ALERT_FAILURE]
+            attempts = dict_[ATTEMPTS]
+            delay_in_seconds = dict_[DELAY_IN_SECONDS]
+        except KeyError as e:
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+
+        return cls(
+            error_on_alert_failure=error_on_alert_failure,
+            attempts=attempts,
+            delay_in_seconds=delay_in_seconds,
+        )
+
+
+@dataclass
+class HttpAlertChannel(BaseAlertChannel):
+    """HTTP alert channel for webhook-based alerts.
+
+    This class implements HTTP alerting functionality for sending alerts
+    to webhooks or HTTP endpoints. It supports custom headers, different HTTP
+    methods, and configurable timeouts.
+
+    Attributes:
+        url: HTTP endpoint URL for sending alerts
+        method: HTTP method to use (GET, POST, PUT, etc.)
+        headers: Dictionary of HTTP headers to include in requests
+        timeout: Request timeout in seconds
+        failure_handling: Configuration for handling channel failures and retries
+    """
+
+    url: str
+    method: str
+    headers: dict[str, str]
+    timeout: int
+    retry: Retry
+
+    @classmethod
+    def from_dict(cls, dict_: dict[str, Any]) -> Self:
+        """Create an HttpChannel instance from a dictionary configuration.
+
+        Args:
+            dict_: Dictionary containing HTTP channel configuration with keys:
+                  - url: HTTP endpoint URL
+                  - method: HTTP method (POST, GET, etc.)
+                  - headers: Dictionary of HTTP headers
+                  - timeout: Request timeout in seconds
+                  - failure_handling: Failure handling configuration
+
+        Returns:
+            An HttpChannel instance configured from the dictionary
+
+        Examples:
+            >>> config = {
+            ...     "url": "${SLACK_WEBHOOK_URL}",
+            ...     "method": "POST",
+            ...     "headers": {"Content-Type": "application/json"},
+            ...     "timeout": 30,
+            ...     "failure_handling": {...}
+            ... }
+            >>> http_channel = HttpChannel.from_dict(config)
+        """
+        logger.debug("Creating HttpChannel from configuration dictionary")
+        try:
+            return cls(
+                url=dict_[URL],
+                method=dict_[METHOD],
+                headers=dict_[HEADERS],
+                timeout=dict_[TIMEOUT],
+                retry=Retry.from_dict(dict_[RETRY]),
+            )
+        except KeyError as e:
+            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
+
+    def _alert(self, title: str, body: str) -> None:
+        """Send an alert message via HTTP.
+
+        Args:
+            title: The alert title.
+            body: The alert message to send.
+
+        Raises:
+            requests.RequestException: If the HTTP request fails after all retries.
+        """
+        payload = json.dumps({"title": title, "message": body})
+
+        for attempt in range(self.retry.attempts + 1):
+            try:
+                response = requests.request(
+                    method=self.method, url=self.url, headers=self.headers, data=payload, timeout=self.timeout
+                )
+                response.raise_for_status()
+                logger.info("HTTP alert sent successfully to %s", self.url)
+                return
+
+            except requests.RequestException as exc:
+                if attempt < self.retry.attempts:
+                    logger.warning(
+                        "HTTP alert attempt %d failed: %s. Retrying in %d seconds...",
+                        attempt + 1,
+                        exc,
+                        self.retry.delay_in_seconds,
+                    )
+                    time.sleep(self.retry.delay_in_seconds)
+                else:
+                    logger.error("HTTP alert failed after %d attempts: %s", self.retry.attempts + 1, exc)
+                    if self.retry.error_on_alert_failure:
+                        raise
+                    return

@@ -8,8 +8,7 @@ import sys
 from argparse import ArgumentParser
 from importlib.metadata import version
 
-from flint.cli import RunCommand, ValidateCommand
-from flint.types import ExitCode
+from flint.cli import JobCommand, ValidateCommand
 from flint.utils.logger import get_logger, set_logger
 
 set_logger()  # Configure root logger for all modules
@@ -38,34 +37,23 @@ def main() -> int:
 
     # Register subcommands
     ValidateCommand.add_subparser(subparsers=subparsers)
-    RunCommand.add_subparser(subparsers=subparsers)
+    JobCommand.add_subparser(subparsers=subparsers)
     args = parser.parse_args()
 
-    exit_code = ExitCode.GENERAL_ERROR  # Default to error until we successfully complete a command
+    if args.command == "validate":
+        logger.info("Running 'validate' command...")
+        validate_command = ValidateCommand.from_args(args)
+        return validate_command.execute()
 
-    try:
-        if args.command == "validate":
-            logger.info("Running 'validate' command...")
-            validate_command = ValidateCommand.from_args(args)
-            exit_code = validate_command.execute()
+    if args.command == "run":
+        logger.info("Running 'run' command...")
+        run_command = JobCommand.from_args(args)
+        return run_command.execute()
 
-        elif args.command == "run":
-            logger.info("Running 'run' command...")
-            run_command = RunCommand.from_args(args)
-            exit_code = run_command.execute()
-
-        else:
-            logger.error("Unknown command: %s", args.command)
-            exit_code = ExitCode.INVALID_ARGUMENTS
-
-    except Exception as e:
-        logger.error("Uncaught exception: %s", str(e))
-        logger.debug("Exception details:", exc_info=e)
-        exit_code = ExitCode.UNEXPECTED_ERROR
-
-    logger.info("Application finished with exit code %d (%s). Exiting.", exit_code, exit_code.name)
-    return exit_code
+    raise NotImplementedError(f"Unknown command '{args.command}'.")
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    exit_code = main()
+    logger.info("Application finished with exit code %d. Exiting.", exit_code)
+    sys.exit(exit_code)
