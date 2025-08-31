@@ -147,9 +147,7 @@ class ValidateCommand(Command):
             )
             return e.exit_code
         except FlintValidationError as e:
-            alert.process_alert(
-                body="Validation failed", title="ETL Pipeline Validation Error", exception=e
-            )
+            alert.process_alert(body="Validation failed", title="ETL Pipeline Validation Error", exception=e)
             return e.exit_code
 
 
@@ -220,12 +218,8 @@ class JobCommand(Command):
             )
             return e.exit_code
         except FlintValidationError as e:
-            alert.process_alert(
-                body="Validation failed", title="ETL Pipeline Validation Error", exception=e
-            )
+            alert.process_alert(body="Validation failed", title="ETL Pipeline Validation Error", exception=e)
             return e.exit_code
         except FlintJobError as e:
-            alert.process_alert(
-                body="Runtime error occurred", title="ETL Pipeline Runtime Error", exception=e
-            )
+            alert.process_alert(body="Runtime error occurred", title="ETL Pipeline Runtime Error", exception=e)
             return e.exit_code
