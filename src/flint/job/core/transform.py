@@ -20,6 +20,7 @@ from typing import Any, Final, Generic, Self, TypeVar
 from flint.job.models.model_transform import FunctionModel, TransformModel
 from flint.types import DataFrameRegistry, RegistryDecorator, Singleton
 from flint.utils.logger import get_logger
+from flint.utils.spark import SparkHandler
 
 logger: logging.Logger = get_logger(__name__)
 
@@ -188,6 +189,10 @@ class Transform:
         """
         logger.info("Starting transformation for: %s from upstream: %s", self.model.name, self.model.upstream_name)
 
+        spark_handler: SparkHandler = SparkHandler()
+        logger.debug("Adding Spark configurations: %s", self.model.options)
+        spark_handler.add_configs(options=self.model.options)
+
         # Copy the dataframe from upstream to current name
         logger.debug("Copying dataframe from %s to %s", self.model.upstream_name, self.model.name)
         self.data_registry[self.model.name] = self.data_registry[self.model.upstream_name]
@@ -202,10 +207,7 @@ class Transform:
             new_count = self.data_registry[self.model.name].count()
 
             logger.info(
-                "Function %s applied - rows changed from %d to %d",
-                function.model.function,
-                original_count,
-                new_count,
+                "Function %s applied - rows changed from %d to %d", function.model.function, original_count, new_count
             )
 
         logger.info("Transformation completed successfully for: %s", self.model.name)

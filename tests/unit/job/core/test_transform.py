@@ -102,7 +102,7 @@ class TestTransform:
     def test_transform_initialization(self) -> None:
         """Test Transform initialization."""
         # Arrange
-        model = TransformModel(name="test_transform", upstream_name="source")
+        model = TransformModel(name="test_transform", upstream_name="source", options={})
         function = MockFunction(model=MockFunctionModel())
         functions: list[Function[MockFunctionModel]] = [function]
 
@@ -117,7 +117,7 @@ class TestTransform:
     def test_from_dict_with_no_functions(self) -> None:
         """Test creating a Transform from a dict with no functions."""
         # Arrange
-        transform_dict = {"name": "test_transform", "upstream_name": "source", "functions": []}
+        transform_dict = {"name": "test_transform", "upstream_name": "source", "functions": [], "options": {}}
 
         # Act
         transform = Transform.from_dict(transform_dict)
@@ -137,6 +137,7 @@ class TestTransform:
             "name": "test_transform",
             "upstream_name": "source",
             "functions": [{"function": "test_function", "arguments": {"key": "value"}}],
+            "options": {}
         }
 
         # Act
@@ -158,6 +159,7 @@ class TestTransform:
             "name": "test_transform",
             "upstream_name": "source",
             "functions": [{"function": "unknown_function", "arguments": {"key": "value"}}],
+            "options": {}
         }
 
         # Act & Assert
@@ -167,7 +169,7 @@ class TestTransform:
     def test_transform_method(self) -> None:
         """Test the transform method."""
         # Arrange
-        model = TransformModel(name="test_transform", upstream_name="source")
+        model = TransformModel(name="test_transform", upstream_name="source", options={})
 
         # Create mock function with callable
         function = MockFunction(model=MockFunctionModel())

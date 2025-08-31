@@ -98,12 +98,12 @@ class TestTransformModel:
     @pytest.fixture
     def valid_transform_dict(self):
         """Return a valid dictionary for creating a TransformModel."""
-        return {"name": "test_transform", "upstream_name": "test_extract"}
+        return {"name": "test_transform", "upstream_name": "test_extract", "options": {}}
 
     @pytest.fixture
     def transform_model_cls(self):
         """Return an initialized TransformModel instance."""
-        return TransformModel(name="test_transform", upstream_name="test_extract")
+        return TransformModel(name="test_transform", upstream_name="test_extract", options={})
 
     def test_transform_model_cls_initialization(self, transform_model_cls) -> None:
         """Test that TransformModel can be initialized with valid parameters."""

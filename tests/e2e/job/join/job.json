@@ -30,6 +30,7 @@
             {
                 "name": "transform-join",
                 "upstream_name": "extract-left",
+                "options": {},
                 "functions": [
                     {
                         "function": "join",

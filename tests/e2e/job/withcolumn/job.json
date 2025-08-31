@@ -18,6 +18,7 @@
             {
                 "name": "transform-withcolumn-test",
                 "upstream_name": "extract-withcolumn-test",
+                "options": {},
                 "functions": [
                     { "function": "withColumn", "arguments": { 
                             "col_name": "full_name",

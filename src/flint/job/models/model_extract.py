@@ -69,11 +69,13 @@ class ExtractModel(Model):
         name: Identifier for this extraction operation
         method: Method of extraction (batch or streaming)
         data_format: Format of the data to extract (parquet, json, csv)
+        options: PySpark reader options as key-value pairs
     """
 
     name: str
     method: ExtractMethod
     data_format: ExtractFormat
+    options: dict[str, str]
 
 
 @dataclass
@@ -89,12 +91,10 @@ class ExtractFileModel(ExtractModel):
         method: Method of extraction (batch or streaming)
         data_format: Format of the files to extract (parquet, json, csv)
         location: URI where the files are located
-        options: PySpark reader options as key-value pairs
         schema: Optional schema definition for the data structure
     """
 
     location: str
-    options: dict[str, str]
     schema: StructType | None = None
 
     @classmethod

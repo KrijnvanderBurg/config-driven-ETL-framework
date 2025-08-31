@@ -18,6 +18,7 @@
             {
                 "name": "transform-dropduplicates-test",
                 "upstream_name": "extract-dropduplicates-test",
+                "options": {},
                 "functions": [
                     { "function": "dropDuplicates", "arguments": { 
                             "columns": ["category", "product", "customer_region"]

@@ -157,8 +157,8 @@ class LoadModelFile(LoadModel):
             mode = LoadMode(dict_[MODE])
             data_format = LoadFormat(dict_[DATA_FORMAT])
             location = dict_[LOCATION]
-            schema_location = dict_.get(SCHEMA_LOCATION, None)
-            options = dict_.get(OPTIONS, {})
+            schema_location = dict_[SCHEMA_LOCATION]
+            options = dict_[OPTIONS]
 
             logger.debug(
                 "Parsed load model - name: %s, upstream: %s, method: %s, mode: %s",
@@ -170,7 +170,7 @@ class LoadModelFile(LoadModel):
             logger.debug("Load details - format: %s, location: %s", data_format.value, location)
             logger.debug("Load options: %s", options)
 
-            if schema_location:
+            if schema_location == "":
                 logger.debug("Schema location specified: %s", schema_location)
             else:
                 logger.debug("No schema location specified")

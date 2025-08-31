@@ -29,6 +29,7 @@ ARGUMENTS: Final[str] = "arguments"
 
 NAME: Final[str] = "name"
 UPSTREAM_NAME: Final[str] = "upstream_name"
+OPTIONS: Final[str] = "options"
 
 
 @dataclass
@@ -55,6 +56,10 @@ class FunctionModel(Model, Generic[ArgsT], ABC):
 
     This class represents the configuration for a transformation function,
     including its name and arguments.
+
+    Args:
+        function: Name of the transformation function to execute
+        arguments: Arguments model specific to the transformation function
     """
 
     function: str
@@ -85,6 +90,11 @@ class TransformModel(Model):
     """
     Modelification for  data transformation.
 
+    Args:
+        name: Identifier for this transformation operation
+        upstream_name: Identifier(s) of the upstream component(s) providing data
+        options: PySpark transformation options as key-value pairs
+
     Examples:
         >>> df = spark.createDataFrame(data=[("Alice", 27), ("Bob", 32),], schema=["name", "age"])
         >>> dict = {"function": "cast", "arguments": {"columns": {"age": "StringType",}}}
@@ -97,6 +107,7 @@ class TransformModel(Model):
 
     name: str
     upstream_name: str
+    options: dict[str, str]
 
     @classmethod
     def from_dict(cls, dict_: dict[str, Any]) -> Self:
@@ -126,10 +137,11 @@ class TransformModel(Model):
         try:
             name = dict_[NAME]
             upstream_name = dict_[UPSTREAM_NAME]
+            options = dict_[OPTIONS]
             logger.debug("Parsed transform model - name: %s, upstream: %s", name, upstream_name)
         except KeyError as e:
             raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
-        model = cls(name=name, upstream_name=upstream_name)
+        model = cls(name=name, upstream_name=upstream_name, options=options)
         logger.info("Successfully created TransformModel: %s", name)
         return model

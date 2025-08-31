@@ -18,6 +18,7 @@
             {
                 "name": "transform-test",
                 "upstream_name": "extract-test",
+                "options": {},
                 "functions": [
                     { "function": "select", "arguments": { "columns": ["name", "age"] } }
                 ]

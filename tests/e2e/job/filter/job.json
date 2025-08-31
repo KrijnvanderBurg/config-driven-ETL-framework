@@ -18,6 +18,7 @@
             {
                 "name": "transform-filter-test",
                 "upstream_name": "extract-filter-test",
+                "options": {},
                 "functions": [
                     { "function": "filter", "arguments": { 
                             "condition": "age >= 18 AND is_active = true"

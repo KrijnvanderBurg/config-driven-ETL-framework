@@ -18,6 +18,7 @@
             {
                 "name": "transform-drop-test",
                 "upstream_name": "extract-drop-test",
+                "options": {},
                 "functions": [
                     { "function": "drop", "arguments": { 
                             "columns": ["address", "phone", "temp_column"]

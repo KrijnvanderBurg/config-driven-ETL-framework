@@ -40,7 +40,7 @@ class TestJob:
         mock_file_handler.read.return_value = {
             "job": {
                 "extracts": [{"name": "test_extract"}],
-                "transforms": [{"name": "test_transform", "upstream_name": "test_extract"}],
+                "transforms": [{"name": "test_transform", "upstream_name": "test_extract", "options": {}}],
                 "loads": [{"name": "test_load", "upstream_name": "test_transform"}],
             }
         }
@@ -85,7 +85,7 @@ class TestJob:
         job_dict: dict = {
             "job": {
                 "extracts": [{"name": "test_extract"}],
-                "transforms": [{"name": "test_transform", "upstream_name": "test_extract"}],
+                "transforms": [{"name": "test_transform", "upstream_name": "test_extract", "options": {}}],
                 "loads": [{"name": "test_load", "upstream_name": "test_transform"}],
             }
         }

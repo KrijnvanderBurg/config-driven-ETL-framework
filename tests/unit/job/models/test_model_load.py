@@ -67,12 +67,12 @@ class TestLoadModelFile:
         assert model.schema_location == "s3://test-bucket/schema"
         assert model.options == {"partitionBy": "date"}
 
-    def test_load_model_cls_file_from_dict_missing_optional(self, valid_load_dict: dict[str, Any]) -> None:
-        """Test from_dict method with missing optional fields."""
-        # Remove optional fields schema_location and options
+    def test_load_model_cls_file_from_dict_minimal_options(self, valid_load_dict: dict[str, Any]) -> None:
+        """Test from_dict method with minimal options field."""
+        # Use minimal options but keep required fields
         minimal_dict = valid_load_dict.copy()
-        del minimal_dict["schema_location"]
-        del minimal_dict["options"]
+        minimal_dict["options"] = {}  # Empty options dict instead of removing it
+        minimal_dict["schema_location"] = ""  # Empty schema location
 
         # Execute
         model = LoadModelFile.from_dict(minimal_dict)
@@ -84,8 +84,8 @@ class TestLoadModelFile:
         assert model.mode == LoadMode.APPEND
         assert model.data_format == LoadFormat.PARQUET
         assert model.location == "s3://test-bucket/output"
-        assert model.schema_location is None
-        assert model.options == {}
+        assert model.schema_location == ""  # Empty schema location as set in the test
+        assert model.options == {}  # Empty options as set in the test
 
     def test_load_model_cls_file_from_dict_missing_required(self, valid_load_dict: dict[str, Any]) -> None:
         """Test from_dict method with missing required key."""
