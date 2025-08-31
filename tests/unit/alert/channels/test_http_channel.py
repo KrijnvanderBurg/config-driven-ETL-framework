@@ -297,6 +297,28 @@ class TestHttpAlertChannel:
         # Verify only one attempt was made
         assert mock_request.call_count == 1
 
+    @patch("flint.alert.channels.http.requests.request")
+    def test_alert_with_negative_attempts_does_nothing(self, mock_request) -> None:
+        """Test that _alert handles negative retry attempts gracefully."""
+        config = {
+            "url": "https://webhook.example.com/alerts",
+            "method": "POST",
+            "headers": {},
+            "timeout": 30,
+            "retry": {
+                "error_on_alert_failure": False,
+                "attempts": -1,  # Negative attempts - edge case
+                "delay_in_seconds": 1,
+            },
+        }
+        channel = HttpAlertChannel.from_dict(config)
+
+        # Should not make any HTTP requests
+        channel._alert("Edge Case Test", "Test message")
+
+        # Verify no requests were made
+        assert mock_request.call_count == 0
+
     def test_alert_method_delegates_to_internal_alert(self, http_channel: HttpAlertChannel) -> None:
         """Test that the public alert method delegates to _alert correctly."""
         with patch.object(http_channel, "_alert") as mock_internal_alert:
