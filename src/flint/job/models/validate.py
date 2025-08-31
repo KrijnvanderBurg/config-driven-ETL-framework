@@ -10,10 +10,12 @@ Available Validators:
 
 import logging
 from abc import ABC, abstractmethod
-from typing import Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar
 
-from flint.job.core.job import Job
 from flint.utils.logger import get_logger
+
+if TYPE_CHECKING:
+    from flint.job.core.job import Job
 
 logger: logging.Logger = get_logger(__name__)
 
