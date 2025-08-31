@@ -22,8 +22,8 @@ from flint.utils.logger import get_logger
 logger: logging.Logger = get_logger(__name__)
 
 ALERT: Final[str] = "alert"
-CHANNELS: Final[str] = "channels"
 TRIGGERS: Final[str] = "triggers"
+CHANNELS: Final[str] = "channels"
 
 
 @dataclass
@@ -35,12 +35,12 @@ class AlertManager(Model):
     It implements the Model interface to support configuration-driven initialization.
 
     Attributes:
-        channels: List of alert channels for handling different alert destinations
         triggers: Rules for determining which channels to use for specific alerts
+        channels: List of alert channels for handling different alert destinations
     """
 
-    channels: list[AlertChannel]
     triggers: list[AlertTrigger]
+    channels: list[AlertChannel]
 
     @classmethod
     def from_file(cls, filepath: Path) -> Self:
@@ -89,18 +89,18 @@ class AlertManager(Model):
         logger.debug("Creating AlertManager from configuration dictionary")
         alert_dict = dict_[ALERT]
 
+        triggers: list[AlertTrigger] = []
+        for trigger_dict in alert_dict[TRIGGERS]:
+            trigger = AlertTrigger.from_dict(trigger_dict)
+            triggers.append(trigger)
+
         channels: list[AlertChannel] = []
         for channel_config in alert_dict[CHANNELS]:
             channel = AlertChannel.from_dict(channel_config)
             channels.append(channel)
             logger.debug("Added %s channel '%s' to configuration", channel.type, channel.name)
 
-        triggers: list[AlertTrigger] = []
-        for trigger_dict in alert_dict[TRIGGERS]:
-            trigger = AlertTrigger.from_dict(trigger_dict)
-            triggers.append(trigger)
-
-        return cls(channels=channels, triggers=triggers)
+        return cls(triggers=triggers, channels=channels)
 
     def evaluate_trigger_and_alert(self, title: str, body: str, exception: Exception) -> None:
         """Process and send an alert to all channels as defined by enabled trigger rules.

@@ -1,0 +1,87 @@
+{
+    "sensor": {
+        "schedule": {
+            "expression": "*/5 * * * *",
+            "timezone": "UTC"
+        },
+        "watchers": [
+            {
+                "name": "file-watcher",
+                "type": "file_system",
+                "enabled": true,
+                "config": {
+                    "location": {
+                        "path": "incoming/daily/",
+                        "recursive": true
+                    },
+                    "file_matching": {
+                        "include_fnmatch_patterns": ["*.csv", "*.json", "*.parquet"],
+                        "exclude_fnmatch_patterns": [".*", "*.tmp", "*_backup_*"]
+                    },
+                    "thresholds": {
+                        "minimum_file_count": 5,
+                        "minimum_total_size_mb": 100,
+                        "maximum_file_age_hours": 1
+                    }
+                },
+                "action_names": ["notify-files-ready", "etl-job-x"]
+            },
+            {
+                "name": "api-health-monitor",
+                "enabled": true,
+                "type": "http_polling",
+                "config": {
+                    "polling": {
+                        "interval_seconds": 60,
+                        "max_failures_before_error": 3
+                    },
+                    "request": {
+                        "url": "https://hooks.slack.com",
+                        "method": "POST",
+                        "headers": {
+                            "Content-Type": "application/json"
+                        },
+                        "timeout": 30,
+                        "retry": {
+                            "error_on_alert_failure": true,
+                            "attempts": 3,
+                            "delay_in_seconds": 30
+                        }
+                    },
+                    "success_criteria": {
+                        "status_codes": [200, 201],
+                        "response_contains": ["healthy", "ok"],
+                        "response_excludes": ["error", "down"]
+                    }
+                },
+                "action_names": ["etl-job-x"]
+            }
+        ],
+        "actions": [
+            {
+                "name": "notify-files-ready",
+                "type": "http_post",
+                "config": {
+                    "url": "https://hooks.slack.com",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "timeout": 30,
+                    "retry": {
+                        "error_on_alert_failure": true,
+                        "attempts": 3,
+                        "delay_in_seconds": 30
+                    }
+                }
+            },
+            {
+                "name": "etl-job-x",
+                "type": "in-sensor-run-etl-job",
+                "config": {
+                    "etl_job_name": "process-data-files"
+                }
+            }
+        ]
+    }
+}
