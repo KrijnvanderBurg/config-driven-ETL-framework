@@ -10,14 +10,36 @@ Custom exceptions help with:
 - Associating exceptions with appropriate exit codes
 """
 
+import enum
 from typing import Any, TypeVar
-
-from flint.types import ExitCode
 
 K = TypeVar("K")  # Key type
 
 
-class FlintException(Exception):
+class ExitCode(enum.IntEnum):
+    """Exit codes for the application.
+
+    These codes follow common Unix/Linux conventions:
+    - 0: Success
+    - 1-63: Application-specific error codes
+    - 64-127: Command-specific error codes
+
+    References:
+        - https://tldp.org/LDP/abs/html/exitcodes.html
+        - https://www.freebsd.org/cgi/man.cgi?query=sysexits&sektion=3
+    """
+
+    SUCCESS = 0
+    INVALID_ARGUMENTS = 10
+    IO_ERROR = 20
+    CONFIGURATION_ERROR = 30
+    VALIDATION_ERROR = 40
+    JOB_ERROR = 50
+    KEYBOARD_INTERRUPT = 98
+    UNEXPECTED_ERROR = 99
+
+
+class FlintError(Exception):
     """Base exception for all Flint-specific exceptions.
 
     Provides common functionality for all Flint exceptions, including
@@ -56,7 +78,19 @@ class FlintException(Exception):
         super().__init__(message)
 
 
-class ConfigurationError(FlintException):
+class FlintIOError(FlintError):
+    """Exception raised for I/O errors."""
+
+    def __init__(self, message: str) -> None:
+        """Initialize ValidationError.
+
+        Args:
+            message: The exception message
+        """
+        super().__init__(message=message, exit_code=ExitCode.IO_ERROR)
+
+
+class FlintConfigurationError(FlintError):
     """Exception raised for configuration-related errors."""
 
     def __init__(self, message: str) -> None:
@@ -68,7 +102,7 @@ class ConfigurationError(FlintException):
         super().__init__(message=message, exit_code=ExitCode.CONFIGURATION_ERROR)
 
 
-class ConfigurationKeyError(ConfigurationError):
+class FlintConfigurationKeyError(FlintConfigurationError):
     """Exception raised when a key is missing from configuration dictionaries.
 
     This exception provides more detailed context about missing keys in configuration
@@ -91,7 +125,7 @@ class ConfigurationKeyError(ConfigurationError):
         super().__init__(f"Missing configuration key: '{key}'. Available keys: {self.available_keys}")
 
 
-class ValidationError(FlintException):
+class FlintValidationError(FlintError):
     """Exception raised for validation failures."""
 
     def __init__(self, message: str) -> None:
@@ -103,37 +137,13 @@ class ValidationError(FlintException):
         super().__init__(message=message, exit_code=ExitCode.VALIDATION_ERROR)
 
 
-class ExtractError(FlintException):
-    """Exception raised for data extraction failures."""
+class FlintJobError(FlintError):
+    """Exception raised for errors related to the ETL process."""
 
     def __init__(self, message: str) -> None:
-        """Initialize ExtractError.
+        """Initialize E.
 
         Args:
             message: The exception message
         """
-        super().__init__(message=message, exit_code=ExitCode.EXTRACT_ERROR)
-
-
-class TransformError(FlintException):
-    """Exception raised for data transformation failures."""
-
-    def __init__(self, message: str) -> None:
-        """Initialize TransformError.
-
-        Args:
-            message: The exception message
-        """
-        super().__init__(message=message, exit_code=ExitCode.TRANSFORM_ERROR)
-
-
-class LoadError(FlintException):
-    """Exception raised for data loading failures."""
-
-    def __init__(self, message: str) -> None:
-        """Initialize LoadError.
-
-        Args:
-            message: The exception message
-        """
-        super().__init__(message=message, exit_code=ExitCode.LOAD_ERROR)
+        super().__init__(message=message, exit_code=ExitCode.JOB_ERROR)
