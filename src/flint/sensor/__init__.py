@@ -12,20 +12,20 @@ The sensor system supports:
 - Flexible trigger conditions for different watcher types
 
 Main Classes:
-    SensorManager: Root manager class for sensor configurations
-    Schedule: Cron-like scheduling configuration
+    SensorController: Root controller class for sensor configurations
+    SensorSchedule: Cron-like scheduling configuration
     Watcher: Individual watcher configurations
     SensorAction: Action configurations for triggering responses
 """
 
 from flint.sensor.actions import SensorAction
-from flint.sensor.manager import SensorManager
-from flint.sensor.schedule import Schedule
+from flint.sensor.controller import SensorController
+from flint.sensor.schedule import SensorSchedule
 from flint.sensor.watchers import Watcher
 
 __all__ = [
-    "SensorManager",
-    "Schedule",
+    "SensorController",
+    "SensorSchedule",
     "Watcher",
     "SensorAction",
 ]

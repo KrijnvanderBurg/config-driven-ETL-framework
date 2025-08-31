@@ -23,8 +23,7 @@ from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
-SENSOR: Final[str] = "sensor"
-
+# Configuration constants
 SCHEDULE: Final[str] = "schedule"
 WATCHERS: Final[str] = "watchers"
 ACTIONS: Final[str] = "actions"
@@ -96,16 +95,15 @@ class SensorController(Model):
         logger.debug("Creating SensorController from configuration dictionary")
 
         try:
-            sensor_dict = dict_[SENSOR]
-            schedule = SensorSchedule.from_dict(sensor_dict[SCHEDULE])
+            schedule = SensorSchedule.from_dict(dict_[SCHEDULE])
 
             watchers: list[SensorWatcher] = []
-            for watcher_dict in sensor_dict[WATCHERS]:
+            for watcher_dict in dict_[WATCHERS]:
                 watcher = SensorWatcher.from_dict(watcher_dict)
                 watchers.append(watcher)
 
             actions: list[SensorAction] = []
-            for action_dict in sensor_dict[ACTIONS]:
+            for action_dict in dict_[ACTIONS]:
                 action = SensorAction.from_dict(action_dict)
                 actions.append(action)
         except KeyError as e:
