@@ -348,3 +348,10 @@ class TestHttpPollingWatcher:
             HttpPollingWatcher.from_dict(config)
 
         assert exc_info.value.key == "trigger_conditions"
+
+    def test_check_conditions_method(self, sample_http_polling_watcher_config: dict) -> None:
+        """Test that check_conditions method can be called without errors."""
+        watcher = HttpPollingWatcher.from_dict(sample_http_polling_watcher_config)
+        # This should not raise an exception and return True (placeholder implementation)
+        result = watcher.check_conditions()
+        assert result is True

@@ -218,3 +218,9 @@ class TestHttpPostAction:
             "User-Agent": "Flint-Sensor/1.0",
         }
         assert action.headers == expected_headers
+
+    def test_execute_method(self, sample_http_post_action_config: dict) -> None:
+        """Test that execute method can be called without errors."""
+        action = HttpPostAction.from_dict(sample_http_post_action_config)
+        # This should not raise an exception
+        action.execute()

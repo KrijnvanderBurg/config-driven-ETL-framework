@@ -159,7 +159,7 @@ class TestTransform:
             "name": "test_transform",
             "upstream_name": "source",
             "functions": [{"function": "unknown_function", "arguments": {"key": "value"}}],
-            "options": {}
+            "options": {},
         }
 
         # Act & Assert

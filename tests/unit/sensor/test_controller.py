@@ -235,3 +235,58 @@ class TestSensorController:
         assert manager1.schedule.expression == manager2.schedule.expression
         assert len(manager1.watchers) == len(manager2.watchers)
         assert len(manager1.actions) == len(manager2.actions)
+
+    def test_from_file_success(self, tmp_path, sample_sensor_controller_config: dict) -> None:
+        """Test successful SensorController creation from file."""
+        import json
+        from pathlib import Path
+
+        # Create a temporary config file
+        config_file = tmp_path / "sensor_config.json"
+        with open(config_file, "w") as f:
+            json.dump(sample_sensor_controller_config, f)
+
+        # Test from_file method
+        controller = SensorController.from_file(Path(config_file))
+
+        # Verify the controller was created correctly
+        assert controller.schedule.expression == "*/5 * * * *"
+        assert controller.schedule.timezone == "UTC"
+        assert len(controller.watchers) == 1
+        assert len(controller.actions) == 1
+
+    def test_from_dict_with_invalid_schedule_key_error(self) -> None:
+        """Test KeyError handling when schedule configuration is invalid."""
+        config = {
+            "schedule": None,  # This will cause a KeyError when trying to access schedule keys
+            "watchers": [],
+            "actions": [],
+        }
+
+        # The KeyError should bubble up from the schedule creation
+        with pytest.raises((FlintConfigurationKeyError, KeyError, TypeError)):
+            SensorController.from_dict(config)
+
+    def test_from_dict_with_invalid_watcher_config(self) -> None:
+        """Test KeyError handling when watcher configuration is invalid."""
+        config = {
+            "schedule": {"expression": "0 * * * *", "timezone": "UTC"},
+            "watchers": [{"invalid": "config"}],  # Missing required keys
+            "actions": [],
+        }
+
+        # The KeyError should bubble up from the watcher creation
+        with pytest.raises((FlintConfigurationKeyError, KeyError)):
+            SensorController.from_dict(config)
+
+    def test_from_dict_with_invalid_action_config(self) -> None:
+        """Test KeyError handling when action configuration is invalid."""
+        config = {
+            "schedule": {"expression": "0 * * * *", "timezone": "UTC"},
+            "watchers": [],
+            "actions": [{"invalid": "config"}],  # Missing required keys
+        }
+
+        # The KeyError should bubble up from the action creation
+        with pytest.raises((FlintConfigurationKeyError, KeyError)):
+            SensorController.from_dict(config)

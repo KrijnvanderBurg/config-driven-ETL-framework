@@ -152,3 +152,9 @@ class TestEtlInSensor:
         assert len(action.job_names) == 100
         assert action.job_names[0] == "job-0000"
         assert action.job_names[99] == "job-0099"
+
+    def test_execute_method(self, sample_etl_in_sensor_config: dict) -> None:
+        """Test that execute method can be called without errors."""
+        action = EtlInSensor.from_dict(sample_etl_in_sensor_config)
+        # This should not raise an exception
+        action.execute()
