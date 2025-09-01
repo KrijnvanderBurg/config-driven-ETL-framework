@@ -16,20 +16,12 @@ class TestActionRetry:
     @pytest.fixture
     def sample_retry_config(self) -> dict:
         """Provide a sample retry configuration for testing."""
-        return {
-            "error_on_alert_failure": False,
-            "attempts": 3,
-            "delay_in_seconds": 5
-        }
+        return {"error_on_alert_failure": False, "attempts": 3, "delay_in_seconds": 5}
 
     @pytest.fixture
     def minimal_retry_config(self) -> dict:
         """Provide a minimal retry configuration for testing."""
-        return {
-            "error_on_alert_failure": True,
-            "attempts": 1,
-            "delay_in_seconds": 1
-        }
+        return {"error_on_alert_failure": True, "attempts": 1, "delay_in_seconds": 1}
 
     def test_from_dict_success(self, sample_retry_config: dict) -> None:
         """Test successful ActionRetry creation from dictionary."""
@@ -47,10 +39,7 @@ class TestActionRetry:
 
     def test_from_dict_missing_attempts_raises_error(self) -> None:
         """Test that missing attempts raises FlintConfigurationKeyError."""
-        config = {
-            "error_on_alert_failure": False,
-            "delay_in_seconds": 5
-        }
+        config = {"error_on_alert_failure": False, "delay_in_seconds": 5}
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             ActionRetry.from_dict(config)
 
@@ -58,10 +47,7 @@ class TestActionRetry:
 
     def test_from_dict_missing_delay_in_seconds_raises_error(self) -> None:
         """Test that missing delay_in_seconds raises FlintConfigurationKeyError."""
-        config = {
-            "error_on_alert_failure": False,
-            "attempts": 3
-        }
+        config = {"error_on_alert_failure": False, "attempts": 3}
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             ActionRetry.from_dict(config)
 
@@ -70,7 +56,6 @@ class TestActionRetry:
         config = {"attempts": 3, "delay_in_seconds": 5}
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             ActionRetry.from_dict(config)
-
 
 
 class TestHttpPostAction:
@@ -82,16 +67,13 @@ class TestHttpPostAction:
         return {
             "url": "https://webhook.example.com/files-ready",
             "method": "POST",
-            "headers": {
-                "Authorization": "Bearer webhook-token",
-                "Content-Type": "application/json"
-            },
+            "headers": {"Authorization": "Bearer webhook-token", "Content-Type": "application/json"},
             "timeout": 30,
             "retry": {
                 "error_on_alert_failure": False,
                 "attempts": 3,
                 "delay_in_seconds": 5,
-            }
+            },
         }
 
     @pytest.fixture
@@ -106,7 +88,7 @@ class TestHttpPostAction:
                 "error_on_alert_failure": True,
                 "attempts": 1,
                 "delay_in_seconds": 1,
-            }
+            },
         }
 
     def test_from_dict_success(self, sample_http_post_action_config: dict) -> None:
@@ -178,7 +160,7 @@ class TestHttpPostAction:
             "url": "https://webhook.example.com/files-ready",
             "method": "POST",
             "headers": {"Authorization": "Bearer webhook-token"},
-            "timeout": 30
+            "timeout": 30,
         }
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             HttpPostAction.from_dict(config)
@@ -188,18 +170,14 @@ class TestHttpPostAction:
     def test_from_dict_various_http_methods(self) -> None:
         """Test HttpPostAction creation with various HTTP methods."""
         methods = ["GET", "POST", "PUT", "PATCH", "DELETE"]
-        
+
         for method in methods:
             config = {
                 "url": f"https://api.example.com/{method.lower()}",
                 "method": method,
                 "headers": {},
                 "timeout": 25,
-                "retry": {
-                    "error_on_alert_failure": False,
-                    "attempts": 1,
-                    "delay_in_seconds": 1
-                }
+                "retry": {"error_on_alert_failure": False, "attempts": 1, "delay_in_seconds": 1},
             }
             action = HttpPostAction.from_dict(config)
             assert action.method == method
@@ -212,11 +190,7 @@ class TestHttpPostAction:
             "method": "POST",
             "headers": {},
             "timeout": 30,
-            "retry": {
-                "error_on_alert_failure": True,
-                "attempts": 1,
-                "delay_in_seconds": 1
-            }
+            "retry": {"error_on_alert_failure": True, "attempts": 1, "delay_in_seconds": 1},
         }
         action = HttpPostAction.from_dict(config)
         assert action.headers == {}
@@ -230,21 +204,17 @@ class TestHttpPostAction:
                 "Authorization": "Bearer complex-token-12345",
                 "Content-Type": "application/json",
                 "X-Custom-Header": "custom-value",
-                "User-Agent": "Flint-Sensor/1.0"
+                "User-Agent": "Flint-Sensor/1.0",
             },
             "timeout": 45,
-            "retry": {
-                "error_on_alert_failure": False,
-                "attempts": 2,
-                "delay_in_seconds": 3
-            }
+            "retry": {"error_on_alert_failure": False, "attempts": 2, "delay_in_seconds": 3},
         }
         action = HttpPostAction.from_dict(config)
-        
+
         expected_headers = {
             "Authorization": "Bearer complex-token-12345",
             "Content-Type": "application/json",
             "X-Custom-Header": "custom-value",
-            "User-Agent": "Flint-Sensor/1.0"
+            "User-Agent": "Flint-Sensor/1.0",
         }
         assert action.headers == expected_headers

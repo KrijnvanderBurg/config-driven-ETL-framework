@@ -125,9 +125,11 @@ class Watcher(Model):
         config: BaseWatcher
         if type_ == "file_system":
             from flint.sensor.watchers.file_system import FileSystemWatcher
+
             config = FileSystemWatcher.from_dict(config_dict)
         elif type_ == "http_polling":
             from flint.sensor.watchers.http_polling import HttpPollingWatcher
+
             config = HttpPollingWatcher.from_dict(config_dict)
         else:
             raise ValueError(f"Unknown watcher type: {type_}")

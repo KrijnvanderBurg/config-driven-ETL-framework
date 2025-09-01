@@ -5,8 +5,8 @@ by sensor watchers when their conditions are met.
 """
 
 from flint.sensor.actions.base import BaseAction, SensorAction
-from flint.sensor.actions.http_post import HttpPostAction
 from flint.sensor.actions.etl_in_sensor import EtlInSensor
+from flint.sensor.actions.http_post import HttpPostAction
 
 __all__ = [
     "BaseAction",

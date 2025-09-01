@@ -17,31 +17,25 @@ class TestSensorController:
     def sample_sensor_controller_config(self) -> dict:
         """Provide a complete sensor controller configuration for testing."""
         return {
-            "schedule": {
-                "expression": "*/5 * * * *",
-                "timezone": "UTC"
-            },
+            "schedule": {"expression": "*/5 * * * *", "timezone": "UTC"},
             "watchers": [
                 {
                     "name": "file-watcher",
                     "type": "file_system",
                     "enabled": True,
                     "config": {
-                        "location": {
-                            "path": "incoming/daily/",
-                            "recursive": True
-                        },
+                        "location": {"path": "incoming/daily/", "recursive": True},
                         "file_patterns": {
                             "include_fnmatch_patterns": ["*.csv", "*.json", "*.parquet"],
-                            "exclude_fnmatch_patterns": [".*", "*.tmp", "*_backup_*"]
+                            "exclude_fnmatch_patterns": [".*", "*.tmp", "*_backup_*"],
                         },
                         "trigger_conditions": {
                             "minimum_file_count": 5,
                             "minimum_total_size_mb": 100,
-                            "maximum_file_age_hours": 1
-                        }
+                            "maximum_file_age_hours": 1,
+                        },
                     },
-                    "trigger_actions": ["notify-files-ready"]
+                    "trigger_actions": ["notify-files-ready"],
                 }
             ],
             "actions": [
@@ -51,40 +45,23 @@ class TestSensorController:
                     "config": {
                         "url": "https://webhook.example.com/files-ready",
                         "method": "POST",
-                        "headers": {
-                            "Authorization": "Bearer webhook-token",
-                            "Content-Type": "application/json"
-                        },
-                        "retry": {
-                            "error_on_alert_failure": False,
-                            "attempts": 3,
-                            "delay_in_seconds": 5
-                        }
-                    }
+                        "headers": {"Authorization": "Bearer webhook-token", "Content-Type": "application/json"},
+                        "retry": {"error_on_alert_failure": False, "attempts": 3, "delay_in_seconds": 5},
+                    },
                 }
-            ]
+            ],
         }
 
     @pytest.fixture
     def minimal_sensor_controller_config(self) -> dict:
         """Provide a minimal sensor manager configuration for testing."""
-        return {
-            "schedule": {
-                "expression": "0 * * * *",
-                "timezone": "UTC"
-            },
-            "watchers": [],
-            "actions": []
-        }
+        return {"schedule": {"expression": "0 * * * *", "timezone": "UTC"}, "watchers": [], "actions": []}
 
     @pytest.fixture
     def multiple_watchers_config(self) -> dict:
         """Provide a sensor manager configuration with multiple watchers."""
         return {
-            "schedule": {
-                "expression": "*/10 * * * *",
-                "timezone": "America/New_York"
-            },
+            "schedule": {"expression": "*/10 * * * *", "timezone": "America/New_York"},
             "watchers": [
                 {
                     "name": "file-watcher-1",
@@ -93,9 +70,13 @@ class TestSensorController:
                     "config": {
                         "location": {"path": "incoming/csv/", "recursive": False},
                         "file_patterns": {"include_fnmatch_patterns": ["*.csv"], "exclude_fnmatch_patterns": []},
-                        "trigger_conditions": {"minimum_file_count": 1, "minimum_total_size_mb": 0, "maximum_file_age_hours": 24}
+                        "trigger_conditions": {
+                            "minimum_file_count": 1,
+                            "minimum_total_size_mb": 0,
+                            "maximum_file_age_hours": 24,
+                        },
                     },
-                    "trigger_actions": ["process-csv"]
+                    "trigger_actions": ["process-csv"],
                 },
                 {
                     "name": "api-monitor",
@@ -108,19 +89,15 @@ class TestSensorController:
                             "method": "GET",
                             "headers": {},
                             "timeout": 10,
-                            "retry": {"error_on_alert_failure": True, "attempts": 1, "delay_in_seconds": 1}
+                            "retry": {"error_on_alert_failure": True, "attempts": 1, "delay_in_seconds": 1},
                         },
-                        "trigger_conditions": {"status_codes": [200], "response_regex": ["ok"]}
+                        "trigger_conditions": {"status_codes": [200], "response_regex": ["ok"]},
                     },
-                    "trigger_actions": ["api-health-check"]
-                }
+                    "trigger_actions": ["api-health-check"],
+                },
             ],
             "actions": [
-                {
-                    "name": "process-csv",
-                    "type": "trigger_job",
-                    "config": {"job_names": ["csv-processor"]}
-                },
+                {"name": "process-csv", "type": "trigger_job", "config": {"job_names": ["csv-processor"]}},
                 {
                     "name": "api-health-check",
                     "type": "http_post",
@@ -128,10 +105,10 @@ class TestSensorController:
                         "url": "https://monitoring.example.com/alert",
                         "method": "POST",
                         "headers": {"Content-Type": "application/json"},
-                        "retry": {"error_on_alert_failure": False, "attempts": 2, "delay_in_seconds": 3}
-                    }
-                }
-            ]
+                        "retry": {"error_on_alert_failure": False, "attempts": 2, "delay_in_seconds": 3},
+                    },
+                },
+            ],
         }
 
     def test_from_dict_success(self, sample_sensor_controller_config: dict) -> None:
@@ -186,10 +163,7 @@ class TestSensorController:
 
     def test_from_dict_missing_schedule_raises_error(self) -> None:
         """Test that missing schedule raises FlintConfigurationKeyError."""
-        config = {
-            "watchers": [],
-            "actions": []
-        }
+        config = {"watchers": [], "actions": []}
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             SensorController.from_dict(config)
 
@@ -197,10 +171,7 @@ class TestSensorController:
 
     def test_from_dict_missing_watchers_raises_error(self) -> None:
         """Test that missing watchers raises FlintConfigurationKeyError."""
-        config = {
-            "schedule": {"expression": "0 * * * *", "timezone": "UTC"},
-            "actions": []
-        }
+        config = {"schedule": {"expression": "0 * * * *", "timezone": "UTC"}, "actions": []}
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             SensorController.from_dict(config)
 
@@ -208,10 +179,7 @@ class TestSensorController:
 
     def test_from_dict_missing_actions_raises_error(self) -> None:
         """Test that missing actions raises FlintConfigurationKeyError."""
-        config = {
-            "schedule": {"expression": "0 * * * *", "timezone": "UTC"},
-            "watchers": []
-        }
+        config = {"schedule": {"expression": "0 * * * *", "timezone": "UTC"}, "watchers": []}
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             SensorController.from_dict(config)
 
@@ -219,11 +187,7 @@ class TestSensorController:
 
     def test_from_dict_empty_watchers_and_actions(self) -> None:
         """Test SensorController creation with empty watchers and actions lists."""
-        config = {
-            "schedule": {"expression": "0 * * * *", "timezone": "UTC"},
-            "watchers": [],
-            "actions": []
-        }
+        config = {"schedule": {"expression": "0 * * * *", "timezone": "UTC"}, "watchers": [], "actions": []}
         manager = SensorController.from_dict(config)
 
         assert len(manager.watchers) == 0
@@ -241,12 +205,16 @@ class TestSensorController:
                     "config": {
                         "location": {"path": "test/", "recursive": True},
                         "file_patterns": {"include_fnmatch_patterns": ["*.txt"], "exclude_fnmatch_patterns": []},
-                        "trigger_conditions": {"minimum_file_count": 1, "minimum_total_size_mb": 0, "maximum_file_age_hours": 24}
+                        "trigger_conditions": {
+                            "minimum_file_count": 1,
+                            "minimum_total_size_mb": 0,
+                            "maximum_file_age_hours": 24,
+                        },
                     },
-                    "trigger_actions": []
+                    "trigger_actions": [],
                 }
             ],
-            "actions": []
+            "actions": [],
         }
         manager = SensorController.from_dict(config)
 
@@ -259,9 +227,9 @@ class TestSensorController:
         manager2 = SensorController.from_dict(sample_sensor_controller_config)
 
         # Test that it has the expected attributes
-        assert hasattr(manager1, 'schedule')
-        assert hasattr(manager1, 'watchers')
-        assert hasattr(manager1, 'actions')
+        assert hasattr(manager1, "schedule")
+        assert hasattr(manager1, "watchers")
+        assert hasattr(manager1, "actions")
 
         # Test equality of basic attributes
         assert manager1.schedule.expression == manager2.schedule.expression

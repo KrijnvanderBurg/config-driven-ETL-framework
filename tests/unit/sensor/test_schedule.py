@@ -16,32 +16,22 @@ class TestSchedule:
     @pytest.fixture
     def sample_schedule_config(self) -> dict:
         """Provide a sample schedule configuration for testing."""
-        return {
-            "expression": "*/5 * * * *",
-            "timezone": "UTC"
-        }
+        return {"expression": "*/5 * * * *", "timezone": "UTC"}
 
     @pytest.fixture
     def minimal_schedule_config(self) -> dict:
         """Provide a minimal schedule configuration for testing."""
-        return {
-            "expression": "0 * * * *",
-            "timezone": "America/New_York"
-        }
+        return {"expression": "0 * * * *", "timezone": "America/New_York"}
 
     @pytest.fixture
     def invalid_config_missing_expression(self) -> dict:
         """Provide an invalid configuration missing expression for testing errors."""
-        return {
-            "timezone": "UTC"
-        }
+        return {"timezone": "UTC"}
 
     @pytest.fixture
     def invalid_config_missing_timezone(self) -> dict:
         """Provide an invalid configuration missing timezone for testing errors."""
-        return {
-            "expression": "*/5 * * * *"
-        }
+        return {"expression": "*/5 * * * *"}
 
     def test_from_dict_success(self, sample_schedule_config: dict) -> None:
         """Test successful Schedule creation from dictionary."""
@@ -83,8 +73,8 @@ class TestSchedule:
         schedule = SensorSchedule.from_dict(sample_schedule_config)
 
         # Test that attributes match the input configuration
-        assert hasattr(schedule, 'expression')
-        assert hasattr(schedule, 'timezone')
+        assert hasattr(schedule, "expression")
+        assert hasattr(schedule, "timezone")
         assert schedule.expression == sample_schedule_config["expression"]
         assert schedule.timezone == sample_schedule_config["timezone"]
 

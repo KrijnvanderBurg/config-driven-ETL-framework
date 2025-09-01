@@ -106,9 +106,11 @@ class SensorAction(Model):
         config: BaseAction
         if type_ == "http_post":
             from flint.sensor.actions.http_post import HttpPostAction
+
             config = HttpPostAction.from_dict(config_dict)
         elif type_ == "trigger_job":
             from flint.sensor.actions.etl_in_sensor import EtlInSensor
+
             config = EtlInSensor.from_dict(config_dict)
         else:
             raise ValueError(f"Unknown action type: {type_}")

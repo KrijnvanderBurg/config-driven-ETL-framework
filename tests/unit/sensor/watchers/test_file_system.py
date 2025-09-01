@@ -21,18 +21,12 @@ class TestWatcherLocation:
     @pytest.fixture
     def sample_location_config(self) -> dict:
         """Provide a sample location configuration for testing."""
-        return {
-            "path": "incoming/daily/",
-            "recursive": True
-        }
+        return {"path": "incoming/daily/", "recursive": True}
 
     @pytest.fixture
     def non_recursive_location_config(self) -> dict:
         """Provide a non-recursive location configuration for testing."""
-        return {
-            "path": "/data/files/",
-            "recursive": False
-        }
+        return {"path": "/data/files/", "recursive": False}
 
     def test_from_dict_success(self, sample_location_config: dict) -> None:
         """Test successful WatcherLocation creation from dictionary."""
@@ -73,16 +67,13 @@ class TestFilePatterns:
         """Provide a sample file patterns configuration for testing."""
         return {
             "include_fnmatch_patterns": ["*.csv", "*.json", "*.parquet"],
-            "exclude_fnmatch_patterns": [".*", "*.tmp", "*_backup_*"]
+            "exclude_fnmatch_patterns": [".*", "*.tmp", "*_backup_*"],
         }
 
     @pytest.fixture
     def minimal_patterns_config(self) -> dict:
         """Provide a minimal file patterns configuration for testing."""
-        return {
-            "include_fnmatch_patterns": ["*.txt"],
-            "exclude_fnmatch_patterns": []
-        }
+        return {"include_fnmatch_patterns": ["*.txt"], "exclude_fnmatch_patterns": []}
 
     def test_from_dict_success(self, sample_patterns_config: dict) -> None:
         """Test successful FilePatterns creation from dictionary."""
@@ -121,20 +112,12 @@ class TestFileSystemTriggerConditions:
     @pytest.fixture
     def sample_conditions_config(self) -> dict:
         """Provide a sample trigger conditions configuration for testing."""
-        return {
-            "minimum_file_count": 5,
-            "minimum_total_size_mb": 100,
-            "maximum_file_age_hours": 1
-        }
+        return {"minimum_file_count": 5, "minimum_total_size_mb": 100, "maximum_file_age_hours": 1}
 
     @pytest.fixture
     def zero_values_conditions_config(self) -> dict:
         """Provide a trigger conditions configuration with zero values."""
-        return {
-            "minimum_file_count": 0,
-            "minimum_total_size_mb": 0,
-            "maximum_file_age_hours": 24
-        }
+        return {"minimum_file_count": 0, "minimum_total_size_mb": 0, "maximum_file_age_hours": 24}
 
     def test_from_dict_success(self, sample_conditions_config: dict) -> None:
         """Test successful FileSystemTriggerConditions creation from dictionary."""
@@ -184,19 +167,12 @@ class TestFileSystemWatcher:
     def sample_file_system_watcher_config(self) -> dict:
         """Provide a complete file system watcher configuration for testing."""
         return {
-            "location": {
-                "path": "incoming/daily/",
-                "recursive": True
-            },
+            "location": {"path": "incoming/daily/", "recursive": True},
             "file_patterns": {
                 "include_fnmatch_patterns": ["*.csv", "*.json", "*.parquet"],
-                "exclude_fnmatch_patterns": [".*", "*.tmp", "*_backup_*"]
+                "exclude_fnmatch_patterns": [".*", "*.tmp", "*_backup_*"],
             },
-            "trigger_conditions": {
-                "minimum_file_count": 5,
-                "minimum_total_size_mb": 100,
-                "maximum_file_age_hours": 1
-            }
+            "trigger_conditions": {"minimum_file_count": 5, "minimum_total_size_mb": 100, "maximum_file_age_hours": 1},
         }
 
     def test_from_dict_success(self, sample_file_system_watcher_config: dict) -> None:
@@ -219,15 +195,8 @@ class TestFileSystemWatcher:
     def test_from_dict_missing_location_raises_error(self) -> None:
         """Test that missing location raises FlintConfigurationKeyError."""
         config = {
-            "file_patterns": {
-                "include_fnmatch_patterns": ["*.csv"], 
-                "exclude_fnmatch_patterns": []
-            },
-            "trigger_conditions": {
-                "minimum_file_count": 1, 
-                "minimum_total_size_mb": 0, 
-                "maximum_file_age_hours": 24
-            }
+            "file_patterns": {"include_fnmatch_patterns": ["*.csv"], "exclude_fnmatch_patterns": []},
+            "trigger_conditions": {"minimum_file_count": 1, "minimum_total_size_mb": 0, "maximum_file_age_hours": 24},
         }
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             FileSystemWatcher.from_dict(config)
@@ -238,11 +207,7 @@ class TestFileSystemWatcher:
         """Test that missing file_patterns raises FlintConfigurationKeyError."""
         config = {
             "location": {"path": "incoming/", "recursive": True},
-            "trigger_conditions": {
-                "minimum_file_count": 1, 
-                "minimum_total_size_mb": 0, 
-                "maximum_file_age_hours": 24
-            }
+            "trigger_conditions": {"minimum_file_count": 1, "minimum_total_size_mb": 0, "maximum_file_age_hours": 24},
         }
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             FileSystemWatcher.from_dict(config)
@@ -253,10 +218,7 @@ class TestFileSystemWatcher:
         """Test that missing trigger_conditions raises FlintConfigurationKeyError."""
         config = {
             "location": {"path": "incoming/", "recursive": True},
-            "file_patterns": {
-                "include_fnmatch_patterns": ["*.csv"], 
-                "exclude_fnmatch_patterns": []
-            }
+            "file_patterns": {"include_fnmatch_patterns": ["*.csv"], "exclude_fnmatch_patterns": []},
         }
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             FileSystemWatcher.from_dict(config)

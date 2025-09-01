@@ -22,17 +22,10 @@ class TestSensorAction:
             "config": {
                 "url": "https://webhook.example.com/files-ready",
                 "method": "POST",
-                "headers": {
-                    "Authorization": "Bearer webhook-token",
-                    "Content-Type": "application/json"
-                },
+                "headers": {"Authorization": "Bearer webhook-token", "Content-Type": "application/json"},
                 "timeout": 30,
-                "retry": {
-                    "error_on_alert_failure": False,
-                    "attempts": 3,
-                    "delay_in_seconds": 5
-                }
-            }
+                "retry": {"error_on_alert_failure": False, "attempts": 3, "delay_in_seconds": 5},
+            },
         }
 
     @pytest.fixture
@@ -41,9 +34,7 @@ class TestSensorAction:
         return {
             "name": "trigger-etl-pipeline",
             "type": "trigger_job",
-            "config": {
-                "job_names": ["extract-data", "transform-data", "load-data"]
-            }
+            "config": {"job_names": ["extract-data", "transform-data", "load-data"]},
         }
 
     @pytest.fixture
@@ -57,12 +48,8 @@ class TestSensorAction:
                 "method": "GET",
                 "headers": {},
                 "timeout": 10,
-                "retry": {
-                    "error_on_alert_failure": True,
-                    "attempts": 1,
-                    "delay_in_seconds": 1
-                }
-            }
+                "retry": {"error_on_alert_failure": True, "attempts": 1, "delay_in_seconds": 1},
+            },
         }
 
     def test_from_dict_http_post_action_success(self, sample_http_post_action_config: dict) -> None:
@@ -73,10 +60,10 @@ class TestSensorAction:
         assert action.type == "http_post"
 
         # Test that config is an HttpPostAction instance
-        assert hasattr(action.config, 'url')
-        assert hasattr(action.config, 'method')
-        assert hasattr(action.config, 'headers')
-        assert hasattr(action.config, 'retry')
+        assert hasattr(action.config, "url")
+        assert hasattr(action.config, "method")
+        assert hasattr(action.config, "headers")
+        assert hasattr(action.config, "retry")
 
     def test_from_dict_etl_action_success(self, sample_etl_action_config: dict) -> None:
         """Test successful SensorAction creation with ETL action from dictionary."""
@@ -86,7 +73,7 @@ class TestSensorAction:
         assert action.type == "trigger_job"
 
         # Test that config is an EtlInSensor instance
-        assert hasattr(action.config, 'job_names')
+        assert hasattr(action.config, "job_names")
 
     def test_from_dict_minimal_config(self, minimal_action_config: dict) -> None:
         """Test SensorAction creation with minimal configuration."""
@@ -97,10 +84,7 @@ class TestSensorAction:
 
     def test_from_dict_missing_name_raises_error(self) -> None:
         """Test that missing name raises FlintConfigurationKeyError."""
-        config = {
-            "type": "http_post",
-            "config": {}
-        }
+        config = {"type": "http_post", "config": {}}
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             SensorAction.from_dict(config)
 
@@ -108,10 +92,7 @@ class TestSensorAction:
 
     def test_from_dict_missing_type_raises_error(self) -> None:
         """Test that missing type raises FlintConfigurationKeyError."""
-        config = {
-            "name": "test-action",
-            "config": {}
-        }
+        config = {"name": "test-action", "config": {}}
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             SensorAction.from_dict(config)
 
@@ -119,10 +100,7 @@ class TestSensorAction:
 
     def test_from_dict_missing_config_raises_error(self) -> None:
         """Test that missing config raises FlintConfigurationKeyError."""
-        config = {
-            "name": "test-action",
-            "type": "http_post"
-        }
+        config = {"name": "test-action", "type": "http_post"}
         with pytest.raises(FlintConfigurationKeyError) as exc_info:
             SensorAction.from_dict(config)
 
@@ -130,11 +108,7 @@ class TestSensorAction:
 
     def test_from_dict_unknown_action_type_raises_error(self) -> None:
         """Test that unknown action type raises ValueError."""
-        config = {
-            "name": "test-action",
-            "type": "unknown_type",
-            "config": {}
-        }
+        config = {"name": "test-action", "type": "unknown_type", "config": {}}
         with pytest.raises(ValueError) as exc_info:
             SensorAction.from_dict(config)
 
@@ -142,13 +116,7 @@ class TestSensorAction:
 
     def test_from_dict_various_action_names(self) -> None:
         """Test SensorAction creation with various action names."""
-        action_names = [
-            "simple-action",
-            "action_with_underscores",
-            "action.with.dots",
-            "action-123",
-            "CamelCaseAction"
-        ]
+        action_names = ["simple-action", "action_with_underscores", "action.with.dots", "action-123", "CamelCaseAction"]
 
         for name in action_names:
             config = {
@@ -159,12 +127,8 @@ class TestSensorAction:
                     "method": "POST",
                     "headers": {},
                     "timeout": 15,
-                    "retry": {
-                        "error_on_alert_failure": False,
-                        "attempts": 1,
-                        "delay_in_seconds": 1
-                    }
-                }
+                    "retry": {"error_on_alert_failure": False, "attempts": 1, "delay_in_seconds": 1},
+                },
             }
             action = SensorAction.from_dict(config)
             assert action.name == name
@@ -180,24 +144,14 @@ class TestSensorAction:
                 "method": "POST",
                 "headers": {},
                 "timeout": 20,
-                "retry": {
-                    "error_on_alert_failure": False,
-                    "attempts": 1,
-                    "delay_in_seconds": 1
-                }
-            }
+                "retry": {"error_on_alert_failure": False, "attempts": 1, "delay_in_seconds": 1},
+            },
         }
         http_action = SensorAction.from_dict(http_config)
         assert http_action.type == "http_post"
 
         # Test ETL trigger action
-        etl_config = {
-            "name": "etl-action",
-            "type": "trigger_job",
-            "config": {
-                "job_names": ["test-job"]
-            }
-        }
+        etl_config = {"name": "etl-action", "type": "trigger_job", "config": {"job_names": ["test-job"]}}
         etl_action = SensorAction.from_dict(etl_config)
         assert etl_action.type == "trigger_job"
 
@@ -209,8 +163,8 @@ class TestSensorAction:
         # Test equality
         assert action1.name == action2.name
         assert action1.type == action2.type
-        
+
         # Test that it has the expected attributes
-        assert hasattr(action1, 'name')
-        assert hasattr(action1, 'type')
-        assert hasattr(action1, 'config')
+        assert hasattr(action1, "name")
+        assert hasattr(action1, "type")
+        assert hasattr(action1, "config")

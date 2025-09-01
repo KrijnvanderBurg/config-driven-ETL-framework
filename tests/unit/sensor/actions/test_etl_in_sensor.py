@@ -16,23 +16,17 @@ class TestEtlInSensor:
     @pytest.fixture
     def sample_etl_in_sensor_config(self) -> dict:
         """Provide a sample ETL in sensor configuration for testing."""
-        return {
-            "job_names": ["extract-data", "transform-data", "load-data"]
-        }
+        return {"job_names": ["extract-data", "transform-data", "load-data"]}
 
     @pytest.fixture
     def single_job_config(self) -> dict:
         """Provide a single job ETL configuration for testing."""
-        return {
-            "job_names": ["single-etl-job"]
-        }
+        return {"job_names": ["single-etl-job"]}
 
     @pytest.fixture
     def empty_jobs_config(self) -> dict:
         """Provide an empty jobs ETL configuration for testing."""
-        return {
-            "job_names": []
-        }
+        return {"job_names": []}
 
     @pytest.fixture
     def complex_job_names_config(self) -> dict:
@@ -40,12 +34,12 @@ class TestEtlInSensor:
         return {
             "job_names": [
                 "extract-customer-data",
-                "extract-order-data", 
+                "extract-order-data",
                 "validate-data-quality",
                 "transform-customer-orders",
                 "enrich-with-demographics",
                 "load-to-warehouse",
-                "update-data-catalog"
+                "update-data-catalog",
             ]
         }
 
@@ -73,12 +67,12 @@ class TestEtlInSensor:
 
         expected_jobs = [
             "extract-customer-data",
-            "extract-order-data", 
+            "extract-order-data",
             "validate-data-quality",
             "transform-customer-orders",
             "enrich-with-demographics",
             "load-to-warehouse",
-            "update-data-catalog"
+            "update-data-catalog",
         ]
         assert action.job_names == expected_jobs
 
@@ -92,9 +86,7 @@ class TestEtlInSensor:
 
     def test_from_dict_preserves_job_order(self) -> None:
         """Test that EtlInSensor preserves the order of jobs."""
-        config = {
-            "job_names": ["job-z", "job-a", "job-m", "job-b"]
-        }
+        config = {"job_names": ["job-z", "job-a", "job-m", "job-b"]}
         action = EtlInSensor.from_dict(config)
 
         # Order should be preserved exactly as specified
@@ -102,9 +94,7 @@ class TestEtlInSensor:
 
     def test_from_dict_duplicate_job_names(self) -> None:
         """Test EtlInSensor creation with duplicate job names."""
-        config = {
-            "job_names": ["job-1", "job-2", "job-1", "job-3", "job-2"]
-        }
+        config = {"job_names": ["job-1", "job-2", "job-1", "job-3", "job-2"]}
         action = EtlInSensor.from_dict(config)
 
         # Duplicates should be preserved as specified
@@ -118,7 +108,7 @@ class TestEtlInSensor:
                 "transform-orders.v2",
                 "load@warehouse",
                 "job:with:colons",
-                "job with spaces"
+                "job with spaces",
             ]
         }
         action = EtlInSensor.from_dict(config)
@@ -128,7 +118,7 @@ class TestEtlInSensor:
             "transform-orders.v2",
             "load@warehouse",
             "job:with:colons",
-            "job with spaces"
+            "job with spaces",
         ]
         assert action.job_names == expected_jobs
 
@@ -149,16 +139,14 @@ class TestEtlInSensor:
 
         # Test equality
         assert action1.job_names == action2.job_names
-        
+
         # Test that it has the expected attributes
-        assert hasattr(action1, 'job_names')
+        assert hasattr(action1, "job_names")
 
     def test_from_dict_very_long_job_list(self) -> None:
         """Test EtlInSensor creation with a very long list of jobs."""
         long_job_list = [f"job-{i:04d}" for i in range(100)]
-        config = {
-            "job_names": long_job_list
-        }
+        config = {"job_names": long_job_list}
         action = EtlInSensor.from_dict(config)
 
         assert len(action.job_names) == 100
