@@ -26,17 +26,17 @@ def mock_config_path() -> Path:
 
 @pytest.fixture
 def mock_alert_manager():
-    """Provide a mocked AlertManager for testing."""
-    with patch("flint.cli.AlertManager") as mock_class:
+    """Provide a mocked AlertController for testing."""
+    with patch("flint.cli.AlertController") as mock_class:
         mock_instance = Mock()
         mock_class.from_file.return_value = mock_instance
         yield mock_instance
 
 
 @pytest.fixture
-def mock_job():
-    """Provide a mocked Job for testing."""
-    with patch("flint.cli.Job") as mock_class:
+def mock_etl():
+    """Provide a mocked Etl for testing."""
+    with patch("flint.cli.Etl") as mock_class:
         mock_instance = Mock()
         mock_class.from_file.return_value = mock_instance
         yield mock_instance
@@ -142,14 +142,14 @@ class TestJobCommand(TestCommandBase):
         assert args.command == "run"
         assert args.config_filepath == "/test/config.json"
 
-    def test_execute_success(self, mock_config_path: Path, mock_alert_manager: Mock, mock_job: Mock) -> None:
+    def test_execute_success(self, mock_config_path: Path, mock_alert_manager: Mock, mock_etl: Mock) -> None:
         """Test successful execution of JobCommand."""
         cmd = JobCommand(config_filepath=mock_config_path)
         result = cmd._execute()
 
         assert result == ExitCode.SUCCESS
-        mock_job.validate.assert_called_once()
-        mock_job.execute.assert_called_once()
+        mock_etl.validate_all.assert_called_once()
+        mock_etl.execute_all.assert_called_once()
 
     @pytest.mark.parametrize(
         "exception_type,expected_exit_code",
@@ -164,14 +164,14 @@ class TestJobCommand(TestCommandBase):
         self,
         mock_config_path: Path,
         mock_alert_manager: Mock,
-        mock_job: Mock,
+        mock_etl: Mock,
         exception_type: type[Exception],
         expected_exit_code: ExitCode,
     ) -> None:
         """Test JobCommand handles various business exceptions correctly."""
         if exception_type == FlintIOError:
-            # Test AlertManager IO error
-            with patch("flint.cli.AlertManager") as mock_alert_class:
+            # Test AlertController IO error
+            with patch("flint.cli.AlertController") as mock_alert_class:
                 mock_alert_class.from_file.side_effect = exception_type("Test error")
                 cmd = JobCommand(config_filepath=mock_config_path)
                 result = cmd._execute()
@@ -179,11 +179,11 @@ class TestJobCommand(TestCommandBase):
         else:
             # Test Job-related errors
             if exception_type == FlintConfigurationError:
-                mock_job.validate.side_effect = exception_type("Test error")
+                mock_etl.validate_all.side_effect = exception_type("Test error")
             elif exception_type == FlintValidationError:
-                mock_job.validate.side_effect = exception_type("Test error")
+                mock_etl.validate_all.side_effect = exception_type("Test error")
             elif exception_type == FlintJobError:
-                mock_job.execute.side_effect = exception_type("Test error")
+                mock_etl.execute_all.side_effect = exception_type("Test error")
 
             cmd = JobCommand(config_filepath=mock_config_path)
             result = cmd._execute()
@@ -196,22 +196,22 @@ class TestJobCommand(TestCommandBase):
     def test_execute_handles_job_io_error_after_alert_manager_success(
         self, mock_config_path: Path, mock_alert_manager: Mock
     ) -> None:
-        """Test JobCommand handles Job IO error when AlertManager succeeds."""
-        # Mock Job.from_file to raise FlintIOError
-        with patch("flint.cli.Job.from_file") as mock_job_from_file:
-            mock_job_from_file.side_effect = FlintIOError("Failed to read job config")
+        """Test JobCommand handles Job IO error when AlertController succeeds."""
+        # Mock Etl.from_file to raise FlintIOError
+        with patch("flint.cli.Etl.from_file") as mock_etl_from_file:
+            mock_etl_from_file.side_effect = FlintIOError("Failed to read job config")
             cmd = JobCommand(config_filepath=mock_config_path)
             result = cmd._execute()
 
             assert result == ExitCode.IO_ERROR
-            # AlertManager should not process alert for IO errors
+            # AlertController should not process alert for IO errors
             mock_alert_manager.evaluate_trigger_and_alert.assert_not_called()
 
     def test_execute_handles_configuration_error_with_alert(
-        self, mock_config_path: Path, mock_alert_manager: Mock, mock_job: Mock
+        self, mock_config_path: Path, mock_alert_manager: Mock, mock_etl: Mock
     ) -> None:
         """Test JobCommand handles configuration error and processes alert."""
-        mock_job.validate.side_effect = FlintConfigurationError("Configuration error")
+        mock_etl.validate_all.side_effect = FlintConfigurationError("Configuration error")
         cmd = JobCommand(config_filepath=mock_config_path)
         result = cmd._execute()
 
@@ -219,7 +219,7 @@ class TestJobCommand(TestCommandBase):
         mock_alert_manager.evaluate_trigger_and_alert.assert_called_once_with(
             body="Configuration error occurred",
             title="ETL Pipeline Configuration Error",
-            exception=mock_job.validate.side_effect,
+            exception=mock_etl.validate_all.side_effect,
         )
 
 
@@ -246,18 +246,18 @@ class TestValidateCommand(TestCommandBase):
         assert args.command == "validate"
         assert args.config_filepath == "/test/config.json"
 
-    def test_execute_success(self, mock_config_path: Path, mock_alert_manager: Mock, mock_job: Mock) -> None:
+    def test_execute_success(self, mock_config_path: Path, mock_alert_manager: Mock, mock_etl: Mock) -> None:
         """Test successful execution of ValidateCommand.
 
-        CRITICAL: ValidateCommand should call job.execute() for validation,
-        not just validate(). This tests the actual implementation.
+        ValidateCommand only validates the ETL configuration, it does not execute.
         """
         cmd = ValidateCommand(config_filepath=mock_config_path)
         result = cmd._execute()
 
         assert result == ExitCode.SUCCESS
-        mock_job.validate.assert_called_once()
-        mock_job.execute.assert_called_once()  # This is the current implementation
+        mock_etl.validate_all.assert_called_once()
+        # ValidateCommand should not execute, only validate
+        mock_etl.execute_all.assert_not_called()
 
     @pytest.mark.parametrize(
         "exception_type,expected_exit_code",
@@ -271,7 +271,7 @@ class TestValidateCommand(TestCommandBase):
         self,
         mock_config_path: Path,
         mock_alert_manager: Mock,
-        mock_job: Mock,
+        mock_etl: Mock,
         exception_type: type[Exception],
         expected_exit_code: ExitCode,
     ) -> None:
@@ -280,8 +280,8 @@ class TestValidateCommand(TestCommandBase):
         Note: ValidateCommand should not encounter FlintJobError since it's validation only.
         """
         if exception_type == FlintIOError:
-            # Test AlertManager IO error
-            with patch("flint.cli.AlertManager") as mock_alert_class:
+            # Test AlertController IO error
+            with patch("flint.cli.AlertController") as mock_alert_class:
                 mock_alert_class.from_file.side_effect = exception_type("Test error")
                 cmd = ValidateCommand(config_filepath=mock_config_path)
                 result = cmd._execute()
@@ -289,10 +289,10 @@ class TestValidateCommand(TestCommandBase):
         else:
             # Test Job-related errors
             if exception_type == FlintConfigurationError:
-                mock_job.validate.side_effect = exception_type("Test error")
+                mock_etl.validate_all.side_effect = exception_type("Test error")
             elif exception_type == FlintValidationError:
-                # In ValidateCommand, validation errors can come from execute()
-                mock_job.execute.side_effect = exception_type("Test error")
+                # In ValidateCommand, validation errors come from validate_all()
+                mock_etl.validate_all.side_effect = exception_type("Test error")
 
             cmd = ValidateCommand(config_filepath=mock_config_path)
             result = cmd._execute()
@@ -305,22 +305,22 @@ class TestValidateCommand(TestCommandBase):
     def test_execute_handles_job_io_error_after_alert_manager_success(
         self, mock_config_path: Path, mock_alert_manager: Mock
     ) -> None:
-        """Test ValidateCommand handles Job IO error when AlertManager succeeds."""
-        # Mock Job.from_file to raise FlintIOError
-        with patch("flint.cli.Job.from_file") as mock_job_from_file:
-            mock_job_from_file.side_effect = FlintIOError("Failed to read job config")
+        """Test ValidateCommand handles Job IO error when AlertController succeeds."""
+        # Mock Etl.from_file to raise FlintIOError
+        with patch("flint.cli.Etl.from_file") as mock_etl_from_file:
+            mock_etl_from_file.side_effect = FlintIOError("Failed to read job config")
             cmd = ValidateCommand(config_filepath=mock_config_path)
             result = cmd._execute()
 
             assert result == ExitCode.IO_ERROR
-            # AlertManager should not process alert for IO errors
+            # AlertController should not process alert for IO errors
             mock_alert_manager.evaluate_trigger_and_alert.assert_not_called()
 
     def test_execute_handles_configuration_error_with_alert(
-        self, mock_config_path: Path, mock_alert_manager: Mock, mock_job: Mock
+        self, mock_config_path: Path, mock_alert_manager: Mock, mock_etl: Mock
     ) -> None:
         """Test ValidateCommand handles configuration error and processes alert."""
-        mock_job.validate.side_effect = FlintConfigurationError("Configuration error")
+        mock_etl.validate_all.side_effect = FlintConfigurationError("Configuration error")
         cmd = ValidateCommand(config_filepath=mock_config_path)
         result = cmd._execute()
 
@@ -328,7 +328,7 @@ class TestValidateCommand(TestCommandBase):
         mock_alert_manager.evaluate_trigger_and_alert.assert_called_once_with(
             body="Configuration error occurred",
             title="ETL Pipeline Configuration Error",
-            exception=mock_job.validate.side_effect,
+            exception=mock_etl.validate_all.side_effect,
         )
 
 

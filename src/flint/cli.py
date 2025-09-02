@@ -10,9 +10,9 @@ from argparse import Namespace, _SubParsersAction  # type: ignore
 from pathlib import Path
 from typing import Self
 
-from flint.alert import AlertManager
+from flint.alert import AlertController
+from flint.etl.core.controller import Etl
 from flint.exceptions import ExitCode, FlintConfigurationError, FlintIOError, FlintJobError, FlintValidationError
-from flint.job.core.job import Job
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -127,27 +127,26 @@ class ValidateCommand(Command):
         logger.info("Validating ETL pipeline with config: %s", self.config_filepath)
 
         try:
-            alert = AlertManager.from_file(filepath=self.config_filepath)
+            alert_controller = AlertController.from_file(filepath=self.config_filepath)
         except FlintIOError as e:
             logger.error("Failed to read alert configuration: %s", e)
             return e.exit_code
 
         try:
-            job = Job.from_file(filepath=self.config_filepath)
-            job.validate()
-            job.execute()
+            etl = Etl.from_file(filepath=self.config_filepath)
+            etl.validate_all()
             logger.info("ETL pipeline validation completed successfully")
             return ExitCode.SUCCESS
         except FlintIOError as e:
             logger.error("Failed to read job configuration: %s", e)
             return e.exit_code
         except FlintConfigurationError as e:
-            alert.evaluate_trigger_and_alert(
+            alert_controller.evaluate_trigger_and_alert(
                 body="Configuration error occurred", title="ETL Pipeline Configuration Error", exception=e
             )
             return e.exit_code
         except FlintValidationError as e:
-            alert.evaluate_trigger_and_alert(
+            alert_controller.evaluate_trigger_and_alert(
                 body="Validation failed", title="ETL Pipeline Validation Error", exception=e
             )
             return e.exit_code
@@ -200,32 +199,32 @@ class JobCommand(Command):
         logger.info("Running ETL pipeline with config: %s", self.config_filepath)
 
         try:
-            alert = AlertManager.from_file(filepath=self.config_filepath)
+            alert_controller = AlertController.from_file(filepath=self.config_filepath)
         except FlintIOError as e:
             logger.error("Failed to read alert configuration: %s", e)
             return e.exit_code
 
         try:
-            job = Job.from_file(filepath=self.config_filepath)
-            job.validate()
-            job.execute()
+            etl = Etl.from_file(filepath=self.config_filepath)
+            etl.validate_all()
+            etl.execute_all()
             logger.info("ETL pipeline completed successfully")
             return ExitCode.SUCCESS
         except FlintIOError as e:
             logger.error("Failed to read job configuration: %s", e)
             return e.exit_code
         except FlintConfigurationError as e:
-            alert.evaluate_trigger_and_alert(
+            alert_controller.evaluate_trigger_and_alert(
                 body="Configuration error occurred", title="ETL Pipeline Configuration Error", exception=e
             )
             return e.exit_code
         except FlintValidationError as e:
-            alert.evaluate_trigger_and_alert(
+            alert_controller.evaluate_trigger_and_alert(
                 body="Validation failed", title="ETL Pipeline Validation Error", exception=e
             )
             return e.exit_code
         except FlintJobError as e:
-            alert.evaluate_trigger_and_alert(
+            alert_controller.evaluate_trigger_and_alert(
                 body="Runtime error occurred", title="ETL Pipeline Runtime Error", exception=e
             )
             return e.exit_code

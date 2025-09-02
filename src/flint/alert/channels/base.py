@@ -14,7 +14,7 @@ import logging
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
 
-from flint.job.models import Model
+from flint.etl.models import Model
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)

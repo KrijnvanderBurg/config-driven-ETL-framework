@@ -9,8 +9,8 @@ import logging
 from dataclasses import dataclass
 from typing import Any, Final, Self
 
+from flint.etl.models import Model
 from flint.exceptions import FlintConfigurationKeyError
-from flint.job.models import Model
 from flint.sensor.actions.base import BaseAction
 from flint.utils.logger import get_logger
 

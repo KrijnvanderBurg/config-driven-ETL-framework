@@ -13,8 +13,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final, Self
 
+from flint.etl.models import Model
 from flint.exceptions import FlintConfigurationKeyError
-from flint.job.models import Model
 from flint.sensor.action import SensorAction
 from flint.sensor.schedule import SensorSchedule
 from flint.sensor.watcher import SensorWatcher
