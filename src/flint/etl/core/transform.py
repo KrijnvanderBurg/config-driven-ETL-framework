@@ -156,16 +156,16 @@ class Transform:
         model = TransformModel.from_dict(dict_=dict_)
         functions: list = []
 
-        function_list = dict_.get(FUNCTIONS, [])
+        function_list = dict_[FUNCTIONS]
         logger.debug("Processing %d transformation functions", len(function_list))
 
-        for functiondict_ in function_list:
-            function_name: str = functiondict_[FUNCTION]
+        for function_dict in function_list:
+            function_name: str = function_dict[FUNCTION]
             logger.debug("Creating function instance: %s", function_name)
 
             try:
                 function_concrete = TransformFunctionRegistry.get(function_name)
-                function_instance = function_concrete.from_dict(dict_=functiondict_)
+                function_instance = function_concrete.from_dict(dict_=function_dict)
                 functions.append(function_instance)
                 logger.debug("Successfully created function: %s", function_name)
             except KeyError as e:

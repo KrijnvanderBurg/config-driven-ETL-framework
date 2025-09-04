@@ -54,6 +54,7 @@ class Extract(Generic[ExtractModelT], ABC):
     """
 
     model_cls: type[ExtractModelT]
+    _spark: SparkHandler = SparkHandler()
 
     def __init__(self, model: ExtractModelT) -> None:
         """Initialize the extraction operation.
@@ -158,7 +159,6 @@ class ExtractFile(Extract[ExtractFileModel]):
     """
 
     model_cls = ExtractFileModel
-    _spark: SparkHandler = SparkHandler()
 
     def _extract_batch(self) -> DataFrame:
         """Read from file in batch mode using PySpark.
