@@ -114,7 +114,6 @@ class AlertTemplate(Model):
 
 
 # Conditions constants
-EXCEPTION_CONTAINS: Final[str] = "exception_contains"
 EXCEPTION_REGEX: Final[str] = "exception_regex"
 ENV_VARS_MATCHES: Final[str] = "env_vars_matches"
 
@@ -127,12 +126,10 @@ class AlertConditions(Model):
     and route alerts to appropriate channels based on alert characteristics.
 
     Attributes:
-        exception_contains: List of strings that must be present in the exception message
         exception_regex: Regular expression pattern for exception message matching
         env_vars_matches: Dictionary of environment variables and their expected values
     """
 
-    exception_contains: list[str]
     exception_regex: str
     env_vars_matches: dict[str, list[str]]
 
@@ -142,7 +139,6 @@ class AlertConditions(Model):
 
         Args:
             dict_: Dictionary containing condition configuration with keys:
-                  - exception_contains: List of required exception message strings
                   - exception_regex: Regular expression for exception message matching
                   - env_vars_matches: Environment variable matching rules
 
@@ -151,7 +147,6 @@ class AlertConditions(Model):
 
         Examples:
             >>> config = {
-            ...     "exception_contains": ["database", "connection"],
             ...     "exception_regex": ".*timeout.*",
             ...     "env_vars_matches": {"ENVIRONMENT": ["production"]}
             ... }
@@ -160,39 +155,15 @@ class AlertConditions(Model):
         logger.debug("Creating Conditions from configuration dictionary")
 
         try:
-            exception_contains = dict_[EXCEPTION_CONTAINS]
             exception_regex = dict_[EXCEPTION_REGEX]
             env_vars_matches = dict_[ENV_VARS_MATCHES]
         except KeyError as e:
             raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
 
         return cls(
-            exception_contains=exception_contains,
             exception_regex=exception_regex,
             env_vars_matches=env_vars_matches,
         )
-
-    def _is_exception_contains(self, exception: Exception) -> bool:
-        """Check if the exception message contains any of the required strings.
-
-        Args:
-            exception: The exception to check
-
-        Returns:
-            True if any of the required strings are found in the message, False otherwise
-        """
-        if not self.exception_contains:
-            logger.debug("No exception_contains configured; skipping contains check.")
-            return True
-
-        message = str(exception)
-
-        for required in self.exception_contains:
-            if required in message:
-                logger.debug("Exception message contains required string: '%s'", required)
-                return True
-        logger.debug("Exception message does not contain any required strings.")
-        return False
 
     def _is_exception_regex(self, exception: Exception) -> bool:
         """Check if the exception message matches the configured regex.
@@ -253,9 +224,7 @@ class AlertConditions(Model):
         Returns:
             True if any conditions are satisfied, False otherwise
         """
-        return (
-            self._is_exception_contains(exception) or self._is_exception_regex(exception) or self._is_env_vars_matches()
-        )
+        return self._is_exception_regex(exception) and self._is_env_vars_matches()
 
 
 # Trigger constants

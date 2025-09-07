@@ -4,6 +4,7 @@ This module contains comprehensive tests for the AlertController functionality,
 including configuration loading, channel management, and alert processing.
 """
 
+import os
 import tempfile
 from pathlib import Path
 from unittest.mock import MagicMock
@@ -47,7 +48,6 @@ class TestAlertController:
                             "append_body": "\n\nPlease investigate.",
                         },
                         "conditions": {
-                            "exception_contains": ["error", "failure"],
                             "exception_regex": ".*critical.*",
                             "env_vars_matches": {"ENV": ["production", "staging"]},
                         },
@@ -128,8 +128,13 @@ class TestAlertController:
         # Create an exception that should trigger the alert
         test_exception = ValueError("critical error occurred")
 
-        # Process the alert
+        # Process the alert with environment that matches
+        os.environ["ENV"] = "production"
         alert_manager.evaluate_trigger_and_alert("Test Alert", "Test message", test_exception)
+
+        # Clean up
+        if "ENV" in os.environ:
+            del os.environ["ENV"]
 
         # Verify alerts were sent to both channels
         file_channel = next(ch for ch in alert_manager.channels if ch.name == "test-file")
@@ -139,7 +144,7 @@ class TestAlertController:
         webhook_channel.trigger.assert_called_once()
 
         # Verify the formatted messages
-        args, kwargs = file_channel.trigger.call_args
+        _, kwargs = file_channel.trigger.call_args
         expected_title = "[ALERT] Test Alert - ETL Pipeline"
         expected_body = "Alert Details:\nTest message\n\nPlease investigate."
 
@@ -164,14 +169,14 @@ class TestAlertController:
         for channel in manager.channels:
             channel.trigger.assert_not_called()
 
-    def test_evaluate_trigger_and_alert_skips_non_matching_conditions(self, sample_alert_config) -> None:
+    def test_evaluate_trigger_and_alert_skips_non_matching_conditions(self, sample_alert_config: dict) -> None:
         """Test that evaluate_trigger_and_alert skips triggers when conditions don't match."""
         # Change conditions so they won't match
-        sample_alert_config["alert"]["triggers"][0]["conditions"] = {
-            "exception_contains": ["database"],
+        non_matching_conditions = {
             "exception_regex": ".*timeout.*",
             "env_vars_matches": {"ENV": ["production"]},
         }
+        sample_alert_config["alert"]["triggers"][0]["conditions"] = non_matching_conditions
         manager = AlertController.from_dict(sample_alert_config)
 
         # Mock the channel send_alert methods
@@ -198,23 +203,23 @@ class TestAlertController:
         # Should not raise an exception
         manager.evaluate_trigger_and_alert("Test Alert", "Test message", test_exception)
 
-    def test_multiple_triggers_can_fire(self, sample_alert_config) -> None:
+    def test_multiple_triggers_can_fire(self, sample_alert_config: dict) -> None:
         """Test that multiple triggers can fire for the same alert."""
-        # Add another trigger
-        sample_alert_config["alert"]["triggers"].append(
-            {
-                "name": "secondary-trigger",
-                "enabled": True,
-                "channel_names": ["test-file"],
-                "Template": {
-                    "prepend_title": "[SECONDARY] ",
-                    "append_title": "",
-                    "prepend_body": "Secondary alert: ",
-                    "append_body": "",
-                },
-                "conditions": {"exception_contains": ["error"], "exception_regex": "", "env_vars_matches": {}},
-            }
-        )
+        # Add a secondary trigger with different template
+        secondary_trigger = {
+            "name": "secondary-trigger",
+            "enabled": True,
+            "channel_names": ["test-file"],
+            "Template": {
+                "prepend_title": "[SECONDARY] ",
+                "append_title": "",
+                "prepend_body": "Secondary alert: ",
+                "append_body": "",
+            },
+            "conditions": {"exception_regex": "", "env_vars_matches": {}},
+        }
+
+        sample_alert_config["alert"]["triggers"].append(secondary_trigger)
 
         manager = AlertController.from_dict(sample_alert_config)
 
@@ -222,9 +227,14 @@ class TestAlertController:
         for channel in manager.channels:
             channel.trigger = MagicMock()
 
-        # Process an alert that should trigger both triggers
+        # Process an alert that should trigger both triggers (set ENV to match first trigger)
         test_exception = ValueError("critical error occurred")
+        os.environ["ENV"] = "production"
         manager.evaluate_trigger_and_alert("Test Alert", "Test message", test_exception)
+
+        # Clean up
+        if "ENV" in os.environ:
+            del os.environ["ENV"]
 
         # File channel should receive alerts from both triggers
         file_channel = next(ch for ch in manager.channels if ch.name == "test-file")

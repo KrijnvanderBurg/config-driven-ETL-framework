@@ -1,0 +1,279 @@
+{
+    "globals": {
+        "channels": [
+            {
+                "type": "email",
+                "name": "custom-email-alert-name",
+                "config": {
+                    "smtp_server": "smtp.company.com",
+                    "smtp_port": 587,
+                    "username": "username",
+                    "password": "password",
+                    "from_email": "etl-alerts@company.com",
+                    "to_emails": [
+                        "ops@company.com",
+                        "data-team@company.com"
+                    ]
+                }
+            },
+            {
+                "type": "http",
+                "name": "a-http-post-alert-name",
+                "config": {
+                    "url": "https://.slack.com",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "timeout": 30,
+                    "retry": {
+                        "error_on_alert_failure": true,
+                        "attempts": 3,
+                        "delay_in_seconds": 30
+                    }
+                }
+            },
+            {
+                "type": "file",
+                "name": "custom-file-alert-name",
+                "config": {
+                    "file_path": "alerts.log"
+                }
+            }
+        ]
+    },
+    "schedule": {
+        "expression": "*/5 * * * *",
+        "timezone": "UTC"
+    },
+    "hooks": {
+        "onStart": [],
+        "onFailure": [
+            {
+                "name": "production_critical_errors",
+                "enabled": true,
+                "channel_names": ["custom-email-alert-name", "a-http-post-alert-name"],
+                "template": {
+                    "prepend_title": "ETL Pipeline Alert",
+                    "append_title": "Alert Notification",
+                    "prepend_body": "Attention: ETL Pipeline Alert",
+                    "append_body": "Please take necessary actions."
+                },
+                "conditions": {
+                    "exception_regex": "",
+                    "env_vars_matches": {
+                        "ENVIRONMENT": ["production", "prod"],
+                        "DEPLOYMENT_STAGE": ["live", "production"]
+                    }
+                }
+            },
+            {
+                "name": "staging_warnings",
+                "enabled": true,
+                "channel_names": ["custom-file-alert-name"],
+                "template": {
+                    "prepend_title": "ETL Pipeline Alert",
+                    "append_title": "Alert Notification",
+                    "prepend_body": "Attention: ETL Pipeline Alert",
+                    "append_body": "Please take necessary actions."
+                },
+                "conditions": {
+                    "exception_regex": ".*connection.*failed.*|.*timeout.*error.*",
+                    "env_vars_matches": {
+                        "ENVIRONMENT": ["staging", "test"],
+                        "APP_MODE": ["debug"]
+                    }
+                }
+            },
+            {
+                "name": "team_specific_alerts",
+                "enabled": true,
+                "channel_names": ["a-http-post-alert-name"],
+                "template": {
+                    "prepend_title": "ETL Pipeline Alert",
+                    "append_title": "Alert Notification",
+                    "prepend_body": "Attention: ETL Pipeline Alert",
+                    "append_body": "Please take necessary actions."
+                },
+                "conditions": {
+                    "exception_regex": "",
+                    "env_vars_matches": {}
+                }
+            }
+        ],
+        "onSuccess": [],
+        "onFinally": []
+    },
+    "sensor": [
+        {
+            "name": "file-watcher",
+            "type": "file_system",
+            "enabled": true,
+            "config": {
+                "location": {
+                    "path": "incoming/daily/",
+                    "recursive": true
+                },
+                "file_patterns": {
+                    "include_fnmatch_patterns": ["*.csv", "*.json", "*.parquet"],
+                    "exclude_fnmatch_patterns": [".*", "*.tmp", "*_backup_*"],
+                    "maximum_file_age_hours": 1
+                },
+                "trigger_conditions": {
+                    "minimum_file_count": 5,
+                    "minimum_total_size_mb": 100    
+                }
+            },
+            "trigger_actions": ["notify-files-ready", "etl-job-x"],
+            "hooks": {
+                "onStart": [],
+                "onFailure": [],
+                "onSuccess": [],
+                "onFinally": []
+            }
+        },
+        {
+            "name": "api-health-monitor",
+            "type": "http_polling",
+            "enabled": true,
+            "config": {
+                "polling": {
+                    "interval_seconds": 60,
+                    "failure_threshold": 3
+                },
+                "request": {
+                    "url": "https://.slack.com",
+                    "method": "POST",
+                    "headers": {
+                        "Content-Type": "application/json"
+                    },
+                    "timeout": 30,
+                    "retry": {
+                        "error_on_alert_failure": true,
+                        "attempts": 3,
+                        "delay_in_seconds": 30
+                    }
+                },
+                "trigger_conditions": {
+                    "status_codes": [200, 201],
+                    "response_regex": ["healthy", "ok"]
+                }
+            },
+            "trigger_actions": ["etl-job-x"],
+            "hooks": {
+                "onStart": [],
+                "onFailure": [],
+                "onSuccess": [
+                    {
+                        "name": "notify-files-ready",
+                        "type": "http_post",
+                        "config": {
+                            "url": "https://.slack.com",
+                            "method": "POST",
+                            "headers": {
+                                "Content-Type": "application/json"
+                            },
+                            "timeout": 30,
+                            "retry": {
+                                "error_on_alert_failure": true,
+                                "attempts": 3,
+                                "delay_in_seconds": 30
+                            }
+                        }
+                    },
+                    {
+                        "name": "etl-job-x",
+                        "type": "trigger_job",
+                        "config": {
+                            "job_name": "process-data-files"
+                        }
+                    }
+                ],
+                "onFinally": []
+            }
+        }
+    ],
+    "etl": [
+        {
+            "name": "bronze",
+            "extracts": [ 
+                {
+                    "data_format": "csv",
+                    "location": "examples/customer_orders/customers.csv",
+                    "method": "batch",
+                    "name": "extract-customers",
+                    "options": {
+                        "delimiter": ",",
+                        "header": true,
+                        "inferSchema": false
+                    },
+                    "schema": "examples/customer_orders/customers_schema.json"
+                },
+                {
+                    "data_format": "json",
+                    "location": "examples/customer_orders/orders.json",
+                    "method": "batch",
+                    "name": "extract-orders",
+                    "options": {},
+                    "schema": "examples/customer_orders/orders_schema.json"
+                }
+            ],
+            "transforms": [
+                {
+                    "name": "transform-join-orders",
+                    "upstream_name": "extract-customers",
+                    "options": {},
+                    "functions": [
+                        { "function": "customers_orders", "arguments": {"amount_minimum": 100} },
+                        { "function": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]} }
+                    ]
+                }
+            ],
+            "loads": [
+                {
+                    "name": "load-customer-orders",
+                    "upstream_name": "transform-join-orders",
+                    "data_format": "csv",
+                    "location": "examples/customer_orders/output",
+                    "method": "batch",
+                    "mode": "overwrite",
+                    "options": {
+                        "header": true
+                    }
+                }
+            ],
+            "hooks": {
+                "onStart": [],
+                "onFailure": [],
+                "onSuccess": [],
+                "onFinally": [
+                    {
+                        "name": "move-read-files",
+                        "type": "etl_job_read_files_operations",
+                        "config": {
+                            "operation": "move",                        // allowed: "move" | "copy"
+                            "source_location": "incoming/daily/",       // filepath, directory, or "dataframe"
+                            "destination_location": "archive/daily/",   // filepath or directory (base target)
+                            "hierarchy_base_path": "incoming/daily/",   // optional; root used when preserving source hierarchy
+                            "duplicate_handling": {
+                                "dedupe_by": ["checksum"],             // options: checksum
+                                "on_match": "skip",                    // identical -> allowed: "overwrite" | "version"
+                                "on_mismatch": "version",              // different -> allowed: "overwrite" | "version" | "fail" | "notify"
+                                "checksum": {
+                                    "algorithm": "sha256",            // allowed: "md5", "sha1", "sha256"
+                                    "chunk_size_bytes": 65536,        // default 65536 (64 KiB)
+                                    "verify_checksum_after_transfer": false    // optional post-transfer verification
+                                },
+                                "version": {
+                                    "datetime_format": "yyyyMMddHHmmss", // format applied when creating versioned filenames
+                                    "timestamp_timezone": "UTC"
+                                }
+                            }
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+
+}

@@ -216,7 +216,7 @@ class TestCastFunction:
         mock_df1 = MagicMock(spec=DataFrame)
         mock_df2 = MagicMock(spec=DataFrame)
         mock_df3 = MagicMock(spec=DataFrame)
-        
+
         # Set up chaining: each withColumn call returns the next DataFrame
         mock_df1.withColumn.return_value = mock_df2
         mock_df2.withColumn.return_value = mock_df3
