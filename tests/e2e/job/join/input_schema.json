@@ -1,0 +1,16 @@
+{
+  "fields": [
+    {
+      "name": "id",
+      "type": "integer",
+      "nullable": false,
+      "metadata": {}
+    },
+    {
+      "name": "name",
+      "type": "string",
+      "nullable": false,
+      "metadata": {}
+    }
+  ]
+}

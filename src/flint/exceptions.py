@@ -33,7 +33,10 @@ class ExitCode(enum.IntEnum):
     INVALID_ARGUMENTS = 10
     IO_ERROR = 20
     CONFIGURATION_ERROR = 30
+    ALERT_CONFIGURATION_ERROR = 31
+    RUNTIME_CONFIGURATION_ERROR = 32
     VALIDATION_ERROR = 40
+    ALERT_TEST_ERROR = 41
     JOB_ERROR = 50
     KEYBOARD_INTERRUPT = 98
     UNEXPECTED_ERROR = 99
@@ -90,7 +93,7 @@ class FlintIOError(FlintError):
         super().__init__(message=message, exit_code=ExitCode.IO_ERROR)
 
 
-class FlintConfigurationError(FlintError):
+class FlintAlertConfigurationError(FlintError):
     """Exception raised for configuration-related errors."""
 
     def __init__(self, message: str) -> None:
@@ -102,7 +105,19 @@ class FlintConfigurationError(FlintError):
         super().__init__(message=message, exit_code=ExitCode.CONFIGURATION_ERROR)
 
 
-class FlintConfigurationKeyError(FlintConfigurationError):
+class FlintRuntimeConfigurationError(FlintError):
+    """Exception raised for configuration-related errors."""
+
+    def __init__(self, message: str) -> None:
+        """Initialize ConfigurationError.
+
+        Args:
+            message: The exception message
+        """
+        super().__init__(message=message, exit_code=ExitCode.CONFIGURATION_ERROR)
+
+
+class FlintConfigurationKeyError(FlintRuntimeConfigurationError):
     """Exception raised when a key is missing from configuration dictionaries.
 
     This exception provides more detailed context about missing keys in configuration
@@ -135,6 +150,18 @@ class FlintValidationError(FlintError):
             message: The exception message
         """
         super().__init__(message=message, exit_code=ExitCode.VALIDATION_ERROR)
+
+
+class FlintAlertTestError(FlintError):
+    """Exception raised for validation failures."""
+
+    def __init__(self, message: str) -> None:
+        """Initialize ValidationError.
+
+        Args:
+            message: The exception message
+        """
+        super().__init__(message=message, exit_code=ExitCode.ALERT_TEST_ERROR)
 
 
 class FlintJobError(FlintError):

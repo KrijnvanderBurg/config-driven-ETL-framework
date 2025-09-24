@@ -1,47 +1,53 @@
 {
-    "etl": [
-        {
-            "name": "test-job",
-            "extracts": [
-                {
-                    "name": "extract-test",
-                    "data_format": "csv",
-                    "location": "tests/e2e/job/select/input_data.csv",
-                    "method": "batch",
-                    "options": {
-                        "delimiter": ",",
-                        "header": true,
-                        "inferSchema": false
-                    },
-                    "schema": "tests/e2e/job/select/input_schema.json"
-                }
-            ],
-            "transforms": [
-                {
-                    "name": "transform-test",
-                    "upstream_name": "extract-test",
-                    "options": {},
-                    "functions": [
-                        { "function": "select", "arguments": { "columns": ["name", "age"] } }
-                    ]
-                }
-            ],
-            "loads": [
-                {
-                    "name": "load-test",
-                    "upstream_name": "transform-test",
-                    "data_format": "csv",
-                    "location": "tests/e2e/job/select/load-test",
-                    "method": "batch",
-                    "mode": "overwrite",
-                    "options": {},
-                    "schema_location": "tests/e2e/job/select/schema_output.json"
-                }
-            ]
-        }
-    ],
     "alert": {
         "channels": [],
         "triggers": []
+    },
+    "runtime": {
+        "jobs": [
+            {
+                "name": "test-job",
+                "description": "",
+                "enabled": true,
+                "engine": "spark",
+                "extracts": [
+                    {
+                        "name": "extract-test",
+                        "type": "file",
+                        "data_format": "csv",
+                        "location": "tests/e2e/job/select/input_data.csv",
+                        "method": "batch",
+                        "options": {
+                            "delimiter": ",",
+                            "header": true,
+                            "inferSchema": false
+                        },
+                        "schema_": "tests/e2e/job/select/input_schema.json"
+                    }
+                ],
+                "transforms": [
+                    {
+                        "name": "transform-test",
+                        "upstream_name": "extract-test",
+                        "options": {},
+                        "functions": [
+                            { "function": "select", "arguments": { "columns": ["name", "age"] } }
+                        ]
+                    }
+                ],
+                "loads": [
+                    {
+                        "name": "load-test",
+                        "upstream_name": "transform-test",
+                        "data_format": "csv",
+                        "location": "tests/e2e/job/select/load-test",
+                        "method": "batch",
+                        "mode": "overwrite",
+                        "options": {},
+                        "schema_location": "tests/e2e/job/select/schema_location.json"
+                    }
+                ]
+            }
+        ]
     }
 }

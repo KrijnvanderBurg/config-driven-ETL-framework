@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import pytest
 from pyspark.sql import SparkSession
 
-from flint.utils.spark import SparkHandler
+from flint.runtime.jobs.spark.session import SparkHandler
 
 
 @pytest.fixture(autouse=True)

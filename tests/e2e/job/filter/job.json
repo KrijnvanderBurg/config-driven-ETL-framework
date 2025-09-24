@@ -1,52 +1,58 @@
 {
-    "etl": [
-        {
-            "name": "test-job",
-            "extracts": [
-                {
-                    "name": "extract-filter-test",
-                    "data_format": "csv",
-                    "location": "tests/e2e/job/filter/input_data.csv",
-                    "method": "batch",
-                    "options": {
-                        "delimiter": ",",
-                        "header": true,
-                        "inferSchema": false
-                    },
-                    "schema": "tests/e2e/job/filter/input_schema.json"
-                }
-            ],
-            "transforms": [
-                {
-                    "name": "transform-filter-test",
-                    "upstream_name": "extract-filter-test",
-                    "options": {},
-                    "functions": [
-                        { "function": "filter", "arguments": { 
-                                "condition": "age >= 18 AND is_active = true"
-                            }
-                        }
-                    ]
-                }
-            ],
-            "loads": [
-                {
-                    "name": "load-test",
-                    "upstream_name": "transform-filter-test",
-                    "data_format": "csv",
-                    "location": "tests/e2e/job/filter/load-test",
-                    "method": "batch",
-                    "mode": "overwrite",
-                    "options": {
-                        "header": true
-                    },
-                    "schema_location": "tests/e2e/job/filter/schema_output.json"
-                }
-            ]
-        }
-    ],
     "alert": {
         "channels": [],
         "triggers": []
+    },
+    "runtime": {
+        "jobs": [
+            {
+                "name": "test-job",
+                "description": "",
+                "enabled": true,
+                "engine": "spark",
+                "extracts": [
+                    {
+                        "name": "extract-filter-test",
+                        "type": "file",
+                        "data_format": "csv",
+                        "location": "tests/e2e/job/filter/input_data.csv",
+                        "method": "batch",
+                        "options": {
+                            "delimiter": ",",
+                            "header": true,
+                            "inferSchema": false
+                        },
+                        "schema_": "tests/e2e/job/filter/input_schema.json"
+                    }
+                ],
+                "transforms": [
+                    {
+                        "name": "transform-filter-test",
+                        "upstream_name": "extract-filter-test",
+                        "options": {},
+                        "functions": [
+                            { "function": "filter", "arguments": { 
+                                    "condition": "age >= 18 AND is_active = true"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "loads": [
+                    {
+                        "name": "load-test",
+                        "upstream_name": "transform-filter-test",
+                        "data_format": "csv",
+                        "location": "tests/e2e/job/filter/load-test",
+                        "method": "batch",
+                        "mode": "overwrite",
+                        "options": {
+                            "header": true
+                        },
+                        "schema_location": "tests/e2e/job/filter/schema_location.json"
+                    }
+                ]
+            }
+        ]
     }
 }

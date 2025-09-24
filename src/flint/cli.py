@@ -5,25 +5,39 @@ No CLI argument parsing or dispatch logic is present here.
 """
 
 import logging
+import os
 from abc import ABC, abstractmethod
 from argparse import Namespace, _SubParsersAction  # type: ignore
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Self
 
 from flint.alert import AlertController
-from flint.etl.core.controller import Etl
-from flint.exceptions import ExitCode, FlintConfigurationError, FlintIOError, FlintJobError, FlintValidationError
+from flint.exceptions import (
+    ExitCode,
+    FlintAlertConfigurationError,
+    FlintAlertTestError,
+    FlintIOError,
+    FlintJobError,
+    FlintRuntimeConfigurationError,
+    FlintValidationError,
+)
+from flint.runtime.controller import RuntimeController
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
 
+@dataclass
 class Command(ABC):
     """Abstract base class for CLI commands.
 
     Defines the interface for all CLI commands in Flint. Each command must
     implement methods for argument parsing and execution.
     """
+
+    alert_filepath: Path
+    runtime_filepath: Path
 
     @staticmethod
     @abstractmethod
@@ -35,16 +49,22 @@ class Command(ABC):
         """
 
     @classmethod
-    @abstractmethod
     def from_args(cls, args: Namespace) -> Self:
-        """Create a Command instance from parsed arguments.
+        """Create a ValidateCommand instance from parsed arguments.
 
         Args:
             args: Parsed CLI arguments.
 
         Returns:
-            Command: An instance of the command.
+            ValidateCommand: An instance of ValidateCommand.
         """
+        runtime_filepath = Path(args.runtime_filepath)
+        alert_filepath = Path(args.alert_filepath)
+
+        return cls(
+            alert_filepath=alert_filepath,
+            runtime_filepath=runtime_filepath,
+        )
 
     def execute(self) -> ExitCode:
         """Execute the command with standardized exception handling.
@@ -81,87 +101,85 @@ class Command(ABC):
         """
 
 
+@dataclass
 class ValidateCommand(Command):
     """Command to validate the ETL pipeline configuration file."""
 
-    def __init__(self, config_filepath: Path) -> None:
-        """Initialize ValidateCommand.
-
-        Args:
-            config_filepath: Path to the ETL pipeline configuration file.
-        """
-        self.config_filepath = config_filepath
+    test_exception_message: str | None = None
+    test_env_vars: dict[str, str] | None = None
 
     @staticmethod
     def add_subparser(subparsers: _SubParsersAction) -> None:
-        """Register the 'validate' subcommand and its arguments.
-
-        Args:
-            subparsers: The subparsers action from argparse.
-        """
-        parser = subparsers.add_parser("validate", help="Validate the ETL pipeline config.")
-        parser.add_argument("--config-filepath", required=True, type=str, help="Path to config file")
+        """Register the 'validate' subcommand and its arguments."""
+        parser = subparsers.add_parser("validate", help="Validate the ETL pipeline configuration")
+        parser.add_argument("--alert-filepath", required=True, type=str, help="Path to alert configuration file")
+        parser.add_argument("--runtime-filepath", required=True, type=str, help="Path to runtime configuration file")
+        parser.add_argument("--test-exception", type=str, help="Test exception message to trigger alert testing")
+        parser.add_argument("--test-env-vars", action="append", help="Test env vars (KEY=VALUE)")
 
     @classmethod
     def from_args(cls, args: Namespace) -> Self:
-        """Create a ValidateCommand instance from parsed arguments.
+        """Create ValidateCommand from args."""
+        test_env_vars = None
+        if args.test_env_vars:
+            test_env_vars = {}
+            for env_var in args.test_env_vars:
+                key, value = env_var.split("=", 1)
+                test_env_vars[key] = value
 
-        Args:
-            args: Parsed CLI arguments.
-
-        Returns:
-            ValidateCommand: An instance of ValidateCommand.
-        """
-        config_filepath = Path(args.config_filepath)
-
-        return cls(config_filepath=config_filepath)
+        return cls(
+            alert_filepath=Path(args.alert_filepath),
+            runtime_filepath=Path(args.runtime_filepath),
+            test_exception_message=args.test_exception,
+            test_env_vars=test_env_vars,
+        )
 
     def _execute(self) -> ExitCode:
-        """Validate the ETL pipeline configuration file.
-
-        Loads and validates the ETL job configuration file. Logs progress and completion status.
-
-        Returns:
-            ExitCode: SUCCESS if validation completes without errors, otherwise an appropriate error code.
-        """
-        logger.info("Validating ETL pipeline with config: %s", self.config_filepath)
+        """Validate the ETL pipeline configuration file."""
+        # Set test env vars if provided
+        if self.test_env_vars:
+            for key, value in self.test_env_vars.items():
+                os.environ[key] = value
 
         try:
-            alert_controller = AlertController.from_file(filepath=self.config_filepath)
+            alert = AlertController.from_file(filepath=self.alert_filepath)
         except FlintIOError as e:
-            logger.error("Failed to read alert configuration: %s", e)
+            logger.error("Cannot access alert configuration file: %s", e)
+            return e.exit_code
+        except FlintAlertConfigurationError as e:
+            logger.error("Alert configuration is invalid: %s", e)
             return e.exit_code
 
         try:
-            etl = Etl.from_file(filepath=self.config_filepath)
-            etl.validate_all()
-            logger.info("ETL pipeline validation completed successfully")
-            return ExitCode.SUCCESS
+            _ = RuntimeController.from_file(filepath=self.runtime_filepath)
+            # Not alerting on exceptions as a validate command is often run locally or from CICD
+            # and thus an alert would be drowning out real alerts
         except FlintIOError as e:
-            logger.error("Failed to read job configuration: %s", e)
+            logger.error("Cannot access runtime configuration file: %s", e)
             return e.exit_code
-        except FlintConfigurationError as e:
-            alert_controller.evaluate_trigger_and_alert(
-                body="Configuration error occurred", title="ETL Pipeline Configuration Error", exception=e
-            )
+        except FlintRuntimeConfigurationError as e:
+            logger.error("Runtime configuration is invalid: %s", e)
             return e.exit_code
         except FlintValidationError as e:
-            alert_controller.evaluate_trigger_and_alert(
-                body="Validation failed", title="ETL Pipeline Validation Error", exception=e
-            )
+            logger.error("Validation failed: %s", e)
             return e.exit_code
 
+        # Trigger test exception if specified (either message or env vars)
+        if self.test_exception_message or self.test_env_vars:
+            try:
+                message = self.test_exception_message or "Test alert triggered"
+                raise FlintAlertTestError(message)
+            except FlintAlertTestError as e:
+                alert.evaluate_trigger_and_alert(title="Test Alert", body="Test alert", exception=e)
+                return e.exit_code
 
-class JobCommand(Command):
+        logger.info("ETL pipeline validation completed successfully")
+        return ExitCode.SUCCESS
+
+
+@dataclass
+class RunCommand(Command):
     """Command to run the ETL pipeline using a configuration file."""
-
-    def __init__(self, config_filepath: Path) -> None:
-        """Initialize JobCommand.
-
-        Args:
-            config_filepath: Path to the ETL pipeline configuration file.
-        """
-        self.config_filepath = config_filepath
 
     @staticmethod
     def add_subparser(subparsers: _SubParsersAction) -> None:
@@ -173,58 +191,42 @@ class JobCommand(Command):
         parser = subparsers.add_parser("run", help="Run the ETL pipeline")
         parser.add_argument("--config-filepath", required=True, type=str, help="Path to config file")
 
-    @classmethod
-    def from_args(cls, args: Namespace) -> Self:
-        """Create a RunCommand instance from parsed arguments.
-
-        Args:
-            args: Parsed CLI arguments.
-
-        Returns:
-            RunCommand: An instance of RunCommand.
-        """
-        config_filepath = Path(args.config_filepath)
-
-        return cls(config_filepath=config_filepath)
-
     def _execute(self) -> ExitCode:
-        """Execute the ETL pipeline as defined in the configuration file.
-
-        Loads, validates, and runs the ETL job using the provided configuration file.
-        Logs progress and completion status.
-
-        Returns:
-            ExitCode: SUCCESS if the pipeline completes without errors, otherwise an appropriate error code.
-        """
-        logger.info("Running ETL pipeline with config: %s", self.config_filepath)
+        """Execute the ETL pipeline as defined in the configuration file."""
+        logger.info("Running ETL pipeline with config: %s", self.runtime_filepath)
 
         try:
-            alert_controller = AlertController.from_file(filepath=self.config_filepath)
+            alert = AlertController.from_file(filepath=self.alert_filepath)
         except FlintIOError as e:
-            logger.error("Failed to read alert configuration: %s", e)
+            logger.error("Cannot access alert configuration file: %s", e)
+            return e.exit_code
+        except FlintAlertConfigurationError as e:
+            logger.error("Alert configuration is invalid: %s", e)
             return e.exit_code
 
         try:
-            etl = Etl.from_file(filepath=self.config_filepath)
-            etl.validate_all()
-            etl.execute_all()
+            runtime = RuntimeController.from_file(filepath=self.runtime_filepath)
+            runtime.execute_all()
             logger.info("ETL pipeline completed successfully")
             return ExitCode.SUCCESS
         except FlintIOError as e:
-            logger.error("Failed to read job configuration: %s", e)
+            logger.error("Cannot access runtime configuration file: %s", e)
+            alert.evaluate_trigger_and_alert(
+                title="ETL Configuration File Error", body="Failed to read runtime configuration file", exception=e
+            )
             return e.exit_code
-        except FlintConfigurationError as e:
-            alert_controller.evaluate_trigger_and_alert(
-                body="Configuration error occurred", title="ETL Pipeline Configuration Error", exception=e
+        except FlintRuntimeConfigurationError as e:
+            alert.evaluate_trigger_and_alert(
+                title="ETL Configuration Error", body="Invalid runtime configuration", exception=e
             )
             return e.exit_code
         except FlintValidationError as e:
-            alert_controller.evaluate_trigger_and_alert(
-                body="Validation failed", title="ETL Pipeline Validation Error", exception=e
+            alert.evaluate_trigger_and_alert(
+                title="ETL Validation Error", body="Configuration validation failed", exception=e
             )
             return e.exit_code
         except FlintJobError as e:
-            alert_controller.evaluate_trigger_and_alert(
-                body="Runtime error occurred", title="ETL Pipeline Runtime Error", exception=e
+            alert.evaluate_trigger_and_alert(
+                title="ETL Execution Error", body="Runtime error during ETL execution", exception=e
             )
             return e.exit_code

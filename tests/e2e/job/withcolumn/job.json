@@ -1,58 +1,66 @@
 {
-    "etl": [
-        {
-            "name": "test-job",
-            "extracts": [
-                {
-                    "name": "extract-withcolumn-test",
-                    "data_format": "csv",
-                    "location": "tests/e2e/job/withcolumn/input_data.csv",
-                    "method": "batch",
-                    "options": {
-                        "delimiter": ",",
-                        "header": true,
-                        "inferSchema": false
-                    },
-                    "schema": "tests/e2e/job/withcolumn/input_schema.json"
-                }
-            ],
-            "transforms": [
-                {
-                    "name": "transform-withcolumn-test",
-                    "upstream_name": "extract-withcolumn-test",
-                    "options": {},
-                    "functions": [
-                        { "function": "withColumn", "arguments": { 
-                                "col_name": "full_name",
-                                "col_expr": "concat(first_name, ' ', last_name)"
-                            }
-                        },
-                        { "function": "withColumn", "arguments": { 
-                                "col_name": "salary_bracket",
-                                "col_expr": "CASE WHEN salary < 60000 THEN 'Low' WHEN salary < 70000 THEN 'Medium' ELSE 'High' END"
-                            }
-                        }
-                    ]
-                }
-            ],
-            "loads": [
-                {
-                    "name": "load-withcolumn-test",
-                    "upstream_name": "transform-withcolumn-test",
-                    "data_format": "csv",
-                    "location": "tests/e2e/job/withcolumn/load-test",
-                    "method": "batch",
-                    "mode": "overwrite",
-                    "options": {
-                        "header": true
-                    },
-                    "schema_location": "tests/e2e/job/withcolumn/schema_output.json"
-                }
-            ]
-        }
-    ],
     "alert": {
         "channels": [],
         "triggers": []
+    },
+    "runtime": {
+        "jobs": [
+            {
+                "name": "test-job",
+                "description": "",
+                "enabled": true,
+                "engine": "spark",
+                "extracts": [
+                    {
+                        "name": "extract-withcolumn-test",
+                        "type": "file",
+                        "data_format": "csv",
+                        "location": "tests/e2e/job/withcolumn/input_data.csv",
+                        "method": "batch",
+                        "options": {
+                            "delimiter": ",",
+                            "header": true,
+                            "inferSchema": false
+                        },
+                        "schema_": "tests/e2e/job/withcolumn/input_schema.json"
+                    }
+                ],
+                "transforms": [
+                    {
+                        "name": "transform-withcolumn-test",
+                        "upstream_name": "extract-withcolumn-test",
+                        "options": {},
+                        "functions": [
+                            { 
+                                "function": "withColumn", "arguments": { 
+                                    "col_name": "full_name",
+                                    "col_expr": "concat(first_name, ' ', last_name)"
+                                }
+                            },
+                            { 
+                                "function": "withColumn", "arguments": { 
+                                    "col_name": "salary_bracket",
+                                    "col_expr": "CASE WHEN salary < 60000 THEN 'Low' WHEN salary < 70000 THEN 'Medium' ELSE 'High' END"
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "loads": [
+                    {
+                        "name": "load-withcolumn-test",
+                        "upstream_name": "transform-withcolumn-test",
+                        "data_format": "csv",
+                        "location": "tests/e2e/job/withcolumn/load-test",
+                        "method": "batch",
+                        "mode": "overwrite",
+                        "options": {
+                            "header": true
+                        },
+                        "schema_location": "tests/e2e/job/withcolumn/schema_location.json"
+                    }
+                ]
+            }
+        ]
     }
 }

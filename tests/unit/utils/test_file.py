@@ -10,11 +10,11 @@ The tests verify that:
 - File validation methods work correctly for various edge cases
 """
 
-import json
 import tempfile
 from pathlib import Path
 from unittest.mock import patch
 
+import pyjson5 as json
 import pytest
 import yaml
 
@@ -52,7 +52,7 @@ class TestFileValidation:
     def test_read_permission_denied(self) -> None:
         """Test reading file with no read permissions raises PermissionError."""
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as temp_file:
-            json.dump({"key": "value"}, temp_file)
+            temp_file.write(json.dumps({"key": "value"}))
             temp_file.flush()
             temp_path = Path(temp_file.name)
 
@@ -149,7 +149,7 @@ class TestJsonHandler:
         """Create a temporary JSON file with valid content."""
         json_content = {"key": "value"}
         with tempfile.NamedTemporaryFile(mode="w", suffix=".json", delete=False) as temp_file:
-            json.dump(json_content, temp_file)
+            temp_file.write(json.dumps(json_content))
             temp_file.flush()
             return Path(temp_file.name)
 
@@ -181,7 +181,7 @@ class TestJsonHandler:
             temp_path = Path(temp_file.name)
 
         handler = FileJsonHandler(filepath=temp_path)
-        with pytest.raises(json.JSONDecodeError):
+        with pytest.raises(json.Json5DecoderException):
             handler.read()
 
 

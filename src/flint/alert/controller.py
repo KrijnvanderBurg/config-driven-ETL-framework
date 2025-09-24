@@ -1,33 +1,32 @@
 """Alert manager for handling notification configurations and trigger.
 
-This module provides the main AlertController class that orchestrates alert
+This module provides the main AlertManager class that orchestrates alert
 processing and trigger based on configuration. It serves as the root object
 for the alert system, managing templates, channels, and trigger rules.
 
-The AlertController uses the from_dict classmethod pattern consistent with other
+The AlertManager uses the from_dict classmethod pattern consistent with other
 components in the Flint framework to create instances from configuration data.
 """
 
 import logging
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Any, Final, Self
 
-from flint.alert.channel import AlertChannel
+from pydantic import Field, ValidationError
+
+from flint import BaseModel
+from flint.alert.channels import ChannelUnion
 from flint.alert.trigger import AlertTrigger
-from flint.etl.models import Model
+from flint.exceptions import FlintAlertConfigurationError, FlintIOError
 from flint.utils.file import FileHandlerContext
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
-ALERT: Final[str] = "alert"
-TRIGGERS: Final[str] = "triggers"
-CHANNELS: Final[str] = "channels"
+ALERT: Final = "alert"
 
 
-@dataclass
-class AlertController(Model):
+class AlertController(BaseModel):
     """Main alert manager that coordinates alert processing and triggering.
 
     This class serves as the root object for the alert system, managing the
@@ -35,72 +34,46 @@ class AlertController(Model):
     It implements the Model interface to support configuration-driven initialization.
 
     Attributes:
-        triggers: Rules for determining which channels to use for specific alerts
         channels: List of alert channels for handling different alert destinations
+        triggers: Rules for determining which channels to use for specific alerts
     """
 
-    triggers: list[AlertTrigger]
-    channels: list[AlertChannel]
+    channels: list[ChannelUnion] = Field(..., description="List of configured channels")
+    triggers: list[AlertTrigger] = Field(..., description="List of alert trigger rules")
 
     @classmethod
     def from_file(cls, filepath: Path) -> Self:
-        """Create an AlertController instance from a configuration file.
+        """Create an AlertManager instance from a configuration file.
 
-        Loads and parses a configuration file to create an AlertController instance.
+        Loads and parses a configuration file to create an AlertManager instance.
 
         Args:
             filepath: Path to the configuration file.
 
         Returns:
-            A fully configured AlertController instance.
-        """
-        logger.info("Creating AlertController from file: %s", filepath)
-
-        handler = FileHandlerContext.from_filepath(filepath=filepath)
-        dict_: dict[str, Any] = handler.read()
-
-        alert = cls.from_dict(dict_=dict_)
-        logger.info("Successfully created AlertController from JSON file: %s", filepath)
-        return alert
-
-    @classmethod
-    def from_dict(cls, dict_: dict[str, Any]) -> Self:
-        """Create an AlertController instance from a dictionary configuration.
-
-        Args:
-            dict_: Dictionary containing alert configuration with keys:
-                  - channels: Channel configurations for notifications
-                  - triggers: Rules for alert trigger
-
-        Returns:
-            An AlertController instance configured from the dictionary
+            A fully configured AlertManager instance.
 
         Raises:
-            FlintConfigurationKeyError: If required configuration keys are missing
-            ValueError: If an unknown channel type is specified
-
-        Examples:
-            >>> config = {
-            ...     "channels": {...},
-            ...     "triggers": [...]
-            ... }
-            >>> manager = AlertController.from_dict(config)
+            FlintIOError: If there are file I/O related issues (file not found, permission denied, etc.)
+            FlintAlertConfigurationError: If there are configuration parsing or validation issues
         """
-        logger.debug("Creating AlertController from configuration dictionary")
-        alert_dict = dict_[ALERT]
+        logger.info("Creating AlertManager from file: %s", filepath)
 
-        triggers: list[AlertTrigger] = []
-        for trigger_dict in alert_dict[TRIGGERS]:
-            trigger = AlertTrigger.from_dict(trigger_dict)
-            triggers.append(trigger)
+        try:
+            handler = FileHandlerContext.from_filepath(filepath=filepath)
+            dict_: dict[str, Any] = handler.read()
+        except (OSError, ValueError) as e:
+            logger.error("Failed to read alert configuration file: %s", e)
+            raise FlintIOError(f"Cannot load alert configuration from '{filepath}': {e}") from e
 
-        channels: list[AlertChannel] = []
-        for channel_config in alert_dict[CHANNELS]:
-            channel = AlertChannel.from_dict(channel_config)
-            channels.append(channel)
-            logger.debug("Added %s channel '%s' to configuration", channel.type, channel.name)
-
-        return cls(triggers=triggers, channels=channels)
+        try:
+            alert = cls(**dict_[ALERT])
+            logger.info("Successfully created AlertManager from configuration file: %s", filepath)
+            return alert
+        except KeyError as e:
+            raise FlintAlertConfigurationError(f"Missing 'alert' section in configuration file '{filepath}'") from e
+        except ValidationError as e:
+            raise FlintAlertConfigurationError(f"Invalid alert configuration in file '{filepath}': {e}") from e
 
     def evaluate_trigger_and_alert(self, title: str, body: str, exception: Exception) -> None:
         """Process and send an alert to all channels as defined by enabled trigger rules.
@@ -126,6 +99,6 @@ class AlertController(Model):
                             formatted_body = trigger.template.format_body(body)
 
                             # Send alert through the channel instance
-                            channel.trigger(title=formatted_title, body=formatted_body)
+                            channel.alert(title=formatted_title, body=formatted_body)
                             logger.debug("Sent alert to channel '%s'", channel.name)
                             break

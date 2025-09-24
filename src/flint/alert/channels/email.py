@@ -4,32 +4,25 @@ This module implements the email alert channel that sends alerts
 through SMTP servers. It supports authentication, multiple recipients,
 and configurable failure handling.
 
-The EmailAlertChannel follows the Flint framework patterns for configuration-driven
-initialization and implements the BaseAlertChannel interface.
+The EmailChannel follows the Flint framework patterns for configuration-driven
+initialization and implements the ChannelModel interface.
 """
 
 import logging
 import smtplib
-from dataclasses import dataclass
 from email.mime.text import MIMEText
-from typing import Any, Final, Self
+from typing import Literal
 
-from flint.alert.channels.base import BaseAlertChannel
-from flint.exceptions import FlintConfigurationKeyError
+from pydantic import EmailStr, Field, SecretStr, StrictInt, StrictStr
+from typing_extensions import override
+
+from flint.alert.channels import ChannelModel
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
-SMTP_SERVER: Final[str] = "smtp_server"
-SMTP_PORT: Final[str] = "smtp_port"
-USERNAME: Final[str] = "username"
-PASSWORD: Final[str] = "password"
-FROM_EMAIL: Final[str] = "from_email"
-TO_EMAILS: Final[str] = "to_emails"
 
-
-@dataclass
-class EmailAlertChannel(BaseAlertChannel):
+class EmailChannel(ChannelModel):
     """Email alert channel for SMTP-based alerts.
 
     This class implements email alerting functionality using SMTP servers.
@@ -37,64 +30,26 @@ class EmailAlertChannel(BaseAlertChannel):
     failure handling with retry logic.
 
     Attributes:
+        channel_id: Always "email" for email channels
+        name: Human-readable name for the channel
+        description: Description of the channel purpose
         smtp_server: SMTP server hostname or IP address
         smtp_port: SMTP server port number
         username: SMTP authentication username
         password: SMTP authentication password
         from_email: Email address to send alerts from
         to_emails: List of recipient email addresses
-        failure_handling: Configuration for handling channel failures and retries
     """
 
-    smtp_server: str
-    smtp_port: int
-    username: str
-    password: str
-    from_email: str
-    to_emails: list[str]
+    channel_id: Literal["email"] = Field("email", description="Type identifier for the email channel")
+    smtp_server: StrictStr = Field(..., description="SMTP server hostname or IP address", min_length=1)
+    smtp_port: StrictInt = Field(..., description="SMTP server port number", gt=0, le=65535)
+    username: StrictStr = Field(..., description="SMTP authentication username", min_length=1)
+    password: SecretStr = Field(..., description="SMTP authentication password")
+    from_email: EmailStr = Field(..., description="Sender email address")
+    to_emails: list[EmailStr] = Field(..., description="List of recipient email addresses", min_length=1)
 
-    @classmethod
-    def from_dict(cls, dict_: dict[str, Any]) -> Self:
-        """Create an EmailChannel instance from a dictionary configuration.
-
-        Args:
-            dict_: Dictionary containing email channel configuration with keys:
-                  - smtp_server: SMTP server hostname
-                  - smtp_port: SMTP server port
-                  - username: SMTP authentication username
-                  - password: SMTP authentication password
-                  - from_email: Sender email address
-                  - to_emails: List of recipient email addresses
-                  - failure_handling: Failure handling configuration
-
-        Returns:
-            An EmailChannel instance configured from the dictionary
-
-        Examples:
-            >>> config = {
-            ...     "smtp_server": "smtp.company.com",
-            ...     "smtp_port": 587,
-            ...     "username": "${SMTP_USER}",
-            ...     "password": "${SMTP_PASSWORD}",
-            ...     "from_email": "etl-alerts@company.com",
-            ...     "to_emails": ["ops@company.com", "data-team@company.com"],
-            ...     "failure_handling": {...}
-            ... }
-            >>> email_channel = EmailChannel.from_dict(config)
-        """
-        logger.debug("Creating EmailChannel from configuration dictionary")
-        try:
-            return cls(
-                smtp_server=dict_[SMTP_SERVER],
-                smtp_port=dict_[SMTP_PORT],
-                username=dict_[USERNAME],
-                password=dict_[PASSWORD],
-                from_email=dict_[FROM_EMAIL],
-                to_emails=dict_[TO_EMAILS],
-            )
-        except KeyError as e:
-            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
-
+    @override
     def _alert(self, title: str, body: str) -> None:
         """Send an alert message via email.
 
@@ -114,13 +69,10 @@ class EmailAlertChannel(BaseAlertChannel):
         try:
             # Create SMTP session
             with smtplib.SMTP(self.smtp_server, self.smtp_port) as server:
-                server.starttls()  # Enable security
-                server.login(self.username, self.password)
-                # Send email
-                server.sendmail(self.from_email, self.to_emails, msg.as_string())
+                server.login(self.username, self.password.get_secret_value())
+                server.sendmail(self.from_email, list(self.to_emails), msg.as_string())
 
             logger.info("Email alert sent successfully to %s", ", ".join(self.to_emails))
-
         except smtplib.SMTPException as exc:
             logger.error("Failed to send email alert: %s", exc)
             raise

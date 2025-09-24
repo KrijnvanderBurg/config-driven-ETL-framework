@@ -1,74 +1,81 @@
 {
-    "etl": [
-        {
-            "name": "test-job",
-            "extracts": [
-                {
-                    "data_format": "csv",
-                    "location": "tests/e2e/job/join/left_data.csv",
-                    "method": "batch",
-                    "name": "extract-left",
-                    "options": {
-                        "delimiter": ",",
-                        "header": true,
-                        "inferSchema": false
-                    },
-                    "schema": "tests/e2e/job/join/left_schema.json"
-                },
-                {
-                    "data_format": "csv",
-                    "location": "tests/e2e/job/join/right_data.csv",
-                    "method": "batch",
-                    "name": "extract-right",
-                    "options": {
-                        "delimiter": ",",
-                        "header": true,
-                        "inferSchema": false
-                    },
-                    "schema": "tests/e2e/job/join/right_schema.json"
-                }
-            ],
-            "transforms": [
-                {
-                    "name": "transform-join",
-                    "upstream_name": "extract-left",
-                    "options": {},
-                    "functions": [
-                        {
-                            "function": "join",
-                            "arguments": {
-                                "other_upstream_name": "extract-right",
-                                "on": "id",
-                                "how": "inner"
-                            }
-                        },
-                        {
-                            "function": "select",
-                            "arguments": {
-                                "columns": ["id", "name", "category", "value"]
-                            }
-                        }
-                    ]
-                }
-            ],
-            "loads": [
-                {
-                    "data_format": "csv",
-                    "location": "tests/e2e/job/join/load-test",
-                    "name": "load-output",
-                    "upstream_name": "transform-join",
-                    "schema_location": "tests/e2e/job/join/schema_output.json",
-                    "method": "batch",
-                    "mode": "overwrite",
-                    "options": {
-                        "header": true
-                    }
-                }
-            ]
-        }
-    ],
     "alert": {
         "channels": [],
         "triggers": []
+    },
+    "runtime": {
+        "jobs": [
+            {
+                "name": "test-job",
+                "description": "",
+                "enabled": true,
+                "engine": "spark",
+                "extracts": [
+                    {
+                        "data_format": "csv",
+                        "location": "tests/e2e/job/join/left_data.csv",
+                        "method": "batch",
+                        "name": "extract-left",
+                        "type": "file",
+                        "options": {
+                            "delimiter": ",",
+                            "header": true,
+                            "inferSchema": false
+                        },
+                        "schema_": "tests/e2e/job/join/input_schema.json"
+                    },
+                    {
+                        "data_format": "csv",
+                        "location": "tests/e2e/job/join/right_data.csv",
+                        "method": "batch",
+                        "name": "extract-right",
+                        "type": "file",
+                        "options": {
+                            "delimiter": ",",
+                            "header": true,
+                            "inferSchema": false
+                        },
+                        "schema_": "tests/e2e/job/join/right_schema.json"
+                    }
+                ],
+                "transforms": [
+                    {
+                        "name": "transform-join",
+                        "upstream_name": "extract-left",
+                        "options": {},
+                        "functions": [
+                            {
+                                "function": "join",
+                                "arguments": {
+                                    "other_upstream_name": "extract-right",
+                                    "on": "id",
+                                    "how": "inner"
+                                }
+                            },
+                            {
+                                "function": "select",
+                                "arguments": {
+                                    "columns": ["id", "name", "category", "value"]
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "loads": [
+                    {
+                        "data_format": "csv",
+                        "location": "tests/e2e/job/join/load-test",
+                        "name": "load-output",
+                        "upstream_name": "transform-join",
+                        "schema_location": "tests/e2e/job/join/schema_location.json",
+                        "method": "batch",
+                        "mode": "overwrite",
+                        "options": {
+                            "header": true
+                        }
+                    }
+                ]
+            }
+        ]
     }
 }

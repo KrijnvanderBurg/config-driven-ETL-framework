@@ -1,322 +1,74 @@
 """Trigger rules for alert channel selection and filtering.
 
 This module defines the trigger rules system that determines which channels
-should receive specific alerts based on conditions like log level, message
-content, and environment variables.
+should receive specific alerts based on flexible rule conditions.
 
-The trigger system supports flexible condition matching with various criteria
-to enable sophisticated alert trigger logic.
+The trigger system supports composable rule evaluation with various criteria
+to enable sophisticated alert trigger logic using the same pattern as
+transform functions.
 """
 
 import logging
-import os
-import re
-from dataclasses import dataclass
-from typing import Any, Final, Self
 
-from flint.etl.models import Model
-from flint.exceptions import FlintConfigurationKeyError
+from flint import BaseModel
+from flint.alert.template import AlertTemplate
 from flint.utils.logger import get_logger
+
+from .rules import AlertRuleUnion
 
 logger: logging.Logger = get_logger(__name__)
 
 
-# Template constants
-PREPEND_TITLE: Final[str] = "prepend_title"
-APPEND_TITLE: Final[str] = "append_title"
-PREPEND_BODY: Final[str] = "prepend_body"
-APPEND_BODY: Final[str] = "append_body"
-
-
-@dataclass
-class AlertTemplate(Model):
-    """Configuration for alert message templates and formatting.
-
-    This class manages the template configuration for formatting alert messages,
-    including prefixes and suffixes for both titles and message content.
-
-    Attributes:
-        prepend_title: Text to prepend to alert titles
-        append_title: Text to append to alert titles
-        prepend_body: Text to prepend to alert messages
-        append_body: Text to append to alert messages
-    """
-
-    prepend_title: str
-    append_title: str
-    prepend_body: str
-    append_body: str
-
-    @classmethod
-    def from_dict(cls, dict_: dict[str, Any]) -> Self:
-        """Create a Templates instance from a dictionary configuration.
-
-        Args:
-            dict_: Dictionary containing template configuration with keys:
-                  - prepend_title: Text to prepend to alert titles
-                  - append_title: Text to append to alert titles
-                  - prepend_body: Text to prepend to alert messages
-                  - append_body: Text to append to alert messages
-
-        Returns:
-            A Templates instance configured from the dictionary
-
-        Raises:
-            FlintConfigurationKeyError: If a required key is missing.
-
-        Examples:
-            >>> config = {
-            ...     "prepend_title": "ETL Pipeline Alert",
-            ...     "append_title": "Alert Notification",
-            ...     "prepend_body": "Attention: ETL Pipeline Alert",
-            ...     "append_body": "Please take necessary actions."
-            ... }
-            >>> templates = Templates.from_dict(config)
-        """
-        logger.debug("Creating Templates from configuration dictionary")
-
-        try:
-            prepend_title = dict_[PREPEND_TITLE]
-            append_title = dict_[APPEND_TITLE]
-            prepend_body = dict_[PREPEND_BODY]
-            append_body = dict_[APPEND_BODY]
-        except KeyError as e:
-            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
-
-        return cls(
-            prepend_title=prepend_title,
-            append_title=append_title,
-            prepend_body=prepend_body,
-            append_body=append_body,
-        )
-
-    def format_body(self, message: str) -> str:
-        """Format a message with prepend and append templates.
-
-        Args:
-            message: The raw message to format
-
-        Returns:
-            The formatted message with templates applied
-        """
-        return f"{self.prepend_body}{message}{self.append_body}"
-
-    def format_title(self, title: str) -> str:
-        """Format a title with prepend and append templates.
-
-        Args:
-            title: The raw title to format
-
-        Returns:
-            The formatted title with templates applied
-        """
-        return f"{self.prepend_title}{title}{self.append_title}"
-
-
-# Conditions constants
-EXCEPTION_REGEX: Final[str] = "exception_regex"
-ENV_VARS_MATCHES: Final[str] = "env_vars_matches"
-
-
-@dataclass
-class AlertConditions(Model):
-    """Conditions for determining when a trigger rule should apply.
-
-    This class defines the various conditions that can be used to filter
-    and route alerts to appropriate channels based on alert characteristics.
-
-    Attributes:
-        exception_regex: Regular expression pattern for exception message matching
-        env_vars_matches: Dictionary of environment variables and their expected values
-    """
-
-    exception_regex: str
-    env_vars_matches: dict[str, list[str]]
-
-    @classmethod
-    def from_dict(cls, dict_: dict[str, Any]) -> Self:
-        """Create a Conditions instance from a dictionary configuration.
-
-        Args:
-            dict_: Dictionary containing condition configuration with keys:
-                  - exception_regex: Regular expression for exception message matching
-                  - env_vars_matches: Environment variable matching rules
-
-        Returns:
-            A Conditions instance configured from the dictionary
-
-        Examples:
-            >>> config = {
-            ...     "exception_regex": ".*timeout.*",
-            ...     "env_vars_matches": {"ENVIRONMENT": ["production"]}
-            ... }
-            >>> conditions = Conditions.from_dict(config)
-        """
-        logger.debug("Creating Conditions from configuration dictionary")
-
-        try:
-            exception_regex = dict_[EXCEPTION_REGEX]
-            env_vars_matches = dict_[ENV_VARS_MATCHES]
-        except KeyError as e:
-            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
-
-        return cls(
-            exception_regex=exception_regex,
-            env_vars_matches=env_vars_matches,
-        )
-
-    def _is_exception_regex(self, exception: Exception) -> bool:
-        """Check if the exception message matches the configured regex.
-
-        Args:
-            exception: The exception to check
-
-        Returns:
-            True if the message matches the regex, False otherwise
-        """
-        if not self.exception_regex:
-            logger.debug("No exception_regex configured; skipping regex check.")
-            return True
-
-        message = str(exception)
-
-        if re.search(self.exception_regex, message):
-            logger.debug("Exception message matches regex: '%s'", self.exception_regex)
-            return True
-
-        logger.debug("Exception message does not match regex: '%s'", self.exception_regex)
-        return False
-
-    def _is_env_vars_matches(self) -> bool:
-        """Check if any environment variable matches the configured rules.
-
-        Returns:
-            True if any specified environment variable matches one of its expected values, False otherwise
-        """
-        if not self.env_vars_matches:
-            logger.debug("No env_vars_matches configured; skipping environment variable check.")
-            return True
-
-        for var, expected_values in self.env_vars_matches.items():
-            actual_value = os.environ.get(var)
-
-            if actual_value is None:
-                continue
-
-            if actual_value in expected_values:
-                logger.debug(
-                    "Environment variable '%s' value '%s' matches expected values: %s",
-                    var,
-                    actual_value,
-                    expected_values,
-                )
-                return True
-
-        logger.debug("No environment variable conditions are satisfied.")
-        return False
-
-    def is_any_condition_met(self, exception: Exception) -> bool:
-        """Check if any conditions are met for the given exception and environment variables.
-
-        Args:
-            exception: The exception or message to evaluate
-
-        Returns:
-            True if any conditions are satisfied, False otherwise
-        """
-        return self._is_exception_regex(exception) and self._is_env_vars_matches()
-
-
-# Trigger constants
-NAME: Final[str] = "name"
-ENABLED: Final[str] = "enabled"
-CHANNEL_NAMES: Final[str] = "channel_names"
-TEMPLATE: Final[str] = "Template"
-CONDITIONS: Final[str] = "conditions"
-
-
-@dataclass
-class AlertTrigger(Model):
+class AlertTrigger(BaseModel):
     """Individual trigger rule for alert channel selection.
 
     This class represents a single trigger rule that defines conditions
-    for when alerts should be sent to specific channel_names.
+    for when alerts should be sent to specific channels using a flexible
+    rule-based system similar to transform functions.
 
     Attributes:
         name: Unique name for the trigger rule
         enabled: Whether this rule is currently active
         channel_names: List of channel names that should receive alerts matching this rule
-        conditions: Conditions that must be met for this rule to apply
+        template: Template configuration for formatting alert messages
+        rules: List of rules that must all evaluate to True for the trigger to fire
     """
 
     name: str
     enabled: bool
+    description: str
     channel_names: list[str]
     template: AlertTemplate
-    conditions: AlertConditions
-
-    @classmethod
-    def from_dict(cls, dict_: dict[str, Any]) -> Self:
-        """Create a RoutingRule instance from a dictionary configuration.
-
-        Args:
-            dict_: Dictionary containing trigger rule configuration with keys:
-                  - name: Unique name for the rule
-                  - enabled: Whether the rule is active
-                  - channel_names: List of channel names
-                  - conditions: Condition configuration
-
-        Returns:
-            A RoutingRule instance configured from the dictionary
-
-        Examples:
-            >>> config = {
-            ...     "name": "production_critical_errors",
-            ...     "enabled": True,
-            ...     "channel_names": ["email", "http"],
-            ...     "conditions": {...}
-            ... }
-            >>> rule = RoutingRule.from_dict(config)
-        """
-        logger.debug("Creating RoutingRule from configuration dictionary")
-
-        try:
-            name = dict_[NAME]
-            enabled = dict_[ENABLED]
-            channel_names = dict_[CHANNEL_NAMES]
-            conditions = AlertConditions.from_dict(dict_[CONDITIONS])
-            template = AlertTemplate.from_dict(dict_[TEMPLATE])
-        except KeyError as e:
-            raise FlintConfigurationKeyError(key=e.args[0], dict_=dict_) from e
-
-        return cls(
-            name=name,
-            enabled=enabled,
-            channel_names=channel_names,
-            template=template,
-            conditions=conditions,
-        )
+    rules: list[AlertRuleUnion]
 
     def should_fire(self, exception: Exception) -> bool:
         """Check if the conditions are met for triggering an alert.
 
-        This method evaluates the conditions against the current alert context
-        to determine if the trigger should be activated.
+        This method evaluates all rules against the current alert context.
+        All rules must evaluate to True for the trigger to be activated (AND logic).
 
         Args:
-            exception: The exception to evaluate against trigger conditions.
+            exception: The exception to evaluate against trigger rules
 
         Returns:
-            True if the trigger should be activated, False otherwise.
+            True if all rules evaluate to True, False otherwise
         """
-
         if not self.enabled:
             logger.debug("Trigger '%s' is disabled; skipping trigger check.", self.name)
             return False
 
-        if not self.conditions.is_any_condition_met(exception):
-            logger.debug("Conditions for trigger '%s' are not met; skipping trigger check.", self.name)
-            return False
+        # If no rules are configured, the trigger should fire (default behavior)
+        if not self.rules:
+            logger.debug("No rules configured for trigger '%s'; trigger will fire.", self.name)
+            return True
 
-        logger.debug("Trigger '%s' conditions met", self.name)
+        # All rules must evaluate to True (AND logic)
+        for rule in self.rules:
+            if not rule.evaluate(exception):
+                logger.debug(
+                    "Rule '%s' for trigger '%s' evaluated to False; trigger will not fire.", rule.rule, self.name
+                )
+                return False
+
+        logger.debug("All rules for trigger '%s' evaluated to True; trigger will fire.", self.name)
         return True

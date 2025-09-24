@@ -21,7 +21,7 @@ from pyspark.sql import DataFrame
 from pyspark.sql.streaming.query import StreamingQuery
 
 # Type variables with more specific constraints
-K = TypeVar("K", bound=str | int)  # Key types typically used in registries
+K = TypeVar("K")  # Key type
 V = TypeVar("V")  # Value type
 
 
