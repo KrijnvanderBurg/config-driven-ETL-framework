@@ -48,7 +48,7 @@
                 ],
                 "loads": [
                     {
-                        "name": "load-withcolumn-test",
+                        "name": "load-test",
                         "upstream_name": "transform-withcolumn-test",
                         "data_format": "csv",
                         "location": "tests/e2e/job/withcolumn/load-test",

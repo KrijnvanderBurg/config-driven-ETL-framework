@@ -65,7 +65,7 @@
                     {
                         "data_format": "csv",
                         "location": "tests/e2e/job/join/load-test",
-                        "name": "load-output",
+                        "name": "load-test",
                         "upstream_name": "transform-join",
                         "schema_location": "tests/e2e/job/join/schema_location.json",
                         "method": "batch",
