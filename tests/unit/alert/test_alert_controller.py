@@ -1,145 +1,167 @@
-"""Tests for AlertController model.
+"""Tests for AlertController orchestration logic.
 
-These tests verify that AlertController instances can be correctly created from
-configuration and function as expected.
+These tests focus only on the AlertController's unique responsibility:
+coordinating triggers and channels. Individual channel and trigger behaviors
+are tested in their respective test files.
 """
 
-from typing import Any
-
-import pytest
+from pathlib import Path
+from unittest.mock import patch
 
 from flint.alert.controller import AlertController
 
-# =========================================================================== #
-# ============================== CONFIG (dict) ============================== #
-# =========================================================================== #
 
+class TestAlertControllerOrchestration:
+    """Test AlertController trigger and channel orchestration."""
 
-@pytest.fixture(name="controller_config")
-def fixture_controller_config() -> dict[str, Any]:
-    """Provide a representative AlertController configuration with multiple items.
+    def test_evaluate_trigger_and_alert__with_multiple_triggers__calls_correct_channels(self, tmp_path: Path) -> None:
+        """Test that multiple triggers each call their configured channels."""
+        # Arrange - create controller with multiple triggers
+        config = {
+            "channels": [
+                {
+                    "channel_id": "file",
+                    "name": "channel-1",
+                    "file_path": tmp_path / "channel1.log",
+                },
+                {
+                    "channel_id": "file",
+                    "name": "channel-2",
+                    "file_path": tmp_path / "channel2.log",
+                },
+            ],
+            "triggers": [
+                {
+                    "name": "always-fire",
+                    "enabled": True,
+                    "description": "Always fires regardless of conditions",
+                    "channel_names": ["channel-1"],
+                    "template": {
+                        "prepend_title": "[ALWAYS] ",
+                        "append_title": "",
+                        "prepend_body": "",
+                        "append_body": "",
+                    },
+                    "rules": [],
+                },
+                {
+                    "name": "critical-only",
+                    "enabled": True,
+                    "description": "Fires only for critical exceptions",
+                    "channel_names": ["channel-2"],
+                    "template": {
+                        "prepend_title": "[CRITICAL] ",
+                        "append_title": "",
+                        "prepend_body": "URGENT: ",
+                        "append_body": "",
+                    },
+                    "rules": [{"rule": "exception_regex", "pattern": "Critical", "flags": ["IGNORECASE"]}],
+                },
+            ],
+        }
+        controller = AlertController(**config)
 
-    Returns:
-        A dictionary representing the alert configuration with multiple channels
-        and triggers keyed by 'channels' and 'triggers'. This mirrors how the
-        AlertController is constructed from a configuration dict in production.
-    """
-    channels = [
-        {
-            "channel_id": "email",
-            "name": "email1",
-            "description": "an email channel",
-            "smtp_server": "smtp.example.com",
-            "smtp_port": 587,
-            "username": "user",
-            "password": "secret",
-            "from_email": "from@example.com",
-            "to_emails": ["to@example.com"],
-        },
-        {
-            "channel_id": "file",
-            "name": "file1",
-            "description": "a file channel",
-            "file_path": "/tmp/alerts.log",
-        },
-        {
-            "channel_id": "http",
-            "name": "http1",
-            "description": "an http channel",
-            "url": "https://example.com/webhook",
-            "method": "POST",
-            "headers": {"Content-Type": "application/json"},
-            "timeout": 5,
-            "retry": {"raise_on_error": False, "max_attempts": 0, "delay_in_seconds": 0},
-        },
-    ]
+        # Mock channels to verify orchestration
+        with (
+            patch.object(controller.channels[0], "_alert") as mock_channel1,
+            patch.object(controller.channels[1], "_alert") as mock_channel2,
+        ):
+            test_exception = ValueError("Critical system failure")
 
-    triggers = [
-        {
-            "name": "test_trigger",
-            "enabled": True,
-            "description": "A test trigger",
-            "channel_names": ["file1"],
-            "template": {"prepend_title": "", "append_title": "", "prepend_body": "", "append_body": ""},
-            "rules": [],
-        },
-        {
-            "name": "disabled_trigger",
-            "enabled": False,
-            "description": "A disabled trigger",
-            "channel_names": ["http1"],
-            "template": {"prepend_title": "", "append_title": "", "prepend_body": "", "append_body": ""},
-            "rules": [],
-        },
-    ]
+            # Act
+            controller.evaluate_trigger_and_alert("System Alert", "Database error", test_exception)
 
-    return {"channels": channels, "triggers": triggers}
+            # Assert - both triggers fire
+            mock_channel1.assert_called_once_with(title="[ALWAYS] System Alert", body="Database error")
+            mock_channel2.assert_called_once_with(title="[CRITICAL] System Alert", body="URGENT: Database error")
 
+    def test_evaluate_trigger_and_alert__with_disabled_trigger__skips_disabled(self, tmp_path: Path) -> None:
+        """Test that disabled triggers are not executed."""
+        # Arrange
+        config = {
+            "channels": [{"channel_id": "file", "name": "test-channel", "file_path": tmp_path / "test.log"}],
+            "triggers": [
+                {
+                    "name": "enabled-trigger",
+                    "enabled": True,
+                    "description": "Test enabled trigger",
+                    "channel_names": ["test-channel"],
+                    "template": {"prepend_title": "", "append_title": "", "prepend_body": "", "append_body": ""},
+                    "rules": [],
+                },
+                {
+                    "name": "disabled-trigger",
+                    "enabled": False,
+                    "description": "Test disabled trigger",
+                    "channel_names": ["test-channel"],
+                    "template": {"prepend_title": "", "append_title": "", "prepend_body": "", "append_body": ""},
+                    "rules": [],
+                },
+            ],
+        }
+        controller = AlertController(**config)
 
-def test_controller_creation__from_config__creates_valid_model(controller_config: dict[str, Any]) -> None:
-    """Test specifically for the creation process itself."""
-    # Act
-    controller = AlertController(**controller_config)
+        with patch.object(controller.channels[0], "_alert") as mock_channel:
+            # Act
+            controller.evaluate_trigger_and_alert("Test Alert", "Test message", RuntimeError("error"))
 
-    # Assert
-    assert isinstance(controller.channels, list)
-    assert len(controller.channels) == 3
-    assert isinstance(controller.triggers, list)
-    assert len(controller.triggers) == 2
+            # Assert - only called once (by enabled trigger)
+            mock_channel.assert_called_once()
 
+    def test_evaluate_trigger_and_alert__with_nonexistent_channel__continues_gracefully(self, tmp_path: Path) -> None:
+        """Test that triggers referencing non-existent channels don't crash."""
+        # Arrange
+        config = {
+            "channels": [{"channel_id": "file", "name": "existing-channel", "file_path": tmp_path / "test.log"}],
+            "triggers": [
+                {
+                    "name": "test-trigger",
+                    "enabled": True,
+                    "description": "Test trigger for nonexistent channel handling",
+                    "channel_names": ["existing-channel", "nonexistent-channel"],  # One exists, one doesn't
+                    "template": {"prepend_title": "", "append_title": "", "prepend_body": "", "append_body": ""},
+                    "rules": [],
+                }
+            ],
+        }
+        controller = AlertController(**config)
 
-# Two blank lines separate top-level test sections
-# =========================================================================== #
-# ============================= MODEL FIXTURE =============================== #
-# =========================================================================== #
+        with patch.object(controller.channels[0], "_alert") as mock_channel:
+            # Act - should not raise exception
+            controller.evaluate_trigger_and_alert("Test Alert", "Test message", RuntimeError("error"))
 
+            # Assert - existing channel still called
+            mock_channel.assert_called_once()
 
-@pytest.fixture(name="controller_instance")
-def fixture_controller_instance(controller_config: dict[str, Any]) -> AlertController:
-    """Create AlertController instance from configuration."""
-    return AlertController(**controller_config)
+    def test_evaluate_trigger_and_alert__with_template_formatting__applies_correctly(self, tmp_path: Path) -> None:
+        """Test that trigger templates are applied to messages."""
+        # Arrange
+        config = {
+            "channels": [{"channel_id": "file", "name": "test-channel", "file_path": tmp_path / "test.log"}],
+            "triggers": [
+                {
+                    "name": "formatting-trigger",
+                    "enabled": True,
+                    "description": "Test trigger for template formatting",
+                    "channel_names": ["test-channel"],
+                    "template": {
+                        "prepend_title": "[PREFIX] ",
+                        "append_title": " [SUFFIX]",
+                        "prepend_body": "BODY START: ",
+                        "append_body": " :BODY END",
+                    },
+                    "rules": [],
+                }
+            ],
+        }
+        controller = AlertController(**config)
 
+        with patch.object(controller.channels[0], "_alert") as mock_channel:
+            # Act
+            controller.evaluate_trigger_and_alert("Original Title", "Original Body", RuntimeError("error"))
 
-def test_controller_properties__after_creation__match_expected_values(controller_instance: AlertController) -> None:
-    """Test model properties using the instantiated object fixture.
-
-    Use hard-coded expected values to avoid comparing fixtures directly.
-    """
-    assert controller_instance.channels[0].name == "email1"
-    assert controller_instance.channels[1].name == "file1"
-    assert controller_instance.channels[2].name == "http1"
-
-    # Assert additional channel attributes in config order
-    # Email channel
-    email_ch = controller_instance.channels[0]
-    assert email_ch.channel_id == "email"
-    assert email_ch.description == "an email channel"
-    assert email_ch.smtp_server == "smtp.example.com"
-    assert email_ch.smtp_port == 587
-
-    # File channel
-    file_ch = controller_instance.channels[1]
-    assert file_ch.channel_id == "file"
-    assert file_ch.description == "a file channel"
-
-    # HTTP channel
-    http_ch = controller_instance.channels[2]
-    assert http_ch.channel_id == "http"
-    assert http_ch.description == "an http channel"
-    assert str(http_ch.url) == "https://example.com/webhook"
-    assert http_ch.method == "POST"
-    assert isinstance(http_ch.retry, type(http_ch.retry))
-
-    assert controller_instance.triggers[0].name == "test_trigger"
-    assert controller_instance.triggers[1].name == "disabled_trigger"
-    # Trigger enabled flags and template/channel_names
-    assert controller_instance.triggers[0].enabled is True
-    assert controller_instance.triggers[1].enabled is False
-    assert controller_instance.triggers[0].channel_names == ["file1"]
-    assert controller_instance.triggers[0].template.prepend_title == ""
-    assert controller_instance.triggers[0].template.append_title == ""
-
-
-# =========================================================================== #
-# ================================== TESTS ================================== #
-# =========================================================================== #
+            # Assert - template formatting applied
+            mock_channel.assert_called_once_with(
+                title="[PREFIX] Original Title [SUFFIX]",
+                body="BODY START: Original Body :BODY END",
+            )

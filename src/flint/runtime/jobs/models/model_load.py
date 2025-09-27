@@ -17,6 +17,8 @@ from abc import ABC
 from enum import Enum
 from typing import Any
 
+from pydantic import Field
+
 from flint import BaseModel
 from flint.utils.logger import get_logger
 
@@ -94,12 +96,12 @@ class LoadModel(BaseModel, ABC):
         options (dict[str, Any]): Options for the sink input.
     """
 
-    name: str
-    upstream_name: str
-    method: LoadMethod
-    location: str
-    schema_location: str | None = None
-    options: dict[str, Any]
+    name: str = Field(..., description="Identifier for this load operation", min_length=1)
+    upstream_name: str = Field(..., description="Identifier of the upstream component providing data")
+    method: LoadMethod = Field(..., description="Loading method (batch or streaming)")
+    location: str = Field(..., description="URI that identifies where to load data in the modelified format.")
+    schema_location: str | None = Field(None, description="URI that identifies where to load schema.")
+    options: dict[str, Any] = Field(..., description="Options for the sink input.")
 
 
 class LoadModelFile(LoadModel):

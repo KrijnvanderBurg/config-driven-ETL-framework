@@ -11,6 +11,8 @@ import logging
 from abc import ABC, abstractmethod
 from enum import Enum
 
+from pydantic import Field
+
 from flint import BaseModel
 from flint.utils.logger import get_logger
 
@@ -42,10 +44,10 @@ class JobBase(BaseModel, ABC):
         engine: The execution engine to use for this job
     """
 
-    name: str
-    description: str
-    enabled: bool
-    engine: JobEngine
+    name: str = Field(..., description="Unique identifier for the job", min_length=1)
+    description: str = Field(..., description="Human-readable description of the job's purpose")
+    enabled: bool = Field(..., description="Whether this job should be executed")
+    engine: JobEngine = Field(..., description="The execution engine to use for this job")
 
     @abstractmethod
     def execute(self) -> None:

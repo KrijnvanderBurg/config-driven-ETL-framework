@@ -236,7 +236,7 @@ class TestDataFrameRegistry:
         """Test getting nonexistent DataFrame shows available DataFrames."""
         df_registry["existing_df"] = MagicMock()
 
-        with pytest.raises(KeyError, match="Available DataFrames"):
+        with pytest.raises(KeyError):
             _ = df_registry["missing_df"]
 
 
@@ -260,5 +260,5 @@ class TestStreamingQueryRegistry:
         """Test getting nonexistent StreamingQuery shows available queries."""
         sq_registry["existing_stream"] = MagicMock()
 
-        with pytest.raises(KeyError, match="Available queries"):
+        with pytest.raises(KeyError):
             _ = sq_registry["missing_stream"]

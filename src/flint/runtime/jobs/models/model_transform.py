@@ -16,6 +16,8 @@ import logging
 from abc import ABC
 from typing import Any, Generic, TypeVar
 
+from pydantic import Field
+
 from flint import BaseModel
 from flint.utils.logger import get_logger
 
@@ -81,6 +83,6 @@ class TransformModel(BaseModel):
         |-- age: string (nullable = true)
     """
 
-    name: str
-    upstream_name: str
-    options: dict[str, Any]
+    name: str = Field(..., description="Identifier for this transformation operation", min_length=1)
+    upstream_name: str = Field(..., description="Identifier(s) of the upstream component(s) providing data")
+    options: dict[str, Any] = Field(..., description="Transformation options as key-value pairs")

@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-import tempfile
 from collections.abc import Generator
-from contextlib import ExitStack
+from pathlib import Path
 from typing import Any
 
 import pytest
@@ -18,15 +17,13 @@ from flint.runtime.jobs.spark.job import JobSpark
 
 
 @pytest.fixture(name="job_config")
-def fixture_job_config() -> Generator[dict[str, Any], Any, None]:
-    """Provide a job configuration dict using temporary files for paths."""
-    stack = ExitStack()
-    temp_in = stack.enter_context(tempfile.NamedTemporaryFile(suffix=".json", mode="w+b"))
-    temp_out = stack.enter_context(tempfile.NamedTemporaryFile(suffix=".json", mode="w+b"))
-    temp_in.write(b"")
-    temp_in.flush()
-    temp_out.write(b"")
-    temp_out.flush()
+def fixture_job_config(tmp_path: Path) -> Generator[dict[str, Any], Any, None]:
+    """Provide a job configuration dict using temporary files for paths under tmp_path."""
+    tmp_in = Path(tmp_path) / "input.json"
+    tmp_in.write_bytes(b"")
+
+    tmp_out = Path(tmp_path) / "output.json"
+    tmp_out.write_bytes(b"")
 
     data = {
         "name": "job_dict",
@@ -39,7 +36,7 @@ def fixture_job_config() -> Generator[dict[str, Any], Any, None]:
                 "method": "batch",
                 "data_format": "csv",
                 "options": {},
-                "location": temp_in.name,
+                "location": str(tmp_in),
                 "schema_": "",
             }
         ],
@@ -49,7 +46,7 @@ def fixture_job_config() -> Generator[dict[str, Any], Any, None]:
                 "name": "ld2",
                 "upstream_name": "tr2",
                 "method": "batch",
-                "location": temp_out.name,
+                "location": str(tmp_out),
                 "schema_location": None,
                 "options": {},
                 "mode": "append",
@@ -59,7 +56,6 @@ def fixture_job_config() -> Generator[dict[str, Any], Any, None]:
     }
 
     yield data
-    stack.close()
 
 
 def test_job_creation__from_config__creates_valid_model(job_config: dict) -> None:

@@ -1,17 +1,18 @@
 """Tests for Extract Spark implementation.
 
-These tests verify that ExtractFileSpark instances can be correctly created from
-configuration and function as expected.
+These tests verify ExtractFileSpark creation, validation, data extraction,
+and error handling scenarios.
 """
 
 import json
-import tempfile
 from collections.abc import Generator
-from contextlib import ExitStack
+from pathlib import Path
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
-from pyspark.sql.types import StructType
+from pydantic import ValidationError
+from pyspark.sql.types import StringType, StructField, StructType
 
 from flint.runtime.jobs.models.model_extract import ExtractFormat, ExtractMethod
 from flint.runtime.jobs.spark.extract import ExtractFileSpark
@@ -21,54 +22,199 @@ from flint.runtime.jobs.spark.extract import ExtractFileSpark
 # =========================================================================== #
 
 
-@pytest.fixture(name="extract_config")
-def fixture_extract_config() -> Generator[dict[str, Any], Any, None]:
-    """Provide a representative extract configuration with proper named tempfiles."""
-    # Use ExitStack to manage multiple temporary resources
-    stack = ExitStack()
+@pytest.fixture(name="valid_extract_config")
+def fixture_valid_extract_config(tmp_path: Path) -> Generator[dict[str, Any], Any, None]:
+    """Provide a valid extract configuration with real test data using tmp_path.
 
-    # Create a named temporary file for the data source
-    temp_data_file = stack.enter_context(tempfile.NamedTemporaryFile(suffix=".json", mode="w+b"))
-    temp_data_file.write(b"")
-    temp_data_file.flush()
+    Args:
+        tmp_path: pytest temporary directory fixture.
 
-    # Schema as filepath exercises the SchemaFilepathHandler path code.
-    temp_schema_file = stack.enter_context(tempfile.NamedTemporaryFile(suffix=".json", mode="w+b"))
-    schema_json_bytes = json.dumps(StructType().jsonValue()).encode("utf-8")
-    temp_schema_file.write(schema_json_bytes)
-    temp_schema_file.flush()
+    Yields:
+        dict: configuration dictionary pointing to files under tmp_path.
+    """
+    # Create a data file under the tmp_path
+    data_file = Path(tmp_path, "test_data.json")
+    test_data = [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]
+    data_file.write_text(json.dumps(test_data), encoding="utf-8")
+
+    # Create schema file under the tmp_path
+    schema_file = Path(tmp_path, "schema.json")
+    schema = StructType(
+        [
+            StructField("name", StringType(), True),
+            StructField("age", StringType(), True),  # Use StringType since JSON parsing can be flexible
+        ]
+    )
+    schema_file.write_text(json.dumps(schema.jsonValue()))
 
     config = {
-        "name": "sales_data",
+        "name": "test_data",
         "method": "batch",
         "data_format": "json",
         "options": {
             "multiLine": True,
-            "inferSchema": True,
         },
-        "location": temp_data_file.name,
-        "schema_": temp_schema_file.name,
+        "location": str(data_file),
+        "schema_": str(schema_file),
     }
 
-    # Return both the config and the stack so we can properly clean up later
     yield config
 
-    # Close all temporary files automatically
-    stack.close()
+
+# =========================================================================== #
+# ========================== VALIDATION TESTS ============================= #
+# =========================================================================== #
 
 
-def test_extract_creation__from_config__creates_valid_model(extract_config: dict[str, Any]) -> None:
-    """Test specifically for the creation process itself."""
-    # Act
-    extract = ExtractFileSpark(**extract_config)
+class TestExtractFileSparkValidation:
+    """Test ExtractFileSpark model validation and instantiation."""
 
-    # Assert
-    assert extract.name == "sales_data"
-    assert extract.method == ExtractMethod.BATCH
-    assert extract.data_format == ExtractFormat.JSON
-    assert extract.options == {"multiLine": True, "inferSchema": True}
-    assert isinstance(extract.location, str) and extract.location.endswith(".json")
-    assert isinstance(extract.schema_, str) and extract.schema_.endswith(".json")
+    def test_create_extract_file_spark__with_valid_config__succeeds(self, valid_extract_config: dict[str, Any]) -> None:
+        """Test ExtractFileSpark creation with valid configuration."""
+        # Act
+        extract = ExtractFileSpark(**valid_extract_config)
+
+        # Assert
+        assert extract.name == "test_data"
+        assert extract.method == ExtractMethod.BATCH
+        assert extract.data_format == ExtractFormat.JSON
+        assert extract.options == {"multiLine": True}
+        assert isinstance(extract.location, str) and extract.location.endswith(".json")
+        assert isinstance(extract.schema_, str) and extract.schema_.endswith(".json")
+
+    def test_create_extract_file_spark__with_missing_name__raises_validation_error(
+        self, valid_extract_config: dict[str, Any]
+    ) -> None:
+        """Test ExtractFileSpark creation fails when name is missing."""
+        # Arrange
+        del valid_extract_config["name"]
+
+        # Assert
+        with pytest.raises(ValidationError):
+            # Act
+            ExtractFileSpark(**valid_extract_config)
+
+    def test_create_extract_file_spark__with_empty_name__raises_validation_error(
+        self, valid_extract_config: dict[str, Any]
+    ) -> None:
+        """Test ExtractFileSpark creation fails with empty name."""
+        # Arrange
+        valid_extract_config["name"] = ""
+
+        # Assert
+        with pytest.raises(ValidationError):
+            # Act
+            ExtractFileSpark(**valid_extract_config)
+
+    def test_create_extract_file_spark__with_invalid_method__raises_validation_error(
+        self, valid_extract_config: dict[str, Any]
+    ) -> None:
+        """Test ExtractFileSpark creation fails with invalid extraction method."""
+        # Arrange
+        valid_extract_config["method"] = "invalid_method"
+
+        # Assert
+        with pytest.raises(ValidationError):
+            # Act
+            ExtractFileSpark(**valid_extract_config)
+
+    def test_create_extract_file_spark__with_invalid_format__raises_validation_error(
+        self, valid_extract_config: dict[str, Any]
+    ) -> None:
+        """Test ExtractFileSpark creation fails with invalid data format."""
+        # Arrange
+        valid_extract_config["data_format"] = "invalid_format"
+
+        # Assert
+        with pytest.raises(ValidationError):
+            # Act
+            ExtractFileSpark(**valid_extract_config)
+
+    def test_create_extract_file_spark__with_missing_location__raises_validation_error(
+        self, valid_extract_config: dict[str, Any]
+    ) -> None:
+        """Test ExtractFileSpark creation fails when location is missing."""
+        # Arrange
+        del valid_extract_config["location"]
+
+        # Assert
+        with pytest.raises(ValidationError):
+            # Act
+            ExtractFileSpark(**valid_extract_config)
+
+    def test_create_extract_file_spark__with_empty_location__succeeds(
+        self, valid_extract_config: dict[str, Any]
+    ) -> None:
+        """Test ExtractFileSpark creation succeeds with empty location."""
+        # Arrange
+        valid_extract_config["location"] = ""
+
+        # Act
+        extract = ExtractFileSpark(**valid_extract_config)
+
+        # Assert
+        assert extract.location == ""
+
+    def test_create_extract_file_spark__with_streaming_method__succeeds(
+        self, valid_extract_config: dict[str, Any]
+    ) -> None:
+        """Test ExtractFileSpark creation with streaming method."""
+        # Arrange
+        valid_extract_config["method"] = "streaming"
+
+        # Act
+        extract = ExtractFileSpark(**valid_extract_config)
+
+        # Assert
+        assert extract.method == ExtractMethod.STREAMING
+
+    def test_create_extract_file_spark__with_csv_format__succeeds(self, valid_extract_config: dict[str, Any]) -> None:
+        """Test ExtractFileSpark creation with CSV data format."""
+        # Arrange
+        valid_extract_config["data_format"] = "csv"
+
+        # Act
+        extract = ExtractFileSpark(**valid_extract_config)
+
+        # Assert
+        assert extract.data_format == ExtractFormat.CSV
+
+    def test_create_extract_file_spark__with_parquet_format__succeeds(
+        self, valid_extract_config: dict[str, Any]
+    ) -> None:
+        """Test ExtractFileSpark creation with Parquet data format."""
+        # Arrange
+        valid_extract_config["data_format"] = "parquet"
+
+        # Act
+        extract = ExtractFileSpark(**valid_extract_config)
+
+        # Assert
+        assert extract.data_format == ExtractFormat.PARQUET
+
+    def test_create_extract_file_spark__with_empty_schema__succeeds(self, valid_extract_config: dict[str, Any]) -> None:
+        """Test ExtractFileSpark creation with empty schema."""
+        # Arrange
+        valid_extract_config["schema_"] = ""
+
+        # Act
+        extract = ExtractFileSpark(**valid_extract_config)
+
+        # Assert
+        assert extract.schema_ == ""
+
+    def test_create_extract_file_spark__with_json_schema_string__succeeds(
+        self, valid_extract_config: dict[str, Any]
+    ) -> None:
+        """Test ExtractFileSpark creation with JSON schema string."""
+        # Arrange
+        valid_extract_config["schema_"] = '{"type":"struct","fields":[]}'
+
+        # Act
+        extract = ExtractFileSpark(**valid_extract_config)
+
+        # Assert
+        assert extract.schema_ == '{"type":"struct","fields":[]}'
 
 
 # =========================================================================== #
@@ -76,38 +222,80 @@ def test_extract_creation__from_config__creates_valid_model(extract_config: dict
 # =========================================================================== #
 
 
-@pytest.fixture(name="extract_spark")
-def fixture_extract_spark(extract_config: dict[str, Any]) -> ExtractFileSpark:
-    """Create ExtractFileSpark instance from configuration.
-
-    Args:
-        extract_config: config dictionary fixture with tempfile paths
-
-    Returns:
-        ExtractFileSpark instance initialized from config
-    """
-    return ExtractFileSpark(**extract_config)
-
-
-def test_extract_properties__after_creation__match_expected_values(extract_spark: ExtractFileSpark) -> None:
-    """Test model properties using the instantiated object fixture.
-
-    Use hard-coded expected values to avoid comparing fixtures directly.
-    """
-    # Assert attributes in the same order as the creation test
-    assert extract_spark.name == "sales_data"
-    assert extract_spark.method == ExtractMethod.BATCH
-    assert extract_spark.data_format == ExtractFormat.JSON
-    assert extract_spark.options == {"multiLine": True, "inferSchema": True}
-
-    # Location and schema_ must be filepaths ending with .json
-    assert isinstance(extract_spark.location, str)
-    assert extract_spark.location.endswith(".json")
-
-    assert isinstance(extract_spark.schema_, str)
-    assert extract_spark.schema_.endswith(".json")
+@pytest.fixture(name="extract_file_spark")
+def fixture_extract_file_spark(valid_extract_config: dict[str, Any]) -> ExtractFileSpark:
+    """Create ExtractFileSpark instance from valid configuration."""
+    return ExtractFileSpark(**valid_extract_config)
 
 
 # =========================================================================== #
-# ================================== TESTS ================================== #
+# ============================ EXTRACT TESTS =============================== #
 # =========================================================================== #
+
+
+class TestExtractFileSparkExtract:
+    """Test ExtractFileSpark extraction functionality."""
+
+    def test_extract__with_batch_method__stores_dataframe_in_registry(
+        self, extract_file_spark: ExtractFileSpark
+    ) -> None:
+        """Test batch extraction creates and stores real DataFrame in registry."""
+        # Act
+        extract_file_spark.extract()
+
+        # Assert - DataFrame was stored in registry and is a real PySpark DataFrame
+        assert extract_file_spark.name in extract_file_spark.data_registry
+        dataframe = extract_file_spark.data_registry[extract_file_spark.name]
+
+        # Verify it's a real DataFrame by collecting data
+        rows = dataframe.collect()
+        assert len(rows) == 2
+        assert rows[0]["name"] == "Alice"
+        assert rows[1]["name"] == "Bob"
+
+    def test_extract__with_streaming_method__stores_streaming_dataframe_in_registry(
+        self, valid_extract_config: dict[str, Any]
+    ) -> None:
+        """Test streaming extraction creates streaming DataFrame."""
+        # Arrange
+        valid_extract_config["method"] = "streaming"
+        extract_spark = ExtractFileSpark(**valid_extract_config)
+
+        # Act
+        extract_spark.extract()
+
+        # Assert - streaming DataFrame was stored
+        assert extract_spark.name in extract_spark.data_registry
+        dataframe = extract_spark.data_registry[extract_spark.name]
+
+        # Verify it's a streaming DataFrame
+        assert dataframe.isStreaming
+
+    def test_extract__with_unsupported_method__raises_value_error(self, extract_file_spark: ExtractFileSpark) -> None:
+        """Test extraction with unsupported method raises ValueError."""
+        # Arrange - create a custom enum value that doesn't match BATCH or STREAMING
+        unsupported_method = Mock()
+        unsupported_method.value = "unsupported"
+        extract_file_spark.method = unsupported_method
+
+        # Assert
+        with pytest.raises(ValueError):
+            # Act
+            extract_file_spark.extract()
+
+    def test_extract__replaces_previous_registry_entry(self, extract_file_spark: ExtractFileSpark) -> None:
+        """Test extraction overwrites previous registry entry."""
+        # Arrange - create a simple DataFrame to put in registry first
+        spark = extract_file_spark.spark.session
+        old_dataframe = spark.createDataFrame([("old", 1)], ["name", "value"])
+        extract_file_spark.data_registry[extract_file_spark.name] = old_dataframe
+
+        # Act
+        extract_file_spark.extract()
+
+        # Assert new DataFrame replaced the old one
+        new_dataframe = extract_file_spark.data_registry[extract_file_spark.name]
+        new_rows = new_dataframe.collect()
+        assert len(new_rows) == 2
+        assert new_rows[0]["name"] == "Alice"  # This proves it's the new data, not the old
+        assert new_dataframe != old_dataframe

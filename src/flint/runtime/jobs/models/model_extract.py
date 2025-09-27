@@ -17,7 +17,7 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Self
 
-from pydantic import FilePath, model_validator
+from pydantic import Field, FilePath, model_validator
 from pyspark.sql.types import StructType
 
 from flint import BaseModel
@@ -63,10 +63,10 @@ class ExtractModel(BaseModel):
         options: PySpark reader options as key-value pairs
     """
 
-    name: str
-    method: ExtractMethod
-    data_format: ExtractFormat
-    options: dict[str, Any]
+    name: str = Field(..., description="Identifier for this extraction operation", min_length=1)
+    method: ExtractMethod = Field(..., description="Method of extraction (batch or streaming)")
+    data_format: ExtractFormat = Field(..., description="Format of the data to extract (parquet, json, csv, etc.)")
+    options: dict[str, Any] = Field(..., description="PySpark reader options as key-value pairs")
 
 
 class ExtractFileModel(ExtractModel):

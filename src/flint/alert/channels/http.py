@@ -83,7 +83,7 @@ class HttpChannel(ChannelModel):
             try:
                 response = requests.request(
                     method=self.method,
-                    url=self.url.encoded_string(),
+                    url=str(self.url),
                     headers=self.headers,
                     data=payload,
                     timeout=self.timeout,
