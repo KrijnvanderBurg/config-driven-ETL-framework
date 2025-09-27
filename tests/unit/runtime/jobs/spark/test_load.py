@@ -281,10 +281,10 @@ class TestLoadFileSparkLoad:
         # Arrange
         mock_method = Mock()
         mock_method.value = "invalid_method"
-        
+
         with (
             patch("flint.runtime.jobs.spark.load.LoadSpark.data_registry"),
-            patch.object(load_file_spark, "method", mock_method)
+            patch.object(load_file_spark, "method", mock_method),
         ):
             # Assert
             with pytest.raises(ValueError, match="is not supported for PySpark"):

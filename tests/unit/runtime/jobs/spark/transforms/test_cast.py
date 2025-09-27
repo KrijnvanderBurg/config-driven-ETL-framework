@@ -66,9 +66,7 @@ class TestCastFunctionValidation:
         with pytest.raises(ValidationError):
             CastFunction(**cast_config)
 
-    def test_create_cast_function__with_empty_columns__succeeds(
-        self, cast_config: dict[str, Any]
-    ) -> None:
+    def test_create_cast_function__with_empty_columns__succeeds(self, cast_config: dict[str, Any]) -> None:
         """Test CastFunction creation succeeds with empty columns list."""
         cast_config["arguments"]["columns"] = []
 
