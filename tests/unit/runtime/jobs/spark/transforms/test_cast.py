@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Any
 
 import pytest
+from pydantic import ValidationError
 
 from flint.runtime.jobs.models.transforms.model_cast import CastArgs
 from flint.runtime.jobs.spark.transforms.cast import CastFunction
@@ -25,8 +26,72 @@ def test_cast_creation__from_config__creates_valid_model(cast_config: dict[str, 
     f = CastFunction(**cast_config)
     assert f.function == "cast"
     assert isinstance(f.arguments, CastArgs)
+    assert len(cast_func.arguments.columns) == 1
     assert f.arguments.columns[0].column_name == "age"
     assert f.arguments.columns[0].cast_type == "int"
+
+
+# =========================================================================== #
+# ========================== VALIDATION TESTS ============================= #
+# =========================================================================== #
+
+
+class TestCastFunctionValidation:
+    """Test CastFunction model validation and instantiation."""
+
+    def test_create_cast_function__with_missing_function__raises_validation_error(
+        self, cast_config: dict[str, Any]
+    ) -> None:
+        """Test CastFunction creation fails without function field."""
+        del cast_config["function"]
+
+        with pytest.raises(ValidationError):
+            CastFunction(**cast_config)
+
+    def test_create_cast_function__with_wrong_function_name__raises_validation_error(
+        self, cast_config: dict[str, Any]
+    ) -> None:
+        """Test CastFunction creation fails with wrong function name."""
+        cast_config["function"] = "wrong_name"
+
+        with pytest.raises(ValidationError):
+            CastFunction(**cast_config)
+
+    def test_create_cast_function__with_missing_arguments__raises_validation_error(
+        self, cast_config: dict[str, Any]
+    ) -> None:
+        """Test CastFunction creation fails without arguments field."""
+        del cast_config["arguments"]
+
+        with pytest.raises(ValidationError):
+            CastFunction(**cast_config)
+
+    def test_create_cast_function__with_empty_columns__raises_validation_error(
+        self, cast_config: dict[str, Any]
+    ) -> None:
+        """Test CastFunction creation fails with empty columns list."""
+        cast_config["arguments"]["columns"] = []
+
+        with pytest.raises(ValidationError):
+            CastFunction(**cast_config)
+
+    def test_create_cast_function__with_missing_column_name__raises_validation_error(
+        self, cast_config: dict[str, Any]
+    ) -> None:
+        """Test CastFunction creation fails with missing column_name."""
+        del cast_config["arguments"]["columns"][0]["column_name"]
+
+        with pytest.raises(ValidationError):
+            CastFunction(**cast_config)
+
+    def test_create_cast_function__with_missing_cast_type__raises_validation_error(
+        self, cast_config: dict[str, Any]
+    ) -> None:
+        """Test CastFunction creation fails with missing cast_type."""
+        del cast_config["arguments"]["columns"][0]["cast_type"]
+
+        with pytest.raises(ValidationError):
+            CastFunction(**cast_config)
 
 
 # =========================================================================== #

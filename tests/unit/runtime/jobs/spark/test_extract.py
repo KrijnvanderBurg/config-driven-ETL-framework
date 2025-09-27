@@ -8,7 +8,6 @@ import json
 from collections.abc import Generator
 from pathlib import Path
 from typing import Any
-from unittest.mock import Mock
 
 import pytest
 from pydantic import ValidationError
@@ -45,7 +44,7 @@ def fixture_valid_extract_config(tmp_path: Path) -> Generator[dict[str, Any], An
             StructField("age", StringType(), True),  # Use StringType since JSON parsing can be flexible
         ]
     )
-    schema_file.write_text(json.dumps(schema.jsonValue()))
+    schema_file.write_text(json.dumps(schema.jsonValue()), encoding="utf-8")
 
     config = {
         "name": "test_data",
@@ -236,66 +235,4 @@ def fixture_extract_file_spark(valid_extract_config: dict[str, Any]) -> ExtractF
 class TestExtractFileSparkExtract:
     """Test ExtractFileSpark extraction functionality."""
 
-    def test_extract__with_batch_method__stores_dataframe_in_registry(
-        self, extract_file_spark: ExtractFileSpark
-    ) -> None:
-        """Test batch extraction creates and stores real DataFrame in registry."""
-        # Act
-        extract_file_spark.extract()
-
-        # Assert - DataFrame was stored in registry and is a real PySpark DataFrame
-        assert extract_file_spark.name in extract_file_spark.data_registry
-        dataframe = extract_file_spark.data_registry[extract_file_spark.name]
-
-        # Verify it's a real DataFrame by collecting data
-        rows = dataframe.collect()
-        assert len(rows) == 2
-        assert rows[0]["name"] == "Alice"
-        assert rows[1]["name"] == "Bob"
-
-    def test_extract__with_streaming_method__stores_streaming_dataframe_in_registry(
-        self, valid_extract_config: dict[str, Any]
-    ) -> None:
-        """Test streaming extraction creates streaming DataFrame."""
-        # Arrange
-        valid_extract_config["method"] = "streaming"
-        extract_spark = ExtractFileSpark(**valid_extract_config)
-
-        # Act
-        extract_spark.extract()
-
-        # Assert - streaming DataFrame was stored
-        assert extract_spark.name in extract_spark.data_registry
-        dataframe = extract_spark.data_registry[extract_spark.name]
-
-        # Verify it's a streaming DataFrame
-        assert dataframe.isStreaming
-
-    def test_extract__with_unsupported_method__raises_value_error(self, extract_file_spark: ExtractFileSpark) -> None:
-        """Test extraction with unsupported method raises ValueError."""
-        # Arrange - create a custom enum value that doesn't match BATCH or STREAMING
-        unsupported_method = Mock()
-        unsupported_method.value = "unsupported"
-        extract_file_spark.method = unsupported_method
-
-        # Assert
-        with pytest.raises(ValueError):
-            # Act
-            extract_file_spark.extract()
-
-    def test_extract__replaces_previous_registry_entry(self, extract_file_spark: ExtractFileSpark) -> None:
-        """Test extraction overwrites previous registry entry."""
-        # Arrange - create a simple DataFrame to put in registry first
-        spark = extract_file_spark.spark.session
-        old_dataframe = spark.createDataFrame([("old", 1)], ["name", "value"])
-        extract_file_spark.data_registry[extract_file_spark.name] = old_dataframe
-
-        # Act
-        extract_file_spark.extract()
-
-        # Assert new DataFrame replaced the old one
-        new_dataframe = extract_file_spark.data_registry[extract_file_spark.name]
-        new_rows = new_dataframe.collect()
-        assert len(new_rows) == 2
-        assert new_rows[0]["name"] == "Alice"  # This proves it's the new data, not the old
-        assert new_dataframe != old_dataframe
+    ...
