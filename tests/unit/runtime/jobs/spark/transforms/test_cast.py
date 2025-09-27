@@ -26,7 +26,7 @@ def test_cast_creation__from_config__creates_valid_model(cast_config: dict[str, 
     f = CastFunction(**cast_config)
     assert f.function == "cast"
     assert isinstance(f.arguments, CastArgs)
-    assert len(cast_func.arguments.columns) == 1
+    assert len(f.arguments.columns) == 1
     assert f.arguments.columns[0].column_name == "age"
     assert f.arguments.columns[0].cast_type == "int"
 
@@ -66,14 +66,17 @@ class TestCastFunctionValidation:
         with pytest.raises(ValidationError):
             CastFunction(**cast_config)
 
-    def test_create_cast_function__with_empty_columns__raises_validation_error(
+    def test_create_cast_function__with_empty_columns__succeeds(
         self, cast_config: dict[str, Any]
     ) -> None:
-        """Test CastFunction creation fails with empty columns list."""
+        """Test CastFunction creation succeeds with empty columns list."""
         cast_config["arguments"]["columns"] = []
 
-        with pytest.raises(ValidationError):
-            CastFunction(**cast_config)
+        # Act
+        cast_function = CastFunction(**cast_config)
+
+        # Assert
+        assert cast_function.arguments.columns == []
 
     def test_create_cast_function__with_missing_column_name__raises_validation_error(
         self, cast_config: dict[str, Any]

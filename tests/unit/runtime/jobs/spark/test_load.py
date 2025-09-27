@@ -8,6 +8,7 @@ import json
 from collections.abc import Generator
 from pathlib import Path
 from typing import Any
+from unittest.mock import Mock, patch
 
 import pytest
 from pydantic import ValidationError
@@ -241,4 +242,51 @@ def fixture_load_file_spark(valid_load_config: dict[str, Any]) -> LoadFileSpark:
 class TestLoadFileSparkLoad:
     """Test LoadFileSpark load functionality."""
 
-    ...
+    def test_load__with_batch_method__calls_load_batch(self, load_file_spark: LoadFileSpark) -> None:
+        """Test load method calls _load_batch for batch loading."""
+        # Arrange
+        with (
+            patch("flint.runtime.jobs.spark.load.LoadSpark.data_registry"),
+            patch.object(load_file_spark, "_load_batch") as mock_load_batch,
+            patch.object(load_file_spark, "_load_schema") as mock_load_schema,
+        ):
+            # Act
+            load_file_spark.load()
+
+            # Assert
+            mock_load_batch.assert_called_once()
+            mock_load_schema.assert_called_once()
+
+    def test_load__with_streaming_method__calls_load_streaming(self, valid_load_config: dict[str, Any]) -> None:
+        """Test load method calls _load_streaming for streaming loading."""
+        # Arrange
+        valid_load_config["method"] = "streaming"
+        load_streaming = LoadFileSpark(**valid_load_config)
+        mock_query = Mock()
+
+        with (
+            patch("flint.runtime.jobs.spark.load.LoadSpark.data_registry"),
+            patch.object(load_streaming, "_load_streaming", return_value=mock_query) as mock_load_streaming,
+            patch.object(load_streaming, "_load_schema") as mock_load_schema,
+        ):
+            # Act
+            load_streaming.load()
+
+            # Assert
+            mock_load_streaming.assert_called_once()
+            mock_load_schema.assert_called_once()
+
+    def test_load__with_invalid_method__raises_value_error(self, load_file_spark: LoadFileSpark) -> None:
+        """Test load method raises ValueError for unsupported loading method."""
+        # Arrange
+        mock_method = Mock()
+        mock_method.value = "invalid_method"
+        
+        with (
+            patch("flint.runtime.jobs.spark.load.LoadSpark.data_registry"),
+            patch.object(load_file_spark, "method", mock_method)
+        ):
+            # Assert
+            with pytest.raises(ValueError, match="is not supported for PySpark"):
+                # Act
+                load_file_spark.load()

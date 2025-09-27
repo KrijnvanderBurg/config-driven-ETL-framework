@@ -8,6 +8,7 @@ import json
 from collections.abc import Generator
 from pathlib import Path
 from typing import Any
+from unittest.mock import Mock, patch
 
 import pytest
 from pydantic import ValidationError
@@ -235,4 +236,44 @@ def fixture_extract_file_spark(valid_extract_config: dict[str, Any]) -> ExtractF
 class TestExtractFileSparkExtract:
     """Test ExtractFileSpark extraction functionality."""
 
-    ...
+    def test_extract__with_batch_method__calls_extract_batch(self, extract_file_spark: ExtractFileSpark) -> None:
+        """Test extract method calls _extract_batch for batch extraction."""
+        # Arrange
+        mock_dataframe = Mock()
+
+        with patch.object(extract_file_spark, "_extract_batch", return_value=mock_dataframe) as mock_extract_batch:
+            # Act
+            extract_file_spark.extract()
+
+            # Assert
+            mock_extract_batch.assert_called_once()
+
+    def test_extract__with_streaming_method__calls_extract_streaming(
+        self, valid_extract_config: dict[str, Any]
+    ) -> None:
+        """Test extract method calls _extract_streaming for streaming extraction."""
+        # Arrange
+        valid_extract_config["method"] = "streaming"
+        extract_streaming = ExtractFileSpark(**valid_extract_config)
+        mock_dataframe = Mock()
+
+        with patch.object(
+            extract_streaming, "_extract_streaming", return_value=mock_dataframe
+        ) as mock_extract_streaming:
+            # Act
+            extract_streaming.extract()
+
+            # Assert
+            mock_extract_streaming.assert_called_once()
+
+    def test_extract__with_invalid_method__raises_value_error(self, extract_file_spark: ExtractFileSpark) -> None:
+        """Test extract method raises ValueError for unsupported extraction method."""
+        # Arrange
+        mock_method = Mock()
+        mock_method.value = "invalid_method"
+        
+        with patch.object(extract_file_spark, "method", mock_method):
+            # Assert
+            with pytest.raises(ValueError, match="is not supported for PySpark"):
+                # Act
+                extract_file_spark.extract()
