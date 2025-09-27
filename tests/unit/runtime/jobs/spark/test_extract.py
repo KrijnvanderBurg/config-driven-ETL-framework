@@ -8,7 +8,7 @@ import json
 from collections.abc import Generator
 from pathlib import Path
 from typing import Any
-from unittest.mock import Mock, patch
+from unittest.mock import ANY, Mock, patch
 
 import pytest
 from pydantic import ValidationError
@@ -277,3 +277,56 @@ class TestExtractFileSparkExtract:
             with pytest.raises(ValueError, match="is not supported for PySpark"):
                 # Act
                 extract_file_spark.extract()
+
+    def test_extract__with_batch_method__calls_spark_read_load(self, extract_file_spark: ExtractFileSpark) -> None:
+        """Test extract method with batch calls spark.session.read.load with correct parameters."""
+        # Arrange
+        mock_dataframe = Mock()
+        mock_dataframe.count.return_value = 10
+        mock_read = Mock()
+        mock_read.load.return_value = mock_dataframe
+        mock_session = Mock()
+        mock_session.read = mock_read
+
+        with patch("flint.runtime.jobs.spark.extract.ExtractSpark.spark") as mock_spark_handler:
+            mock_spark_handler.session = mock_session
+            mock_spark_handler.add_configs = Mock()
+
+            # Act
+            extract_file_spark.extract()
+
+            # Assert
+            mock_read.load.assert_called_once_with(
+                path=extract_file_spark.location,
+                format=extract_file_spark.data_format.value,
+                schema=ANY,
+                **extract_file_spark.options,
+            )
+
+    def test_extract__with_streaming_method__calls_spark_read_stream_load(
+        self, valid_extract_config: dict[str, Any]
+    ) -> None:
+        """Test extract method with streaming calls spark.session.readStream.load with correct parameters."""
+        # Arrange
+        valid_extract_config["method"] = "streaming"
+        extract_streaming = ExtractFileSpark(**valid_extract_config)
+        mock_dataframe = Mock()
+        mock_read_stream = Mock()
+        mock_read_stream.load.return_value = mock_dataframe
+        mock_session = Mock()
+        mock_session.readStream = mock_read_stream
+
+        with patch("flint.runtime.jobs.spark.extract.ExtractSpark.spark") as mock_spark_handler:
+            mock_spark_handler.session = mock_session
+            mock_spark_handler.add_configs = Mock()
+
+            # Act
+            extract_streaming.extract()
+
+            # Assert
+            mock_read_stream.load.assert_called_once_with(
+                path=extract_streaming.location,
+                format=extract_streaming.data_format.value,
+                schema=ANY,
+                **extract_streaming.options,
+            )
