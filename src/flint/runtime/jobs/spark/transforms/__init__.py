@@ -12,7 +12,7 @@ from pydantic import Discriminator
 from .cast import CastFunction
 from .drop import DropFunction
 from .dropduplicates import DropDuplicatesFunction
-from .filter_ import FilterFunction
+from .filter import FilterFunction
 from .join import JoinFunction
 from .select import SelectFunction
 from .withcolumn import WithColumnFunction

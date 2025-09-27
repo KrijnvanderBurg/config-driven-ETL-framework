@@ -29,8 +29,8 @@ class TestSchemaHandlers:
         - Edge cases for missing or malformed schema definitions
     """
 
-    @pytest.fixture
-    def schema_struct(self) -> StructType:
+    @pytest.fixture(name="schema_struct")
+    def fixture_schema_struct(self) -> StructType:
         """
         Return a sample PySpark StructType schema for testing.
 
@@ -45,8 +45,8 @@ class TestSchemaHandlers:
             ]
         )
 
-    @pytest.fixture
-    def schema_json_file(self, schema_struct: StructType) -> Path:
+    @pytest.fixture(name="schema_json_file")
+    def fixture_schema_json_file(self, schema_struct: StructType) -> Path:
         """
         Create a temporary named JSON file containing the schema definition.
 
@@ -62,8 +62,8 @@ class TestSchemaHandlers:
             f.flush()
             return Path(f.name)
 
-    @pytest.fixture
-    def schema_dict(self, schema_struct: StructType) -> dict:
+    @pytest.fixture(name="schema_dict")
+    def fixture_schema_dict(self, schema_struct: StructType) -> dict:
         """
         Convert the sample schema to a dictionary representation.
 
@@ -75,8 +75,8 @@ class TestSchemaHandlers:
         """
         return schema_struct.jsonValue()
 
-    @pytest.fixture
-    def schema_json_str(self, schema_struct: StructType) -> str:
+    @pytest.fixture(name="schema_json_str")
+    def fixture_schema_json_str(self, schema_struct: StructType) -> str:
         """
         Convert the sample schema to a JSON string representation.
 
