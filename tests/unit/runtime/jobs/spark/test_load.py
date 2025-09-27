@@ -241,9 +241,7 @@ def fixture_load_file_spark(valid_load_config: dict[str, Any]) -> LoadFileSpark:
 class TestLoadFileSparkLoad:
     """Test LoadFileSpark load functionality."""
 
-    def test_load__with_batch_method__loads_data_to_file_successfully(
-        self, load_file_spark: LoadFileSpark
-    ) -> None:
+    def test_load__with_batch_method__loads_data_to_file_successfully(self, load_file_spark: LoadFileSpark) -> None:
         """Test batch load writes DataFrame data to file location."""
         # Arrange - create test data in the registry under upstream_name
         spark = load_file_spark.spark.session
@@ -257,7 +255,7 @@ class TestLoadFileSparkLoad:
         # Assert - data was copied to load_file_spark.name in registry
         assert load_file_spark.name in load_file_spark.data_registry
         loaded_dataframe = load_file_spark.data_registry[load_file_spark.name]
-        
+
         # Verify the data is the same as upstream
         loaded_rows = loaded_dataframe.collect()
         assert len(loaded_rows) == 2
@@ -274,9 +272,9 @@ class TestLoadFileSparkLoad:
         # Add checkpoint location for streaming
         checkpoint_dir = tmp_path / "checkpoint"
         valid_load_config["options"]["checkpointLocation"] = str(checkpoint_dir)
-        
+
         load_spark = LoadFileSpark(**valid_load_config)
-        
+
         # Create streaming test data
         spark = load_spark.spark.session
         # Convert to streaming DataFrame by reading from a stream-like source
@@ -289,10 +287,10 @@ class TestLoadFileSparkLoad:
         # Assert - streaming query was created and stored
         assert load_spark.name in load_spark.streaming_query_registry
         streaming_query = load_spark.streaming_query_registry[load_spark.name]
-        
+
         # Verify it's a streaming query
         assert streaming_query.isActive
-        
+
         # Clean up
         streaming_query.stop()
 
@@ -302,9 +300,10 @@ class TestLoadFileSparkLoad:
         spark = load_file_spark.spark.session
         upstream_dataframe = spark.createDataFrame([("test", 1)], ["name", "value"])
         load_file_spark.data_registry[load_file_spark.upstream_name] = upstream_dataframe
-        
+
         # Create unsupported method
         from unittest.mock import Mock
+
         unsupported_method = Mock()
         unsupported_method.value = "unsupported"
         load_file_spark.method = unsupported_method
@@ -328,7 +327,7 @@ class TestLoadFileSparkLoad:
         copied_dataframe = load_file_spark.data_registry[load_file_spark.name]
         copied_rows = copied_dataframe.collect()
         original_rows = original_dataframe.collect()
-        
+
         # Verify same data
         assert len(copied_rows) == len(original_rows) == 1
         assert copied_rows[0]["type"] == original_rows[0]["type"] == "original"
@@ -339,7 +338,7 @@ class TestLoadFileSparkLoad:
         # Arrange
         valid_load_config["schema_location"] = None
         load_spark = LoadFileSpark(**valid_load_config)
-        
+
         spark = load_spark.spark.session
         upstream_dataframe = spark.createDataFrame([("test", 1)], ["name", "value"])
         load_spark.data_registry[load_spark.upstream_name] = upstream_dataframe
@@ -364,11 +363,11 @@ class TestLoadFileSparkLoad:
 
         # Assert - schema file was created
         assert Path(load_file_spark.schema_location).exists()
-        
+
         # Verify schema content
         schema_content = Path(load_file_spark.schema_location).read_text(encoding="utf-8")
         schema_dict = json.loads(schema_content)
-        
+
         # Check that it's a valid PySpark schema JSON structure
         assert "type" in schema_dict
         assert schema_dict["type"] == "struct"
