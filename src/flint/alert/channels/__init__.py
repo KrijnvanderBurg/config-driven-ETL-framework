@@ -11,7 +11,7 @@ Available Channels:
 """
 
 import logging
-from typing import Annotated, Final
+from typing import Annotated
 
 from pydantic import Discriminator
 

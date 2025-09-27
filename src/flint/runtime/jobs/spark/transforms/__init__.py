@@ -5,7 +5,7 @@ TransformFunctionRegistry. Each transform function is automatically registered
 when imported.
 """
 
-from typing import Annotated, Union
+from typing import Annotated
 
 from pydantic import Discriminator
 
@@ -28,14 +28,12 @@ __all__ = [
 ]
 
 TransformFunctionSparkUnion = Annotated[
-    Union[
-        CastFunction,
-        DropFunction,
-        DropDuplicatesFunction,
-        FilterFunction,
-        JoinFunction,
-        SelectFunction,
-        WithColumnFunction,
-    ],
+    CastFunction
+    | DropFunction
+    | DropDuplicatesFunction
+    | FilterFunction
+    | JoinFunction
+    | SelectFunction
+    | WithColumnFunction,
     Discriminator("function"),
 ]

@@ -1,3 +1,5 @@
+"""Alerting module for Flint."""
+
 import logging
 
 from flint.alert.controller import AlertController

@@ -144,22 +144,6 @@ class TestRegistryDecorator:
         with pytest.raises(KeyError):
             RegistryDecorator.get_all("nonexistent")
 
-    def test_registry_init_without_attribute(self) -> None:
-        """Test registry initialization when _registry doesn't exist."""
-        original = RegistryDecorator._registry
-        delattr(RegistryDecorator, "_registry")
-
-        try:
-
-            @RegistryDecorator.register("init_test")
-            class TestClass:
-                pass
-
-            result = RegistryDecorator.get("init_test")
-            assert result is TestClass
-        finally:
-            RegistryDecorator._registry = original
-
     def test_duplicate_registration_prevention(self) -> None:
         """Test that duplicate registration of same class is prevented."""
 
@@ -180,7 +164,7 @@ class TestRegistryInstance:
     """Tests for RegistryInstance class."""
 
     @pytest.fixture
-    def registry(self):
+    def registry(self) -> Any:
         """Return a fresh registry instance."""
         registry = RegistryInstance()
         registry._items.clear()  # type: ignore

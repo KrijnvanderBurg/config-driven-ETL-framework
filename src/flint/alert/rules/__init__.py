@@ -7,7 +7,7 @@ The rule system follows the same pattern as transform functions, with
 abstract base classes, registries, and concrete implementations.
 """
 
-from typing import Annotated, Union
+from typing import Annotated
 
 from pydantic import Discriminator
 
@@ -21,9 +21,6 @@ __all__ = [
 
 
 AlertRuleUnion = Annotated[
-    Union[
-        EnvVarsMatchesRule,
-        ExceptionRegexRule,
-    ],
+    EnvVarsMatchesRule | ExceptionRegexRule,
     Discriminator("rule"),
 ]

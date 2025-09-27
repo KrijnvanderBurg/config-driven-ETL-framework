@@ -15,7 +15,7 @@ from typing import Literal
 from pydantic import Field
 from typing_extensions import override
 
-from flint.alert.channels import ChannelModel
+from flint.alert.channels.base import ChannelModel
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
