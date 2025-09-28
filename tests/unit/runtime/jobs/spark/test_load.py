@@ -240,7 +240,6 @@ class TestLoadFileSparkLoad:
     def test_load__with_batch_method__calls_load_batch(self, load_file_spark: LoadFileSpark) -> None:
         """Test load method calls _load_batch for batch loading."""
         # Arrange
-        load_file_spark.schema_location = None
 
         with (
             patch("flint.runtime.jobs.spark.load.LoadSpark.data_registry"),

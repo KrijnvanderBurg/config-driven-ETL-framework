@@ -96,9 +96,6 @@ class RegistryDecorator(Generic[K, V]):
         Returns:
             A decorator function that registers the class and returns it unchanged
         """
-        # Ensure the registry is initialized
-        if not hasattr(cls, "_registry"):
-            cls._registry = {}
 
         def decorator(registered_class: type[V]) -> type[V]:
             if key not in cls._registry:
