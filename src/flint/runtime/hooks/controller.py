@@ -1,0 +1,43 @@
+"""Controller for managing hooks."""
+
+from abc import ABC
+
+from pydantic import Field
+
+from flint import BaseModel
+from flint.runtime.hooks.actions.base import ActionBase
+
+
+class HooksController(BaseModel, ABC):
+    """A controller for managing hooks in a model.
+
+    Args:
+        model (BaseModel): The model to manage hooks for.
+    """
+
+    onStart: list[ActionBase] = Field(default_factory=list, description="Actions to perform on Job start.")
+    onError: list[ActionBase] = Field(default_factory=list, description="Actions to perform on Job error.")
+    onSuccess: list[ActionBase] = Field(default_factory=list, description="Actions to perform on Job success.")
+    onFinally: list[ActionBase] = Field(
+        default_factory=list, description="Actions to perform on Job end, regardless of success or error."
+    )
+
+    def on_start(self) -> None:
+        """Execute all actions defined in the onStart hook."""
+        for action in self.onStart:
+            action.execute()
+
+    def on_error(self) -> None:
+        """Execute all actions defined in the onError hook."""
+        for action in self.onError:
+            action.execute()
+
+    def on_success(self) -> None:
+        """Execute all actions defined in the onSuccess hook."""
+        for action in self.onSuccess:
+            action.execute()
+
+    def on_finally(self) -> None:
+        """Execute all actions defined in the onFinally hook."""
+        for action in self.onFinally:
+            action.execute()
