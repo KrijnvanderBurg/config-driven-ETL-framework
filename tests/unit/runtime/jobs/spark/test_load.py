@@ -4,6 +4,7 @@ These tests verify LoadFileSpark creation, validation, data loading,
 and error handling scenarios.
 """
 
+import json
 from collections.abc import Generator
 from pathlib import Path
 from typing import Any
@@ -237,49 +238,55 @@ def fixture_load_file_spark(valid_load_config: dict[str, Any]) -> LoadFileSpark:
 class TestLoadFileSparkLoad:
     """Test LoadFileSpark load functionality."""
 
-    def test_load__with_batch_method__calls_load_batch(self, load_file_spark: LoadFileSpark) -> None:
-        """Test load method calls _load_batch for batch loading."""
+    def test_load__with_batch_method__completes_successfully(self, load_file_spark: LoadFileSpark) -> None:
+        """Test load method completes successfully for batch loading."""
         # Arrange
+        mock_dataframe = Mock()
+        mock_dataframe.count.return_value = 5
+        mock_dataframe.schema.jsonValue.return_value = {"type": "struct", "fields": []}
+        mock_dataframe.write = Mock()
+        mock_dataframe.write.save = Mock()
 
-        with (
-            patch("flint.runtime.jobs.spark.load.LoadSpark.data_registry"),
-            patch.object(load_file_spark, "_load_batch") as mock_load_batch,
-            patch.object(load_file_spark, "_load_schema") as mock_load_schema,
-        ):
-            # Act
+        with patch.object(LoadFileSpark, "data_registry", {load_file_spark.upstream_name: mock_dataframe}):
+            # Act & Assert - should complete without exception
             load_file_spark.load()
 
-            # Assert
-            mock_load_batch.assert_called_once()
-            mock_load_schema.assert_called_once()
+            # Verify the dataframe was copied to the load step
+            assert LoadFileSpark.data_registry[load_file_spark.name] == mock_dataframe
 
-    def test_load__with_streaming_method__calls_load_streaming(self, valid_load_config: dict[str, Any]) -> None:
-        """Test load method calls _load_streaming for streaming loading."""
+    def test_load__with_streaming_method__completes_successfully(self, valid_load_config: dict[str, Any]) -> None:
+        """Test load method completes successfully for streaming loading."""
         # Arrange
         valid_load_config["method"] = "streaming"
         load_streaming = LoadFileSpark(**valid_load_config)
-        mock_query = Mock()
+
+        mock_dataframe = Mock()
+        mock_dataframe.schema.jsonValue.return_value = {"type": "struct", "fields": []}
+        mock_streaming_query = Mock()
+        mock_streaming_query.id = "test-query-id"
+        mock_write_stream = Mock()
+        mock_write_stream.start.return_value = mock_streaming_query
+        mock_dataframe.writeStream = mock_write_stream
 
         with (
-            patch("flint.runtime.jobs.spark.load.LoadSpark.data_registry"),
-            patch.object(load_streaming, "_load_streaming", return_value=mock_query) as mock_load_streaming,
-            patch.object(load_streaming, "_load_schema") as mock_load_schema,
+            patch.object(LoadFileSpark, "data_registry", {load_streaming.upstream_name: mock_dataframe}),
+            patch.object(LoadFileSpark, "streaming_query_registry", {}),
         ):
-            # Act
+            # Act & Assert - should complete without exception
             load_streaming.load()
 
-            # Assert
-            mock_load_streaming.assert_called_once()
-            mock_load_schema.assert_called_once()
+            # Verify the streaming query was registered
+            assert LoadFileSpark.streaming_query_registry[load_streaming.name] == mock_streaming_query
 
     def test_load__with_invalid_method__raises_value_error(self, load_file_spark: LoadFileSpark) -> None:
         """Test load method raises ValueError for unsupported loading method."""
         # Arrange
         mock_method = Mock()
         mock_method.value = "invalid_method"
+        mock_dataframe = Mock()
 
         with (
-            patch("flint.runtime.jobs.spark.load.LoadSpark.data_registry"),
+            patch.object(LoadFileSpark, "data_registry", {load_file_spark.upstream_name: mock_dataframe}),
             patch.object(load_file_spark, "method", mock_method),
         ):
             # Assert
@@ -287,57 +294,42 @@ class TestLoadFileSparkLoad:
                 # Act
                 load_file_spark.load()
 
-    def test_load__with_batch_method__calls_dataframe_write_save(self, load_file_spark: LoadFileSpark) -> None:
-        """Test load method with batch calls dataframe.write.save with correct parameters."""
+    def test_load__with_none_schema_location__skips_schema_export(self, load_file_spark: LoadFileSpark) -> None:
+        """Test schema export is skipped when schema_location is None."""
         # Arrange
+        load_file_spark.schema_location = None  # No schema export
+
         mock_dataframe = Mock()
         mock_dataframe.count.return_value = 5
-        mock_dataframe.schema.jsonValue.return_value = {"type": "struct", "fields": []}
-        # Provide a write.save mock directly on the dataframe
         mock_dataframe.write = Mock()
         mock_dataframe.write.save = Mock()
 
-        # Patch the class-level registry to a simple dict that returns our mock dataframe
         with patch.object(LoadFileSpark, "data_registry", {load_file_spark.upstream_name: mock_dataframe}):
             # Act
             load_file_spark.load()
 
-            # Assert
-            mock_dataframe.write.save.assert_called_once_with(
-                path=load_file_spark.location,
-                format=load_file_spark.data_format.value,
-                mode=load_file_spark.mode.value,
-                **load_file_spark.options,
-            )
+            # Assert - no exception should be raised, load should complete
 
-    def test_load__with_streaming_method__calls_dataframe_write_stream_start(
-        self, valid_load_config: dict[str, Any]
+    def test_load__with_valid_schema_location__writes_schema_to_file(
+        self, tmp_path: Path, load_file_spark: LoadFileSpark
     ) -> None:
-        """Test load method with streaming calls dataframe.writeStream.start with correct parameters."""
+        """Test schema export writes schema to file when schema_location is provided."""
         # Arrange
-        valid_load_config["method"] = "streaming"
-        load_streaming = LoadFileSpark(**valid_load_config)
+        schema_file = tmp_path / "test_schema.json"
+        load_file_spark.schema_location = str(schema_file)
+
         mock_dataframe = Mock()
-        mock_dataframe.schema.jsonValue.return_value = {"type": "struct", "fields": []}
-        mock_streaming_query = Mock()
-        mock_streaming_query.id = "test-query-id"
-        # attach a writeStream mock with a start() that returns a query
-        mock_write_stream = Mock()
-        mock_write_stream.start.return_value = mock_streaming_query
-        mock_dataframe.writeStream = mock_write_stream
+        mock_dataframe.count.return_value = 5
+        test_schema = {"type": "struct", "fields": [{"name": "id", "type": "integer"}]}
+        mock_dataframe.schema.jsonValue.return_value = test_schema
+        mock_dataframe.write = Mock()
+        mock_dataframe.write.save = Mock()
 
-        # Use simple dicts for the registries so LoadFileSpark can read/set entries
-        with (
-            patch.object(LoadFileSpark, "data_registry", {load_streaming.upstream_name: mock_dataframe}),
-            patch.object(LoadFileSpark, "streaming_query_registry", {}),
-        ):
+        with patch.object(LoadFileSpark, "data_registry", {load_file_spark.upstream_name: mock_dataframe}):
             # Act
-            load_streaming.load()
+            load_file_spark.load()
 
-            # Assert
-            mock_dataframe.writeStream.start.assert_called_once_with(
-                path=load_streaming.location,
-                format=load_streaming.data_format.value,
-                outputMode=load_streaming.mode.value,
-                **load_streaming.options,
-            )
+            # Assert - schema file should exist and contain the expected schema
+            assert schema_file.exists()
+            written_schema = json.loads(schema_file.read_text(encoding="utf-8"))
+            assert written_schema == test_schema

@@ -55,22 +55,20 @@ class LoadSpark(LoadModel, ABC):
             A streaming query object that can be used to monitor the stream
         """
 
-    def _load_schema(self) -> None:
+    def _export_schema(self, schema_json: str, schema_path: str) -> None:
         """
-        load schema from DataFrame.
+        Export DataFrame schema to a JSON file.
+
+        Args:
+            schema_json: JSON representation of the DataFrame schema
+            schema_path: File path where schema should be written
         """
-        if self.schema_location is None:
-            logger.debug("No schema location specified for %s, skipping schema export", self.name)
-            return
+        logger.debug("Exporting schema for %s to: %s", self.name, schema_path)
 
-        logger.debug("Exporting schema for %s to: %s", self.name, self.schema_location)
+        with open(schema_path, mode="w", encoding="utf-8") as f:
+            f.write(schema_json)
 
-        schema = json.dumps(self.data_registry[self.name].schema.jsonValue())
-
-        with open(self.schema_location, mode="w", encoding="utf-8") as f:
-            f.write(schema)
-
-        logger.info("Schema exported successfully for %s to: %s", self.name, self.schema_location)
+        logger.info("Schema exported successfully for %s to: %s", self.name, schema_path)
 
     def load(self) -> None:
         """
@@ -100,7 +98,11 @@ class LoadSpark(LoadModel, ABC):
         else:
             raise ValueError(f"Loading method {self.method} is not supported for PySpark")
 
-        self._load_schema()
+        # Export schema if location is specified
+        if self.schema_location is not None:
+            schema_json = json.dumps(self.data_registry[self.name].schema.jsonValue())
+            self._export_schema(schema_json, self.schema_location)
+
         logger.info("Load operation completed successfully for: %s", self.name)
 
 
