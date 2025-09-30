@@ -11,4 +11,4 @@ from flint.runtime.jobs.spark.job import JobSpark
 # Job = Annotated[Union[JobSpark, JobPandas, JobDask], Discriminator("engine")]
 Job = JobSpark
 
-__all__ = ["Job"]
+__all__ = ["Job", "JobSpark"]

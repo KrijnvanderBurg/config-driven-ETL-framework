@@ -1,14 +1,12 @@
 """Controller for managing hooks."""
 
-from abc import ABC
-
 from pydantic import Field
 
 from flint import BaseModel
-from flint.runtime.hooks.actions.base import ActionBase
+from flint.actions.base import ActionBase
 
 
-class HooksController(BaseModel, ABC):
+class Hooks(BaseModel):
     """A controller for managing hooks in a model.
 
     Args:

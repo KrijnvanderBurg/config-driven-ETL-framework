@@ -132,55 +132,55 @@
                             "header": true
                         }
                     }
-                ]
+                ],
+                "hooks": {
+                    "onStart": [],
+                    "onFailure": [],
+                    "onSuccess": [
+                        {
+                            "name": "notify-data-is-ready",
+                            "type": "https",
+                            "config": {
+                                "url": "https://.slack.com",
+                                "method": "POST",
+                                "headers": {
+                                    "Content-Type": "application/json"
+                                },
+                                "timeout": 30,
+                                "retry": {
+                                    "error_on_alert_failure": true,
+                                    "attempts": 3,
+                                    "delay_in_seconds": 30
+                                }
+                            }
+                        }
+                    ],
+                    "onFinally": [
+                        {
+                            "name": "archive-processed-files",
+                            "action": "move_or_copy_job_files",
+                            "operation": "move",                        // allowed: "move" | "copy"
+                            "source_location": "incoming/daily/",       // filepath, directory, or "dataframe"
+                            "destination_location": "archive/daily/",   // filepath or directory (base target)
+                            "hierarchy_base_path": "incoming/daily/",   // optional; root used when preserving source hierarchy
+                            "duplicate_handling": {
+                                "dedupe_by": ["checksum"],              // options: "checksum"
+                                "on_match": "skip",                     // destination already exists and is identical -> allowed: "overwrite" | "version"
+                                "on_mismatch": "version",               // destination already exists but is not identical -> allowed: "overwrite" | "version" | "fail" | "notify"
+                                "checksum": {
+                                    "algorithm": "sha256",              // allowed: "md5", "sha1", "sha256"
+                                    "chunk_size_bytes": 65536,          // default 65536 (64 KiB)
+                                    "verify_checksum_after_transfer": false    // optional post-transfer verification
+                                },
+                                "version": {
+                                    "datetime_format": "yyyyMMddHHmmss", // format applied when creating versioned filenames
+                                    "timestamp_timezone": "UTC"
+                                }
+                            }
+                        }
+                    ]
+                }
             }
-        ],
-        "hooks": {
-            "onStart": [],
-            "onFailure": [],
-            "onSuccess": [
-                {
-                    "name": "notify-data-is-ready",
-                    "type": "https",
-                    "config": {
-                        "url": "https://.slack.com",
-                        "method": "POST",
-                        "headers": {
-                            "Content-Type": "application/json"
-                        },
-                        "timeout": 30,
-                        "retry": {
-                            "error_on_alert_failure": true,
-                            "attempts": 3,
-                            "delay_in_seconds": 30
-                        }
-                    }
-                }
-            ],
-            "onFinally": [
-                {
-                    "name": "archive-processed-files",
-                    "action": "move_or_copy_job_files",
-                    "operation": "move",                        // allowed: "move" | "copy"
-                    "source_location": "incoming/daily/",       // filepath, directory, or "dataframe"
-                    "destination_location": "archive/daily/",   // filepath or directory (base target)
-                    "hierarchy_base_path": "incoming/daily/",   // optional; root used when preserving source hierarchy
-                    "duplicate_handling": {
-                        "dedupe_by": ["checksum"],              // options: "checksum"
-                        "on_match": "skip",                     // destination already exists and is identical -> allowed: "overwrite" | "version"
-                        "on_mismatch": "version",               // destination already exists but is not identical -> allowed: "overwrite" | "version" | "fail" | "notify"
-                        "checksum": {
-                            "algorithm": "sha256",              // allowed: "md5", "sha1", "sha256"
-                            "chunk_size_bytes": 65536,          // default 65536 (64 KiB)
-                            "verify_checksum_after_transfer": false    // optional post-transfer verification
-                        },
-                        "version": {
-                            "datetime_format": "yyyyMMddHHmmss", // format applied when creating versioned filenames
-                            "timestamp_timezone": "UTC"
-                        }
-                    }
-                }
-            ]
-        }
+        ]
     }
 }

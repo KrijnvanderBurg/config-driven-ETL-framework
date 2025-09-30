@@ -14,6 +14,7 @@ from enum import Enum
 from pydantic import Field
 
 from flint import BaseModel
+from flint.runtime.jobs.hooks import Hooks
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -48,6 +49,8 @@ class JobBase(BaseModel, ABC):
     description: str = Field(..., description="Human-readable description of the job's purpose")
     enabled: bool = Field(..., description="Whether this job should be executed")
     engine: JobEngine = Field(..., description="The execution engine to use for this job")
+    # implementation job
+    hooks: Hooks = Field(..., description="Hooks to execute at various stages of the job lifecycle")
 
     @abstractmethod
     def execute(self) -> None:
