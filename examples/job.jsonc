@@ -139,19 +139,18 @@
                     "onSuccess": [
                         {
                             "name": "notify-data-is-ready",
-                            "type": "https",
-                            "config": {
-                                "url": "https://.slack.com",
-                                "method": "POST",
-                                "headers": {
-                                    "Content-Type": "application/json"
-                                },
-                                "timeout": 30,
-                                "retry": {
-                                    "error_on_alert_failure": true,
-                                    "attempts": 3,
-                                    "delay_in_seconds": 30
-                                }
+                            "action": "http_request",
+                            "url": "https://.slack.com",
+                            "method": "POST",
+                            "headers": {
+                                "Content-Type": "application/json"
+                            },
+                            "payload": {},
+                            "timeout": 30,
+                            "retry": {
+                                "error_on_alert_failure": true,
+                                "attempts": 3,
+                                "delay_in_seconds": 30
                             }
                         }
                     ],
@@ -164,7 +163,7 @@
                             "destination_location": "archive/daily/",   // filepath or directory (base target)
                             "hierarchy_base_path": "incoming/daily/",   // optional; root used when preserving source hierarchy
                             "duplicate_handling": {
-                                "dedupe_by": ["checksum"],              // options: "checksum"
+                                "dedupe_by": ["size", "checksum"],      // options: "checksum" | "size"
                                 "on_match": "skip",                     // destination already exists and is identical -> allowed: "overwrite" | "version"
                                 "on_mismatch": "version",               // destination already exists but is not identical -> allowed: "overwrite" | "version" | "fail" | "notify"
                                 "checksum": {

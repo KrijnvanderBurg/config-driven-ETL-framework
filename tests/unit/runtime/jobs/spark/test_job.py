@@ -53,6 +53,12 @@ def fixture_job_config(tmp_path: Path) -> Generator[dict[str, Any], Any, None]:
                 "data_format": "csv",
             }
         ],
+        "hooks": {
+            "onStart": [],
+            "onError": [],
+            "onSuccess": [],
+            "onFinally": [],
+        },
     }
 
     yield data

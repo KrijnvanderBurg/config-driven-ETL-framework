@@ -12,7 +12,7 @@ from pydantic import ValidationError
 
 from flint import BaseModel
 from flint.exceptions import FlintIOError, FlintRuntimeConfigurationError
-from flint.runtime.jobs import Job
+from flint.runtime.jobs import JobUnion
 from flint.utils.file import FileHandlerContext
 from flint.utils.logger import get_logger
 
@@ -31,7 +31,7 @@ class RuntimeController(BaseModel):
         globals: Global configuration including channels and framework settings
     """
 
-    jobs: list[Job]
+    jobs: list[JobUnion]
 
     @classmethod
     def from_file(cls, filepath: Path) -> Self:

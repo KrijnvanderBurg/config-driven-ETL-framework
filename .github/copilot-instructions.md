@@ -1,27 +1,36 @@
-## General instructions
-- When editing or updating existing code, do not create separate files, classes or functions unless absolutely necessary. Instead, modify the existing code to improve it.
-- Do not run python code in the terminal.
+# Flint: Configuration-Driven Data Processing Framework
 
-## My application: Flint
-Flint is a configuration-driven PySpark ETL framework. It uses JSON files to define extract-transform-load pipelines. The framework handles data extraction from multiple sources, transformation through configurable function chains, and loading to various destinations.
+Flint is a framework that lets you **define entire data pipelines through configuration files rather than code**. This declarative approach is the core approach - transforming data engineering from a programming task to a configuration exercise.
 
-Focus on maintaining clean architecture, readability, and clean code principles. Always adhere to design patterns and principles like:
-- Single Responsibility Principle (SRP)
-- Open/Closed Principle (OCP)
-- Dependency Inversion
-- Don't Repeat Yourself (DRY)
-- SOLID principles
-- Composition over Inheritance
-- Separation of concerns
+## Core Concept
 
-Code should be testable, maintainable, and follow the configuration-based approach that is central to the framework's design.
+**Configuration over code**: Define complete data pipelines in JSON with:
+- Data sources and connection details
+- Transformation chains and their parameters
+- Output destinations and formats
+- Event-triggered actions and alerts
 
-Technical requirements:
-- Type annotations for all code
-- Clear docstrings in Google format
-- Logging with appropriate levels
+## Key Components
 
-Project structure conventions:
-- Core components in core/
-- Data models in models/
-- Utility functions in utils/
+### Data Pipeline Definition
+- **Extracts**: Configure data sources (CSV, JSON, databases) with all connection parameters
+- **Transforms**: Chain operations (`select`, `filter`, `join`, `cast`) through simple JSON configuration
+- **Loads**: Define outputs with formats, paths, and write modes
+
+### Engine Flexibility
+- **Multi-engine architecture**: Support for different ETL engines implementations like Pandas, Polars and more.
+- **Engine-agnostic configurations**: Same pipeline definition works across different processing backends
+
+### Auxiliary Systems
+- **Alert System**: Configurable notifications via email, HTTP webhooks, and files based on rule-based triggers. Extendable to any communication platform.
+- **Event Hooks**: Execute custom actions at key pipeline stages (`onStart`, `onFailure`, `onSuccess`, `onFinally`). Extendable to any custom logic.
+
+## Benefits
+
+- **Standardization**: Consistent pipeline patterns across projects and teams
+- **Maintainability**: Changes require updating JSON, not refactoring code
+- **Accessibility**: Pipeline logic becomes readable to non-developers
+- **Version Control**: Pipeline definitions evolve with clear diffs in version control
+- **Reduced Development Time**: Eliminate boilerplate code for common operations
+
+By moving pipeline definition from code to configuration, Flint makes data processing more accessible, consistent, and maintainable while providing the flexibility to extend with custom transforms when needed.
