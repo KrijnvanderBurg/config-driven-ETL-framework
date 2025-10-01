@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 
@@ -55,3 +56,47 @@ def test_dropduplicates_fixture(dropduplicates_func: DropDuplicatesFunction) -> 
 # =========================================================================== #
 # ================================== TESTS ================================== #
 # =========================================================================== #
+
+
+class TestDropDuplicatesFunctionTransform:
+    """Test DropDuplicatesFunction transform behavior."""
+
+    def test_transform__returns_callable(self, dropduplicates_func: DropDuplicatesFunction) -> None:
+        """Test transform returns a callable function."""
+        # Act
+        transform_fn = dropduplicates_func.transform()
+
+        # Assert
+        assert callable(transform_fn)
+
+    def test_transform__applies_drop_duplicates(self, dropduplicates_func: DropDuplicatesFunction) -> None:
+        """Test transform applies dropDuplicates operation."""
+
+        # Arrange
+        mock_df = Mock()
+        mock_df.dropDuplicates.return_value = mock_df
+
+        # Act
+        transform_fn = dropduplicates_func.transform()
+        transform_fn(mock_df)
+
+        # Assert
+        mock_df.dropDuplicates.assert_called_once_with(["test_col"])
+
+    def test_transform__with_no_columns__applies_drop_duplicates_on_all_columns(
+        self, dropduplicates_config: dict[str, Any]
+    ) -> None:
+        """Test transform applies dropDuplicates without columns when none specified."""
+
+        # Arrange
+        dropduplicates_config["arguments"]["columns"] = None
+        dropduplicates_func = DropDuplicatesFunction(**dropduplicates_config)
+        mock_df = Mock()
+        mock_df.dropDuplicates.return_value = mock_df
+
+        # Act
+        transform_fn = dropduplicates_func.transform()
+        transform_fn(mock_df)
+
+        # Assert
+        mock_df.dropDuplicates.assert_called_once_with()

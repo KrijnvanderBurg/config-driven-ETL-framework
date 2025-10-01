@@ -11,7 +11,7 @@ Custom exceptions help with:
 """
 
 import enum
-from typing import Any, TypeVar
+from typing import TypeVar
 
 K = TypeVar("K")  # Key type
 
@@ -115,29 +115,6 @@ class FlintRuntimeConfigurationError(FlintError):
             message: The exception message
         """
         super().__init__(message=message, exit_code=ExitCode.CONFIGURATION_ERROR)
-
-
-class FlintConfigurationKeyError(FlintRuntimeConfigurationError):
-    """Exception raised when a key is missing from configuration dictionaries.
-
-    This exception provides more detailed context about missing keys in configuration
-    dictionaries, showing all available keys to help diagnose configuration issues.
-
-    Attributes:
-        key: The key that was not found
-        available_keys: List of keys that are available in the dictionary
-    """
-
-    def __init__(self, key: K, dict_: dict[K, Any]) -> None:
-        """Initialize ConfigurationKeyError with the missing key and available keys.
-
-        Args:
-            key: The key that was not found
-            dict_: The dictionary that was being accessed
-        """
-        self.key = key
-        self.available_keys = list(dict_.keys())
-        super().__init__(f"Missing configuration key: '{key}'. Available keys: {self.available_keys}")
 
 
 class FlintValidationError(FlintError):

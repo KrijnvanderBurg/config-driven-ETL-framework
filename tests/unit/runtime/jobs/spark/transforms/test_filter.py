@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 
@@ -49,3 +50,30 @@ def test_filter_fixture(filter_func: FilterFunction) -> None:
 # =========================================================================== #
 # ================================== TESTS ================================== #
 # =========================================================================== #
+
+
+class TestFilterFunctionTransform:
+    """Test FilterFunction transform behavior."""
+
+    def test_transform__returns_callable(self, filter_func: FilterFunction) -> None:
+        """Test transform returns a callable function."""
+        # Act
+        transform_fn = filter_func.transform()
+
+        # Assert
+        assert callable(transform_fn)
+
+    def test_transform__applies_filter_condition(self, filter_func: FilterFunction) -> None:
+        """Test transform applies filter with correct condition."""
+
+        # Arrange
+        mock_df = Mock()
+        mock_df.filter.return_value = mock_df
+        mock_df.count.return_value = 100  # Mock count for logging
+
+        # Act
+        transform_fn = filter_func.transform()
+        transform_fn(mock_df)
+
+        # Assert
+        mock_df.filter.assert_called_once_with("age > 18")

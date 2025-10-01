@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 
@@ -49,3 +50,32 @@ def test_select_fixture(select_func: SelectFunction) -> None:
 # =========================================================================== #
 # ================================== TESTS ================================== #
 # =========================================================================== #
+
+
+class TestSelectFunctionTransform:
+    """Test SelectFunction transform behavior."""
+
+    def test_transform__returns_callable(self, select_func: SelectFunction) -> None:
+        """Test transform returns a callable function."""
+        # Act
+        transform_fn = select_func.transform()
+
+        # Assert
+        assert callable(transform_fn)
+
+    def test_transform__applies_select_operation(self, select_func: SelectFunction) -> None:
+        """Test transform applies select with correct columns."""
+
+        # Arrange
+        mock_df = Mock()
+        mock_result_df = Mock()
+        mock_df.select.return_value = mock_result_df
+        mock_df.columns = ["id", "name", "age"]  # Mock columns for logging
+        mock_result_df.columns = ["id", "name"]  # Mock result columns for logging
+
+        # Act
+        transform_fn = select_func.transform()
+        transform_fn(mock_df)
+
+        # Assert
+        mock_df.select.assert_called_once_with("id", "name")

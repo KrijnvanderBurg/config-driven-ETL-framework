@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 
@@ -54,3 +55,31 @@ def test_withcolumn_fixture__values(withcolumn_func: WithColumnFunction) -> None
 # =========================================================================== #
 # ================================== TESTS ================================== #
 # =========================================================================== #
+
+
+class TestWithColumnFunctionTransform:
+    """Test WithColumnFunction transform behavior."""
+
+    def test_transform__returns_callable(self, withcolumn_func: WithColumnFunction) -> None:
+        """Test transform returns a callable function."""
+        # Act
+        transform_fn = withcolumn_func.transform()
+
+        # Assert
+        assert callable(transform_fn)
+
+    def test_transform__applies_withcolumn_operation(self, withcolumn_func: WithColumnFunction) -> None:
+        """Test transform applies withColumn with correct parameters."""
+
+        # Arrange
+        mock_df = Mock()
+        mock_df.withColumn.return_value = mock_df
+
+        # Act
+        transform_fn = withcolumn_func.transform()
+        transform_fn(mock_df)
+
+        # Assert
+        assert mock_df.withColumn.called
+        call_args = mock_df.withColumn.call_args[0]
+        assert call_args[0] == "full_name"

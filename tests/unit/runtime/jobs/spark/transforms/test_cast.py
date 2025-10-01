@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 from pydantic import ValidationError
@@ -121,3 +122,31 @@ def test_cast_fixture(cast_func: CastFunction) -> None:
 # =========================================================================== #
 # ================================== TESTS ================================== #
 # =========================================================================== #
+
+
+class TestCastFunctionTransform:
+    """Test CastFunction transform behavior."""
+
+    def test_transform__returns_callable(self, cast_func: CastFunction) -> None:
+        """Test transform returns a callable function."""
+        # Act
+        transform_fn = cast_func.transform()
+
+        # Assert
+        assert callable(transform_fn)
+
+    def test_transform__applies_cast_to_column(self, cast_func: CastFunction) -> None:
+        """Test transform applies cast operation to specified column."""
+
+        # Arrange
+        mock_df = Mock()
+        mock_df.withColumn.return_value = mock_df
+
+        # Act
+        transform_fn = cast_func.transform()
+        transform_fn(mock_df)
+
+        # Assert
+        assert mock_df.withColumn.called
+        call_args = mock_df.withColumn.call_args[0]
+        assert call_args[0] == "age"

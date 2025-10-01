@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 
@@ -53,3 +54,35 @@ def test_join_fixture__args(join_func: JoinFunction) -> None:
 # =========================================================================== #
 # ================================== TESTS ================================== #
 # =========================================================================== #
+
+
+class TestJoinFunctionTransform:
+    """Test JoinFunction transform behavior."""
+
+    def test_transform__returns_callable(self, join_func: JoinFunction) -> None:
+        """Test transform returns a callable function."""
+        # Act
+        transform_fn = join_func.transform()
+
+        # Assert
+        assert callable(transform_fn)
+
+    def test_transform__applies_join_operation(self, join_func: JoinFunction) -> None:
+        """Test transform applies join with correct parameters."""
+
+        # Arrange
+        mock_df = Mock()
+        mock_other_df = Mock()
+        mock_df.join.return_value = mock_df
+        mock_df.count.return_value = 100  # Mock count for logging
+        mock_other_df.count.return_value = 50  # Mock count for logging
+        mock_other_df.columns = ["id", "city"]  # Mock columns for logging
+
+        JoinFunction.data_registry["other_df"] = mock_other_df
+
+        # Act
+        transform_fn = join_func.transform()
+        transform_fn(mock_df)
+
+        # Assert
+        mock_df.join.assert_called_once_with(mock_other_df, on="id", how="inner")

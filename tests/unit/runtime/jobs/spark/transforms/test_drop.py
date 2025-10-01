@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Any
+from unittest.mock import Mock
 
 import pytest
 
@@ -49,3 +50,29 @@ def test_drop_fixture(drop_func: DropFunction) -> None:
 # =========================================================================== #
 # ================================== TESTS ================================== #
 # =========================================================================== #
+
+
+class TestDropFunctionTransform:
+    """Test DropFunction transform behavior."""
+
+    def test_transform__returns_callable(self, drop_func: DropFunction) -> None:
+        """Test transform returns a callable function."""
+        # Act
+        transform_fn = drop_func.transform()
+
+        # Assert
+        assert callable(transform_fn)
+
+    def test_transform__applies_drop_to_columns(self, drop_func: DropFunction) -> None:
+        """Test transform applies drop operation to specified columns."""
+
+        # Arrange
+        mock_df = Mock()
+        mock_df.drop.return_value = mock_df
+
+        # Act
+        transform_fn = drop_func.transform()
+        transform_fn(mock_df)
+
+        # Assert
+        mock_df.drop.assert_called_once_with("temp_col")
