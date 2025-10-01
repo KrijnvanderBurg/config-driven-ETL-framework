@@ -31,13 +31,21 @@
                         "upstream_name": "extract-test",
                         "options": {},
                         "functions": [
-                            { "function": "cast", "arguments": { 
+                            { 
+                                "function": "cast", 
+                                "arguments": { 
                                     "columns": [
-                                        {"column_name": "id", "cast_type": "integer"},
-                                        {"column_name": "age", "cast_type": "integer"},
-                                        {"column_name": "price", "cast_type": "decimal(5,2)"},
-                                        {"column_name": "is_active", "cast_type": "boolean"},
-                                        {"column_name": "join_date", "cast_type": "date"}
+                                        {"column_name": "byte_to_str", "cast_type": "string"},
+                                        {"column_name": "short_to_int", "cast_type": "integer"},
+                                        {"column_name": "int_to_long", "cast_type": "long"},
+                                        {"column_name": "long_to_dbl", "cast_type": "double"},
+                                        {"column_name": "float_to_dec", "cast_type": "decimal(10,4)"},
+                                        {"column_name": "dbl_to_str", "cast_type": "string"},
+                                        {"column_name": "dec_to_float", "cast_type": "float"},
+                                        {"column_name": "str_to_int", "cast_type": "integer"},
+                                        {"column_name": "bool_to_str", "cast_type": "string"},
+                                        {"column_name": "date_to_ts", "cast_type": "timestamp"},
+                                        {"column_name": "ts_to_str", "cast_type": "string"}
                                     ]
                                 }
                             }

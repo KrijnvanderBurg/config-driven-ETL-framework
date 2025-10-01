@@ -55,10 +55,14 @@ class JobTestExecutor:
         with open(self.isolated_config_path, "w", encoding="utf-8") as f:
             json.dump(isolated_config, f, indent=2)
 
-        # Execute via CLI exactly as in production
+        # Execute via CLI exactly as in production (with coverage tracking)
         result = subprocess.run(
             [
-                "python",
+                "coverage",
+                "run",
+                "--parallel-mode",
+                "--branch",
+                "--source=src",
                 "-m",
                 "flint",
                 "run",

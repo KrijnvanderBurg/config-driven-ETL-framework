@@ -1,41 +1,16 @@
 {
     "type": "struct",
     "fields": [
-        {
-            "name": "id",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-        },
-        {
-            "name": "name",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-        },
-        {
-            "name": "age",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-        },
-        {
-            "name": "price",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-        },
-        {
-            "name": "is_active",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-        },
-        {
-            "name": "join_date",
-            "type": "string",
-            "nullable": true,
-            "metadata": {}
-        }
+        {"name": "byte_to_str", "type": "byte", "nullable": true, "metadata": {}},
+        {"name": "short_to_int", "type": "short", "nullable": true, "metadata": {}},
+        {"name": "int_to_long", "type": "integer", "nullable": true, "metadata": {}},
+        {"name": "long_to_dbl", "type": "long", "nullable": true, "metadata": {}},
+        {"name": "float_to_dec", "type": "float", "nullable": true, "metadata": {}},
+        {"name": "dbl_to_str", "type": "double", "nullable": true, "metadata": {}},
+        {"name": "dec_to_float", "type": "decimal(10,2)", "nullable": true, "metadata": {}},
+        {"name": "str_to_int", "type": "string", "nullable": true, "metadata": {}},
+        {"name": "bool_to_str", "type": "boolean", "nullable": true, "metadata": {}},
+        {"name": "date_to_ts", "type": "date", "nullable": true, "metadata": {}},
+        {"name": "ts_to_str", "type": "timestamp", "nullable": true, "metadata": {}}
     ]
 }
