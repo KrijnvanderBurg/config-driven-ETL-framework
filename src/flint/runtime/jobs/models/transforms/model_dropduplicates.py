@@ -17,11 +17,11 @@ class DropDuplicatesArgs(ArgsModel):
     """Arguments for dropDuplicates transform operations.
 
     Attributes:
-        columns: Optional list of column names to consider when dropping duplicates.
-                If None, all columns are considered.
+        columns: List of column names to consider when dropping duplicates.
+                If empty list, all columns are considered.
     """
 
-    columns: list[str] | None = None
+    columns: list[str]
 
 
 class DropDuplicatesFunctionModel(FunctionModel[DropDuplicatesArgs]):

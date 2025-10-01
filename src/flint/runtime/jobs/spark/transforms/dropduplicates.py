@@ -75,7 +75,7 @@ class DropDuplicatesFunction(Function):
         """
 
         def __f(df: DataFrame) -> DataFrame:
-            columns: list[str] | None = self.arguments.columns
+            columns: list[str] = self.arguments.columns
             if columns:
                 return df.dropDuplicates(columns)
             return df.dropDuplicates()

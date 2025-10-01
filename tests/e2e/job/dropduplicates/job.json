@@ -27,7 +27,7 @@
                 ],
                 "transforms": [
                     {
-                        "name": "transform-dropduplicates-test",
+                        "name": "transform-dropduplicates-with-columns",
                         "upstream_name": "extract-dropduplicates-test",
                         "options": {},
                         "functions": [
@@ -39,6 +39,19 @@
                                         "product",
                                         "customer_region"
                                     ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "name": "transform-dropduplicates-test",
+                        "upstream_name": "transform-dropduplicates-with-columns",
+                        "options": {},
+                        "functions": [
+                            {
+                                "function": "dropduplicates",
+                                "arguments": {
+                                    "columns": []
                                 }
                             }
                         ]
