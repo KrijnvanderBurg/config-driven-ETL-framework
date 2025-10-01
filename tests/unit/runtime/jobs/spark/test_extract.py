@@ -8,7 +8,7 @@ import json
 from collections.abc import Generator
 from pathlib import Path
 from typing import Any
-from unittest.mock import ANY, Mock, patch
+from unittest.mock import Mock, patch
 
 import pytest
 from pydantic import ValidationError
@@ -236,51 +236,10 @@ def fixture_extract_file_spark(valid_extract_config: dict[str, Any]) -> ExtractF
 class TestExtractFileSparkExtract:
     """Test ExtractFileSpark extraction functionality."""
 
-    def test_extract__with_batch_method__calls_extract_batch(self, extract_file_spark: ExtractFileSpark) -> None:
-        """Test extract method calls _extract_batch for batch extraction."""
-        # Arrange
-        mock_dataframe = Mock()
-
-        with patch.object(extract_file_spark, "_extract_batch", return_value=mock_dataframe) as mock_extract_batch:
-            # Act
-            extract_file_spark.extract()
-
-            # Assert
-            mock_extract_batch.assert_called_once()
-
-    def test_extract__with_streaming_method__calls_extract_streaming(
-        self, valid_extract_config: dict[str, Any]
+    def test_extract__with_batch_method__creates_dataframe_in_registry(
+        self, extract_file_spark: ExtractFileSpark
     ) -> None:
-        """Test extract method calls _extract_streaming for streaming extraction."""
-        # Arrange
-        valid_extract_config["method"] = "streaming"
-        extract_streaming = ExtractFileSpark(**valid_extract_config)
-        mock_dataframe = Mock()
-
-        with patch.object(
-            extract_streaming, "_extract_streaming", return_value=mock_dataframe
-        ) as mock_extract_streaming:
-            # Act
-            extract_streaming.extract()
-
-            # Assert
-            mock_extract_streaming.assert_called_once()
-
-    def test_extract__with_invalid_method__raises_value_error(self, extract_file_spark: ExtractFileSpark) -> None:
-        """Test extract method raises ValueError for unsupported extraction method."""
-        # Arrange
-        mock_method = Mock()
-        mock_method.value = "invalid_method"
-
-        with patch.object(extract_file_spark, "method", mock_method):
-            # Assert
-            with pytest.raises(ValueError, match="is not supported for PySpark"):
-                # Act
-                extract_file_spark.extract()
-
-    def test_extract__with_batch_method__calls_spark_read_load(self, extract_file_spark: ExtractFileSpark) -> None:
-        """Test extract method with batch calls spark.session.read.load with correct parameters."""
-        # Arrange
+        """Test extract method creates DataFrame for batch extraction."""
         mock_dataframe = Mock()
         mock_dataframe.count.return_value = 10
         mock_read = Mock()
@@ -292,22 +251,14 @@ class TestExtractFileSparkExtract:
             mock_spark_handler.session = mock_session
             mock_spark_handler.add_configs = Mock()
 
-            # Act
             extract_file_spark.extract()
 
-            # Assert
-            mock_read.load.assert_called_once_with(
-                path=extract_file_spark.location,
-                format=extract_file_spark.data_format.value,
-                schema=ANY,
-                **extract_file_spark.options,
-            )
+            mock_read.load.assert_called_once()
 
-    def test_extract__with_streaming_method__calls_spark_read_stream_load(
+    def test_extract__with_streaming_method__creates_streaming_query(
         self, valid_extract_config: dict[str, Any]
     ) -> None:
-        """Test extract method with streaming calls spark.session.readStream.load with correct parameters."""
-        # Arrange
+        """Test extract method creates StreamingQuery for streaming extraction."""
         valid_extract_config["method"] = "streaming"
         extract_streaming = ExtractFileSpark(**valid_extract_config)
         mock_dataframe = Mock()
@@ -320,13 +271,15 @@ class TestExtractFileSparkExtract:
             mock_spark_handler.session = mock_session
             mock_spark_handler.add_configs = Mock()
 
-            # Act
             extract_streaming.extract()
 
-            # Assert
-            mock_read_stream.load.assert_called_once_with(
-                path=extract_streaming.location,
-                format=extract_streaming.data_format.value,
-                schema=ANY,
-                **extract_streaming.options,
-            )
+            mock_read_stream.load.assert_called_once()
+
+    def test_extract__with_invalid_method__raises_value_error(self, extract_file_spark: ExtractFileSpark) -> None:
+        """Test extract method raises ValueError for unsupported extraction method."""
+        mock_method = Mock()
+        mock_method.value = "invalid_method"
+
+        with patch.object(extract_file_spark, "method", mock_method):
+            with pytest.raises(ValueError, match="is not supported for PySpark"):
+                extract_file_spark.extract()

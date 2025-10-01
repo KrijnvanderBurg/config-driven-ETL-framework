@@ -27,7 +27,9 @@ class TestCommand:
         """Test Command.execute handles KeyboardInterrupt correctly."""
         command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
 
-        with patch.object(command, "_execute", side_effect=KeyboardInterrupt):
+        with (
+            patch.object(AlertController, "from_file", side_effect=KeyboardInterrupt),
+        ):
             result = command.execute()
 
         assert result == ExitCode.KEYBOARD_INTERRUPT
@@ -36,7 +38,7 @@ class TestCommand:
         """Test Command.execute handles unexpected exceptions correctly."""
         command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
 
-        with patch.object(command, "_execute", side_effect=RuntimeError):
+        with patch.object(AlertController, "from_file", side_effect=RuntimeError):
             result = command.execute()
 
         assert result == ExitCode.UNEXPECTED_ERROR
@@ -45,7 +47,7 @@ class TestCommand:
         """Test Command.execute handles NotImplementedError correctly."""
         command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
 
-        with patch.object(command, "_execute", side_effect=NotImplementedError):
+        with patch.object(AlertController, "from_file", side_effect=NotImplementedError):
             result = command.execute()
 
         assert result == ExitCode.UNEXPECTED_ERROR

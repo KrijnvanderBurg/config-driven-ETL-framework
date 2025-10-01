@@ -111,55 +111,69 @@ class TestJobSparkValidation:
 class TestJobSparkExecute:
     """Test JobSpark execute method."""
 
-    def test_execute__calls_extract_transform_load_in_sequence(self, job_spark: JobSpark) -> None:
-        """Test execute calls _extract, _transform, and _load in order."""
-        with (
-            patch.object(job_spark, "_extract") as mock_extract,
-            patch.object(job_spark, "_transform") as mock_transform,
-            patch.object(job_spark, "_load") as mock_load,
-        ):
+    def test_execute__with_empty_extracts_transforms_loads__completes_successfully(self, job_spark: JobSpark) -> None:
+        """Test execute completes when all lists are empty."""
+        job_spark.extracts = []
+        job_spark.transforms = []
+        job_spark.loads = []
+
+        job_spark.execute()  # Should not raise
+
+    def test_execute__with_failing_extractor__propagates_exception(self, job_spark: JobSpark) -> None:
+        """Test execute propagates exception when extractor fails."""
+        mock_extract = Mock()
+        mock_extract.name = "failing_extract"
+        mock_extract.extract.side_effect = Exception("Extract failed")
+        job_spark.extracts = [mock_extract]
+
+        with pytest.raises(Exception, match="Extract failed"):
             job_spark.execute()
-
-            mock_extract.assert_called_once()
-            mock_transform.assert_called_once()
-            mock_load.assert_called_once()
-
-    def test_execute__when_extract_fails__propagates_exception(self, job_spark: JobSpark) -> None:
-        """Test execute propagates exception when _extract fails."""
-        with patch.object(job_spark, "_extract", side_effect=Exception("Extract failed")):
-            with pytest.raises(Exception, match="Extract failed"):
-                job_spark.execute()
 
 
 class TestJobSparkPhases:
     """Test JobSpark ETL phase methods."""
 
     def test_extract__calls_extract_on_all_extractors(self, job_spark: JobSpark) -> None:
-        """Test _extract calls extract() on each extractor."""
-        mock_extract = Mock()
-        mock_extract.name = "extract1"
-        job_spark.extracts = [mock_extract]
+        """Test that extract phase calls extract() on each extractor."""
+        mock_extract1 = Mock()
+        mock_extract1.name = "extract1"
+        mock_extract2 = Mock()
+        mock_extract2.name = "extract2"
+        job_spark.extracts = [mock_extract1, mock_extract2]
+        job_spark.transforms = []  # Empty transforms to avoid failures
+        job_spark.loads = []  # Empty loads to avoid failures
 
-        job_spark._extract()  # noqa: SLF001
+        job_spark.execute()
 
-        mock_extract.extract.assert_called_once()
+        mock_extract1.extract.assert_called_once()
+        mock_extract2.extract.assert_called_once()
 
     def test_transform__calls_transform_on_all_transformers(self, job_spark: JobSpark) -> None:
-        """Test _transform calls transform() on each transformer."""
-        mock_transform = Mock()
-        mock_transform.name = "transform1"
-        job_spark.transforms = [mock_transform]
+        """Test that transform phase calls transform() on each transformer."""
+        mock_transform1 = Mock()
+        mock_transform1.name = "transform1"
+        mock_transform2 = Mock()
+        mock_transform2.name = "transform2"
+        job_spark.extracts = []  # Empty extracts
+        job_spark.transforms = [mock_transform1, mock_transform2]
+        job_spark.loads = []  # Empty loads to avoid failures
 
-        job_spark._transform()  # noqa: SLF001
+        job_spark.execute()
 
-        mock_transform.transform.assert_called_once()
+        mock_transform1.transform.assert_called_once()
+        mock_transform2.transform.assert_called_once()
 
     def test_load__calls_load_on_all_loaders(self, job_spark: JobSpark) -> None:
-        """Test _load calls load() on each loader."""
-        mock_load = Mock()
-        mock_load.name = "load1"
-        job_spark.loads = [mock_load]
+        """Test that load phase calls load() on each loader."""
+        mock_load1 = Mock()
+        mock_load1.name = "load1"
+        mock_load2 = Mock()
+        mock_load2.name = "load2"
+        job_spark.extracts = []  # Empty extracts
+        job_spark.transforms = []  # Empty transforms
+        job_spark.loads = [mock_load1, mock_load2]
 
-        job_spark._load()  # noqa: SLF001
+        job_spark.execute()
 
-        mock_load.load.assert_called_once()
+        mock_load1.load.assert_called_once()
+        mock_load2.load.assert_called_once()
