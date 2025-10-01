@@ -189,7 +189,8 @@ class RunCommand(Command):
             subparsers: The subparsers action from argparse.
         """
         parser = subparsers.add_parser("run", help="Run the ETL pipeline")
-        parser.add_argument("--config-filepath", required=True, type=str, help="Path to config file")
+        parser.add_argument("--alert-filepath", required=True, type=str, help="Path to alert configuration file")
+        parser.add_argument("--runtime-filepath", required=True, type=str, help="Path to runtime configuration file")
 
     def _execute(self) -> ExitCode:
         """Execute the ETL pipeline as defined in the configuration file."""

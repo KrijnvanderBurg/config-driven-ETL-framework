@@ -15,14 +15,14 @@
                         "name": "extract-filter-test",
                         "type": "file",
                         "data_format": "csv",
-                        "location": "tests/e2e/job/filter/input_data.csv",
+                        "location": "tests/e2e/job/filter/extract-filter-test/input_data.csv",
                         "method": "batch",
                         "options": {
                             "delimiter": ",",
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema_": "tests/e2e/job/filter/input_schema.json"
+                        "schema_": "tests/e2e/job/filter/extract-filter-test/input_schema.json"
                     }
                 ],
                 "transforms": [
@@ -31,7 +31,9 @@
                         "upstream_name": "extract-filter-test",
                         "options": {},
                         "functions": [
-                            { "function": "filter", "arguments": { 
+                            {
+                                "function": "filter",
+                                "arguments": {
                                     "condition": "age >= 18 AND is_active = true"
                                 }
                             }
@@ -51,7 +53,13 @@
                         },
                         "schema_location": "tests/e2e/job/filter/schema_location.json"
                     }
-                ]
+                ],
+                "hooks": {
+                    "onStart": [],
+                    "onFailure": [],
+                    "onSuccess": [],
+                    "onFinally": []
+                }
             }
         ]
     }

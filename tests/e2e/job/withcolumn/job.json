@@ -15,14 +15,14 @@
                         "name": "extract-withcolumn-test",
                         "type": "file",
                         "data_format": "csv",
-                        "location": "tests/e2e/job/withcolumn/input_data.csv",
+                        "location": "tests/e2e/job/withcolumn/extract-withcolumn-test/input_data.csv",
                         "method": "batch",
                         "options": {
                             "delimiter": ",",
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema_": "tests/e2e/job/withcolumn/input_schema.json"
+                        "schema_": "tests/e2e/job/withcolumn/extract-withcolumn-test/input_schema.json"
                     }
                 ],
                 "transforms": [
@@ -31,14 +31,16 @@
                         "upstream_name": "extract-withcolumn-test",
                         "options": {},
                         "functions": [
-                            { 
-                                "function": "withColumn", "arguments": { 
+                            {
+                                "function": "withColumn",
+                                "arguments": {
                                     "col_name": "full_name",
                                     "col_expr": "concat(first_name, ' ', last_name)"
                                 }
                             },
-                            { 
-                                "function": "withColumn", "arguments": { 
+                            {
+                                "function": "withColumn",
+                                "arguments": {
                                     "col_name": "salary_bracket",
                                     "col_expr": "CASE WHEN salary < 60000 THEN 'Low' WHEN salary < 70000 THEN 'Medium' ELSE 'High' END"
                                 }
@@ -59,7 +61,13 @@
                         },
                         "schema_location": "tests/e2e/job/withcolumn/schema_location.json"
                     }
-                ]
+                ],
+                "hooks": {
+                    "onStart": [],
+                    "onFailure": [],
+                    "onSuccess": [],
+                    "onFinally": []
+                }
             }
         ]
     }

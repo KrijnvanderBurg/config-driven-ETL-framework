@@ -15,14 +15,14 @@
                         "name": "extract-drop-test",
                         "type": "file",
                         "data_format": "csv",
-                        "location": "tests/e2e/job/drop/input_data.csv",
+                        "location": "tests/e2e/job/drop/extract-drop-test/input_data.csv",
                         "method": "batch",
                         "options": {
                             "delimiter": ",",
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema_": "tests/e2e/job/drop/input_schema.json"
+                        "schema_": "tests/e2e/job/drop/extract-drop-test/input_schema.json"
                     }
                 ],
                 "transforms": [
@@ -31,8 +31,14 @@
                         "upstream_name": "extract-drop-test",
                         "options": {},
                         "functions": [
-                            { "function": "drop", "arguments": { 
-                                    "columns": ["address", "phone", "temp_column"]
+                            {
+                                "function": "drop",
+                                "arguments": {
+                                    "columns": [
+                                        "address",
+                                        "phone",
+                                        "temp_column"
+                                    ]
                                 }
                             }
                         ]
@@ -51,7 +57,13 @@
                         },
                         "schema_location": "tests/e2e/job/drop/schema_location.json"
                     }
-                ]
+                ],
+                "hooks": {
+                    "onStart": [],
+                    "onFailure": [],
+                    "onSuccess": [],
+                    "onFinally": []
+                }
             }
         ]
     }
