@@ -15,7 +15,9 @@ from flint.actions.http import HttpAction
 
 # __all__ = []
 
-HooksActionsUnion = Annotated[
-    HttpAction,
-    Discriminator("action"),
-]
+# HooksActionsUnion = Annotated[
+#     HttpAction,
+#     Discriminator("action"),
+# ]
+
+HooksActionsUnion = HttpAction

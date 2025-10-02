@@ -8,7 +8,7 @@ from flint.runtime.jobs.spark.job import JobSpark
 
 # For now, just use JobSpark directly since it's the only engine
 # When more engines are added, this will become a discriminated union:
-# JobUnion = Annotated[Union[JobSpark, JobPandas, JobDask], Discriminator("engine")]
+# JobUnion = Annotated[JobSpark | JobPolars, Discriminator("engine")]
 JobUnion = JobSpark
 
 __all__ = ["JobUnion", "JobSpark"]
