@@ -269,9 +269,12 @@ class TestRunCommand:
         RunCommand.add_subparser(subparsers)
 
         # Parse arguments to verify the subcommand was registered correctly
-        args = parser.parse_args(["run", "--config-filepath", "/test/config.json"])
+        args = parser.parse_args(
+            ["run", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
+        )
 
-        assert args.config_filepath == "/test/config.json"
+        assert args.alert_filepath == "/test/alert.json"
+        assert args.runtime_filepath == "/test/runtime.json"
 
     def test_from_args__creates_command_correctly(self) -> None:
         """Test RunCommand.from_args creates command correctly using base Command.from_args."""

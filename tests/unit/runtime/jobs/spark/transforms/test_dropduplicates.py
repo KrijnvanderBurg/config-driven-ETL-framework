@@ -86,10 +86,10 @@ class TestDropDuplicatesFunctionTransform:
     def test_transform__with_no_columns__applies_drop_duplicates_on_all_columns(
         self, dropduplicates_config: dict[str, Any]
     ) -> None:
-        """Test transform applies dropDuplicates without columns when none specified."""
+        """Test transform applies dropDuplicates without columns when empty list specified."""
 
         # Arrange
-        dropduplicates_config["arguments"]["columns"] = None
+        dropduplicates_config["arguments"]["columns"] = []
         dropduplicates_func = DropDuplicatesFunction(**dropduplicates_config)
         mock_df = Mock()
         mock_df.dropDuplicates.return_value = mock_df
