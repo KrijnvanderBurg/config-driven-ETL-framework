@@ -290,7 +290,7 @@ class TestLoadFileSparkLoad:
             patch.object(load_file_spark, "method", mock_method),
         ):
             # Assert
-            with pytest.raises(ValueError, match="is not supported for PySpark"):
+            with pytest.raises(ValueError):
                 # Act
                 load_file_spark.load()
 

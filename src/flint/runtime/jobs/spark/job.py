@@ -11,6 +11,7 @@ of the appropriate Extract, Transform, and Load components based on the configur
 import logging
 import time
 
+from flint.exceptions import FlintJobError
 from flint.runtime.jobs.models.model_job import JobBase, JobEngine
 from flint.runtime.jobs.spark.extract import ExtractFileSpark
 from flint.runtime.jobs.spark.load import LoadSparkUnion
@@ -53,25 +54,43 @@ class JobSpark(JobBase):
     loads: list[LoadSparkUnion]
 
     def execute(self) -> None:
-        """Execute the complete ETL pipeline.
+        """Execute the complete ETL pipeline with comprehensive exception handling.
 
-        Runs the extract, transform, and load phases in sequence.
-        This is the main entry point for running a configured job.
+        Triggers hooks at appropriate lifecycle points:
+        - onStart: When execution begins
+        - onError: When any exception occurs
+        - onSuccess: When all phases complete successfully
+        - onFinally: Always executed at the end
+
+        Raises:
+            FlintJobError: Wraps configuration and I/O exceptions with context,
+                preserving the original exception as the cause.
         """
-        start_time = time.time()
-        logger.info(
-            "Starting job execution with %d extracts, %d transforms, %d loads",
-            len(self.extracts),
-            len(self.transforms),
-            len(self.loads),
-        )
+        self.hooks.on_start()
 
-        self._extract()
-        self._transform()
-        self._load()
+        try:
+            start_time = time.time()
+            logger.info(
+                "Starting job execution with %d extracts, %d transforms, %d loads",
+                len(self.extracts),
+                len(self.transforms),
+                len(self.loads),
+            )
 
-        execution_time = time.time() - start_time
-        logger.info("Job completed successfully in %.2f seconds", execution_time)
+            self._extract()
+            self._transform()
+            self._load()
+
+            execution_time = time.time() - start_time
+            logger.info("Job completed successfully in %.2f seconds", execution_time)
+
+            self.hooks.on_success()
+        except (ValueError, KeyError, OSError) as e:
+            logger.error(e)
+            self.hooks.on_error()
+            raise FlintJobError("Error occurred during job execution") from e
+        finally:
+            self.hooks.on_finally()
 
     def _extract(self) -> None:
         """Execute the extraction phase of the ETL pipeline.

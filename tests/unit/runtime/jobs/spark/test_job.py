@@ -9,6 +9,7 @@ from unittest.mock import Mock
 import pytest
 from pydantic import ValidationError
 
+from flint.exceptions import FlintJobError
 from flint.runtime.jobs.models.model_job import JobEngine
 from flint.runtime.jobs.spark.job import JobSpark
 
@@ -119,14 +120,60 @@ class TestJobSparkExecute:
 
         job_spark.execute()  # Should not raise
 
-    def test_execute__with_failing_extractor__propagates_exception(self, job_spark: JobSpark) -> None:
-        """Test execute propagates exception when extractor fails."""
+    def test_execute__with_failing_extractor__wraps_exception_in_flint_job_error(self, job_spark: JobSpark) -> None:
+        """Test execute wraps exceptions in FlintJobError when extractor fails."""
         mock_extract = Mock()
         mock_extract.name = "failing_extract"
-        mock_extract.extract.side_effect = Exception("Extract failed")
+        mock_extract.extract.side_effect = ValueError("Extract failed")
         job_spark.extracts = [mock_extract]
 
-        with pytest.raises(Exception, match="Extract failed"):
+        with pytest.raises(FlintJobError):
+            job_spark.execute()
+
+    def test_execute__with_file_not_found_error__wraps_in_flint_job_error(self, job_spark: JobSpark) -> None:
+        """Test execute wraps FileNotFoundError in FlintJobError."""
+        mock_extract = Mock()
+        mock_extract.name = "extract_missing_file"
+        mock_extract.extract.side_effect = FileNotFoundError("File not found: data.csv")
+        job_spark.extracts = [mock_extract]
+
+        with pytest.raises(FlintJobError):
+            job_spark.execute()
+
+    def test_execute__with_permission_error__wraps_in_flint_job_error(self, job_spark: JobSpark) -> None:
+        """Test execute wraps PermissionError in FlintJobError."""
+        mock_load = Mock()
+        mock_load.name = "load_restricted"
+        mock_load.load.side_effect = PermissionError("Permission denied")
+        job_spark.extracts = []
+        job_spark.transforms = []
+        job_spark.loads = [mock_load]
+
+        with pytest.raises(FlintJobError):
+            job_spark.execute()
+
+    def test_execute__with_os_error__wraps_in_flint_job_error(self, job_spark: JobSpark) -> None:
+        """Test execute wraps OSError in FlintJobError."""
+        mock_load = Mock()
+        mock_load.name = "load_io_error"
+        mock_load.load.side_effect = OSError("Disk full")
+        job_spark.extracts = []
+        job_spark.transforms = []
+        job_spark.loads = [mock_load]
+
+        with pytest.raises(FlintJobError):
+            job_spark.execute()
+
+    def test_execute__with_key_error__wraps_in_flint_job_error(self, job_spark: JobSpark) -> None:
+        """Test execute wraps KeyError in FlintJobError."""
+        mock_transform = Mock()
+        mock_transform.name = "transform_missing_upstream"
+        mock_transform.transform.side_effect = KeyError("upstream_name")
+        job_spark.extracts = []
+        job_spark.transforms = [mock_transform]
+        job_spark.loads = []
+
+        with pytest.raises(FlintJobError):
             job_spark.execute()
 
 

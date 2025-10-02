@@ -10,11 +10,12 @@ from typing import Annotated
 from pydantic import Discriminator
 
 from flint.actions.http import HttpAction
-from flint.actions.move_files import MoveOrCopyJobFiles
+
+# from flint.actions.move_or_copy_job_files import MoveOrCopyJobFiles
 
 # __all__ = []
 
 HooksActionsUnion = Annotated[
-    HttpAction | MoveOrCopyJobFiles,
+    HttpAction,
     Discriminator("action"),
 ]

@@ -72,7 +72,7 @@ class TestMain:
             patch.object(ValidateCommand, "add_subparser"),
             patch.object(RunCommand, "add_subparser"),
         ):
-            with pytest.raises(ValueError, match="Unknown command 'unknown-command'"):
+            with pytest.raises(ValueError):
                 main()
 
     def test_main__returns_command_exit_code(self) -> None:

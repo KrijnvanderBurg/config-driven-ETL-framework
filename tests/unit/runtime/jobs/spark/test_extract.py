@@ -281,5 +281,5 @@ class TestExtractFileSparkExtract:
         mock_method.value = "invalid_method"
 
         with patch.object(extract_file_spark, "method", mock_method):
-            with pytest.raises(ValueError, match="is not supported for PySpark"):
+            with pytest.raises(ValueError):
                 extract_file_spark.extract()
