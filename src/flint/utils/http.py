@@ -32,7 +32,7 @@ class Retry(BaseModel):
 
     raise_on_error: bool = Field(..., description="Whether to raise errors when HTTP request fails")
     max_attempts: int = Field(..., description="Maximum number of retry attempts for failed requests", ge=0, le=3)
-    delay_in_seconds: int = Field(..., description="Delay between retry attempts in seconds", ge=0)
+    delay_in_seconds: PositiveInt = Field(..., description="Delay between retry attempts in seconds", ge=1, le=30)
 
 
 class HttpBase(BaseModel):
@@ -54,7 +54,7 @@ class HttpBase(BaseModel):
     headers: dict[str, str] = Field(
         default_factory=dict, description="Dictionary of HTTP headers to include in requests"
     )
-    timeout: PositiveInt = Field(..., description="Request timeout in seconds")
+    timeout: PositiveInt = Field(..., description="Request timeout in seconds", ge=1, le=30)
     retry: Retry = Field(..., description="Configuration for handling failures and retries")
 
     def _make_http_request(self, payload: dict[str, Any] | None = None) -> None:

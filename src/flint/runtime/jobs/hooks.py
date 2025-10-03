@@ -3,7 +3,7 @@
 from pydantic import Field
 
 from flint import BaseModel
-from flint.actions.base import ActionBase
+from flint.actions import HooksActionsUnion
 
 
 class Hooks(BaseModel):
@@ -13,10 +13,10 @@ class Hooks(BaseModel):
         model (BaseModel): The model to manage hooks for.
     """
 
-    onStart: list[ActionBase] = Field(default_factory=list, description="Actions to perform on Job start.")
-    onError: list[ActionBase] = Field(default_factory=list, description="Actions to perform on Job error.")
-    onSuccess: list[ActionBase] = Field(default_factory=list, description="Actions to perform on Job success.")
-    onFinally: list[ActionBase] = Field(
+    onStart: list[HooksActionsUnion] = Field(default_factory=list, description="Actions to perform on Job start.")
+    onError: list[HooksActionsUnion] = Field(default_factory=list, description="Actions to perform on Job error.")
+    onSuccess: list[HooksActionsUnion] = Field(default_factory=list, description="Actions to perform on Job success.")
+    onFinally: list[HooksActionsUnion] = Field(
         default_factory=list, description="Actions to perform on Job end, regardless of success or error."
     )
 

@@ -3,7 +3,7 @@
         "channels": [
             {
                 "channel_id": "email",
-                "name": "custom-email-alert-name",
+                "name": "alert-operations-team",
                 "description": "",
                 "enabled": true,
                 "smtp_server": "smtp.company.com",
@@ -18,7 +18,7 @@
             },
             {
                 "channel_id": "http",
-                "name": "a-http-post-alert-name",
+                "name": "alert-data-team-on-slack",
                 "url": "https://.slack.com",
                 "method": "POST",
                 "headers": {
@@ -30,59 +30,37 @@
                     "max_attempts": 3,
                     "delay_in_seconds": 30
                 }       
-            },
-            {
-                "channel_id": "file",
-                "name": "custom-file-alert-name",
-                "file_path": "alerts.log"
             }
         ],
         "triggers": [
             {
-                "name": "production_critical_errors",
+                "name": "production-external-errors",
                 "enabled": true,
                 "description": "",
-                "channel_names": ["custom-email-alert-name", "a-http-post-alert-name"],
+                "channel_names": ["alert-operations-team", "alert-data-team-on-slack"],
                 "template": {
-                    "prepend_title": "ETL Pipeline Alert",
-                    "append_title": "Alert Notification",
+                    "prepend_title": "ETL Pipeline Alert - ",
+                    "append_title": " - Team XYZ",
                     "prepend_body": "Attention: ETL Pipeline Alert",
                     "append_body": "Please take necessary actions."
                 },
-                "rules": [
-                    {"rule": "exception_regex", "pattern": ".*database.*|.*connection.*|.*timeout.*" },
-                    {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "prod"]}
-                ]
-            },
+                "rules": []
+            },  
             {
-                "name": "staging_warnings",
-                "enabled": true,
-                "description": "",
-                "channel_names": ["custom-file-alert-name"],
-                "template": {
-                    "prepend_title": "ETL Pipeline Alert",
-                    "append_title": "Alert Notification",
-                    "prepend_body": "Attention: ETL Pipeline Alert",
-                    "append_body": "Please take necessary actions."
-                },
-                "rules": [
-                    {"rule": "exception_regex", "pattern": ".*connection.*failed.*|.*timeout.*error.*"},
-                    {"rule": "env_vars_matches", "env_var_name": "APP_MODE", "env_var_values": ["debug"]}
-                ]
-            },
-            {
-                "name": "team_specific_alerts",
+                "name": "dev-warnings",
                 "enabled": true,
                 "description": "",
                 "channel_names": ["a-http-post-alert-name"],
                 "template": {
-                    "prepend_title": "ETL Pipeline Alert",
-                    "append_title": "Alert Notification",
-                    "prepend_body": "Attention: ETL Pipeline Alert",
-                    "append_body": "Please take necessary actions."
+                    "prepend_title": "",
+                    "append_title": "",
+                    "prepend_body": "",
+                    "append_body": ""
                 },
                 "rules": [
-                    {"rule": "exception_regex", "pattern": ".*database.*|.*connection.*|.*timeout.*"}
+                    {"rule": "exception_regex", "pattern": "validation|connection|database" },
+                    {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["development", "acceptance"]},
+                    {"rule": "env_vars_matches", "env_var_name": "APP_MODE", "env_var_values": ["live"]}
                 ]
             }
         ]
@@ -106,7 +84,7 @@
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema_": "examples/customer_orders/customers_schema.json",
+                        "schema_": "examples/customer_orders/customers_schema.json"
                     }
                 ],
                 "transforms": [
@@ -139,8 +117,9 @@
                     "onSuccess": [
                         {
                             "name": "notify-data-is-ready",
-                            "action": "http_request",
-                            "url": "https://.slack.com",
+                            "description": "",
+                            "action": "http",
+                            "url": "https://hooks.slack.com",
                             "method": "POST",
                             "headers": {
                                 "Content-Type": "application/json"
@@ -148,35 +127,36 @@
                             "payload": {},
                             "timeout": 30,
                             "retry": {
-                                "error_on_alert_failure": true,
-                                "attempts": 3,
+                                "raise_on_error": true,
+                                "max_attempts": 3,
                                 "delay_in_seconds": 30
                             }
                         }
                     ],
                     "onFinally": [
-                        {
-                            "name": "archive-processed-files",
-                            "action": "move_or_copy_job_files",
-                            "operation": "move",                        // allowed: "move" | "copy"
-                            "source_location": "incoming/daily/",       // filepath, directory, or "dataframe"
-                            "destination_location": "archive/daily/",   // filepath or directory (base target)
-                            "hierarchy_base_path": "incoming/daily/",   // optional; root used when preserving source hierarchy
-                            "duplicate_handling": {
-                                "dedupe_by": ["size", "checksum"],      // options: "checksum" | "size"
-                                "on_match": "skip",                     // destination already exists and is identical -> allowed: "overwrite" | "version"
-                                "on_mismatch": "version",               // destination already exists but is not identical -> allowed: "overwrite" | "version" | "fail" | "notify"
-                                "checksum": {
-                                    "algorithm": "sha256",              // allowed: "md5", "sha1", "sha256"
-                                    "chunk_size_bytes": 65536,          // default 65536 (64 KiB)
-                                    "verify_checksum_after_transfer": false    // optional post-transfer verification
-                                },
-                                "version": {
-                                    "datetime_format": "yyyyMMddHHmmss", // format applied when creating versioned filenames
-                                    "timestamp_timezone": "UTC"
-                                }
-                            }
-                        }
+                        // {
+                        //     "name": "archive-processed-files",
+                        //     "description": "",
+                        //     "action": "move_or_copy_job_files",
+                        //     "operation": "move",                        // allowed: "move" | "copy"
+                        //     "source_location": "incoming/daily/",       // filepath, directory, or "dataframe"
+                        //     "destination_location": "archive/daily/",   // filepath or directory (base target)
+                        //     "hierarchy_base_path": "incoming/daily/",   // optional; root used when preserving source hierarchy
+                        //     "duplicate_handling": {
+                        //         "dedupe_by": ["size", "checksum"],      // options: "checksum" | "size"
+                        //         "on_match": "skip",                     // destination already exists and is identical -> allowed: "overwrite" | "version"
+                        //         "on_mismatch": "version",               // destination already exists but is not identical -> allowed: "overwrite" | "version" | "fail" | "notify"
+                        //         "checksum": {
+                        //             "algorithm": "sha256",              // allowed: "md5", "sha1", "sha256"
+                        //             "chunk_size_bytes": 65536,          // default 65536 (64 KiB)
+                        //             "verify_checksum_after_transfer": false    // optional post-transfer verification
+                        //         },
+                        //         "version": {
+                        //             "datetime_format": "yyyyMMddHHmmss", // format applied when creating versioned filenames
+                        //             "timestamp_timezone": "UTC"
+                        //         }
+                        //     }
+                        // }
                     ]
                 }
             }

@@ -66,7 +66,7 @@ poetry install                           # install dependencies
 The included example demonstrates a real-world ETL pipeline:
 
 - 📄 **Config**: `examples/job.json`
-- 🏃 **Execution**: `python -m flint run --config-filepath examples/job.json`
+- 🏃 **Execution**: `python -m flint run --alert-filepath="examples/job.jsonc" --runtime-filepath="examples/job.json"`
 - 📂 **Output**: `examples/customer_orders/output/`
 
 Running this command executes a complete pipeline that showcases Flint's key capabilities:

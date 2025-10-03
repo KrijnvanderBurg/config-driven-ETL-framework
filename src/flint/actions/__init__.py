@@ -5,19 +5,10 @@ HooksActionsUnion. Each action function is automatically registered
 when imported.
 """
 
-from typing import Annotated
-
-from pydantic import Discriminator
-
 from flint.actions.http import HttpAction
 
 # from flint.actions.move_or_copy_job_files import MoveOrCopyJobFiles
 
-# __all__ = []
-
-# HooksActionsUnion = Annotated[
-#     HttpAction,
-#     Discriminator("action"),
-# ]
-
+# When there's only one action type, use it directly
+# When there are multiple, use: Annotated[HttpAction | OtherAction, Discriminator("action")]
 HooksActionsUnion = HttpAction

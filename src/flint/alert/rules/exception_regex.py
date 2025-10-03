@@ -43,5 +43,5 @@ class ExceptionRegexRule(AlertRule):
             logger.debug("Exception message matches regex: '%s'", self.pattern)
             return True
 
-        logger.debug("Exception message does not match regex: '%s'", self.pattern)
+        logger.debug("Exception message '%s' does not match regex: '%s'", message, self.pattern)
         return False

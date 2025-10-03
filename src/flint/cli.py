@@ -115,15 +115,15 @@ class ValidateCommand(Command):
         parser.add_argument("--alert-filepath", required=True, type=str, help="Path to alert configuration file")
         parser.add_argument("--runtime-filepath", required=True, type=str, help="Path to runtime configuration file")
         parser.add_argument("--test-exception", type=str, help="Test exception message to trigger alert testing")
-        parser.add_argument("--test-env-vars", action="append", help="Test env vars (KEY=VALUE)")
+        parser.add_argument("--test-env-var", action="append", help="Test env vars (KEY=VALUE)")
 
     @classmethod
     def from_args(cls, args: Namespace) -> Self:
         """Create ValidateCommand from args."""
         test_env_vars = None
-        if args.test_env_vars:
+        if args.test_env_var:
             test_env_vars = {}
-            for env_var in args.test_env_vars:
+            for env_var in args.test_env_var:
                 key, value = env_var.split("=", 1)
                 test_env_vars[key] = value
 
