@@ -82,7 +82,7 @@ class TestGetLogger:
 class TestContextBinding:
     """Test context binding and clearing functions."""
 
-    def test_bind_context_adds_context_variables(self, caplog: pytest.LogCaptureFixture) -> None:
+    def test_bind_context_adds_context_variables(self) -> None:
         """Test that bind_context adds context variables to subsequent logs."""
         # Arrange
         logger = set_logger("test_context")
@@ -94,7 +94,7 @@ class TestContextBinding:
         # Cleanup
         clear_context()
 
-    def test_clear_context_removes_bound_variables(self, caplog: pytest.LogCaptureFixture) -> None:
+    def test_clear_context_removes_bound_variables(self) -> None:
         """Test that clear_context removes all bound context variables."""
         # Arrange
         bind_context(user_id="456", request_id="def")
