@@ -35,9 +35,9 @@ class SelectFunctionModel(FunctionModel[SelectArgs]):
     transformation, specifying which columns should be included in the output.
 
     Attributes:
-        function: The name of the function to be used (always "select")
+        function_type: The name of the function to be used (always "select")
         arguments: Container for the column selection parameters
     """
 
-    function: str
+    function_type: str
     arguments: SelectArgs

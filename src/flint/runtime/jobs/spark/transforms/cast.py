@@ -26,11 +26,11 @@ class CastFunction(Function):
     for correcting data type issues after import.
 
     Attributes:
-        function: The name of the function (always "cast")
+        function_type: The name of the function (always "cast")
         arguments: Container for the column casting parameters
     """
 
-    function: Literal["cast"]
+    function_type: Literal["cast"]
     arguments: CastArgs
 
     def transform(self) -> Callable:

@@ -43,9 +43,9 @@ class CastFunctionModel(FunctionModel[CastArgs]):
     transformation, specifying which columns should be cast to which data types.
 
     Attributes:
-        function: The name of the function to be used (always "cast")
+        function_type: The name of the function to be used (always "cast")
         arguments: Container for the column casting parameters
     """
 
-    function: str
+    function_type: str
     arguments: CastArgs

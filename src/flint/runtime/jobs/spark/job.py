@@ -11,7 +11,8 @@ of the appropriate Extract, Transform, and Load components based on the configur
 import logging
 import time
 
-from flint.exceptions import FlintJobError
+from typing_extensions import override
+
 from flint.runtime.jobs.models.model_job import JobBase, JobEngine
 from flint.runtime.jobs.spark.extract import ExtractFileSpark
 from flint.runtime.jobs.spark.load import LoadSparkUnion
@@ -30,7 +31,7 @@ class JobSpark(JobBase):
     to define pipelines without code changes.
 
     Attributes:
-        name (str): name of the etl job
+        id (str): unique identifier of the etl job
         extracts (list[Extract]): Collection of Extract components to obtain data from sources.
         transforms (list[Transform]): Collection of Transform components to process the data.
         loads (list[Load]): Collection of Load components to write data to destinations.
@@ -48,49 +49,34 @@ class JobSpark(JobBase):
         ```
     """
 
-    engine: JobEngine = JobEngine.SPARK
+    engine_type: JobEngine = JobEngine.SPARK
     extracts: list[ExtractFileSpark]
     transforms: list[TransformSparkUnion]
     loads: list[LoadSparkUnion]
 
-    def execute(self) -> None:
-        """Execute the complete ETL pipeline with comprehensive exception handling.
+    @override
+    def _execute(self) -> None:
+        """Execute the engine-specific ETL pipeline logic.
 
-        Triggers hooks at appropriate lifecycle points:
-        - onStart: When execution begins
-        - onError: When any exception occurs
-        - onSuccess: When all phases complete successfully
-        - onFinally: Always executed at the end
-
-        Raises:
-            FlintJobError: Wraps configuration and I/O exceptions with context,
-                preserving the original exception as the cause.
+        Executes the three phases of the ETL pipeline in sequence:
+        1. Extract: Retrieve data from sources
+        2. Transform: Apply transformations to the data
+        3. Load: Write transformed data to destinations
         """
-        self.hooks.on_start()
+        start_time = time.time()
+        logger.info(
+            "Starting Spark job execution with %d extracts, %d transforms, %d loads",
+            len(self.extracts),
+            len(self.transforms),
+            len(self.loads),
+        )
 
-        try:
-            start_time = time.time()
-            logger.info(
-                "Starting job execution with %d extracts, %d transforms, %d loads",
-                len(self.extracts),
-                len(self.transforms),
-                len(self.loads),
-            )
+        self._extract()
+        self._transform()
+        self._load()
 
-            self._extract()
-            self._transform()
-            self._load()
-
-            execution_time = time.time() - start_time
-            logger.info("Job completed successfully in %.2f seconds", execution_time)
-
-            self.hooks.on_success()
-        except (ValueError, KeyError, OSError) as e:
-            logger.error(e)
-            self.hooks.on_error()
-            raise FlintJobError("Error occurred during job execution") from e
-        finally:
-            self.hooks.on_finally()
+        execution_time = time.time() - start_time
+        logger.info("Spark job completed in %.2f seconds", execution_time)
 
     def _extract(self) -> None:
         """Execute the extraction phase of the ETL pipeline.
@@ -103,10 +89,10 @@ class JobSpark(JobBase):
 
         for i, extract in enumerate(self.extracts):
             extract_start_time = time.time()
-            logger.debug("Running extractor %d/%d: %s", i, len(self.extracts), extract.name)
+            logger.debug("Running extractor %d/%d: %s", i, len(self.extracts), extract.id)
             extract.extract()
             extract_time = time.time() - extract_start_time
-            logger.debug("Extractor %s completed in %.2f seconds", extract.name, extract_time)
+            logger.debug("Extractor %s completed in %.2f seconds", extract.id, extract_time)
 
         phase_time = time.time() - start_time
         logger.info("Extract phase completed successfully in %.2f seconds", phase_time)
@@ -122,10 +108,10 @@ class JobSpark(JobBase):
 
         for i, transform in enumerate(self.transforms):
             transform_start_time = time.time()
-            logger.debug("Running transformer %d/%d: %s", i, len(self.transforms), transform.name)
+            logger.debug("Running transformer %d/%d: %s", i, len(self.transforms), transform.id)
             transform.transform()
             transform_time = time.time() - transform_start_time
-            logger.debug("Transformer %s completed in %.2f seconds", transform.name, transform_time)
+            logger.debug("Transformer %s completed in %.2f seconds", transform.id, transform_time)
 
         phase_time = time.time() - start_time
         logger.info("Transform phase completed successfully in %.2f seconds", phase_time)
@@ -141,10 +127,10 @@ class JobSpark(JobBase):
 
         for i, load in enumerate(self.loads):
             load_start_time = time.time()
-            logger.debug("Running loader %d/%d: %s", i, len(self.loads), load.name)
+            logger.debug("Running loader %d/%d: %s", i, len(self.loads), load.id)
             load.load()
             load_time = time.time() - load_start_time
-            logger.debug("Loader %s completed in %.2f seconds", load.name, load_time)
+            logger.debug("Loader %s completed in %.2f seconds", load.id, load_time)
 
         phase_time = time.time() - start_time
         logger.info("Load phase completed successfully in %.2f seconds", phase_time)

@@ -22,7 +22,7 @@ from flint.alert.rules.env_vars_matches import EnvVarsMatchesRule
 def fixture_env_rule_config() -> dict[str, Any]:
     """Provide a representative environment variable matching rule configuration."""
     return {
-        "rule": "env_vars_matches",
+        "rule_type": "env_vars_matches",
         "env_var_name": "TEST_ENV",
         "env_var_values": ["1", "true"],
     }
@@ -42,7 +42,7 @@ class TestEnvVarsMatchesRuleValidation:
         rule = EnvVarsMatchesRule(**env_rule_config)
 
         # Assert
-        assert rule.rule == "env_vars_matches"
+        assert rule.rule_type == "env_vars_matches"
         assert rule.env_var_name == "TEST_ENV"
         assert rule.env_var_values == ["1", "true"]
 
@@ -51,7 +51,7 @@ class TestEnvVarsMatchesRuleValidation:
     ) -> None:
         """Test EnvVarsMatchesRule creation fails when rule is missing."""
         # Arrange
-        del env_rule_config["rule"]
+        del env_rule_config["rule_type"]
 
         # Assert
         with pytest.raises(ValidationError):
@@ -87,7 +87,7 @@ class TestEnvVarsMatchesRuleValidation:
     ) -> None:
         """Test EnvVarsMatchesRule creation fails when rule type is incorrect."""
         # Arrange
-        env_rule_config["rule"] = "wrong_rule_type"
+        env_rule_config["rule_type"] = "wrong_rule_type"
 
         # Assert
         with pytest.raises(ValidationError):
@@ -211,7 +211,7 @@ class TestEnvVarsMatchesRuleEvaluation:
         """Test evaluation returns True when env_var_name is empty (edge case behavior)."""
         # Arrange
         config = {
-            "rule": "env_vars_matches",
+            "rule_type": "env_vars_matches",
             "env_var_name": "",
             "env_var_values": ["test"],
         }
@@ -227,7 +227,7 @@ class TestEnvVarsMatchesRuleEvaluation:
         """Test evaluation returns True when first value in list matches."""
         # Arrange
         config = {
-            "rule": "env_vars_matches",
+            "rule_type": "env_vars_matches",
             "env_var_name": "MULTI_TEST",
             "env_var_values": ["dev", "staging", "prod"],
         }
@@ -245,7 +245,7 @@ class TestEnvVarsMatchesRuleEvaluation:
         """Test evaluation returns True when last value in list matches."""
         # Arrange
         config = {
-            "rule": "env_vars_matches",
+            "rule_type": "env_vars_matches",
             "env_var_name": "MULTI_TEST",
             "env_var_values": ["dev", "staging", "prod"],
         }

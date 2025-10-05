@@ -4,19 +4,22 @@
         "triggers": []
     },
     "runtime": {
+        "id": "test-runtime",
+        "description": "",
+        "enabled": true,
         "jobs": [
             {
-                "name": "test-job",
+                "id": "test-job",
                 "description": "",
                 "enabled": true,
-                "engine": "spark",
+                "engine_type": "spark",
                 "extracts": [
                     {
                         "data_format": "csv",
                         "location": "tests/e2e/job/join/extract-left/left_data.csv",
                         "method": "batch",
-                        "name": "extract-left",
-                        "type": "file",
+                        "id": "extract-left",
+                        "extract_type": "file",
                         "options": {
                             "delimiter": ",",
                             "header": true,
@@ -28,8 +31,8 @@
                         "data_format": "csv",
                         "location": "tests/e2e/job/join/extract-right/right_data.csv",
                         "method": "batch",
-                        "name": "extract-right",
-                        "type": "file",
+                        "id": "extract-right",
+                        "extract_type": "file",
                         "options": {
                             "delimiter": ",",
                             "header": true,
@@ -40,20 +43,20 @@
                 ],
                 "transforms": [
                     {
-                        "name": "transform-join",
-                        "upstream_name": "extract-left",
+                        "id": "transform-join",
+                        "upstream_id": "extract-left",
                         "options": {},
                         "functions": [
                             {
-                                "function": "join",
+                                "function_type": "join",
                                 "arguments": {
-                                    "other_upstream_name": "extract-right",
+                                    "other_upstream_id": "extract-right",
                                     "on": "id",
                                     "how": "inner"
                                 }
                             },
                             {
-                                "function": "select",
+                                "function_type": "select",
                                 "arguments": {
                                     "columns": [
                                         "id",
@@ -70,8 +73,8 @@
                     {
                         "data_format": "csv",
                         "location": "tests/e2e/job/join/load-test",
-                        "name": "load-test",
-                        "upstream_name": "transform-join",
+                        "id": "load-test",
+                        "upstream_id": "transform-join",
                         "schema_location": "tests/e2e/job/join/schema_location.json",
                         "method": "batch",
                         "mode": "overwrite",
@@ -82,7 +85,7 @@
                 ],
                 "hooks": {
                     "onStart": [],
-                    "onFailure": [],
+                    "onError": [],
                     "onSuccess": [],
                     "onFinally": []
                 }

@@ -18,13 +18,13 @@ from flint.runtime.jobs.spark.transforms.select import SelectFunction
 @pytest.fixture(name="select_config")
 def fixture_select_config() -> dict[str, Any]:
     """Return a config dict for SelectFunction."""
-    return {"function": "select", "arguments": {"columns": ["id", "name"]}}
+    return {"function_type": "select", "arguments": {"columns": ["id", "name"]}}
 
 
 def test_select_creation__from_config__creates_valid_model(select_config: dict[str, Any]) -> None:
     """Instantiate from config only to test dict-based initialization."""
     f = SelectFunction(**select_config)
-    assert f.function == "select"
+    assert f.function_type == "select"
     assert isinstance(f.arguments, SelectArgs)
     assert f.arguments.columns == ["id", "name"]
 
@@ -42,7 +42,7 @@ def select_func(select_config: dict[str, Any]) -> SelectFunction:
 
 def test_select_fixture(select_func: SelectFunction) -> None:
     """Assert the instantiated fixture has expected columns."""
-    assert select_func.function == "select"
+    assert select_func.function_type == "select"
     assert isinstance(select_func.arguments, SelectArgs)
     assert select_func.arguments.columns == ["id", "name"]
 

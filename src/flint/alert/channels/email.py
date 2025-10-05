@@ -30,8 +30,8 @@ class EmailChannel(ChannelModel):
     failure handling with retry logic.
 
     Attributes:
-        channel_id: Always "email" for email channels
-        name: Human-readable name for the channel
+        channel_type: Always "email" for email channels
+        id: Human-readable identifier for the channel
         description: Description of the channel purpose
         smtp_server: SMTP server hostname or IP address
         smtp_port: SMTP server port number
@@ -41,7 +41,7 @@ class EmailChannel(ChannelModel):
         to_emails: List of recipient email addresses
     """
 
-    channel_id: Literal["email"] = Field("email", description="Type identifier for the email channel")
+    channel_type: Literal["email"] = Field("email", description="Type identifier for the email channel")
     smtp_server: StrictStr = Field(..., description="SMTP server hostname or IP address", min_length=1)
     smtp_port: StrictInt = Field(..., description="SMTP server port number", gt=0, le=65535)
     username: StrictStr = Field(..., description="SMTP authentication username", min_length=1)

@@ -19,7 +19,7 @@ from flint.runtime.jobs.spark.transforms.withcolumn import WithColumnFunction
 def fixture_withcolumn_config() -> dict[str, Any]:
     """Return a config dict for WithColumnFunction."""
     return {
-        "function": "withColumn",
+        "function_type": "withColumn",
         "arguments": {"col_name": "full_name", "col_expr": "concat(first_name, ' ', last_name)"},
     }
 
@@ -27,7 +27,7 @@ def fixture_withcolumn_config() -> dict[str, Any]:
 def test_withcolumn_creation__from_config__creates_valid_model(withcolumn_config: dict[str, Any]) -> None:
     """Instantiate from config only to test dict-based initialization."""
     f = WithColumnFunction(**withcolumn_config)
-    assert f.function == "withColumn"
+    assert f.function_type == "withColumn"
     assert isinstance(f.arguments, WithColumnArgs)
     assert f.arguments.col_name == "full_name"
     assert f.arguments.col_expr.startswith("concat")
@@ -46,7 +46,7 @@ def fixture_withcolumn_func(withcolumn_config: dict[str, Any]) -> WithColumnFunc
 
 def test_withcolumn_fixture__values(withcolumn_func: WithColumnFunction) -> None:
     """Assert the instantiated fixture has expected column name and expression."""
-    assert withcolumn_func.function == "withColumn"
+    assert withcolumn_func.function_type == "withColumn"
     assert isinstance(withcolumn_func.arguments, WithColumnArgs)
     assert withcolumn_func.arguments.col_name == "full_name"
     assert withcolumn_func.arguments.col_expr.startswith("concat")

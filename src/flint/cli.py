@@ -217,16 +217,19 @@ class RunCommand(Command):
             )
             return e.exit_code
         except FlintRuntimeConfigurationError as e:
+            logger.error("Runtime configuration is invalid: %s", e)
             alert.evaluate_trigger_and_alert(
                 title="ETL Configuration Error", body="Invalid runtime configuration", exception=e
             )
             return e.exit_code
         except FlintValidationError as e:
+            logger.error("Configuration validation failed: %s", e)
             alert.evaluate_trigger_and_alert(
                 title="ETL Validation Error", body="Configuration validation failed", exception=e
             )
             return e.exit_code
         except FlintJobError as e:
+            logger.error("ETL job failed: %s", e)
             alert.evaluate_trigger_and_alert(
                 title="ETL Execution Error", body="Runtime error during ETL execution", exception=e
             )

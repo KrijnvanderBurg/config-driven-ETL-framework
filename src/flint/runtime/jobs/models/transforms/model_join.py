@@ -22,12 +22,12 @@ class JoinArgs(ArgsModel):
     """Arguments for join transform operations.
 
     Attributes:
-        other_upstream_name: Name of the dataframe to join with the current dataframe
+        other_upstream_id: Identifier of the dataframe to join with the current dataframe
         on: Column(s) to join on. Can be a string for a single column or a list of strings for multiple columns
         how: Type of join to perform (inner, outer, left, right, etc.). Defaults to "inner"
     """
 
-    other_upstream_name: str
+    other_upstream_id: str
     on: str | list[str]
     how: str = "inner"
 
@@ -39,9 +39,9 @@ class JoinFunctionModel(FunctionModel[JoinArgs]):
     transformation, specifying the dataframes to join and how to join them.
 
     Attributes:
-        function: The name of the function to be used (always "join")
+        function_type: The name of the function to be used (always "join")
         arguments: Container for the join parameters
     """
 
-    function: str
+    function_type: str
     arguments: JoinArgs

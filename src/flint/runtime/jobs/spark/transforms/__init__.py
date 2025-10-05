@@ -35,5 +35,5 @@ TransformFunctionSparkUnion = Annotated[
     | JoinFunction
     | SelectFunction
     | WithColumnFunction,
-    Discriminator("function"),
+    Discriminator("function_type"),
 ]

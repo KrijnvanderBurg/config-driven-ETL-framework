@@ -27,5 +27,5 @@ __all__ = ["ChannelModel", "ChannelUnion"]
 
 ChannelUnion = Annotated[
     EmailChannel | HttpChannel | FileChannel,
-    Discriminator("channel_id"),
+    Discriminator("channel_type"),
 ]

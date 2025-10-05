@@ -36,15 +36,18 @@ def fixture_runtime_config(tmp_path: Path) -> dict[str, Any]:
     output_file.write_text("[]", encoding="utf-8")
 
     return {
+        "id": "test-runtime",
+        "description": "Test runtime configuration",
+        "enabled": True,
         "jobs": [
             {
-                "name": "test_job",
+                "id": "test_job",
                 "description": "Test job description",
                 "enabled": True,
-                "engine": "spark",
+                "engine_type": "spark",
                 "extracts": [
                     {
-                        "name": "extract1",
+                        "id": "extract1",
                         "method": "batch",
                         "data_format": "json",
                         "options": {},
@@ -54,16 +57,16 @@ def fixture_runtime_config(tmp_path: Path) -> dict[str, Any]:
                 ],
                 "transforms": [
                     {
-                        "name": "transform1",
-                        "upstream_name": "extract1",
+                        "id": "transform1",
+                        "upstream_id": "extract1",
                         "options": {},
                         "functions": [],
                     }
                 ],
                 "loads": [
                     {
-                        "name": "load1",
-                        "upstream_name": "transform1",
+                        "id": "load1",
+                        "upstream_id": "transform1",
                         "method": "batch",
                         "location": str(output_file),
                         "schema_location": None,
@@ -79,7 +82,7 @@ def fixture_runtime_config(tmp_path: Path) -> dict[str, Any]:
                     "onFinally": [],
                 },
             }
-        ]
+        ],
     }
 
 
@@ -89,7 +92,7 @@ def test_runtime_creation__from_config__creates_valid_model(runtime_config: dict
 
     assert isinstance(controller.jobs, list)
     assert len(controller.jobs) == 1
-    assert controller.jobs[0].name == "test_job"
+    assert controller.jobs[0].id == "test_job"
 
 
 # =========================================================================== #
@@ -113,10 +116,54 @@ class TestRuntimeControllerValidation:
         self, runtime_config: dict[str, Any]
     ) -> None:
         """Test RuntimeController creation fails with invalid job configuration."""
-        runtime_config["jobs"][0]["engine"] = "invalid_engine"
+        runtime_config["jobs"][0]["engine_type"] = "invalid_engine"
 
         with pytest.raises(ValidationError):
             RuntimeController(**runtime_config)
+
+    def test_create_runtime_controller__with_missing_name__raises_validation_error(
+        self, runtime_config: dict[str, Any]
+    ) -> None:
+        """Test RuntimeController creation fails when name field is missing."""
+        del runtime_config["id"]
+
+        with pytest.raises(ValidationError):
+            RuntimeController(**runtime_config)
+
+    def test_create_runtime_controller__with_empty_name__raises_validation_error(
+        self, runtime_config: dict[str, Any]
+    ) -> None:
+        """Test RuntimeController creation fails when name is empty."""
+        runtime_config["id"] = ""
+
+        with pytest.raises(ValidationError):
+            RuntimeController(**runtime_config)
+
+    def test_create_runtime_controller__with_missing_description__raises_validation_error(
+        self, runtime_config: dict[str, Any]
+    ) -> None:
+        """Test RuntimeController creation fails when description is missing."""
+        del runtime_config["description"]
+
+        with pytest.raises(ValidationError):
+            RuntimeController(**runtime_config)
+
+    def test_create_runtime_controller__with_missing_enabled__raises_validation_error(
+        self, runtime_config: dict[str, Any]
+    ) -> None:
+        """Test RuntimeController creation fails when enabled is missing."""
+        del runtime_config["enabled"]
+
+        with pytest.raises(ValidationError):
+            RuntimeController(**runtime_config)
+
+    def test_create_runtime_controller__with_enabled_false__succeeds(self, runtime_config: dict[str, Any]) -> None:
+        """Test RuntimeController creation succeeds with enabled set to False."""
+        runtime_config["enabled"] = False
+
+        controller = RuntimeController(**runtime_config)
+
+        assert controller.enabled is False
 
 
 # =========================================================================== #
@@ -175,10 +222,22 @@ class TestRuntimeControllerFromFile:
 class TestRuntimeControllerExecuteAll:
     """Test RuntimeController.execute_all() method."""
 
+    def test_execute_all__when_disabled__skips_job_execution(self, runtime_controller: RuntimeController) -> None:
+        """Test execute_all skips all jobs when runtime is disabled."""
+        runtime_controller.enabled = False
+        mock_job = Mock()
+        mock_job.id = "mock_job"
+        runtime_controller.jobs = [mock_job]
+
+        runtime_controller.execute_all()
+
+        # Job should not be executed
+        mock_job.execute.assert_not_called()
+
     def test_execute_all__with_single_job__calls_job_execute(self, runtime_controller: RuntimeController) -> None:
         """Test execute_all calls execute on single job."""
         mock_job = Mock()
-        mock_job.name = "mock_job"
+        mock_job.id = "mock_job"
         runtime_controller.jobs = [mock_job]
 
         runtime_controller.execute_all()
@@ -188,9 +247,9 @@ class TestRuntimeControllerExecuteAll:
     def test_execute_all__with_multiple_jobs__calls_execute_on_all(self, runtime_controller: RuntimeController) -> None:
         """Test execute_all calls execute on all jobs in order."""
         mock_job1 = Mock()
-        mock_job1.name = "job1"
+        mock_job1.id = "job1"
         mock_job2 = Mock()
-        mock_job2.name = "job2"
+        mock_job2.id = "job2"
         runtime_controller.jobs = [mock_job1, mock_job2]
 
         runtime_controller.execute_all()
@@ -201,7 +260,7 @@ class TestRuntimeControllerExecuteAll:
     def test_execute_all__when_job_fails__propagates_exception(self, runtime_controller: RuntimeController) -> None:
         """Test execute_all propagates exception when a job fails."""
         mock_job = Mock()
-        mock_job.name = "failing_job"
+        mock_job.id = "failing_job"
         mock_job.execute.side_effect = Exception("Job execution failed")
         runtime_controller.jobs = [mock_job]
 

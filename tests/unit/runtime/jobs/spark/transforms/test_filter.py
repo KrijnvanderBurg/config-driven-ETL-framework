@@ -18,13 +18,13 @@ from flint.runtime.jobs.spark.transforms.filter import FilterFunction
 @pytest.fixture(name="filter_config")
 def fixture_filter_config() -> dict:
     """Return a config dict for FilterFunction."""
-    return {"function": "filter", "arguments": {"condition": "age > 18"}}
+    return {"function_type": "filter", "arguments": {"condition": "age > 18"}}
 
 
 def test_filter_creation__from_config__creates_valid_model(filter_config: dict[str, Any]) -> None:
     """Instantiate from config only to test dict-based initialization."""
     f = FilterFunction(**filter_config)
-    assert f.function == "filter"
+    assert f.function_type == "filter"
     assert isinstance(f.arguments, FilterArgs)
     assert f.arguments.condition == "age > 18"
 
@@ -42,7 +42,7 @@ def fixture_filter_func(filter_config: dict[str, Any]) -> FilterFunction:
 
 def test_filter_fixture(filter_func: FilterFunction) -> None:
     """Assert the instantiated fixture has the expected condition."""
-    assert filter_func.function == "filter"
+    assert filter_func.function_type == "filter"
     assert isinstance(filter_func.arguments, FilterArgs)
     assert filter_func.arguments.condition == "age > 18"
 

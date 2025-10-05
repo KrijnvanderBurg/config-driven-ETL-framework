@@ -27,7 +27,7 @@ class DropDuplicatesFunction(Function):
         arguments: Container for the dropDuplicates parameters
     """
 
-    function: Literal["dropduplicates"]
+    function_type: Literal["dropduplicates"]
     arguments: DropDuplicatesArgs
 
     def transform(self) -> Callable:

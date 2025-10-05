@@ -32,9 +32,9 @@ class WithColumnFunctionModel(FunctionModel[WithColumnArgs]):
     transformation, specifying the column name and expression.
 
     Attributes:
-        function: The name of the function to be used (always "withColumn")
+        function_type: The name of the function to be used (always "withColumn")
         arguments: Container for the withColumn parameters
     """
 
-    function: str
+    function_type: str
     arguments: WithColumnArgs

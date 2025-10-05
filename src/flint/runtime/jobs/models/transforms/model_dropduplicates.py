@@ -31,9 +31,9 @@ class DropDuplicatesFunctionModel(FunctionModel[DropDuplicatesArgs]):
     transformation, specifying which columns to consider when identifying duplicates.
 
     Attributes:
-        function: The name of the function to be used (always "dropDuplicates")
+        function_type: The name of the function to be used (always "dropDuplicates")
         arguments: Container for the dropDuplicates parameters
     """
 
-    function: str
+    function_type: str
     arguments: DropDuplicatesArgs

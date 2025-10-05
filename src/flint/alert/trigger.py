@@ -27,17 +27,17 @@ class AlertTrigger(BaseModel):
     rule-based system similar to transform functions.
 
     Attributes:
-        name: Unique name for the trigger rule
+        id: Unique identifier for the trigger rule
         enabled: Whether this rule is currently active
-        channel_names: List of channel names that should receive alerts matching this rule
+        channel_ids: List of channel identifiers that should receive alerts matching this rule
         template: Template configuration for formatting alert messages
         rules: List of rules that must all evaluate to True for the trigger to fire
     """
 
-    name: str
+    id: str
     enabled: bool
     description: str
-    channel_names: list[str]
+    channel_ids: list[str]
     template: AlertTemplate
     rules: list[AlertRuleUnion]
 
@@ -54,21 +54,21 @@ class AlertTrigger(BaseModel):
             True if all rules evaluate to True, False otherwise
         """
         if not self.enabled:
-            logger.debug("Trigger '%s' is disabled; skipping trigger check.", self.name)
+            logger.debug("Trigger '%s' is disabled; skipping trigger check.", self.id)
             return False
 
         # If no rules are configured, the trigger should fire (default behavior)
         if not self.rules:
-            logger.debug("No rules configured for trigger '%s'; trigger will fire.", self.name)
+            logger.debug("No rules configured for trigger '%s'; trigger will fire.", self.id)
             return True
 
         # All rules must evaluate to True (AND logic)
         for rule in self.rules:
             if not rule.evaluate(exception):
                 logger.debug(
-                    "Rule '%s' for trigger '%s' evaluated to False; trigger will not fire.", rule.rule, self.name
+                    "Rule '%s' for trigger '%s' evaluated to False; trigger will not fire.", rule.rule_type, self.id
                 )
                 return False
 
-        logger.debug("All rules for trigger '%s' evaluated to True; trigger will fire.", self.name)
+        logger.debug("All rules for trigger '%s' evaluated to True; trigger will fire.", self.id)
         return True

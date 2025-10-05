@@ -31,7 +31,7 @@ class FilterFunction(Function):
         arguments: Container for the filter parameters
     """
 
-    function: Literal["filter"]
+    function_type: Literal["filter"]
     arguments: FilterArgs
 
     def transform(self) -> Callable:

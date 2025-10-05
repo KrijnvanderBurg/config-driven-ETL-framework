@@ -39,8 +39,8 @@ def fixture_valid_load_config(tmp_path: Path) -> Generator[dict[str, Any], Any, 
     schema_file = Path(tmp_path) / "schema.json"
 
     config = {
-        "name": "customer_data_output",
-        "upstream_name": "customer_transform",
+        "id": "customer_data_output",
+        "upstream_id": "customer_transform",
         "method": "batch",
         "location": str(output_file),
         "schema_location": str(schema_file),
@@ -68,8 +68,8 @@ class TestLoadFileSparkValidation:
         load = LoadFileSpark(**valid_load_config)
 
         # Assert
-        assert load.name == "customer_data_output"
-        assert load.upstream_name == "customer_transform"
+        assert load.id == "customer_data_output"
+        assert load.upstream_id == "customer_transform"
         assert load.method == LoadMethod.BATCH
         assert load.data_format == LoadFormat.JSON
         assert load.mode == LoadMode.OVERWRITE
@@ -82,7 +82,7 @@ class TestLoadFileSparkValidation:
     ) -> None:
         """Test LoadFileSpark creation fails when name is missing."""
         # Arrange
-        del valid_load_config["name"]
+        del valid_load_config["id"]
 
         # Assert
         with pytest.raises(ValidationError):
@@ -94,7 +94,7 @@ class TestLoadFileSparkValidation:
     ) -> None:
         """Test LoadFileSpark creation fails with empty name."""
         # Arrange
-        valid_load_config["name"] = ""
+        valid_load_config["id"] = ""
 
         # Assert
         with pytest.raises(ValidationError):
@@ -137,12 +137,12 @@ class TestLoadFileSparkValidation:
             # Act
             LoadFileSpark(**valid_load_config)
 
-    def test_create_load_file_spark__with_missing_upstream_name__raises_validation_error(
+    def test_create_load_file_spark__with_missing_upstream_id__raises_validation_error(
         self, valid_load_config: dict[str, Any]
     ) -> None:
-        """Test LoadFileSpark creation fails when upstream_name is missing."""
+        """Test LoadFileSpark creation fails when upstream_id is missing."""
         # Arrange
-        del valid_load_config["upstream_name"]
+        del valid_load_config["upstream_id"]
 
         # Assert
         with pytest.raises(ValidationError):
@@ -247,12 +247,12 @@ class TestLoadFileSparkLoad:
         mock_dataframe.write = Mock()
         mock_dataframe.write.save = Mock()
 
-        with patch.object(LoadFileSpark, "data_registry", {load_file_spark.upstream_name: mock_dataframe}):
+        with patch.object(LoadFileSpark, "data_registry", {load_file_spark.upstream_id: mock_dataframe}):
             # Act & Assert - should complete without exception
             load_file_spark.load()
 
             # Verify the dataframe was copied to the load step
-            assert LoadFileSpark.data_registry[load_file_spark.name] == mock_dataframe
+            assert LoadFileSpark.data_registry[load_file_spark.id] == mock_dataframe
 
     def test_load__with_streaming_method__completes_successfully(self, valid_load_config: dict[str, Any]) -> None:
         """Test load method completes successfully for streaming loading."""
@@ -269,14 +269,14 @@ class TestLoadFileSparkLoad:
         mock_dataframe.writeStream = mock_write_stream
 
         with (
-            patch.object(LoadFileSpark, "data_registry", {load_streaming.upstream_name: mock_dataframe}),
+            patch.object(LoadFileSpark, "data_registry", {load_streaming.upstream_id: mock_dataframe}),
             patch.object(LoadFileSpark, "streaming_query_registry", {}),
         ):
             # Act & Assert - should complete without exception
             load_streaming.load()
 
             # Verify the streaming query was registered
-            assert LoadFileSpark.streaming_query_registry[load_streaming.name] == mock_streaming_query
+            assert LoadFileSpark.streaming_query_registry[load_streaming.id] == mock_streaming_query
 
     def test_load__with_invalid_method__raises_value_error(self, load_file_spark: LoadFileSpark) -> None:
         """Test load method raises ValueError for unsupported loading method."""
@@ -286,7 +286,7 @@ class TestLoadFileSparkLoad:
         mock_dataframe = Mock()
 
         with (
-            patch.object(LoadFileSpark, "data_registry", {load_file_spark.upstream_name: mock_dataframe}),
+            patch.object(LoadFileSpark, "data_registry", {load_file_spark.upstream_id: mock_dataframe}),
             patch.object(load_file_spark, "method", mock_method),
         ):
             # Assert
@@ -304,7 +304,7 @@ class TestLoadFileSparkLoad:
         mock_dataframe.write = Mock()
         mock_dataframe.write.save = Mock()
 
-        with patch.object(LoadFileSpark, "data_registry", {load_file_spark.upstream_name: mock_dataframe}):
+        with patch.object(LoadFileSpark, "data_registry", {load_file_spark.upstream_id: mock_dataframe}):
             # Act
             load_file_spark.load()
 
@@ -320,12 +320,12 @@ class TestLoadFileSparkLoad:
 
         mock_dataframe = Mock()
         mock_dataframe.count.return_value = 5
-        test_schema = {"type": "struct", "fields": [{"name": "id", "type": "integer"}]}
+        test_schema = {"type": "struct", "fields": [{"id": "id", "type": "integer"}]}
         mock_dataframe.schema.jsonValue.return_value = test_schema
         mock_dataframe.write = Mock()
         mock_dataframe.write.save = Mock()
 
-        with patch.object(LoadFileSpark, "data_registry", {load_file_spark.upstream_name: mock_dataframe}):
+        with patch.object(LoadFileSpark, "data_registry", {load_file_spark.upstream_id: mock_dataframe}):
             # Act
             load_file_spark.load()
 

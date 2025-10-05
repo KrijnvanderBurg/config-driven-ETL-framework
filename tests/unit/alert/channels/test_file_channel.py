@@ -22,9 +22,10 @@ from flint.alert.channels.file import FileChannel
 def fixture_valid_file_config(tmp_path: Path) -> dict[str, Any]:
     """Provide a valid file channel configuration."""
     return {
-        "name": "error-log-alerts",
+        "id": "error-log-alerts",
         "description": "Error logging to file",
         "file_path": tmp_path / "alerts.log",
+        "enabled": True,
     }
 
 
@@ -42,9 +43,9 @@ class TestFileChannelValidation:
         channel = FileChannel(**valid_file_config)
 
         # Assert
-        assert channel.name == "error-log-alerts"
+        assert channel.id == "error-log-alerts"
         assert channel.description == "Error logging to file"
-        assert channel.channel_id == "file"
+        assert channel.channel_type == "file"
         assert isinstance(channel.file_path, Path)
         assert channel.file_path.name == "alerts.log"
 
@@ -53,7 +54,7 @@ class TestFileChannelValidation:
     ) -> None:
         """Test FileChannel creation fails when name is missing."""
         # Arrange
-        del valid_file_config["name"]
+        del valid_file_config["id"]
 
         # Assert
         with pytest.raises(ValidationError):
@@ -65,7 +66,7 @@ class TestFileChannelValidation:
     ) -> None:
         """Test FileChannel creation fails when name is empty string."""
         # Arrange
-        valid_file_config["name"] = ""
+        valid_file_config["id"] = ""
 
         # Assert
         with pytest.raises(ValidationError):
@@ -98,18 +99,16 @@ class TestFileChannelValidation:
         assert isinstance(channel.file_path, Path)
         assert str(channel.file_path) == "/tmp/alerts.log"
 
-    def test_create_file_channel__with_default_description__uses_empty_string(
+    def test_create_file_channel__with_missing_description__raises_validation_error(
         self, valid_file_config: dict[str, Any]
     ) -> None:
-        """Test FileChannel creation uses empty description when not provided."""
+        """Test FileChannel creation fails when description is missing."""
         # Arrange
         del valid_file_config["description"]
 
-        # Act
-        channel = FileChannel(**valid_file_config)
-
-        # Assert
-        assert channel.description == ""
+        # Act & Assert
+        with pytest.raises(ValidationError):
+            FileChannel(**valid_file_config)
 
 
 # =========================================================================== #
@@ -209,9 +208,10 @@ class TestFileChannelAlert:
         # Arrange
         nested_path = tmp_path / "logs" / "alerts" / "system.log"
         config = {
-            "name": "nested-alerts",
+            "id": "nested-alerts",
             "description": "Nested directory alerts",
             "file_path": nested_path,
+            "enabled": True,
         }
         channel = FileChannel(**config)
 

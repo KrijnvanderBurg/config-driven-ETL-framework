@@ -30,9 +30,9 @@ class DropFunctionModel(FunctionModel[DropArgs]):
     transformation, specifying which columns to remove from the DataFrame.
 
     Attributes:
-        function: The name of the function to be used (always "drop")
+        function_type: The name of the function to be used (always "drop")
         arguments: Container for the drop parameters
     """
 
-    function: str
+    function_type: str
     arguments: DropArgs

@@ -30,9 +30,9 @@ class FilterFunctionModel(FunctionModel[FilterArgs]):
     transformation, specifying the condition to filter rows.
 
     Attributes:
-        function: The name of the function to be used (always "filter")
+        function_type: The name of the function to be used (always "filter")
         arguments: Container for the filter parameters
     """
 
-    function: str
+    function_type: str
     arguments: FilterArgs

@@ -33,10 +33,10 @@ class ResultVerifier:
         """
         for job in isolated_config["runtime"]["jobs"]:
             for load in job["loads"]:
-                expected_dir = self.job_dir / load["name"]
+                expected_dir = self.job_dir / load["id"]
 
                 self._verify_single_output(
-                    load_name=load["name"],
+                    load_name=load["id"],
                     actual_data_path=Path(load["location"]),
                     actual_schema_path=Path(load["schema_location"]),
                     expected_dir=expected_dir,

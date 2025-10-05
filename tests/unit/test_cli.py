@@ -78,7 +78,7 @@ class TestValidateCommand:
             alert_filepath="/path/to/alert.json",
             runtime_filepath="/path/to/runtime.json",
             test_exception=None,
-            test_env_vars=None,
+            test_env_var=None,
         )
 
         command = ValidateCommand.from_args(args)
@@ -94,7 +94,7 @@ class TestValidateCommand:
             alert_filepath="/path/to/alert.json",
             runtime_filepath="/path/to/runtime.json",
             test_exception="Test error message",
-            test_env_vars=None,
+            test_env_var=None,
         )
 
         command = ValidateCommand.from_args(args)
@@ -107,7 +107,7 @@ class TestValidateCommand:
             alert_filepath="/path/to/alert.json",
             runtime_filepath="/path/to/runtime.json",
             test_exception=None,
-            test_env_vars=["ENV1=value1", "ENV2=value2"],
+            test_env_var=["ENV1=value1", "ENV2=value2"],
         )
 
         command = ValidateCommand.from_args(args)

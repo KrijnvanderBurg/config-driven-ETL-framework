@@ -2,10 +2,10 @@
     "alert": {
         "channels": [
             {
-                "channel_id": "email",
-                "name": "alert-operations-team",
+                "id": "alert-operations-team",
                 "description": "",
                 "enabled": true,
+                "channel_type": "email",
                 "smtp_server": "smtp.company.com",
                 "smtp_port": 587,
                 "username": "username",
@@ -17,8 +17,10 @@
                 ]
             },
             {
-                "channel_id": "http",
-                "name": "alert-data-team-on-slack",
+                "id": "alert-data-team-on-slack",
+                "description": "",
+                "enabled": true,
+                "channel_type": "http",
                 "url": "https://.slack.com",
                 "method": "POST",
                 "headers": {
@@ -34,10 +36,10 @@
         ],
         "triggers": [
             {
-                "name": "production-external-errors",
-                "enabled": true,
+                "id": "production-external-errors",
                 "description": "",
-                "channel_names": ["alert-operations-team", "alert-data-team-on-slack"],
+                "enabled": true,
+                "channel_ids": ["alert-operations-team", "alert-data-team-on-slack"],
                 "template": {
                     "prepend_title": "ETL Pipeline Alert - ",
                     "append_title": " - Team XYZ",
@@ -47,10 +49,10 @@
                 "rules": []
             },  
             {
-                "name": "dev-warnings",
-                "enabled": true,
+                "id": "dev-warnings",
                 "description": "",
-                "channel_names": ["a-http-post-alert-name"],
+                "enabled": true,
+                "channel_ids": ["a-http-post-alert-name"],
                 "template": {
                     "prepend_title": "",
                     "append_title": "",
@@ -58,50 +60,54 @@
                     "append_body": ""
                 },
                 "rules": [
-                    {"rule": "exception_regex", "pattern": "validation|connection|database" },
-                    {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["development", "acceptance"]},
-                    {"rule": "env_vars_matches", "env_var_name": "APP_MODE", "env_var_values": ["live"]}
+                    {"rule_type": "exception_regex", "pattern": "validation|connection|database" },
+                    {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["development", "acceptance"]},
+                    {"rule_type": "env_vars_matches", "env_var_name": "APP_MODE", "env_var_values": ["live"]}
                 ]
             }
         ]
     },
     "runtime": {
+        "id": "customer-orders-pipeline",
+        "description": "ETL pipeline for processing customer orders data",
+        "enabled": true,
         "jobs": [
             {
-                "name": "bronze",
+                "id": "bronze",
                 "description": "",
                 "enabled": true,
-                "engine": "spark",
+                "engine_type": "spark",
                 "extracts": [
                     {
-                        "type": "file",
+                        "id": "extract-customers",
+                        "extract_type": "file",
                         "data_format": "csv",
                         "location": "examples/customer_orders/customers.csv",
                         "method": "batch",
-                        "name": "extract-customers",
                         "options": {
                             "delimiter": ",",
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema_": "examples/customer_orders/customers_schema.json"
+                        "schema": "examples/customer_orders/customers_schema.json"
                     }
                 ],
                 "transforms": [
                     {
-                        "name": "transform-join-orders",
-                        "upstream_name": "extract-customers",
+                        "id": "transform-join-orders",
+                        "upstream_id": "extract-customers",
                         "options": {},
                         "functions": [
-                            { "function": "drop", "arguments": {"columns": ["temp_col"]} },
-                            { "function": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]} }
+                            { "function_type": "drop", "arguments": {"columns": ["temp_col"]} },
+                            { "function_type": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]} }
                         ]
                     }
                 ],
                 "loads": [
                     {
-                        "name": "load-customer-orders",
-                        "upstream_name": "transform-join-orders",
+                        "id": "load-customer-orders",
+                        "upstream_id": "transform-join-orders",
+                        "load_type": "file",
                         "data_format": "csv",
                         "location": "examples/customer_orders/output",
                         "method": "batch",
@@ -116,9 +122,10 @@
                     "onFailure": [],
                     "onSuccess": [
                         {
-                            "name": "notify-data-is-ready",
+                            "id": "notify-data-is-ready",
                             "description": "",
-                            "action": "http",
+                            "enabled": true,
+                            "action_type": "http",
                             "url": "https://hooks.slack.com",
                             "method": "POST",
                             "headers": {
@@ -135,9 +142,10 @@
                     ],
                     "onFinally": [
                         // {
-                        //     "name": "archive-processed-files",
+                        //     "id": "archive-processed-files",
                         //     "description": "",
-                        //     "action": "move_or_copy_job_files",
+                        //     "enabled": true,
+                        //     "action_type": "move_or_copy_job_files",
                         //     "operation": "move",                        // allowed: "move" | "copy"
                         //     "source_location": "incoming/daily/",       // filepath, directory, or "dataframe"
                         //     "destination_location": "archive/daily/",   // filepath or directory (base target)

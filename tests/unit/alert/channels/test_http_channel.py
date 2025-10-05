@@ -14,13 +14,14 @@ class TestHttpChannel:
         # Arrange
         retry = Retry(raise_on_error=True, max_attempts=2, delay_in_seconds=1)
         channel = HttpChannel(
-            name="test_http_channel",
+            id="test_http_channel",
             description="Test HTTP channel",
-            channel_id="http",
+            channel_type="http",
             url="https://example.com/webhook",
             method="POST",
             timeout=30,
             retry=retry,
+            enabled=True,
         )
 
         with patch.object(channel, "_make_http_request") as mock_make_http_request:
@@ -35,15 +36,16 @@ class TestHttpChannel:
     def test_alert__with_empty_title_and_body__calls_make_http_request_with_empty_strings(self) -> None:
         """Test that alert calls _make_http_request with empty strings when title and body are empty."""
         # Arrange
-        retry = Retry(raise_on_error=False, max_attempts=0, delay_in_seconds=0)
+        retry = Retry(raise_on_error=False, max_attempts=0, delay_in_seconds=1)
         channel = HttpChannel(
-            name="test_http_channel",
+            id="test_http_channel",
             description="Test HTTP channel",
-            channel_id="http",
+            channel_type="http",
             url="https://example.com/webhook",
             method="POST",
             timeout=30,
             retry=retry,
+            enabled=True,
         )
 
         with patch.object(channel, "_make_http_request") as mock_make_http_request:

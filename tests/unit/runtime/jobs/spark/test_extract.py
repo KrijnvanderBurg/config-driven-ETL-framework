@@ -34,7 +34,7 @@ def fixture_valid_extract_config(tmp_path: Path) -> Generator[dict[str, Any], An
     """
     # Create a data file under the tmp_path
     data_file = Path(tmp_path, "test_data.json")
-    test_data = [{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]
+    test_data = [{"id": "Alice", "age": 30}, {"id": "Bob", "age": 25}]
     data_file.write_text(json.dumps(test_data), encoding="utf-8")
 
     # Create schema file under the tmp_path
@@ -48,7 +48,7 @@ def fixture_valid_extract_config(tmp_path: Path) -> Generator[dict[str, Any], An
     schema_file.write_text(json.dumps(schema.jsonValue()), encoding="utf-8")
 
     config = {
-        "name": "test_data",
+        "id": "test_data",
         "method": "batch",
         "data_format": "json",
         "options": {
@@ -75,7 +75,7 @@ class TestExtractFileSparkValidation:
         extract = ExtractFileSpark(**valid_extract_config)
 
         # Assert
-        assert extract.name == "test_data"
+        assert extract.id == "test_data"
         assert extract.method == ExtractMethod.BATCH
         assert extract.data_format == ExtractFormat.JSON
         assert extract.options == {"multiLine": True}
@@ -87,7 +87,7 @@ class TestExtractFileSparkValidation:
     ) -> None:
         """Test ExtractFileSpark creation fails when name is missing."""
         # Arrange
-        del valid_extract_config["name"]
+        del valid_extract_config["id"]
 
         # Assert
         with pytest.raises(ValidationError):
@@ -99,7 +99,7 @@ class TestExtractFileSparkValidation:
     ) -> None:
         """Test ExtractFileSpark creation fails with empty name."""
         # Arrange
-        valid_extract_config["name"] = ""
+        valid_extract_config["id"] = ""
 
         # Assert
         with pytest.raises(ValidationError):

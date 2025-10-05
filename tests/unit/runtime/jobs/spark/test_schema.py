@@ -132,7 +132,7 @@ class TestSchemaHandlers:
         Verifies that proper JSON validation happens when a malformed string is provided.
         """
         # Arrange
-        invalid_json = '{"name": "John" "age": 30}'  # Missing comma makes it invalid JSON
+        invalid_json = '{"id": "John" "age": 30}'  # Missing comma makes it invalid JSON
 
         # Act & Assert
         with pytest.raises(ValueError):

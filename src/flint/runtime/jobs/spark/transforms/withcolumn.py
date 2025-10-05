@@ -45,7 +45,7 @@ class WithColumnFunction(Function):
         ```
     """
 
-    function: Literal["withColumn"]
+    function_type: Literal["withColumn"]
     arguments: WithColumnArgs
 
     def transform(self) -> Callable:

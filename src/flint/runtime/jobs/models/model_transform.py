@@ -66,16 +66,16 @@ class TransformModel(BaseModel):
     Model for data transformation operations.
 
     This model configures transformation operations for data processing,
-    including the name, upstream source, and transformation options.
+    including the identifier, upstream source, and transformation options.
 
     Args:
-        name: Identifier for this transformation operation
-        upstream_name: Identifier(s) of the upstream component(s) providing data
+        id: Identifier for this transformation operation
+        upstream_id: Identifier(s) of the upstream component(s) providing data
         options: Transformation options as key-value pairs
 
     Examples:
         >>> df = spark.createDataFrame(data=[("Alice", 27), ("Bob", 32),], schema=["name", "age"])
-        >>> dict = {"function": "cast", "arguments": {"columns": {"age": "StringType",}}}
+        >>> dict = {"function_type": "cast", "arguments": {"columns": {"age": "StringType",}}}
         >>> transform = TransformFunction.from_dict(dict=dict[str, Any])
         >>> df = df.transform(func=transform).printSchema()
         root
@@ -83,6 +83,6 @@ class TransformModel(BaseModel):
         |-- age: string (nullable = true)
     """
 
-    name: str = Field(..., description="Identifier for this transformation operation", min_length=1)
-    upstream_name: str = Field(..., description="Identifier(s) of the upstream component(s) providing data")
+    id: str = Field(..., description="Identifier for this transformation operation", min_length=1)
+    upstream_id: str = Field(..., description="Identifier(s) of the upstream component(s) providing data")
     options: dict[str, Any] = Field(..., description="Transformation options as key-value pairs")

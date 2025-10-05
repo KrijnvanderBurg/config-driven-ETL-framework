@@ -13,11 +13,13 @@ Documentation is written for 2 main audiences:
 # Documentation Principles
 - **Clarity**: Use clear and concise language. Avoid jargon unless necessary, and provide explanations for technical terms.
 - **Consistency**: Maintain a consistent style and format throughout the documentation. Use the same terminology and structure for similar concepts.
+- **Parameters**: Do not create tables or lists etc of parameters, show the code or configuration in a code block instead and comment on the same line the various options.
 - **Comprehensiveness**: Cover all necessary topics, including installation, configuration, usage, troubleshooting, and contribution guidelines.
-- **Length**: Keep sections focused and avoid unnecessary verbosity. Do not create long README files; instead, break down information into smaller, manageable sections or separate documents. A new README may never be more than 300 lines, preferably less.
+- **Length**: Be concise and to the point. Avoid unnecessary verbosity. Each section should be as long as necessary to convey the information, but no longer.
 - **Examples**: Provide practical examples and use cases to illustrate concepts and procedures. Do not create too many examples, max one or two.
 - **Visual Aids**: Create placeholders for diagrams and screenshots if it can enhance understanding.
 - **Feedback**: Encourage users to provide feedback on the documentation to identify areas for improvement.
 - **Searchability and SEO optimisation**: Ensure the documentation is searchable. Use relevant keywords and phrases to improve the visibility of the documentation in search engines.
 - **Tone**: Maintain a professional and approachable tone. Be respectful and inclusive in language.
 - **Actionable Steps**: Provide clear, step-by-step instructions for tasks, ensuring that users can follow along without confusion.
+- **Faq**: Do NOT create a FAQ section, instead integrate common questions and answers into the relevant sections of the documentation.

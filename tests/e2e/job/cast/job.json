@@ -4,16 +4,19 @@
         "triggers": []
     },
     "runtime": {
+        "id": "test-runtime",
+        "description": "",
+        "enabled": true,
         "jobs": [
             {
-                "name": "test-job",
+                "id": "test-job",
                 "description": "",
                 "enabled": true,
-                "engine": "spark",
+                "engine_type": "spark",
                 "extracts": [
                     {
-                        "name": "extract-test",
-                        "type": "file",
+                        "id": "extract-test",
+                        "extract_type": "file",
                         "data_format": "csv",
                         "location": "tests/e2e/job/cast/extract-test/input_data.csv",
                         "method": "batch",
@@ -27,12 +30,12 @@
                 ],
                 "transforms": [
                     {
-                        "name": "transform-test",
-                        "upstream_name": "extract-test",
+                        "id": "transform-test",
+                        "upstream_id": "extract-test",
                         "options": {},
                         "functions": [
                             { 
-                                "function": "cast", 
+                                "function_type": "cast", 
                                 "arguments": { 
                                     "columns": [
                                         {"column_name": "byte_to_str", "cast_type": "string"},
@@ -54,8 +57,8 @@
                 ],
                 "loads": [
                     {
-                        "name": "load-test",
-                        "upstream_name": "transform-test",
+                        "id": "load-test",
+                        "upstream_id": "transform-test",
                         "data_format": "csv",
                         "location": "tests/e2e/job/cast/load-test",
                         "method": "batch",
@@ -68,7 +71,7 @@
                 ],
                 "hooks": {
                     "onStart": [],
-                    "onFailure": [],
+                    "onError": [],
                     "onSuccess": [],
                     "onFinally": []
                 }

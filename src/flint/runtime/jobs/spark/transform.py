@@ -40,38 +40,38 @@ class TransformSpark(TransformModel):
         Apply all transformation functions to the data source.
 
         This method performs the following steps:
-        1. Copies the dataframe from the upstream source to current transform's name
+        1. Copies the dataframe from the upstream source to current transform's id
         2. Sequentially applies each transformation function to the dataframe
         3. Each function updates the registry with its results
 
         Note:
             Functions are applied in the order they were defined in the configuration.
         """
-        logger.info("Starting transformation for: %s from upstream: %s", self.name, self.upstream_name)
+        logger.info("Starting transformation for: %s from upstream: %s", self.id, self.upstream_id)
 
         logger.debug("Adding Spark configurations: %s", self.options)
         self.spark.add_configs(options=self.options)
 
-        # Copy the dataframe from upstream to current name
-        logger.debug("Copying dataframe from %s to %s", self.upstream_name, self.name)
-        self.data_registry[self.name] = self.data_registry[self.upstream_name]
+        # Copy the dataframe from upstream to current id
+        logger.debug("Copying dataframe from %s to %s", self.upstream_id, self.id)
+        self.data_registry[self.id] = self.data_registry[self.upstream_id]
 
         # Apply transformations
         logger.debug("Applying %d transformation functions", len(self.functions))
         for i, function in enumerate(self.functions):
-            logger.debug("Applying function %d/%d: %s", i, len(self.functions), function.function)
+            logger.debug("Applying function %d/%d: %s", i, len(self.functions), function.function_type)
 
-            original_count = self.data_registry[self.name].count()
+            original_count = self.data_registry[self.id].count()
             callable_ = function.transform()
-            self.data_registry[self.name] = callable_(df=self.data_registry[self.name])
+            self.data_registry[self.id] = callable_(df=self.data_registry[self.id])
 
-            new_count = self.data_registry[self.name].count()
+            new_count = self.data_registry[self.id].count()
 
             logger.info(
-                "Function %s applied - rows changed from %d to %d", function.function, original_count, new_count
+                "Function %s applied - rows changed from %d to %d", function.function_type, original_count, new_count
             )
 
-        logger.info("Transformation completed successfully for: %s", self.name)
+        logger.info("Transformation completed successfully for: %s", self.id)
 
 
 TransformSparkUnion = TransformSpark

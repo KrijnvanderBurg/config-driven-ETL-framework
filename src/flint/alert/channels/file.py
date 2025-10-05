@@ -29,11 +29,11 @@ class FileChannel(ChannelModel):
     paths and handles file system errors appropriately.
 
     Attributes:
-        channel_id: Always "file" for file channels
+        channel_type: Always "file" for file channels
         file_path: Path to the file where alerts should be written
     """
 
-    channel_id: Literal["file"] = Field("file", description="Type identifier for the file channel")
+    channel_type: Literal["file"] = Field("file", description="Type identifier for the file channel")
     file_path: Path = Field(..., description="Path to the file where alerts should be written")
 
     @override

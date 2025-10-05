@@ -20,7 +20,7 @@ from flint.alert.rules.exception_regex import ExceptionRegexRule
 @pytest.fixture(name="exception_rule_config")
 def fixture_exception_rule_config() -> dict[str, Any]:
     """Provide a representative exception regex rule configuration."""
-    return {"rule": "exception_regex", "pattern": "error"}
+    return {"rule_type": "exception_regex", "pattern": "error"}
 
 
 # =========================================================================== #
@@ -30,7 +30,7 @@ def fixture_exception_rule_config() -> dict[str, Any]:
 
 def create_exception_regex_rule(pattern: str) -> ExceptionRegexRule:
     """Create ExceptionRegexRule with proper configuration."""
-    config: dict[str, Any] = {"rule": "exception_regex", "pattern": pattern}
+    config: dict[str, Any] = {"rule_type": "exception_regex", "pattern": pattern}
     return ExceptionRegexRule(**config)  # type: ignore[arg-type]
 
 
@@ -50,7 +50,7 @@ class TestExceptionRegexRuleValidation:
         rule = ExceptionRegexRule(**exception_rule_config)
 
         # Assert
-        assert rule.rule == "exception_regex"
+        assert rule.rule_type == "exception_regex"
         assert rule.pattern == "error"
 
     def test_create_exception_regex_rule__with_missing_rule__raises_validation_error(
@@ -58,7 +58,7 @@ class TestExceptionRegexRuleValidation:
     ) -> None:
         """Test ExceptionRegexRule creation fails when rule is missing."""
         # Arrange
-        del exception_rule_config["rule"]
+        del exception_rule_config["rule_type"]
 
         # Assert
         with pytest.raises(ValidationError):
@@ -82,7 +82,7 @@ class TestExceptionRegexRuleValidation:
     ) -> None:
         """Test ExceptionRegexRule creation fails when rule type is incorrect."""
         # Arrange
-        exception_rule_config["rule"] = "wrong_rule_type"
+        exception_rule_config["rule_type"] = "wrong_rule_type"
 
         # Assert
         with pytest.raises(ValidationError):

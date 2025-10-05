@@ -24,18 +24,19 @@ logger: logging.Logger = get_logger(__name__)
 class ChannelModel(BaseModel, ABC):
     """Base configuration for alert channels.
 
-    Each concrete implementation must define a channel_id field with a specific
+    Each concrete implementation must define a channel_type field with a specific
     Literal value to ensure type safety and proper discrimination.
     """
 
-    name: str = Field(..., description="Name of the alert channel", min_length=1)
-    description: str = Field("", description="Description of the alert channel")
+    id: str = Field(..., description="Unique identifier for the alert channel", min_length=1)
+    description: str = Field(..., description="Description of the alert channel")
+    enabled: bool = Field(..., description="Whether this channel is enabled")
 
     def alert(self, title: str, body: str) -> None:
         """Send an alert message through this channel."""
-        logger.debug("Sending alert through channel: %s", self.name)
+        logger.debug("Sending alert through channel: %s", self.id)
         self._alert(title=title, body=body)
-        logger.info("Alert sent through %s channel", self.name)
+        logger.info("Alert sent through %s channel", self.id)
 
     @abstractmethod
     def _alert(self, title: str, body: str) -> None:

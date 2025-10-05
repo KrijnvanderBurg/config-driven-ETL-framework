@@ -22,10 +22,10 @@ from flint.alert.trigger import AlertTrigger
 def fixture_valid_trigger_config() -> dict[str, Any]:
     """Provide a valid alert trigger configuration."""
     return {
-        "name": "production-errors",
+        "id": "production-errors",
         "enabled": True,
         "description": "Production error notifications",
-        "channel_names": ["email", "file"],
+        "channel_ids": ["email", "file"],
         "template": {
             "prepend_title": "[ALERT]",
             "append_title": "[/ALERT]",
@@ -50,38 +50,38 @@ class TestAlertTriggerValidation:
         trigger = AlertTrigger(**valid_trigger_config)
 
         # Assert
-        assert trigger.name == "production-errors"
+        assert trigger.id == "production-errors"
         assert trigger.enabled is True
         assert trigger.description == "Production error notifications"
-        assert trigger.channel_names == ["email", "file"]
+        assert trigger.channel_ids == ["email", "file"]
         assert trigger.template.prepend_title == "[ALERT]"
         assert trigger.template.append_title == "[/ALERT]"
         assert trigger.template.prepend_body == ">>> "
         assert trigger.template.append_body == " <<<"
         assert trigger.rules == []
 
-    def test_create_alert_trigger__with_missing_name__raises_validation_error(
+    def test_create_alert_trigger__with_missing_id__raises_validation_error(
         self, valid_trigger_config: dict[str, Any]
     ) -> None:
-        """Test AlertTrigger creation fails when name is missing."""
+        """Test AlertTrigger creation fails when id is missing."""
         # Arrange
-        del valid_trigger_config["name"]
+        del valid_trigger_config["id"]
 
         # Assert
         with pytest.raises(ValidationError):
             # Act
             AlertTrigger(**valid_trigger_config)
 
-    def test_create_alert_trigger__with_empty_name__succeeds(self, valid_trigger_config: dict[str, Any]) -> None:
-        """Test AlertTrigger creation allows empty name string."""
+    def test_create_alert_trigger__with_empty_id__succeeds(self, valid_trigger_config: dict[str, Any]) -> None:
+        """Test AlertTrigger creation allows empty id string."""
         # Arrange
-        valid_trigger_config["name"] = ""
+        valid_trigger_config["id"] = ""
 
         # Act
         trigger = AlertTrigger(**valid_trigger_config)
 
         # Assert
-        assert trigger.name == ""
+        assert trigger.id == ""
 
     def test_create_alert_trigger__with_missing_enabled__raises_validation_error(
         self, valid_trigger_config: dict[str, Any]
@@ -107,12 +107,12 @@ class TestAlertTriggerValidation:
             # Act
             AlertTrigger(**valid_trigger_config)
 
-    def test_create_alert_trigger__with_missing_channel_names__raises_validation_error(
+    def test_create_alert_trigger__with_missing_channel_ids__raises_validation_error(
         self, valid_trigger_config: dict[str, Any]
     ) -> None:
-        """Test AlertTrigger creation fails when channel_names is missing."""
+        """Test AlertTrigger creation fails when channel_ids is missing."""
         # Arrange
-        del valid_trigger_config["channel_names"]
+        del valid_trigger_config["channel_ids"]
 
         # Assert
         with pytest.raises(ValidationError):
@@ -143,18 +143,16 @@ class TestAlertTriggerValidation:
             # Act
             AlertTrigger(**valid_trigger_config)
 
-    def test_create_alert_trigger__with_empty_channel_names__succeeds(
-        self, valid_trigger_config: dict[str, Any]
-    ) -> None:
-        """Test AlertTrigger creation with empty channel names list."""
+    def test_create_alert_trigger__with_empty_channel_ids__succeeds(self, valid_trigger_config: dict[str, Any]) -> None:
+        """Test AlertTrigger creation with empty channel ids list."""
         # Arrange
-        valid_trigger_config["channel_names"] = []
+        valid_trigger_config["channel_ids"] = []
 
         # Act
         trigger = AlertTrigger(**valid_trigger_config)
 
         # Assert
-        assert trigger.channel_names == []
+        assert trigger.channel_ids == []
 
     def test_create_alert_trigger__with_empty_rules__succeeds(self, valid_trigger_config: dict[str, Any]) -> None:
         """Test AlertTrigger creation with empty rules list."""
@@ -170,21 +168,25 @@ class TestAlertTriggerValidation:
     def test_create_alert_trigger__with_regex_rule__succeeds(self, valid_trigger_config: dict[str, Any]) -> None:
         """Test AlertTrigger creation with exception regex rule."""
         # Arrange
-        valid_trigger_config["rules"] = [{"rule": "exception_regex", "pattern": r"database.*connection.*failed"}]
+        valid_trigger_config["rules"] = [{"rule_type": "exception_regex", "pattern": r"database.*connection.*failed"}]
 
         # Act
         trigger = AlertTrigger(**valid_trigger_config)
 
         # Assert
         assert len(trigger.rules) == 1
-        assert trigger.rules[0].rule == "exception_regex"
+        assert trigger.rules[0].rule_type == "exception_regex"
         assert trigger.rules[0].pattern == r"database.*connection.*failed"
 
     def test_create_alert_trigger__with_env_vars_rule__succeeds(self, valid_trigger_config: dict[str, Any]) -> None:
         """Test AlertTrigger creation with environment variables rule."""
         # Arrange
         valid_trigger_config["rules"] = [
-            {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "staging"]}
+            {
+                "rule_type": "env_vars_matches",
+                "env_var_name": "ENVIRONMENT",
+                "env_var_values": ["production", "staging"],
+            }
         ]
 
         # Act
@@ -192,7 +194,7 @@ class TestAlertTriggerValidation:
 
         # Assert
         assert len(trigger.rules) == 1
-        assert trigger.rules[0].rule == "env_vars_matches"
+        assert trigger.rules[0].rule_type == "env_vars_matches"
         assert trigger.rules[0].env_var_name == "ENVIRONMENT"
         assert trigger.rules[0].env_var_values == ["production", "staging"]
 
@@ -200,8 +202,8 @@ class TestAlertTriggerValidation:
         """Test AlertTrigger creation with multiple rules."""
         # Arrange
         valid_trigger_config["rules"] = [
-            {"rule": "exception_regex", "pattern": r"database.*error"},
-            {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production"]},
+            {"rule_type": "exception_regex", "pattern": r"database.*error"},
+            {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production"]},
         ]
 
         # Act
@@ -209,8 +211,8 @@ class TestAlertTriggerValidation:
 
         # Assert
         assert len(trigger.rules) == 2
-        assert trigger.rules[0].rule == "exception_regex"
-        assert trigger.rules[1].rule == "env_vars_matches"
+        assert trigger.rules[0].rule_type == "exception_regex"
+        assert trigger.rules[1].rule_type == "env_vars_matches"
 
 
 # =========================================================================== #
@@ -258,7 +260,7 @@ class TestAlertTriggerShouldFire:
         """Test trigger does not fire when disabled even if rules would match."""
         # Arrange
         valid_trigger_config["enabled"] = False
-        valid_trigger_config["rules"] = [{"rule": "exception_regex", "pattern": "test"}]
+        valid_trigger_config["rules"] = [{"rule_type": "exception_regex", "pattern": "test"}]
         trigger = AlertTrigger(**valid_trigger_config)
 
         # Act
@@ -270,7 +272,7 @@ class TestAlertTriggerShouldFire:
     def test_should_fire__with_matching_regex_rule__returns_true(self, valid_trigger_config: dict[str, Any]) -> None:
         """Test trigger fires when regex rule matches exception message."""
         # Arrange
-        valid_trigger_config["rules"] = [{"rule": "exception_regex", "pattern": r"database.*connection"}]
+        valid_trigger_config["rules"] = [{"rule_type": "exception_regex", "pattern": r"database.*connection"}]
         trigger = AlertTrigger(**valid_trigger_config)
 
         # Act
@@ -284,7 +286,7 @@ class TestAlertTriggerShouldFire:
     ) -> None:
         """Test trigger does not fire when regex rule does not match."""
         # Arrange
-        valid_trigger_config["rules"] = [{"rule": "exception_regex", "pattern": r"database.*connection"}]
+        valid_trigger_config["rules"] = [{"rule_type": "exception_regex", "pattern": r"database.*connection"}]
         trigger = AlertTrigger(**valid_trigger_config)
 
         # Act
@@ -297,7 +299,7 @@ class TestAlertTriggerShouldFire:
         """Test trigger fires when environment variable rule matches."""
         # Arrange
         valid_trigger_config["rules"] = [
-            {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "staging"]}
+            {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "staging"]}
         ]
         trigger = AlertTrigger(**valid_trigger_config)
 
@@ -315,7 +317,7 @@ class TestAlertTriggerShouldFire:
         """Test trigger does not fire when environment variable rule does not match."""
         # Arrange
         valid_trigger_config["rules"] = [
-            {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "staging"]}
+            {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "staging"]}
         ]
         trigger = AlertTrigger(**valid_trigger_config)
 
@@ -331,7 +333,7 @@ class TestAlertTriggerShouldFire:
         """Test trigger does not fire when environment variable is not set."""
         # Arrange
         valid_trigger_config["rules"] = [
-            {"rule": "env_vars_matches", "env_var_name": "NONEXISTENT_VAR", "env_var_values": ["any_value"]}
+            {"rule_type": "env_vars_matches", "env_var_name": "NONEXISTENT_VAR", "env_var_values": ["any_value"]}
         ]
         trigger = AlertTrigger(**valid_trigger_config)
 
@@ -345,8 +347,8 @@ class TestAlertTriggerShouldFire:
         """Test trigger fires when all rules evaluate to True (AND logic)."""
         # Arrange
         valid_trigger_config["rules"] = [
-            {"rule": "exception_regex", "pattern": "database"},
-            {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production"]},
+            {"rule_type": "exception_regex", "pattern": "database"},
+            {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production"]},
         ]
         trigger = AlertTrigger(**valid_trigger_config)
 
@@ -362,8 +364,8 @@ class TestAlertTriggerShouldFire:
         """Test trigger does not fire when any rule evaluates to False (AND logic)."""
         # Arrange
         valid_trigger_config["rules"] = [
-            {"rule": "exception_regex", "pattern": "database"},
-            {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production"]},
+            {"rule_type": "exception_regex", "pattern": "database"},
+            {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production"]},
         ]
         trigger = AlertTrigger(**valid_trigger_config)
 
@@ -381,7 +383,7 @@ class TestAlertTriggerShouldFire:
         """Test trigger with complex regex patterns."""
         # Arrange
         valid_trigger_config["rules"] = [
-            {"rule": "exception_regex", "pattern": r"(?i)(error|exception|failed).*\d{3,4}"}
+            {"rule_type": "exception_regex", "pattern": r"(?i)(error|exception|failed).*\d{3,4}"}
         ]
         trigger = AlertTrigger(**valid_trigger_config)
 
@@ -397,7 +399,7 @@ class TestAlertTriggerShouldFire:
     def test_should_fire__with_empty_regex_pattern__returns_true(self, valid_trigger_config: dict[str, Any]) -> None:
         """Test trigger with empty regex pattern defaults to True."""
         # Arrange
-        valid_trigger_config["rules"] = [{"rule": "exception_regex", "pattern": ""}]
+        valid_trigger_config["rules"] = [{"rule_type": "exception_regex", "pattern": ""}]
         trigger = AlertTrigger(**valid_trigger_config)
 
         # Act
@@ -410,7 +412,7 @@ class TestAlertTriggerShouldFire:
         """Test trigger with empty env var name defaults to True."""
         # Arrange
         valid_trigger_config["rules"] = [
-            {"rule": "env_vars_matches", "env_var_name": "", "env_var_values": ["production"]}
+            {"rule_type": "env_vars_matches", "env_var_name": "", "env_var_values": ["production"]}
         ]
         trigger = AlertTrigger(**valid_trigger_config)
 
@@ -425,7 +427,7 @@ class TestAlertTriggerShouldFire:
     ) -> None:
         """Test trigger handles different exception types correctly."""
         # Arrange
-        valid_trigger_config["rules"] = [{"rule": "exception_regex", "pattern": "connection"}]
+        valid_trigger_config["rules"] = [{"rule_type": "exception_regex", "pattern": "connection"}]
         trigger = AlertTrigger(**valid_trigger_config)
 
         # Act & Assert - different exception types

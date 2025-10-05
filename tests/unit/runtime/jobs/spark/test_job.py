@@ -10,7 +10,6 @@ import pytest
 from pydantic import ValidationError
 
 from flint.exceptions import FlintJobError
-from flint.runtime.jobs.models.model_job import JobEngine
 from flint.runtime.jobs.spark.job import JobSpark
 
 # =========================================================================== #
@@ -27,13 +26,13 @@ def fixture_job_config(tmp_path: Path) -> dict[str, Any]:
     tmp_out.write_bytes(b"")
 
     data = {
-        "name": "job_dict",
+        "id": "job_dict",
         "description": "desc",
         "enabled": True,
-        "engine": "spark",
+        "engine_type": "spark",
         "extracts": [
             {
-                "name": "ex2",
+                "id": "ex2",
                 "method": "batch",
                 "data_format": "csv",
                 "options": {},
@@ -41,11 +40,11 @@ def fixture_job_config(tmp_path: Path) -> dict[str, Any]:
                 "schema_": "",
             }
         ],
-        "transforms": [{"name": "tr2", "upstream_name": "ex2", "options": {}, "functions": []}],
+        "transforms": [{"id": "tr2", "upstream_id": "ex2", "options": {}, "functions": []}],
         "loads": [
             {
-                "name": "ld2",
-                "upstream_name": "tr2",
+                "id": "ld2",
+                "upstream_id": "tr2",
                 "method": "batch",
                 "location": str(tmp_out),
                 "schema_location": None,
@@ -65,14 +64,43 @@ def fixture_job_config(tmp_path: Path) -> dict[str, Any]:
     return data
 
 
-def test_job_creation__from_config__creates_valid_model(job_config: dict) -> None:
-    """Create a JobSpark from the config and assert its top-level attributes."""
-    job = JobSpark(**job_config)
+# =========================================================================== #
+# ========================== VALIDATION TESTS ============================= #
+# =========================================================================== #
 
-    assert job.name == "job_dict"
-    assert job.description == "desc"
-    assert job.enabled is True
-    assert job.engine == JobEngine.SPARK
+
+class TestJobSparkValidation:
+    """Test JobSpark model validation."""
+
+    def test_create_job_spark__with_missing_extracts__raises_validation_error(self, job_config: dict[str, Any]) -> None:
+        """Test JobSpark creation fails when extracts field is missing."""
+        del job_config["extracts"]
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_missing_transforms__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when transforms field is missing."""
+        del job_config["transforms"]
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_missing_loads__raises_validation_error(self, job_config: dict[str, Any]) -> None:
+        """Test JobSpark creation fails when loads field is missing."""
+        del job_config["loads"]
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_invalid_engine__raises_validation_error(self, job_config: dict[str, Any]) -> None:
+        """Test JobSpark creation fails with invalid engine value."""
+        job_config["engine_type"] = "invalid_engine"
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
 
 
 # =========================================================================== #
@@ -91,24 +119,6 @@ def fixture_job_spark(job_config: dict[str, Any]) -> JobSpark:
 # =========================================================================== #
 
 
-class TestJobSparkValidation:
-    """Test JobSpark model validation."""
-
-    def test_create_job_spark__with_missing_name__raises_validation_error(self, job_config: dict[str, Any]) -> None:
-        """Test JobSpark creation fails when name is missing."""
-        del job_config["name"]
-
-        with pytest.raises(ValidationError):
-            JobSpark(**job_config)
-
-    def test_create_job_spark__with_invalid_engine__raises_validation_error(self, job_config: dict[str, Any]) -> None:
-        """Test JobSpark creation fails with invalid engine."""
-        job_config["engine"] = "invalid_engine"
-
-        with pytest.raises(ValidationError):
-            JobSpark(**job_config)
-
-
 class TestJobSparkExecute:
     """Test JobSpark execute method."""
 
@@ -120,42 +130,30 @@ class TestJobSparkExecute:
 
         job_spark.execute()  # Should not raise
 
-    def test_execute__with_failing_extractor__wraps_exception_in_flint_job_error(self, job_spark: JobSpark) -> None:
-        """Test execute wraps exceptions in FlintJobError when extractor fails."""
+    def test_execute__when_disabled__returns_early(self, job_spark: JobSpark) -> None:
+        """Test execute returns early when job is disabled (tests JobBase behavior)."""
+        job_spark.enabled = False
+
+        job_spark.execute()  # Should not raise, just return
+
+    def test_execute__with_exception__triggers_on_error_and_wraps_in_flint_job_error(self, job_spark: JobSpark) -> None:
+        """Test execute triggers onError hook and wraps exceptions in FlintJobError."""
+        mock_error_action = Mock()
+        job_spark.hooks.onError = [mock_error_action]
         mock_extract = Mock()
-        mock_extract.name = "failing_extract"
+        mock_extract.id = "failing_extract"
         mock_extract.extract.side_effect = ValueError("Extract failed")
         job_spark.extracts = [mock_extract]
 
         with pytest.raises(FlintJobError):
             job_spark.execute()
 
-    def test_execute__with_file_not_found_error__wraps_in_flint_job_error(self, job_spark: JobSpark) -> None:
-        """Test execute wraps FileNotFoundError in FlintJobError."""
-        mock_extract = Mock()
-        mock_extract.name = "extract_missing_file"
-        mock_extract.extract.side_effect = FileNotFoundError("File not found: data.csv")
-        job_spark.extracts = [mock_extract]
-
-        with pytest.raises(FlintJobError):
-            job_spark.execute()
-
-    def test_execute__with_permission_error__wraps_in_flint_job_error(self, job_spark: JobSpark) -> None:
-        """Test execute wraps PermissionError in FlintJobError."""
-        mock_load = Mock()
-        mock_load.name = "load_restricted"
-        mock_load.load.side_effect = PermissionError("Permission denied")
-        job_spark.extracts = []
-        job_spark.transforms = []
-        job_spark.loads = [mock_load]
-
-        with pytest.raises(FlintJobError):
-            job_spark.execute()
+        mock_error_action.execute.assert_called_once()
 
     def test_execute__with_os_error__wraps_in_flint_job_error(self, job_spark: JobSpark) -> None:
-        """Test execute wraps OSError in FlintJobError."""
+        """Test execute wraps OSError (and subclasses like FileNotFoundError, PermissionError) in FlintJobError."""
         mock_load = Mock()
-        mock_load.name = "load_io_error"
+        mock_load.id = "load_io_error"
         mock_load.load.side_effect = OSError("Disk full")
         job_spark.extracts = []
         job_spark.transforms = []
@@ -167,7 +165,7 @@ class TestJobSparkExecute:
     def test_execute__with_key_error__wraps_in_flint_job_error(self, job_spark: JobSpark) -> None:
         """Test execute wraps KeyError in FlintJobError."""
         mock_transform = Mock()
-        mock_transform.name = "transform_missing_upstream"
+        mock_transform.id = "transform_missing_upstream"
         mock_transform.transform.side_effect = KeyError("upstream_name")
         job_spark.extracts = []
         job_spark.transforms = [mock_transform]
@@ -183,9 +181,9 @@ class TestJobSparkPhases:
     def test_extract__calls_extract_on_all_extractors(self, job_spark: JobSpark) -> None:
         """Test that extract phase calls extract() on each extractor."""
         mock_extract1 = Mock()
-        mock_extract1.name = "extract1"
+        mock_extract1.id = "extract1"
         mock_extract2 = Mock()
-        mock_extract2.name = "extract2"
+        mock_extract2.id = "extract2"
         job_spark.extracts = [mock_extract1, mock_extract2]
         job_spark.transforms = []  # Empty transforms to avoid failures
         job_spark.loads = []  # Empty loads to avoid failures
@@ -198,9 +196,9 @@ class TestJobSparkPhases:
     def test_transform__calls_transform_on_all_transformers(self, job_spark: JobSpark) -> None:
         """Test that transform phase calls transform() on each transformer."""
         mock_transform1 = Mock()
-        mock_transform1.name = "transform1"
+        mock_transform1.id = "transform1"
         mock_transform2 = Mock()
-        mock_transform2.name = "transform2"
+        mock_transform2.id = "transform2"
         job_spark.extracts = []  # Empty extracts
         job_spark.transforms = [mock_transform1, mock_transform2]
         job_spark.loads = []  # Empty loads to avoid failures
@@ -213,9 +211,9 @@ class TestJobSparkPhases:
     def test_load__calls_load_on_all_loaders(self, job_spark: JobSpark) -> None:
         """Test that load phase calls load() on each loader."""
         mock_load1 = Mock()
-        mock_load1.name = "load1"
+        mock_load1.id = "load1"
         mock_load2 = Mock()
-        mock_load2.name = "load2"
+        mock_load2.id = "load2"
         job_spark.extracts = []  # Empty extracts
         job_spark.transforms = []  # Empty transforms
         job_spark.loads = [mock_load1, mock_load2]

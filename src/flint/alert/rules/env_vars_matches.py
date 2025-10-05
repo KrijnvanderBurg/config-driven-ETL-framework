@@ -21,7 +21,7 @@ class EnvVarsMatchesRule(AlertRule):
     variables match their expected values.
     """
 
-    rule: Literal["env_vars_matches"]
+    rule_type: Literal["env_vars_matches"]
     env_var_name: str
     env_var_values: list[str]
 

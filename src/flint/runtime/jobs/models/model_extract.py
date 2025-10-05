@@ -57,13 +57,13 @@ class ExtractModel(BaseModel):
     including the method of extraction and the format of the data.
 
     Args:
-        name: Identifier for this extraction operation
+        id: Identifier for this extraction operation
         method: Method of extraction (batch or streaming)
         data_format: Format of the data to extract (parquet, json, csv)
         options: PySpark reader options as key-value pairs
     """
 
-    name: str = Field(..., description="Identifier for this extraction operation", min_length=1)
+    id: str = Field(..., description="Identifier for this extraction operation", min_length=1)
     method: ExtractMethod = Field(..., description="Method of extraction (batch or streaming)")
     data_format: ExtractFormat = Field(..., description="Format of the data to extract (parquet, json, csv, etc.)")
     options: dict[str, Any] = Field(..., description="PySpark reader options as key-value pairs")
@@ -77,7 +77,7 @@ class ExtractFileModel(ExtractModel):
     including format, location, and schema information.
 
     Args:
-        name: Identifier for this extraction operation
+        id: Identifier for this extraction operation
         method: Method of extraction (batch or streaming)
         data_format: Format of the files to extract (parquet, json, csv)
         location: URI where the files are located

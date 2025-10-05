@@ -18,15 +18,15 @@ from flint.runtime.jobs.spark.transforms.join import JoinFunction
 @pytest.fixture(name="join_config")
 def fixture_join_config() -> dict[str, Any]:
     """Return a config dict for JoinFunction."""
-    return {"function": "join", "arguments": {"other_upstream_name": "other_df", "on": "id", "how": "inner"}}
+    return {"function_type": "join", "arguments": {"other_upstream_id": "other_df", "on": "id", "how": "inner"}}
 
 
 def test_join_creation__from_config__creates_valid_model(join_config: dict[str, Any]) -> None:
     """Instantiate from config only to test dict-based initialization."""
     f = JoinFunction(**join_config)
-    assert f.function == "join"
+    assert f.function_type == "join"
     assert isinstance(f.arguments, JoinArgs)
-    assert f.arguments.other_upstream_name == "other_df"
+    assert f.arguments.other_upstream_id == "other_df"
     assert f.arguments.on == "id"
     assert f.arguments.how == "inner"
 
@@ -44,9 +44,9 @@ def fixture_join_func(join_config: dict[str, Any]) -> JoinFunction:
 
 def test_join_fixture__args(join_func: JoinFunction) -> None:
     """Assert the instantiated fixture has expected join arguments."""
-    assert join_func.function == "join"
+    assert join_func.function_type == "join"
     assert isinstance(join_func.arguments, JoinArgs)
-    assert join_func.arguments.other_upstream_name == "other_df"
+    assert join_func.arguments.other_upstream_id == "other_df"
     assert join_func.arguments.on == "id"
     assert join_func.arguments.how == "inner"
 

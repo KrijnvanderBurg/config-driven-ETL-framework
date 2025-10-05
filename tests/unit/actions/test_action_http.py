@@ -14,14 +14,15 @@ class TestHttpAction:
         # Arrange
         retry = Retry(raise_on_error=True, max_attempts=2, delay_in_seconds=1)
         action = HttpAction(
-            name="test_http_action",
+            id="test_http_action",
             description="Test HTTP action",
-            action="http",
+            action_type="http",
             url="https://example.com/api",
             method="POST",
             timeout=30,
             retry=retry,
             payload={"test_key": "test_value"},
+            enabled=True,
         )
 
         with patch.object(action, "_make_http_request") as mock_make_http_request:
@@ -34,15 +35,16 @@ class TestHttpAction:
     def test_execute__with_empty_payload__calls_make_http_request_with_empty_dict(self) -> None:
         """Test that execute calls _make_http_request with empty dict when payload is not provided."""
         # Arrange
-        retry = Retry(raise_on_error=False, max_attempts=0, delay_in_seconds=0)
+        retry = Retry(raise_on_error=False, max_attempts=0, delay_in_seconds=1)
         action = HttpAction(
-            name="test_http_action",
+            id="test_http_action",
             description="Test HTTP action",
-            action="http",
+            action_type="http",
             url="https://example.com/api",
             method="GET",
             timeout=30,
             retry=retry,
+            enabled=True,
         )
 
         with patch.object(action, "_make_http_request") as mock_make_http_request:

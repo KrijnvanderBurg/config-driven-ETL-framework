@@ -4,16 +4,19 @@
         "triggers": []
     },
     "runtime": {
+        "id": "test-runtime",
+        "description": "",
+        "enabled": true,
         "jobs": [
             {
-                "name": "test-job",
+                "id": "test-job",
                 "description": "",
                 "enabled": true,
-                "engine": "spark",
+                "engine_type": "spark",
                 "extracts": [
                     {
-                        "name": "extract-test",
-                        "type": "file",
+                        "id": "extract-test",
+                        "extract_type": "file",
                         "data_format": "csv",
                         "location": "tests/e2e/job/select/extract-test/input_data.csv",
                         "method": "batch",
@@ -27,12 +30,12 @@
                 ],
                 "transforms": [
                     {
-                        "name": "transform-test",
-                        "upstream_name": "extract-test",
+                        "id": "transform-test",
+                        "upstream_id": "extract-test",
                         "options": {},
                         "functions": [
                             {
-                                "function": "select",
+                                "function_type": "select",
                                 "arguments": {
                                     "columns": [
                                         "name",
@@ -45,8 +48,8 @@
                 ],
                 "loads": [
                     {
-                        "name": "load-test",
-                        "upstream_name": "transform-test",
+                        "id": "load-test",
+                        "upstream_id": "transform-test",
                         "data_format": "csv",
                         "location": "tests/e2e/job/select/load-test",
                         "method": "batch",
@@ -57,7 +60,7 @@
                 ],
                 "hooks": {
                     "onStart": [],
-                    "onFailure": [],
+                    "onError": [],
                     "onSuccess": [],
                     "onFinally": []
                 }

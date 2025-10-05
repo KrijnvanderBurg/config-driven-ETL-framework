@@ -27,7 +27,7 @@ class DropFunction(Function):
         arguments: Container for the drop parameters
     """
 
-    function: Literal["drop"]
+    function_type: Literal["drop"]
     arguments: DropArgs
 
     def transform(self) -> Callable:

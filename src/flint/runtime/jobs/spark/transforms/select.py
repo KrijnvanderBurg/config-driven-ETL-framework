@@ -47,7 +47,7 @@ class SelectFunction(Function):
         ```
     """
 
-    function: Literal["select"]
+    function_type: Literal["select"]
     arguments: SelectArgs
 
     def transform(self) -> Callable:

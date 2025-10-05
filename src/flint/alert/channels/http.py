@@ -29,10 +29,10 @@ class HttpChannel(HttpBase, ChannelModel):
     and channel functionality from ChannelModel.
 
     Attributes:
-        channel_id: Always "http" for HTTP channels
+        channel_type: Always "http" for HTTP channels
     """
 
-    channel_id: Literal["http"] = Field("http", description="Type identifier for the HTTP channel")
+    channel_type: Literal["http"] = Field("http", description="Type identifier for the HTTP channel")
 
     @override
     def _alert(self, title: str, body: str) -> None:

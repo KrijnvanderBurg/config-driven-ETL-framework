@@ -20,22 +20,26 @@ class TestAlertControllerOrchestration:
         config = {
             "channels": [
                 {
-                    "channel_id": "file",
-                    "name": "channel-1",
+                    "channel_type": "file",
+                    "id": "channel-1",
+                    "description": "First test channel",
                     "file_path": tmp_path / "channel1.log",
+                    "enabled": True,
                 },
                 {
-                    "channel_id": "file",
-                    "name": "channel-2",
+                    "channel_type": "file",
+                    "id": "channel-2",
+                    "description": "Second test channel",
                     "file_path": tmp_path / "channel2.log",
+                    "enabled": True,
                 },
             ],
             "triggers": [
                 {
-                    "name": "always-fire",
+                    "id": "always-fire",
                     "enabled": True,
                     "description": "Always fires regardless of conditions",
-                    "channel_names": ["channel-1"],
+                    "channel_ids": ["channel-1"],
                     "template": {
                         "prepend_title": "[ALWAYS] ",
                         "append_title": "",
@@ -45,17 +49,17 @@ class TestAlertControllerOrchestration:
                     "rules": [],
                 },
                 {
-                    "name": "critical-only",
+                    "id": "critical-only",
                     "enabled": True,
                     "description": "Fires only for critical exceptions",
-                    "channel_names": ["channel-2"],
+                    "channel_ids": ["channel-2"],
                     "template": {
                         "prepend_title": "[CRITICAL] ",
                         "append_title": "",
                         "prepend_body": "URGENT: ",
                         "append_body": "",
                     },
-                    "rules": [{"rule": "exception_regex", "pattern": "Critical", "flags": ["IGNORECASE"]}],
+                    "rules": [{"rule_type": "exception_regex", "pattern": "Critical", "flags": ["IGNORECASE"]}],
                 },
             ],
         }
@@ -79,21 +83,29 @@ class TestAlertControllerOrchestration:
         """Test that disabled triggers are not executed."""
         # Arrange
         config = {
-            "channels": [{"channel_id": "file", "name": "test-channel", "file_path": tmp_path / "test.log"}],
+            "channels": [
+                {
+                    "channel_type": "file",
+                    "id": "test-channel",
+                    "description": "Test channel",
+                    "file_path": tmp_path / "test.log",
+                    "enabled": True,
+                }
+            ],
             "triggers": [
                 {
-                    "name": "enabled-trigger",
+                    "id": "enabled-trigger",
                     "enabled": True,
                     "description": "Test enabled trigger",
-                    "channel_names": ["test-channel"],
+                    "channel_ids": ["test-channel"],
                     "template": {"prepend_title": "", "append_title": "", "prepend_body": "", "append_body": ""},
                     "rules": [],
                 },
                 {
-                    "name": "disabled-trigger",
+                    "id": "disabled-trigger",
                     "enabled": False,
                     "description": "Test disabled trigger",
-                    "channel_names": ["test-channel"],
+                    "channel_ids": ["test-channel"],
                     "template": {"prepend_title": "", "append_title": "", "prepend_body": "", "append_body": ""},
                     "rules": [],
                 },
@@ -112,13 +124,21 @@ class TestAlertControllerOrchestration:
         """Test that triggers referencing non-existent channels don't crash."""
         # Arrange
         config = {
-            "channels": [{"channel_id": "file", "name": "existing-channel", "file_path": tmp_path / "test.log"}],
+            "channels": [
+                {
+                    "channel_type": "file",
+                    "id": "existing-channel",
+                    "description": "Existing test channel",
+                    "file_path": tmp_path / "test.log",
+                    "enabled": True,
+                }
+            ],
             "triggers": [
                 {
-                    "name": "test-trigger",
+                    "id": "test-trigger",
                     "enabled": True,
                     "description": "Test trigger for nonexistent channel handling",
-                    "channel_names": ["existing-channel", "nonexistent-channel"],  # One exists, one doesn't
+                    "channel_ids": ["existing-channel", "nonexistent-channel"],  # One exists, one doesn't
                     "template": {"prepend_title": "", "append_title": "", "prepend_body": "", "append_body": ""},
                     "rules": [],
                 }
@@ -137,13 +157,21 @@ class TestAlertControllerOrchestration:
         """Test that trigger templates are applied to messages."""
         # Arrange
         config = {
-            "channels": [{"channel_id": "file", "name": "test-channel", "file_path": tmp_path / "test.log"}],
+            "channels": [
+                {
+                    "channel_type": "file",
+                    "id": "test-channel",
+                    "description": "Test channel for formatting",
+                    "file_path": tmp_path / "test.log",
+                    "enabled": True,
+                }
+            ],
             "triggers": [
                 {
-                    "name": "formatting-trigger",
+                    "id": "formatting-trigger",
                     "enabled": True,
                     "description": "Test trigger for template formatting",
-                    "channel_names": ["test-channel"],
+                    "channel_ids": ["test-channel"],
                     "template": {
                         "prepend_title": "[PREFIX] ",
                         "append_title": " [SUFFIX]",

@@ -22,7 +22,7 @@ from flint.alert.channels.email import EmailChannel
 def fixture_valid_email_config() -> dict[str, Any]:
     """Provide a valid email channel configuration."""
     return {
-        "name": "production-alerts",
+        "id": "production-alerts",
         "description": "Production error notifications",
         "smtp_server": "smtp.company.com",
         "smtp_port": 587,
@@ -30,6 +30,7 @@ def fixture_valid_email_config() -> dict[str, Any]:
         "password": "secure_password",
         "from_email": "alerts@company.com",
         "to_emails": ["admin@company.com", "team@company.com"],
+        "enabled": True,
     }
 
 
@@ -47,9 +48,9 @@ class TestEmailChannelValidation:
         channel = EmailChannel(**valid_email_config)
 
         # Assert
-        assert channel.name == "production-alerts"
+        assert channel.id == "production-alerts"
         assert channel.description == "Production error notifications"
-        assert channel.channel_id == "email"
+        assert channel.channel_type == "email"
         assert channel.smtp_server == "smtp.company.com"
         assert channel.smtp_port == 587
         assert channel.username == "alerts@company.com"
@@ -62,7 +63,7 @@ class TestEmailChannelValidation:
     ) -> None:
         """Test EmailChannel creation fails when name is missing."""
         # Arrange
-        del valid_email_config["name"]
+        del valid_email_config["id"]
 
         # Assert
         with pytest.raises(ValidationError):
@@ -74,7 +75,7 @@ class TestEmailChannelValidation:
     ) -> None:
         """Test EmailChannel creation fails when name is empty string."""
         # Arrange
-        valid_email_config["name"] = ""
+        valid_email_config["id"] = ""
 
         # Assert
         with pytest.raises(ValidationError):

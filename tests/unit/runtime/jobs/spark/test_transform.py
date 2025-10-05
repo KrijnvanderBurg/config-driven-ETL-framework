@@ -33,8 +33,8 @@ def fixture_transform_config() -> Generator[dict[str, Any], Any, None]:
     stack = ExitStack()
 
     data: dict[str, Any] = {
-        "name": "customer_transform",
-        "upstream_name": "customer_data",
+        "id": "customer_transform",
+        "upstream_id": "customer_data",
         "options": {"spark.sql.shuffle.partitions": "10"},
         "functions": [],
     }
@@ -57,8 +57,8 @@ class TestTransformSparkValidation:
         transform = TransformSpark(**transform_config)
 
         # Assert
-        assert transform.name == "customer_transform"
-        assert transform.upstream_name == "customer_data"
+        assert transform.id == "customer_transform"
+        assert transform.upstream_id == "customer_data"
         assert transform.options == {"spark.sql.shuffle.partitions": "10"}
         assert isinstance(transform.functions, list)
         assert len(transform.functions) == 0
@@ -80,7 +80,7 @@ class TestTransformSparkValidation:
     ) -> None:
         """Test TransformSpark creation fails when name is missing."""
         # Arrange
-        del transform_config["name"]
+        del transform_config["id"]
 
         # Assert
         with pytest.raises(ValidationError):
@@ -92,19 +92,19 @@ class TestTransformSparkValidation:
     ) -> None:
         """Test TransformSpark creation fails with empty name."""
         # Arrange
-        transform_config["name"] = ""
+        transform_config["id"] = ""
 
         # Assert
         with pytest.raises(ValidationError):
             # Act
             TransformSpark(**transform_config)
 
-    def test_create_transform_spark__with_missing_upstream_name__raises_validation_error(
+    def test_create_transform_spark__with_missing_upstream_id__raises_validation_error(
         self, transform_config: dict[str, Any]
     ) -> None:
-        """Test TransformSpark creation fails when upstream_name is missing."""
+        """Test TransformSpark creation fails when upstream_id is missing."""
         # Arrange
-        del transform_config["upstream_name"]
+        del transform_config["upstream_id"]
 
         # Assert
         with pytest.raises(ValidationError):
@@ -150,7 +150,7 @@ class TestTransformSparkValidation:
         """Test TransformSpark creation with valid function list."""
         # Arrange
         transform_config["functions"] = [
-            {"function": "select", "arguments": {"columns": ["id", "name"]}},
+            {"function_type": "select", "arguments": {"columns": ["id", "name"]}},
         ]
 
         # Act
@@ -158,7 +158,7 @@ class TestTransformSparkValidation:
 
         # Assert
         assert len(transform.functions) == 1
-        assert transform.functions[0].function == "select"
+        assert transform.functions[0].function_type == "select"
 
 
 # =========================================================================== #
@@ -186,18 +186,18 @@ class TestTransformSparkTransform:
         mock_dataframe = Mock()
         mock_dataframe.count.return_value = 10
 
-        with patch.object(TransformSpark, "data_registry", {transform_spark.upstream_name: mock_dataframe}):
+        with patch.object(TransformSpark, "data_registry", {transform_spark.upstream_id: mock_dataframe}):
             # Act
             transform_spark.transform()
 
             # Assert - dataframe should be copied to transform name
-            assert TransformSpark.data_registry[transform_spark.name] == mock_dataframe
+            assert TransformSpark.data_registry[transform_spark.id] == mock_dataframe
 
     def test_transform__with_single_function__applies_transformation(self, transform_config: dict[str, Any]) -> None:
         """Test transform method applies single transformation function."""
         # Arrange
         transform_config["functions"] = [
-            {"function": "select", "arguments": {"columns": ["id", "name"]}},
+            {"function_type": "select", "arguments": {"columns": ["id", "name"]}},
         ]
         transform = TransformSpark(**transform_config)
 
@@ -209,7 +209,7 @@ class TestTransformSparkTransform:
         mock_callable = Mock(return_value=mock_transformed_df)
 
         with (
-            patch.object(TransformSpark, "data_registry", {transform.upstream_name: mock_dataframe}),
+            patch.object(TransformSpark, "data_registry", {transform.upstream_id: mock_dataframe}),
             patch(
                 "flint.runtime.jobs.spark.transforms.select.SelectFunction.transform",
                 return_value=mock_callable,
@@ -221,14 +221,14 @@ class TestTransformSparkTransform:
             # Assert
             mock_transform_func.assert_called_once()
             mock_callable.assert_called_once_with(df=mock_dataframe)
-            assert TransformSpark.data_registry[transform.name] == mock_transformed_df
+            assert TransformSpark.data_registry[transform.id] == mock_transformed_df
 
     def test_transform__with_multiple_functions__applies_in_sequence(self, transform_config: dict[str, Any]) -> None:
         """Test transform method applies multiple transformation functions in sequence."""
         # Arrange
         transform_config["functions"] = [
-            {"function": "select", "arguments": {"columns": ["id", "name", "age"]}},
-            {"function": "filter", "arguments": {"condition": "age > 18"}},
+            {"function_type": "select", "arguments": {"columns": ["id", "name", "age"]}},
+            {"function_type": "filter", "arguments": {"condition": "age > 18"}},
         ]
         transform = TransformSpark(**transform_config)
 
@@ -245,7 +245,7 @@ class TestTransformSparkTransform:
         mock_filter_callable = Mock(return_value=mock_df_after_filter)
 
         with (
-            patch.object(TransformSpark, "data_registry", {transform.upstream_name: mock_df_original}),
+            patch.object(TransformSpark, "data_registry", {transform.upstream_id: mock_df_original}),
             patch(
                 "flint.runtime.jobs.spark.transforms.select.SelectFunction.transform",
                 return_value=mock_select_callable,
@@ -264,4 +264,4 @@ class TestTransformSparkTransform:
             # Second function should receive result from first function
             mock_filter_callable.assert_called_once_with(df=mock_df_after_select)
             # Final result should be in registry
-            assert TransformSpark.data_registry[transform.name] == mock_df_after_filter
+            assert TransformSpark.data_registry[transform.id] == mock_df_after_filter

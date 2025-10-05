@@ -317,7 +317,7 @@ class TestHttpBaseRetry:
     ) -> None:
         """Test request succeeds on retry after initial failure."""
         # Arrange
-        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 2, "delay_in_seconds": 0}
+        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 2, "delay_in_seconds": 1}
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to fail first, succeed second
@@ -338,14 +338,14 @@ class TestHttpBaseRetry:
 
             # Assert
             assert mock_request.call_count == 2
-            mock_sleep.assert_called_once_with(0)
+            mock_sleep.assert_called_once_with(1)
 
     def test_make_http_request__with_all_retries_exhausted_and_raise_on_error__raises_exception(
         self, valid_http_config: dict[str, Any]
     ) -> None:
         """Test request raises exception when all retries are exhausted and raise_on_error is True."""
         # Arrange
-        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 1, "delay_in_seconds": 0}
+        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 1, "delay_in_seconds": 1}
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to always fail
@@ -368,7 +368,7 @@ class TestHttpBaseRetry:
     ) -> None:
         """Test request returns silently when all retries exhausted and raise_on_error is False."""
         # Arrange
-        valid_http_config["retry"] = {"raise_on_error": False, "max_attempts": 1, "delay_in_seconds": 0}
+        valid_http_config["retry"] = {"raise_on_error": False, "max_attempts": 1, "delay_in_seconds": 1}
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to always fail
@@ -389,7 +389,7 @@ class TestHttpBaseRetry:
     ) -> None:
         """Test request fails immediately when max_attempts is 0."""
         # Arrange
-        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 0, "delay_in_seconds": 0}
+        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 0, "delay_in_seconds": 1}
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to fail
@@ -409,7 +409,7 @@ class TestHttpBaseRetry:
     ) -> None:
         """Test request returns silently when max_attempts is 0 and raise_on_error is False."""
         # Arrange
-        valid_http_config["retry"] = {"raise_on_error": False, "max_attempts": 0, "delay_in_seconds": 0}
+        valid_http_config["retry"] = {"raise_on_error": False, "max_attempts": 0, "delay_in_seconds": 1}
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to fail
@@ -427,7 +427,7 @@ class TestHttpBaseRetry:
     ) -> None:
         """Test request retries on HTTP status errors."""
         # Arrange
-        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 1, "delay_in_seconds": 0}
+        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 1, "delay_in_seconds": 1}
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to return 500 error
@@ -499,7 +499,7 @@ class TestHttpBaseRetry:
     ) -> None:
         """Test request exhausts all attempts when max_attempts is at maximum (3) and all fail."""
         # Arrange - Use maximum allowed retries
-        valid_http_config["retry"] = {"raise_on_error": False, "max_attempts": 3, "delay_in_seconds": 0}
+        valid_http_config["retry"] = {"raise_on_error": False, "max_attempts": 3, "delay_in_seconds": 1}
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to always fail

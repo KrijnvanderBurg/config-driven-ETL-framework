@@ -20,7 +20,7 @@ class AlertRule(BaseModel, ABC):
     including its name and any rule-specific attributes.
 
     Args:
-        rule: Name of the rule type
+        rule_type: Name of the rule type
     """
 
     @abstractmethod

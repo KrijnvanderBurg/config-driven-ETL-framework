@@ -21,7 +21,7 @@ class ExceptionRegexRule(AlertRule):
     the configured regular expression pattern.
     """
 
-    rule: Literal["exception_regex"]
+    rule_type: Literal["exception_regex"]
     pattern: str
 
     def evaluate(self, exception: Exception) -> bool:

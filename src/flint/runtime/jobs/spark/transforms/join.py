@@ -31,7 +31,7 @@ class JoinFunction(Function):
         arguments: Container for the join parameters
     """
 
-    function: Literal["join"]
+    function_type: Literal["join"]
     arguments: JoinArgs
 
     def transform(self) -> Callable:
@@ -45,7 +45,7 @@ class JoinFunction(Function):
         """
         logger.debug(
             "Creating join transform - other: %s, on: %s, how: %s",
-            self.arguments.other_upstream_name,
+            self.arguments.other_upstream_id,
             self.arguments.on,
             self.arguments.how,
         )
@@ -54,10 +54,10 @@ class JoinFunction(Function):
             logger.debug("Applying join transform")
 
             # Get the right DataFrame from the registry
-            right_df = self.data_registry[self.arguments.other_upstream_name]
+            right_df = self.data_registry[self.arguments.other_upstream_id]
             logger.debug(
                 "Retrieved right DataFrame: %s (columns: %s)",
-                self.arguments.other_upstream_name,
+                self.arguments.other_upstream_id,
                 right_df.columns,
             )
 

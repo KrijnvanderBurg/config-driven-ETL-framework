@@ -4,16 +4,19 @@
         "triggers": []
     },
     "runtime": {
+        "id": "test-runtime",
+        "description": "",
+        "enabled": true,
         "jobs": [
             {
-                "name": "test-job",
+                "id": "test-job",
                 "description": "",
                 "enabled": true,
-                "engine": "spark",
+                "engine_type": "spark",
                 "extracts": [
                     {
-                        "name": "extract-dropduplicates-test",
-                        "type": "file",
+                        "id": "extract-dropduplicates-test",
+                        "extract_type": "file",
                         "data_format": "csv",
                         "location": "tests/e2e/job/dropduplicates/extract-dropduplicates-test/input_data.csv",
                         "method": "batch",
@@ -27,12 +30,12 @@
                 ],
                 "transforms": [
                     {
-                        "name": "transform-dropduplicates-with-columns",
-                        "upstream_name": "extract-dropduplicates-test",
+                        "id": "transform-dropduplicates-with-columns",
+                        "upstream_id": "extract-dropduplicates-test",
                         "options": {},
                         "functions": [
                             {
-                                "function": "dropduplicates",
+                                "function_type": "dropduplicates",
                                 "arguments": {
                                     "columns": [
                                         "category",
@@ -44,12 +47,12 @@
                         ]
                     },
                     {
-                        "name": "transform-dropduplicates-test",
-                        "upstream_name": "transform-dropduplicates-with-columns",
+                        "id": "transform-dropduplicates-test",
+                        "upstream_id": "transform-dropduplicates-with-columns",
                         "options": {},
                         "functions": [
                             {
-                                "function": "dropduplicates",
+                                "function_type": "dropduplicates",
                                 "arguments": {
                                     "columns": []
                                 }
@@ -59,8 +62,8 @@
                 ],
                 "loads": [
                     {
-                        "name": "load-test",
-                        "upstream_name": "transform-dropduplicates-test",
+                        "id": "load-test",
+                        "upstream_id": "transform-dropduplicates-test",
                         "data_format": "csv",
                         "location": "tests/e2e/job/dropduplicates/load-test",
                         "method": "batch",
@@ -73,7 +76,7 @@
                 ],
                 "hooks": {
                     "onStart": [],
-                    "onFailure": [],
+                    "onError": [],
                     "onSuccess": [],
                     "onFinally": []
                 }

@@ -82,22 +82,22 @@ class LoadModel(BaseModel, ABC):
     """Abstract base class for load operation models.
 
     This class defines the configuration model for data loading operations,
-    specifying the name, upstream source, method, and destination for the load.
+    specifying the identifier, upstream source, method, and destination for the load.
 
     It serves as the foundation for more specific load model types based on
     the destination type (file, database, etc.).
 
     Attributes:
-        name: Unique identifier for this load operation
-        upstream_name: Identifier of the upstream component providing data
+        id: Unique identifier for this load operation
+        upstream_id: Identifier of the upstream component providing data
         method: Loading method (batch or streaming)
         location (str): URI that identifies where to load data in the modelified format.
         schema_location (str): URI that identifies where to load schema.
         options (dict[str, Any]): Options for the sink input.
     """
 
-    name: str = Field(..., description="Identifier for this load operation", min_length=1)
-    upstream_name: str = Field(..., description="Identifier of the upstream component providing data")
+    id: str = Field(..., description="Identifier for this load operation", min_length=1)
+    upstream_id: str = Field(..., description="Identifier of the upstream component providing data")
     method: LoadMethod = Field(..., description="Loading method (batch or streaming)")
     location: str = Field(..., description="URI that identifies where to load data in the modelified format.")
     schema_location: str | None = Field(None, description="URI that identifies where to load schema.")

@@ -19,13 +19,13 @@ from flint.runtime.jobs.spark.transforms.cast import CastFunction
 @pytest.fixture(name="cast_config")
 def fixture_cast_config() -> dict[str, Any]:
     """Configuration dict for CastFunction."""
-    return {"function": "cast", "arguments": {"columns": [{"column_name": "age", "cast_type": "int"}]}}
+    return {"function_type": "cast", "arguments": {"columns": [{"column_name": "age", "cast_type": "int"}]}}
 
 
 def test_cast_creation__from_config__creates_valid_model(cast_config: dict[str, Any]) -> None:
     """Ensure the CastFunction can be created from a config dict."""
     f = CastFunction(**cast_config)
-    assert f.function == "cast"
+    assert f.function_type == "cast"
     assert isinstance(f.arguments, CastArgs)
     assert len(f.arguments.columns) == 1
     assert f.arguments.columns[0].column_name == "age"
@@ -44,7 +44,7 @@ class TestCastFunctionValidation:
         self, cast_config: dict[str, Any]
     ) -> None:
         """Test CastFunction creation fails without function field."""
-        del cast_config["function"]
+        del cast_config["function_type"]
 
         with pytest.raises(ValidationError):
             CastFunction(**cast_config)
@@ -53,7 +53,7 @@ class TestCastFunctionValidation:
         self, cast_config: dict[str, Any]
     ) -> None:
         """Test CastFunction creation fails with wrong function name."""
-        cast_config["function"] = "wrong_name"
+        cast_config["function_type"] = "wrong_name"
 
         with pytest.raises(ValidationError):
             CastFunction(**cast_config)
@@ -113,7 +113,7 @@ def fixture_cast_func(cast_config: dict[str, Any]) -> CastFunction:
 
 def test_cast_fixture(cast_func: CastFunction) -> None:
     """Sanity-check the instantiated fixture has the expected arguments."""
-    assert cast_func.function == "cast"
+    assert cast_func.function_type == "cast"
     assert isinstance(cast_func.arguments, CastArgs)
     assert cast_func.arguments.columns[0].column_name == "age"
     assert cast_func.arguments.columns[0].cast_type == "int"
