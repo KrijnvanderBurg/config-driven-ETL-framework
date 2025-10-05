@@ -46,7 +46,9 @@
                     "prepend_body": "Attention: ETL Pipeline Alert",
                     "append_body": "Please take necessary actions."
                 },
-                "rules": []
+                "rules": [
+                    {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production"]},
+                ]
             },  
             {
                 "id": "dev-warnings",

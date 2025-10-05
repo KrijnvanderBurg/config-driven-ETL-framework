@@ -1,10 +1,7 @@
 ---
 applyTo: "**/test_*.py,**/*_test.py"
 ---
-
-# Test File Quality Standards & Creation Guidelines
-
-You are writing **production-grade unit tests** that must meet absolute highest quality standards. This document provides guidelines for creating new test files and maintaining existing ones.
+You are writing **production-grade unit tests** that must meet absolute highest quality standards. This document provides guidelines for creating tests and improving existing ones.
 
 ## 📋 MANDATORY QUALITY STANDARDS
 
@@ -14,7 +11,7 @@ You are writing **production-grade unit tests** that must meet absolute highest 
 - **Naming convention**: `test_method_name__scenario__expected_outcome` (double underscores for readability)
 - **Structure**: Use clear Arrange / Act / Assert sections with comments when needed
 - **No Mocking**: Only use mocking when absolutely necessary, this includes also creating sideffects.
-- **Use exception assertions** with `pytest.raises` for error cases and do NOT match on error message
+- **Use exception assertions** with `pytest.raises` for error cases and do NOT match on error message. Do not match on error message.
 
 Example:
 ```python

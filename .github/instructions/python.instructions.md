@@ -1,6 +1,16 @@
 ---
 applyTo: "**/*.py"
 ---
+# Design patterns and principles
+Focus on maintaining clean architecture, readability, and clean code principles. Always adhere to design patterns and principles like:
+- Single Responsibility Principle (SRP)
+- Open/Closed Principle (OCP)
+- Dependency Inversion
+- Don't Repeat Yourself (DRY)
+- SOLID principles
+- Composition over Inheritance
+- Separation of concerns
+
 # Python Coding Principles
 
 ## Type Annotations
@@ -40,16 +50,6 @@ applyTo: "**/*.py"
 - Avoid global variables and mutable default arguments
 - Use enumeration for related constants (`from enum import Enum`)
 - Handle exceptions at appropriate levels, use built-in exceptions.
-
-## Design patterns and principles
-Focus on maintaining clean architecture, readability, and clean code principles. Always adhere to design patterns and principles like:
-- Single Responsibility Principle (SRP)
-- Open/Closed Principle (OCP)
-- Dependency Inversion
-- Don't Repeat Yourself (DRY)
-- SOLID principles
-- Composition over Inheritance
-- Separation of concerns
 
 ## Don´t
 - Do not use `print`, use logging
