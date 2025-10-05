@@ -195,18 +195,18 @@ class TestLoadFileSparkValidation:
         # Assert
         assert load.data_format == LoadFormat.PARQUET
 
-    def test_create_load_file_spark__with_none_schema_location__succeeds(
+    def test_create_load_file_spark__with_empty_schema_location__succeeds(
         self, valid_load_config: dict[str, Any]
     ) -> None:
-        """Test LoadFileSpark creation with None schema location."""
+        """Test LoadFileSpark creation with empty schema location."""
         # Arrange
-        valid_load_config["schema_location"] = None
+        valid_load_config["schema_location"] = ""
 
         # Act
         load = LoadFileSpark(**valid_load_config)
 
         # Assert
-        assert load.schema_location is None
+        assert load.schema_location == ""
 
     def test_create_load_file_spark__with_empty_options__succeeds(self, valid_load_config: dict[str, Any]) -> None:
         """Test LoadFileSpark creation with empty options."""
@@ -295,10 +295,10 @@ class TestLoadFileSparkLoad:
                 # Act
                 load_file_spark.load()
 
-    def test_load__with_none_schema_location__skips_schema_export(self, load_file_spark: LoadFileSpark) -> None:
-        """Test schema export is skipped when schema_location is None."""
+    def test_load__with_empty_schema_location__skips_schema_export(self, load_file_spark: LoadFileSpark) -> None:
+        """Test schema export is skipped when schema_location is empty."""
         # Arrange
-        load_file_spark.schema_location = None  # No schema export
+        load_file_spark.schema_location = ""  # No schema export
 
         mock_dataframe = Mock()
         mock_dataframe.count.return_value = 5

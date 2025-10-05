@@ -99,7 +99,7 @@ class LoadSpark(LoadModel, ABC):
             raise ValueError(f"Loading method {self.method} is not supported for PySpark")
 
         # Export schema if location is specified
-        if self.schema_location is not None:
+        if self.schema_location:
             schema_json = json.dumps(self.data_registry[self.id_].schema.jsonValue())
             self._export_schema(schema_json, self.schema_location)
 

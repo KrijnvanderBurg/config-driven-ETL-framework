@@ -49,7 +49,7 @@ def fixture_job_config(tmp_path: Path) -> dict[str, Any]:
                 "load_type": "file",
                 "method": "batch",
                 "location": str(tmp_out),
-                "schema_location": None,
+                "schema_location": "",
                 "options": {},
                 "mode": "append",
                 "data_format": "csv",
