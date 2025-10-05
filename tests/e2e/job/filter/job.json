@@ -47,6 +47,7 @@
                     {
                         "id": "load-test",
                         "upstream_id": "transform-filter-test",
+                        "load_type": "file",
                         "data_format": "csv",
                         "location": "tests/e2e/job/filter/load-test",
                         "method": "batch",

@@ -60,6 +60,7 @@
                         "id": "load-test",
                         "upstream_id": "transform-test",
                         "data_format": "csv",
+                        "load_type": "file",
                         "location": "tests/e2e/job/cast/load-test",
                         "method": "batch",
                         "mode": "overwrite",

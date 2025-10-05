@@ -73,6 +73,7 @@
                     {
                         "data_format": "csv",
                         "location": "tests/e2e/job/join/load-test",
+                        "load_type": "file",
                         "id": "load-test",
                         "upstream_id": "transform-join",
                         "schema_location": "tests/e2e/job/join/schema_location.json",

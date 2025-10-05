@@ -64,6 +64,7 @@
                     {
                         "id": "load-test",
                         "upstream_id": "transform-dropduplicates-test",
+                        "load_type": "file",
                         "data_format": "csv",
                         "location": "tests/e2e/job/dropduplicates/load-test",
                         "method": "batch",

@@ -51,6 +51,7 @@
                     {
                         "id": "load-test",
                         "upstream_id": "transform-drop-test",
+                        "load_type": "file",
                         "data_format": "csv",
                         "location": "tests/e2e/job/drop/load-test",
                         "method": "batch",

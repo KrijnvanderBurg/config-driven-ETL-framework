@@ -15,7 +15,7 @@ and provide a type-safe interface between configuration and implementation.
 import logging
 from abc import ABC
 from enum import Enum
-from typing import Any
+from typing import Any, Literal
 
 from pydantic import Field
 
@@ -105,7 +105,14 @@ class LoadModel(BaseModel, ABC):
 
 
 class LoadModelFile(LoadModel):
-    """Abstract base class for file-based load models."""
+    """Abstract base class for file-based load models.
+    
+    Args:
+        load_type: Type discriminator for file-based loading
+        mode: Write mode for the load operation
+        data_format: Format of the output files
+    """
 
+    load_type: Literal["file"]
     mode: LoadMode
     data_format: LoadFormat

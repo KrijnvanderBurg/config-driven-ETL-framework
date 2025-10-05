@@ -16,7 +16,7 @@ for writing processed data to target destinations.
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import ClassVar
+from typing import ClassVar, Literal
 
 from pyspark.sql.streaming.query import StreamingQuery
 
@@ -111,6 +111,8 @@ class LoadFileSpark(LoadSpark, LoadModelFile):
     Concrete class for file loading using PySpark DataFrame.
     """
 
+    load_type: Literal["file"]
+
     def _load_batch(self) -> None:
         """
         Write to file in batch mode.
@@ -159,7 +161,12 @@ class LoadFileSpark(LoadSpark, LoadModelFile):
         return streaming_query
 
 
-# For now, just use LoadFileSpark directly since it's the only load type
-# When more load types are added, this will become a discriminated union:
-# LoadSparkUnion = Annotated[Union[LoadFileSpark, LoadDatabaseSpark], Discriminator("type")]
+# When more load types are added, use a discriminated union:
+# from typing import Annotated, Union
+# from pydantic import Discriminator
+# LoadSparkUnion = Annotated[
+#     Union[LoadFileSpark, LoadDatabaseSpark, ...],
+#     Discriminator("load_type"),
+# ]
+# For now, with only one type, just use it directly:
 LoadSparkUnion = LoadFileSpark

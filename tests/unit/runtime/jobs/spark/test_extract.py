@@ -49,6 +49,7 @@ def fixture_valid_extract_config(tmp_path: Path) -> Generator[dict[str, Any], An
 
     config = {
         "id": "test_data",
+        "extract_type": "file",
         "method": "batch",
         "data_format": "json",
         "options": {

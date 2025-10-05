@@ -15,7 +15,7 @@ and provide a type-safe interface between configuration and implementation.
 import logging
 from enum import Enum
 from pathlib import Path
-from typing import Any, Self
+from typing import Any, Literal, Self
 
 from pydantic import Field, FilePath, model_validator
 from pyspark.sql.types import StructType
@@ -77,6 +77,7 @@ class ExtractFileModel(ExtractModel):
     including format, location, and schema information.
 
     Args:
+        extract_type: Type discriminator for file-based extraction
         id: Identifier for this extraction operation
         method: Method of extraction (batch or streaming)
         data_format: Format of the files to extract (parquet, json, csv)
@@ -84,6 +85,7 @@ class ExtractFileModel(ExtractModel):
         schema_: Schema definition - can be a file path or JSON string (defaults to empty string)
     """
 
+    extract_type: Literal["file"]
     location: str
     schema_: str | FilePath = ""
     _schema_parsed: StructType | None = None

@@ -33,6 +33,7 @@ def fixture_job_config(tmp_path: Path) -> dict[str, Any]:
         "extracts": [
             {
                 "id": "ex2",
+                "extract_type": "file",
                 "method": "batch",
                 "data_format": "csv",
                 "options": {},
@@ -45,6 +46,7 @@ def fixture_job_config(tmp_path: Path) -> dict[str, Any]:
             {
                 "id": "ld2",
                 "upstream_id": "tr2",
+                "load_type": "file",
                 "method": "batch",
                 "location": str(tmp_out),
                 "schema_location": None,

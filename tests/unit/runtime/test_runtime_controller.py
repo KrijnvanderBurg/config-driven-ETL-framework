@@ -48,6 +48,7 @@ def fixture_runtime_config(tmp_path: Path) -> dict[str, Any]:
                 "extracts": [
                     {
                         "id": "extract1",
+                        "extract_type": "file",
                         "method": "batch",
                         "data_format": "json",
                         "options": {},
@@ -67,6 +68,7 @@ def fixture_runtime_config(tmp_path: Path) -> dict[str, Any]:
                     {
                         "id": "load1",
                         "upstream_id": "transform1",
+                        "load_type": "file",
                         "method": "batch",
                         "location": str(output_file),
                         "schema_location": None,

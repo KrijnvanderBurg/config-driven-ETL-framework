@@ -14,7 +14,7 @@ import time
 from typing_extensions import override
 
 from flint.runtime.jobs.models.model_job import JobBase, JobEngine
-from flint.runtime.jobs.spark.extract import ExtractFileSpark
+from flint.runtime.jobs.spark.extract import ExtractSparkUnion
 from flint.runtime.jobs.spark.load import LoadSparkUnion
 from flint.runtime.jobs.spark.transform import TransformSparkUnion
 from flint.utils.logger import get_logger
@@ -50,7 +50,7 @@ class JobSpark(JobBase):
     """
 
     engine_type: JobEngine = JobEngine.SPARK
-    extracts: list[ExtractFileSpark]
+    extracts: list[ExtractSparkUnion]
     transforms: list[TransformSparkUnion]
     loads: list[LoadSparkUnion]
 

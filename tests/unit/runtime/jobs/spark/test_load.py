@@ -41,6 +41,7 @@ def fixture_valid_load_config(tmp_path: Path) -> Generator[dict[str, Any], Any, 
     config = {
         "id": "customer_data_output",
         "upstream_id": "customer_transform",
+        "load_type": "file",
         "method": "batch",
         "location": str(output_file),
         "schema_location": str(schema_file),

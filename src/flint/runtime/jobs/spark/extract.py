@@ -11,7 +11,7 @@ It includes:
 
 import logging
 from abc import ABC, abstractmethod
-from typing import ClassVar
+from typing import ClassVar, Literal
 
 from pyspark.sql import DataFrame
 
@@ -83,6 +83,8 @@ class ExtractFileSpark(ExtractSpark, ExtractFileModel):
     Supports both batch and streaming extraction using PySpark's DataFrame API.
     """
 
+    extract_type: Literal["file"]
+
     def _extract_batch(self) -> DataFrame:
         """Read from file in batch mode using PySpark.
 
@@ -119,9 +121,12 @@ class ExtractFileSpark(ExtractSpark, ExtractFileModel):
         return dataframe
 
 
+# When more extract types are added, use a discriminated union:
+# from typing import Annotated, Union
+# from pydantic import Discriminator
 # ExtractSparkUnion = Annotated[
-#     Union[ExtractFileSpark],
-#     Discriminator("type"),
+#     Union[ExtractFileSpark, ExtractDatabaseSpark, ...],
+#     Discriminator("extract_type"),
 # ]
-
+# For now, with only one type, just use it directly:
 ExtractSparkUnion = ExtractFileSpark
