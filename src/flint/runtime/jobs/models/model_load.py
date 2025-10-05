@@ -106,7 +106,7 @@ class LoadModel(BaseModel, ABC):
 
 class LoadModelFile(LoadModel):
     """Abstract base class for file-based load models.
-    
+
     Args:
         load_type: Type discriminator for file-based loading
         mode: Write mode for the load operation
