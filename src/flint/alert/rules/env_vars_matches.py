@@ -8,6 +8,8 @@ import logging
 import os
 from typing import Literal
 
+from pydantic import Field
+
 from flint.alert.rules.base import AlertRule
 from flint.utils.logger import get_logger
 
@@ -21,9 +23,9 @@ class EnvVarsMatchesRule(AlertRule):
     variables match their expected values.
     """
 
-    rule_type: Literal["env_vars_matches"]
-    env_var_name: str
-    env_var_values: list[str]
+    rule_type: Literal["env_vars_matches"] = Field(..., description="Rule type discriminator")
+    env_var_name: str = Field(..., description="Name of the environment variable to check")
+    env_var_values: list[str] = Field(..., description="List of expected values for the environment variable")
 
     def evaluate(self, exception: Exception) -> bool:
         """Evaluate if any environment variable matches the configured rules.

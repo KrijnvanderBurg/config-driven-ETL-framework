@@ -32,7 +32,7 @@ class HttpChannel(HttpBase, ChannelModel):
         channel_type: Always "http" for HTTP channels
     """
 
-    channel_type: Literal["http"] = Field("http", description="Type identifier for the HTTP channel")
+    channel_type: Literal["http"] = Field(..., description="Channel type discriminator")
 
     @override
     def _alert(self, title: str, body: str) -> None:

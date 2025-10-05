@@ -47,31 +47,31 @@ class TransformSpark(TransformModel):
         Note:
             Functions are applied in the order they were defined in the configuration.
         """
-        logger.info("Starting transformation for: %s from upstream: %s", self.id, self.upstream_id)
+        logger.info("Starting transformation for: %s from upstream: %s", self.id_, self.upstream_id)
 
         logger.debug("Adding Spark configurations: %s", self.options)
         self.spark.add_configs(options=self.options)
 
         # Copy the dataframe from upstream to current id
-        logger.debug("Copying dataframe from %s to %s", self.upstream_id, self.id)
-        self.data_registry[self.id] = self.data_registry[self.upstream_id]
+        logger.debug("Copying dataframe from %s to %s", self.upstream_id, self.id_)
+        self.data_registry[self.id_] = self.data_registry[self.upstream_id]
 
         # Apply transformations
         logger.debug("Applying %d transformation functions", len(self.functions))
         for i, function in enumerate(self.functions):
             logger.debug("Applying function %d/%d: %s", i, len(self.functions), function.function_type)
 
-            original_count = self.data_registry[self.id].count()
+            original_count = self.data_registry[self.id_].count()
             callable_ = function.transform()
-            self.data_registry[self.id] = callable_(df=self.data_registry[self.id])
+            self.data_registry[self.id_] = callable_(df=self.data_registry[self.id_])
 
-            new_count = self.data_registry[self.id].count()
+            new_count = self.data_registry[self.id_].count()
 
             logger.info(
                 "Function %s applied - rows changed from %d to %d", function.function_type, original_count, new_count
             )
 
-        logger.info("Transformation completed successfully for: %s", self.id)
+        logger.info("Transformation completed successfully for: %s", self.id_)
 
 
 TransformSparkUnion = TransformSpark

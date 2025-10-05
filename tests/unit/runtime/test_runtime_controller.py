@@ -94,7 +94,7 @@ def test_runtime_creation__from_config__creates_valid_model(runtime_config: dict
 
     assert isinstance(controller.jobs, list)
     assert len(controller.jobs) == 1
-    assert controller.jobs[0].id == "test_job"
+    assert controller.jobs[0].id_ == "test_job"
 
 
 # =========================================================================== #

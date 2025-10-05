@@ -12,6 +12,8 @@ from configuration files or dictionaries.
 
 import logging
 
+from pydantic import Field
+
 from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
 from flint.utils.logger import get_logger
 
@@ -25,7 +27,7 @@ class SelectArgs(ArgsModel):
         columns: List of column names to select from the DataFrame
     """
 
-    columns: list[str]
+    columns: list[str] = Field(..., description="List of column names to select from the DataFrame", min_length=1)
 
 
 class SelectFunctionModel(FunctionModel[SelectArgs]):
@@ -39,5 +41,5 @@ class SelectFunctionModel(FunctionModel[SelectArgs]):
         arguments: Container for the column selection parameters
     """
 
-    function_type: str
-    arguments: SelectArgs
+    function_type: str = "select"
+    arguments: SelectArgs = Field(..., description="Container for the column selection parameters")

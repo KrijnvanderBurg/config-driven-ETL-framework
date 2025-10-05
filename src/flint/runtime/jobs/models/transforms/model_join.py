@@ -12,6 +12,8 @@ from configuration files or dictionaries.
 
 import logging
 
+from pydantic import Field
+
 from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
 from flint.utils.logger import get_logger
 
@@ -27,9 +29,16 @@ class JoinArgs(ArgsModel):
         how: Type of join to perform (inner, outer, left, right, etc.). Defaults to "inner"
     """
 
-    other_upstream_id: str
-    on: str | list[str]
-    how: str = "inner"
+    other_upstream_id: str = Field(
+        ..., description="Identifier of the dataframe to join with the current dataframe", min_length=1
+    )
+    on: str | list[str] = Field(
+        ...,
+        description=(
+            "Column(s) to join on. Can be a string for a single column or a list of strings for multiple columns"
+        ),
+    )
+    how: str = Field(default="inner", description="Type of join to perform (inner, outer, left, right, etc.)")
 
 
 class JoinFunctionModel(FunctionModel[JoinArgs]):
@@ -43,5 +52,5 @@ class JoinFunctionModel(FunctionModel[JoinArgs]):
         arguments: Container for the join parameters
     """
 
-    function_type: str
-    arguments: JoinArgs
+    function_type: str = "join"
+    arguments: JoinArgs = Field(..., description="Container for the join parameters")

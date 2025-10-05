@@ -69,7 +69,7 @@ class TestLoadFileSparkValidation:
         load = LoadFileSpark(**valid_load_config)
 
         # Assert
-        assert load.id == "customer_data_output"
+        assert load.id_ == "customer_data_output"
         assert load.upstream_id == "customer_transform"
         assert load.method == LoadMethod.BATCH
         assert load.data_format == LoadFormat.JSON
@@ -253,7 +253,7 @@ class TestLoadFileSparkLoad:
             load_file_spark.load()
 
             # Verify the dataframe was copied to the load step
-            assert LoadFileSpark.data_registry[load_file_spark.id] == mock_dataframe
+            assert LoadFileSpark.data_registry[load_file_spark.id_] == mock_dataframe
 
     def test_load__with_streaming_method__completes_successfully(self, valid_load_config: dict[str, Any]) -> None:
         """Test load method completes successfully for streaming loading."""
@@ -277,7 +277,7 @@ class TestLoadFileSparkLoad:
             load_streaming.load()
 
             # Verify the streaming query was registered
-            assert LoadFileSpark.streaming_query_registry[load_streaming.id] == mock_streaming_query
+            assert LoadFileSpark.streaming_query_registry[load_streaming.id_] == mock_streaming_query
 
     def test_load__with_invalid_method__raises_value_error(self, load_file_spark: LoadFileSpark) -> None:
         """Test load method raises ValueError for unsupported loading method."""

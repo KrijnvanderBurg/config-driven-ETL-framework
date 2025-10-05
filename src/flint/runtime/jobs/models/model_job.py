@@ -54,7 +54,7 @@ class JobBase(BaseModel, ABC):
         hooks: Hooks to execute at various stages of the job lifecycle
     """
 
-    id: str = Field(..., description="Unique identifier for the job", min_length=1)
+    id_: str = Field(..., alias="id", description="Unique identifier for the job", min_length=1)
     description: str = Field(..., description="Human-readable description of the job's purpose")
     enabled: bool = Field(..., description="Whether this job should be executed")
     engine_type: JobEngine = Field(..., description="The execution engine to use for this job")
@@ -76,20 +76,20 @@ class JobBase(BaseModel, ABC):
                 preserving the original exception as the cause.
         """
         if not self.enabled:
-            logger.info("Job '%s' is disabled. Skipping execution.", self.id)
+            logger.info("Job '%s' is disabled. Skipping execution.", self.id_)
             return
 
         self.hooks.on_start()
 
         try:
-            logger.info("Starting job execution: %s", self.id)
+            logger.info("Starting job execution: %s", self.id_)
             self._execute()
-            logger.info("Job completed successfully: %s", self.id)
+            logger.info("Job completed successfully: %s", self.id_)
             self.hooks.on_success()
         except (ValueError, KeyError, OSError) as e:
-            logger.error("Job '%s' failed: %s", self.id, e)
+            logger.error("Job '%s' failed: %s", self.id_, e)
             self.hooks.on_error()
-            raise FlintJobError(f"Error occurred during job '{self.id}' execution") from e
+            raise FlintJobError(f"Error occurred during job '{self.id_}' execution") from e
         finally:
             self.hooks.on_finally()
 

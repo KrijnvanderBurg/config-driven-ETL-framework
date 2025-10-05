@@ -10,6 +10,8 @@ These models provide a type-safe interface for configuring column type casting
 from configuration files or dictionaries.
 """
 
+from pydantic import Field
+
 from flint import BaseModel
 from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
 
@@ -22,8 +24,8 @@ class CastColumn(BaseModel):
         cast_type: Target data type to cast the column to
     """
 
-    column_name: str
-    cast_type: str
+    column_name: str = Field(..., description="Name of the column to cast", min_length=1)
+    cast_type: str = Field(..., description="Target data type to cast the column to", min_length=1)
 
 
 class CastArgs(ArgsModel):
@@ -33,7 +35,7 @@ class CastArgs(ArgsModel):
         columns: List of column casting definitions
     """
 
-    columns: list[CastColumn]
+    columns: list[CastColumn] = Field(..., description="List of column casting definitions")
 
 
 class CastFunctionModel(FunctionModel[CastArgs]):
@@ -47,5 +49,5 @@ class CastFunctionModel(FunctionModel[CastArgs]):
         arguments: Container for the column casting parameters
     """
 
-    function_type: str
-    arguments: CastArgs
+    function_type: str = "cast"
+    arguments: CastArgs = Field(..., description="Container for the column casting parameters")

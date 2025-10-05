@@ -10,6 +10,8 @@ These models provide a type-safe interface for configuring duplicate row removal
 from configuration files or dictionaries.
 """
 
+from pydantic import Field
+
 from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
 
 
@@ -21,7 +23,12 @@ class DropDuplicatesArgs(ArgsModel):
                 If empty list, all columns are considered.
     """
 
-    columns: list[str]
+    columns: list[str] = Field(
+        ...,
+        description=(
+            "List of column names to consider when dropping duplicates. If empty list, all columns are considered."
+        ),
+    )
 
 
 class DropDuplicatesFunctionModel(FunctionModel[DropDuplicatesArgs]):
@@ -35,5 +42,5 @@ class DropDuplicatesFunctionModel(FunctionModel[DropDuplicatesArgs]):
         arguments: Container for the dropDuplicates parameters
     """
 
-    function_type: str
-    arguments: DropDuplicatesArgs
+    function_type: str = "dropDuplicates"
+    arguments: DropDuplicatesArgs = Field(..., description="Container for the dropDuplicates parameters")

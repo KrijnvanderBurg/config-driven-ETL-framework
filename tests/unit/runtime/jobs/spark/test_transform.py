@@ -57,7 +57,7 @@ class TestTransformSparkValidation:
         transform = TransformSpark(**transform_config)
 
         # Assert
-        assert transform.id == "customer_transform"
+        assert transform.id_ == "customer_transform"
         assert transform.upstream_id == "customer_data"
         assert transform.options == {"spark.sql.shuffle.partitions": "10"}
         assert isinstance(transform.functions, list)
@@ -191,7 +191,7 @@ class TestTransformSparkTransform:
             transform_spark.transform()
 
             # Assert - dataframe should be copied to transform name
-            assert TransformSpark.data_registry[transform_spark.id] == mock_dataframe
+            assert TransformSpark.data_registry[transform_spark.id_] == mock_dataframe
 
     def test_transform__with_single_function__applies_transformation(self, transform_config: dict[str, Any]) -> None:
         """Test transform method applies single transformation function."""
@@ -221,7 +221,7 @@ class TestTransformSparkTransform:
             # Assert
             mock_transform_func.assert_called_once()
             mock_callable.assert_called_once_with(df=mock_dataframe)
-            assert TransformSpark.data_registry[transform.id] == mock_transformed_df
+            assert TransformSpark.data_registry[transform.id_] == mock_transformed_df
 
     def test_transform__with_multiple_functions__applies_in_sequence(self, transform_config: dict[str, Any]) -> None:
         """Test transform method applies multiple transformation functions in sequence."""
@@ -264,4 +264,4 @@ class TestTransformSparkTransform:
             # Second function should receive result from first function
             mock_filter_callable.assert_called_once_with(df=mock_df_after_select)
             # Final result should be in registry
-            assert TransformSpark.data_registry[transform.id] == mock_df_after_filter
+            assert TransformSpark.data_registry[transform.id_] == mock_df_after_filter

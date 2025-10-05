@@ -24,6 +24,7 @@ def fixture_valid_file_config(tmp_path: Path) -> dict[str, Any]:
     return {
         "id": "error-log-alerts",
         "description": "Error logging to file",
+        "channel_type": "file",
         "file_path": tmp_path / "alerts.log",
         "enabled": True,
     }
@@ -43,7 +44,7 @@ class TestFileChannelValidation:
         channel = FileChannel(**valid_file_config)
 
         # Assert
-        assert channel.id == "error-log-alerts"
+        assert channel.id_ == "error-log-alerts"
         assert channel.description == "Error logging to file"
         assert channel.channel_type == "file"
         assert isinstance(channel.file_path, Path)
@@ -210,6 +211,7 @@ class TestFileChannelAlert:
         config = {
             "id": "nested-alerts",
             "description": "Nested directory alerts",
+            "channel_type": "file",
             "file_path": nested_path,
             "enabled": True,
         }

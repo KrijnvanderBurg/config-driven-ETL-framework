@@ -50,7 +50,7 @@ class HttpBase(BaseModel):
     """
 
     url: HttpUrl = Field(..., description="HTTP endpoint URL for sending requests")
-    method: str = Field(..., description="HTTP method to use (GET, POST, PUT, etc.)")
+    method: str = Field(..., description="HTTP method to use (GET, POST, PUT, etc.)", min_length=1)
     headers: dict[str, str] = Field(
         default_factory=dict, description="Dictionary of HTTP headers to include in requests"
     )

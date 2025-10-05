@@ -34,7 +34,7 @@ class HttpAction(HttpBase, ActionBase):
         payload: Optional payload data to send in the request
     """
 
-    action_type: Literal["http"] = Field("http", description="Type identifier for the HTTP action")
+    action_type: Literal["http"] = Field(..., description="Action type discriminator")
     payload: dict[str, Any] = Field(default_factory=dict, description="Optional payload data to send in the request")
 
     @override
@@ -47,6 +47,6 @@ class HttpAction(HttpBase, ActionBase):
         Raises:
             requests.RequestException: If the HTTP request fails after all retries.
         """
-        logger.info("Executing HTTP action: %s", self.id)
+        logger.info("Executing HTTP action: %s", self.id_)
         self._make_http_request(self.payload)
-        logger.info("HTTP action completed: %s", self.id)
+        logger.info("HTTP action completed: %s", self.id_)

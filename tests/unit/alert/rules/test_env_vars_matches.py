@@ -46,10 +46,10 @@ class TestEnvVarsMatchesRuleValidation:
         assert rule.env_var_name == "TEST_ENV"
         assert rule.env_var_values == ["1", "true"]
 
-    def test_create_env_vars_rule__with_missing_rule__raises_validation_error(
+    def test_create_env_vars_rule__with_missing_rule_type__raises_validation_error(
         self, env_rule_config: dict[str, Any]
     ) -> None:
-        """Test EnvVarsMatchesRule creation fails when rule is missing."""
+        """Test EnvVarsMatchesRule creation fails when rule_type is missing."""
         # Arrange
         del env_rule_config["rule_type"]
 

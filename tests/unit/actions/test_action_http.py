@@ -13,8 +13,8 @@ class TestHttpAction:
         """Test that execute calls _execute which then calls _make_http_request."""
         # Arrange
         retry = Retry(raise_on_error=True, max_attempts=2, delay_in_seconds=1)
-        action = HttpAction(
-            id="test_http_action",
+        action = HttpAction.model_construct(
+            id_="test_http_action",
             description="Test HTTP action",
             action_type="http",
             url="https://example.com/api",
@@ -36,8 +36,8 @@ class TestHttpAction:
         """Test that execute calls _make_http_request with empty dict when payload is not provided."""
         # Arrange
         retry = Retry(raise_on_error=False, max_attempts=0, delay_in_seconds=1)
-        action = HttpAction(
-            id="test_http_action",
+        action = HttpAction.model_construct(
+            id_="test_http_action",
             description="Test HTTP action",
             action_type="http",
             url="https://example.com/api",

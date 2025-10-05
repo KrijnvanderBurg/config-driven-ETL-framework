@@ -34,10 +34,10 @@ class RuntimeController(BaseModel):
         jobs: List of jobs to execute in the ETL pipeline
     """
 
-    id: str = Field(..., description="Unique identifier for the runtime configuration", min_length=1)
+    id_: str = Field(..., alias="id", description="Unique identifier for the runtime configuration", min_length=1)
     description: str = Field(..., description="Description of the runtime configuration")
     enabled: bool = Field(..., description="Whether this runtime is enabled")
-    jobs: list[JobUnion]
+    jobs: list[JobUnion] = Field(..., description="List of jobs to execute in the ETL pipeline")
 
     @classmethod
     def from_file(cls, filepath: Path) -> Self:
@@ -86,7 +86,7 @@ class RuntimeController(BaseModel):
         logger.info("Executing all %d jobs in ETL pipeline", len(self.jobs))
 
         for i, job in enumerate(self.jobs):
-            logger.info("Executing job %d/%d: %s", i + 1, len(self.jobs), job.id)
+            logger.info("Executing job %d/%d: %s", i + 1, len(self.jobs), job.id_)
             job.execute()
 
         logger.info("All jobs in ETL pipeline executed successfully")

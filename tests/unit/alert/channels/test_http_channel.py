@@ -13,8 +13,8 @@ class TestHttpChannel:
         """Test that alert calls _alert which then calls _make_http_request."""
         # Arrange
         retry = Retry(raise_on_error=True, max_attempts=2, delay_in_seconds=1)
-        channel = HttpChannel(
-            id="test_http_channel",
+        channel = HttpChannel.model_construct(
+            id_="test_http_channel",
             description="Test HTTP channel",
             channel_type="http",
             url="https://example.com/webhook",
@@ -37,8 +37,8 @@ class TestHttpChannel:
         """Test that alert calls _make_http_request with empty strings when title and body are empty."""
         # Arrange
         retry = Retry(raise_on_error=False, max_attempts=0, delay_in_seconds=1)
-        channel = HttpChannel(
-            id="test_http_channel",
+        channel = HttpChannel.model_construct(
+            id_="test_http_channel",
             description="Test HTTP channel",
             channel_type="http",
             url="https://example.com/webhook",

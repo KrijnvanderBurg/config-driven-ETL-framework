@@ -83,6 +83,6 @@ class TransformModel(BaseModel):
         |-- age: string (nullable = true)
     """
 
-    id: str = Field(..., description="Identifier for this transformation operation", min_length=1)
-    upstream_id: str = Field(..., description="Identifier(s) of the upstream component(s) providing data")
+    id_: str = Field(..., alias="id", description="Identifier for this transformation operation", min_length=1)
+    upstream_id: str = Field(..., description="Identifier(s) of the upstream component(s) providing data", min_length=1)
     options: dict[str, Any] = Field(..., description="Transformation options as key-value pairs")

@@ -50,7 +50,7 @@ class TestAlertTriggerValidation:
         trigger = AlertTrigger(**valid_trigger_config)
 
         # Assert
-        assert trigger.id == "production-errors"
+        assert trigger.id_ == "production-errors"
         assert trigger.enabled is True
         assert trigger.description == "Production error notifications"
         assert trigger.channel_ids == ["email", "file"]
@@ -72,16 +72,16 @@ class TestAlertTriggerValidation:
             # Act
             AlertTrigger(**valid_trigger_config)
 
-    def test_create_alert_trigger__with_empty_id__succeeds(self, valid_trigger_config: dict[str, Any]) -> None:
-        """Test AlertTrigger creation allows empty id string."""
+    def test_create_alert_trigger__with_empty_id__raises_validation_error(
+        self, valid_trigger_config: dict[str, Any]
+    ) -> None:
+        """Test AlertTrigger creation fails when id is empty string."""
         # Arrange
         valid_trigger_config["id"] = ""
 
-        # Act
-        trigger = AlertTrigger(**valid_trigger_config)
-
-        # Assert
-        assert trigger.id == ""
+        # Act & Assert
+        with pytest.raises(ValidationError):
+            AlertTrigger(**valid_trigger_config)
 
     def test_create_alert_trigger__with_missing_enabled__raises_validation_error(
         self, valid_trigger_config: dict[str, Any]
@@ -299,7 +299,11 @@ class TestAlertTriggerShouldFire:
         """Test trigger fires when environment variable rule matches."""
         # Arrange
         valid_trigger_config["rules"] = [
-            {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "staging"]}
+            {
+                "rule_type": "env_vars_matches",
+                "env_var_name": "ENVIRONMENT",
+                "env_var_values": ["production", "staging"],
+            }
         ]
         trigger = AlertTrigger(**valid_trigger_config)
 
@@ -317,7 +321,11 @@ class TestAlertTriggerShouldFire:
         """Test trigger does not fire when environment variable rule does not match."""
         # Arrange
         valid_trigger_config["rules"] = [
-            {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "staging"]}
+            {
+                "rule_type": "env_vars_matches",
+                "env_var_name": "ENVIRONMENT",
+                "env_var_values": ["production", "staging"],
+            }
         ]
         trigger = AlertTrigger(**valid_trigger_config)
 

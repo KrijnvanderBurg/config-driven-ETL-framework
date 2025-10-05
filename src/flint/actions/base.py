@@ -17,15 +17,14 @@ class ActionBase(BaseModel):
         parameters (dict): A dictionary of parameters for the action.
     """
 
-    id: str = Field(..., description="Unique identifier for the action.")
+    id_: str = Field(..., alias="id", description="Unique identifier for the action.", min_length=1)
     description: str = Field(..., description="A description of the action.")
     enabled: bool = Field(..., description="Whether the action is enabled.")
-    parameters: dict = Field(default_factory=dict, description="A dictionary of parameters for the action.")
 
     def execute(self) -> None:
         """Execute the action."""
         if not self.enabled:
-            logger.debug("Action '%s' is disabled; skipping execution.", self.id)
+            logger.debug("Action '%s' is disabled; skipping execution.", self.id_)
             return
         self._execute()
 

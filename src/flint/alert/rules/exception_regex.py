@@ -8,6 +8,8 @@ import logging
 import re
 from typing import Literal
 
+from pydantic import Field
+
 from flint.alert.rules.base import AlertRule
 from flint.utils.logger import get_logger
 
@@ -21,8 +23,8 @@ class ExceptionRegexRule(AlertRule):
     the configured regular expression pattern.
     """
 
-    rule_type: Literal["exception_regex"]
-    pattern: str
+    rule_type: Literal["exception_regex"] = Field(..., description="Rule type discriminator")
+    pattern: str = Field(..., description="Regular expression pattern to match against exception messages")
 
     def evaluate(self, exception: Exception) -> bool:
         """Evaluate if the exception message matches the regex pattern.

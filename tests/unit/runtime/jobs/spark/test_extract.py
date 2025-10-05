@@ -76,7 +76,7 @@ class TestExtractFileSparkValidation:
         extract = ExtractFileSpark(**valid_extract_config)
 
         # Assert
-        assert extract.id == "test_data"
+        assert extract.id_ == "test_data"
         assert extract.method == ExtractMethod.BATCH
         assert extract.data_format == ExtractFormat.JSON
         assert extract.options == {"multiLine": True}

@@ -10,6 +10,8 @@ These models provide a type-safe interface for configuring filter operations
 from configuration files or dictionaries.
 """
 
+from pydantic import Field
+
 from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
 
 
@@ -20,7 +22,7 @@ class FilterArgs(ArgsModel):
         condition: String expression representing the filter condition
     """
 
-    condition: str
+    condition: str = Field(..., description="String expression representing the filter condition", min_length=1)
 
 
 class FilterFunctionModel(FunctionModel[FilterArgs]):
@@ -34,5 +36,5 @@ class FilterFunctionModel(FunctionModel[FilterArgs]):
         arguments: Container for the filter parameters
     """
 
-    function_type: str
-    arguments: FilterArgs
+    function_type: str = "filter"
+    arguments: FilterArgs = Field(..., description="Container for the filter parameters")

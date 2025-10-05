@@ -86,7 +86,7 @@ class AlertController(BaseModel):
 
         for trigger in self.triggers:
             if trigger.should_fire(exception=exception):
-                logger.debug("Trigger '%s' conditions met; processing alert", trigger.id)
+                logger.debug("Trigger '%s' conditions met; processing alert", trigger.id_)
 
                 formatted_title = trigger.template.format_title(title)
                 formatted_body = trigger.template.format_body(body)
@@ -94,11 +94,11 @@ class AlertController(BaseModel):
                 for channel_id in trigger.channel_ids:
                     # Find the channel by id
                     for channel in self.channels:
-                        if channel.id == channel_id:
+                        if channel.id_ == channel_id:
                             formatted_title = trigger.template.format_title(title)
                             formatted_body = trigger.template.format_body(body)
 
                             # Send alert through the channel instance
                             channel.alert(title=formatted_title, body=formatted_body)
-                            logger.debug("Sent alert to channel '%s'", channel.id)
+                            logger.debug("Sent alert to channel '%s'", channel.id_)
                             break

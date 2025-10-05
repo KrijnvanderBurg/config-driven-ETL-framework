@@ -10,6 +10,8 @@ transform functions.
 
 import logging
 
+from pydantic import Field
+
 from flint import BaseModel
 from flint.utils.logger import get_logger
 
@@ -29,10 +31,10 @@ class AlertTemplate(BaseModel):
         append_body: Text to append to alert messages
     """
 
-    prepend_title: str
-    append_title: str
-    prepend_body: str
-    append_body: str
+    prepend_title: str = Field(..., description="Text to prepend to alert titles")
+    append_title: str = Field(..., description="Text to append to alert titles")
+    prepend_body: str = Field(..., description="Text to prepend to alert messages")
+    append_body: str = Field(..., description="Text to append to alert messages")
 
     def format_body(self, message: str) -> str:
         """Format a message with prepend and append templates.

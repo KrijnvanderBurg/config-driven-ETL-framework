@@ -41,7 +41,7 @@ class EmailChannel(ChannelModel):
         to_emails: List of recipient email addresses
     """
 
-    channel_type: Literal["email"] = Field("email", description="Type identifier for the email channel")
+    channel_type: Literal["email"] = Field(..., description="Channel type discriminator")
     smtp_server: StrictStr = Field(..., description="SMTP server hostname or IP address", min_length=1)
     smtp_port: StrictInt = Field(..., description="SMTP server port number", gt=0, le=65535)
     username: StrictStr = Field(..., description="SMTP authentication username", min_length=1)

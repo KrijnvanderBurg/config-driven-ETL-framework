@@ -28,15 +28,15 @@ class ChannelModel(BaseModel, ABC):
     Literal value to ensure type safety and proper discrimination.
     """
 
-    id: str = Field(..., description="Unique identifier for the alert channel", min_length=1)
+    id_: str = Field(..., alias="id", description="Unique identifier for the alert channel", min_length=1)
     description: str = Field(..., description="Description of the alert channel")
     enabled: bool = Field(..., description="Whether this channel is enabled")
 
     def alert(self, title: str, body: str) -> None:
         """Send an alert message through this channel."""
-        logger.debug("Sending alert through channel: %s", self.id)
+        logger.debug("Sending alert through channel: %s", self.id_)
         self._alert(title=title, body=body)
-        logger.info("Alert sent through %s channel", self.id)
+        logger.info("Alert sent through %s channel", self.id_)
 
     @abstractmethod
     def _alert(self, title: str, body: str) -> None:

@@ -96,11 +96,13 @@ class LoadModel(BaseModel, ABC):
         options (dict[str, Any]): Options for the sink input.
     """
 
-    id: str = Field(..., description="Identifier for this load operation", min_length=1)
-    upstream_id: str = Field(..., description="Identifier of the upstream component providing data")
+    id_: str = Field(..., alias="id", description="Identifier for this load operation", min_length=1)
+    upstream_id: str = Field(..., description="Identifier of the upstream component providing data", min_length=1)
     method: LoadMethod = Field(..., description="Loading method (batch or streaming)")
-    location: str = Field(..., description="URI that identifies where to load data in the modelified format.")
-    schema_location: str | None = Field(None, description="URI that identifies where to load schema.")
+    location: str = Field(
+        ..., description="URI that identifies where to load data in the modelified format.", min_length=1
+    )
+    schema_location: str | None = Field(..., description="URI that identifies where to load schema.")
     options: dict[str, Any] = Field(..., description="Options for the sink input.")
 
 
@@ -113,6 +115,6 @@ class LoadModelFile(LoadModel):
         data_format: Format of the output files
     """
 
-    load_type: Literal["file"]
-    mode: LoadMode
-    data_format: LoadFormat
+    load_type: Literal["file"] = Field(..., description="Load type discriminator")
+    mode: LoadMode = Field(..., description="Write mode for the load operation")
+    data_format: LoadFormat = Field(..., description="Format of the output files")

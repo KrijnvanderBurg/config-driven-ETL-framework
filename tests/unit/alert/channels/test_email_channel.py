@@ -24,6 +24,7 @@ def fixture_valid_email_config() -> dict[str, Any]:
     return {
         "id": "production-alerts",
         "description": "Production error notifications",
+        "channel_type": "email",
         "smtp_server": "smtp.company.com",
         "smtp_port": 587,
         "username": "alerts@company.com",
@@ -48,7 +49,7 @@ class TestEmailChannelValidation:
         channel = EmailChannel(**valid_email_config)
 
         # Assert
-        assert channel.id == "production-alerts"
+        assert channel.id_ == "production-alerts"
         assert channel.description == "Production error notifications"
         assert channel.channel_type == "email"
         assert channel.smtp_server == "smtp.company.com"

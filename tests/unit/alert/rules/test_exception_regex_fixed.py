@@ -53,10 +53,10 @@ class TestExceptionRegexRuleValidation:
         assert rule.rule_type == "exception_regex"
         assert rule.pattern == "error"
 
-    def test_create_exception_regex_rule__with_missing_rule__raises_validation_error(
+    def test_create_exception_regex_rule__with_missing_rule_type__raises_validation_error(
         self, exception_rule_config: dict[str, Any]
     ) -> None:
-        """Test ExceptionRegexRule creation fails when rule is missing."""
+        """Test ExceptionRegexRule creation fails when rule_type is missing."""
         # Arrange
         del exception_rule_config["rule_type"]
 

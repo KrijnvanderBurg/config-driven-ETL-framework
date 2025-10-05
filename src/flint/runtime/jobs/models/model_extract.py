@@ -63,7 +63,7 @@ class ExtractModel(BaseModel):
         options: PySpark reader options as key-value pairs
     """
 
-    id: str = Field(..., description="Identifier for this extraction operation", min_length=1)
+    id_: str = Field(..., alias="id", description="Identifier for this extraction operation", min_length=1)
     method: ExtractMethod = Field(..., description="Method of extraction (batch or streaming)")
     data_format: ExtractFormat = Field(..., description="Format of the data to extract (parquet, json, csv, etc.)")
     options: dict[str, Any] = Field(..., description="PySpark reader options as key-value pairs")
@@ -85,9 +85,9 @@ class ExtractFileModel(ExtractModel):
         schema_: Schema definition - can be a file path or JSON string (defaults to empty string)
     """
 
-    extract_type: Literal["file"]
-    location: str
-    schema_: str | FilePath = ""
+    extract_type: Literal["file"] = Field(..., description="Extract type discriminator")
+    location: str = Field(..., description="URI where the files are located")
+    schema_: str | FilePath = Field(..., description="Schema definition - can be a file path or JSON string")
     _schema_parsed: StructType | None = None
 
     @model_validator(mode="after")

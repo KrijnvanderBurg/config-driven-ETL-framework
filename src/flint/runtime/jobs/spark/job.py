@@ -11,6 +11,7 @@ of the appropriate Extract, Transform, and Load components based on the configur
 import logging
 import time
 
+from pydantic import Field
 from typing_extensions import override
 
 from flint.runtime.jobs.models.model_job import JobBase, JobEngine
@@ -50,9 +51,11 @@ class JobSpark(JobBase):
     """
 
     engine_type: JobEngine = JobEngine.SPARK
-    extracts: list[ExtractSparkUnion]
-    transforms: list[TransformSparkUnion]
-    loads: list[LoadSparkUnion]
+    extracts: list[ExtractSparkUnion] = Field(..., description="Collection of Extract components")
+    transforms: list[TransformSparkUnion] = Field(
+        ..., description="Collection of Transform components to process the data"
+    )
+    loads: list[LoadSparkUnion] = Field(..., description="Collection of Load components")
 
     @override
     def _execute(self) -> None:
@@ -89,10 +92,10 @@ class JobSpark(JobBase):
 
         for i, extract in enumerate(self.extracts):
             extract_start_time = time.time()
-            logger.debug("Running extractor %d/%d: %s", i, len(self.extracts), extract.id)
+            logger.debug("Running extractor %d/%d: %s", i, len(self.extracts), extract.id_)
             extract.extract()
             extract_time = time.time() - extract_start_time
-            logger.debug("Extractor %s completed in %.2f seconds", extract.id, extract_time)
+            logger.debug("Extractor %s completed in %.2f seconds", extract.id_, extract_time)
 
         phase_time = time.time() - start_time
         logger.info("Extract phase completed successfully in %.2f seconds", phase_time)
@@ -108,10 +111,10 @@ class JobSpark(JobBase):
 
         for i, transform in enumerate(self.transforms):
             transform_start_time = time.time()
-            logger.debug("Running transformer %d/%d: %s", i, len(self.transforms), transform.id)
+            logger.debug("Running transformer %d/%d: %s", i, len(self.transforms), transform.id_)
             transform.transform()
             transform_time = time.time() - transform_start_time
-            logger.debug("Transformer %s completed in %.2f seconds", transform.id, transform_time)
+            logger.debug("Transformer %s completed in %.2f seconds", transform.id_, transform_time)
 
         phase_time = time.time() - start_time
         logger.info("Transform phase completed successfully in %.2f seconds", phase_time)
@@ -127,10 +130,10 @@ class JobSpark(JobBase):
 
         for i, load in enumerate(self.loads):
             load_start_time = time.time()
-            logger.debug("Running loader %d/%d: %s", i, len(self.loads), load.id)
+            logger.debug("Running loader %d/%d: %s", i, len(self.loads), load.id_)
             load.load()
             load_time = time.time() - load_start_time
-            logger.debug("Loader %s completed in %.2f seconds", load.id, load_time)
+            logger.debug("Loader %s completed in %.2f seconds", load.id_, load_time)
 
         phase_time = time.time() - start_time
         logger.info("Load phase completed successfully in %.2f seconds", phase_time)

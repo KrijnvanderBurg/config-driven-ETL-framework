@@ -63,12 +63,12 @@ class LoadSpark(LoadModel, ABC):
             schema_json: JSON representation of the DataFrame schema
             schema_path: File path where schema should be written
         """
-        logger.debug("Exporting schema for %s to: %s", self.id, schema_path)
+        logger.debug("Exporting schema for %s to: %s", self.id_, schema_path)
 
         with open(schema_path, mode="w", encoding="utf-8") as f:
             f.write(schema_json)
 
-        logger.info("Schema exported successfully for %s to: %s", self.id, schema_path)
+        logger.info("Schema exported successfully for %s to: %s", self.id_, schema_path)
 
     def load(self) -> None:
         """
@@ -76,7 +76,7 @@ class LoadSpark(LoadModel, ABC):
         """
         logger.info(
             "Starting load operation for: %s from upstream: %s using method: %s",
-            self.id,
+            self.id_,
             self.upstream_id,
             self.method.value,
         )
@@ -84,26 +84,26 @@ class LoadSpark(LoadModel, ABC):
         logger.debug("Adding Spark configurations: %s", self.options)
         self.spark.add_configs(options=self.options)
 
-        logger.debug("Copying dataframe from %s to %s", self.upstream_id, self.id)
-        self.data_registry[self.id] = self.data_registry[self.upstream_id]
+        logger.debug("Copying dataframe from %s to %s", self.upstream_id, self.id_)
+        self.data_registry[self.id_] = self.data_registry[self.upstream_id]
 
         if self.method == LoadMethod.BATCH:
-            logger.debug("Performing batch load for: %s", self.id)
+            logger.debug("Performing batch load for: %s", self.id_)
             self._load_batch()
-            logger.info("Batch load completed successfully for: %s", self.id)
+            logger.info("Batch load completed successfully for: %s", self.id_)
         elif self.method == LoadMethod.STREAMING:
-            logger.debug("Performing streaming load for: %s", self.id)
-            self.streaming_query_registry[self.id] = self._load_streaming()
-            logger.info("Streaming load started successfully for: %s", self.id)
+            logger.debug("Performing streaming load for: %s", self.id_)
+            self.streaming_query_registry[self.id_] = self._load_streaming()
+            logger.info("Streaming load started successfully for: %s", self.id_)
         else:
             raise ValueError(f"Loading method {self.method} is not supported for PySpark")
 
         # Export schema if location is specified
         if self.schema_location is not None:
-            schema_json = json.dumps(self.data_registry[self.id].schema.jsonValue())
+            schema_json = json.dumps(self.data_registry[self.id_].schema.jsonValue())
             self._export_schema(schema_json, self.schema_location)
 
-        logger.info("Load operation completed successfully for: %s", self.id)
+        logger.info("Load operation completed successfully for: %s", self.id_)
 
 
 class LoadFileSpark(LoadSpark, LoadModelFile):
@@ -124,10 +124,10 @@ class LoadFileSpark(LoadSpark, LoadModelFile):
             self.mode.value,
         )
 
-        row_count = self.data_registry[self.id].count()
+        row_count = self.data_registry[self.id_].count()
         logger.debug("Writing %d rows to %s", row_count, self.location)
 
-        self.data_registry[self.id].write.save(
+        self.data_registry[self.id_].write.save(
             path=self.location,
             format=self.data_format.value,
             mode=self.mode.value,
@@ -150,7 +150,7 @@ class LoadFileSpark(LoadSpark, LoadModelFile):
             self.mode.value,
         )
 
-        streaming_query = self.data_registry[self.id].writeStream.start(
+        streaming_query = self.data_registry[self.id_].writeStream.start(
             path=self.location,
             format=self.data_format.value,
             outputMode=self.mode.value,

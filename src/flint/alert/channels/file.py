@@ -33,7 +33,7 @@ class FileChannel(ChannelModel):
         file_path: Path to the file where alerts should be written
     """
 
-    channel_type: Literal["file"] = Field("file", description="Type identifier for the file channel")
+    channel_type: Literal["file"] = Field(..., description="Channel type discriminator")
     file_path: Path = Field(..., description="Path to the file where alerts should be written")
 
     @override
