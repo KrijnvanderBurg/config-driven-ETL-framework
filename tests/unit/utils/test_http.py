@@ -26,14 +26,14 @@ def fixture_valid_http_config() -> dict[str, Any]:
         "method": "POST",
         "headers": {"Content-Type": "application/json", "Authorization": "Bearer token123"},
         "timeout": 30,
-        "retry": {"raise_on_error": True, "max_attempts": 2, "delay_in_seconds": 1},
+        "retry": {"max_attempts": 2, "delay_in_seconds": 1},
     }
 
 
 @pytest.fixture(name="valid_retry_config")
 def fixture_valid_retry_config() -> dict[str, Any]:
     """Provide a valid retry configuration."""
-    return {"raise_on_error": False, "max_attempts": 3, "delay_in_seconds": 2}
+    return {"max_attempts": 3, "delay_in_seconds": 2}
 
 
 # =========================================================================== #
@@ -50,7 +50,6 @@ class TestRetryValidation:
         retry = Retry(**valid_retry_config)
 
         # Assert
-        assert retry.raise_on_error is False
         assert retry.max_attempts == 3
         assert retry.delay_in_seconds == 2
 
@@ -87,17 +86,6 @@ class TestRetryValidation:
         with pytest.raises(ValidationError):
             Retry(**valid_retry_config)
 
-    def test_create_retry__with_missing_required_field__raises_validation_error(
-        self, valid_retry_config: dict[str, Any]
-    ) -> None:
-        """Test Retry creation fails when required field is missing."""
-        # Arrange
-        del valid_retry_config["raise_on_error"]
-
-        # Assert
-        with pytest.raises(ValidationError):
-            Retry(**valid_retry_config)
-
 
 # =========================================================================== #
 # ===================== HTTP BASE VALIDATION TESTS ======================= #
@@ -121,7 +109,6 @@ class TestHttpBaseValidation:
         }
         assert http_base.timeout == 30
         assert isinstance(http_base.retry, Retry)
-        assert http_base.retry.raise_on_error is True
         assert http_base.retry.max_attempts == 2
         assert http_base.retry.delay_in_seconds == 1
 
@@ -317,7 +304,7 @@ class TestHttpBaseRetry:
     ) -> None:
         """Test request succeeds on retry after initial failure."""
         # Arrange
-        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 2, "delay_in_seconds": 1}
+        valid_http_config["retry"] = {"max_attempts": 2, "delay_in_seconds": 1}
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to fail first, succeed second
@@ -340,35 +327,12 @@ class TestHttpBaseRetry:
             assert mock_request.call_count == 2
             mock_sleep.assert_called_once_with(1)
 
-    def test_make_http_request__with_all_retries_exhausted_and_raise_on_error__raises_exception(
+    def test_make_http_request__with_all_retries_exhausted__returns_silently(
         self, valid_http_config: dict[str, Any]
     ) -> None:
-        """Test request raises exception when all retries are exhausted and raise_on_error is True."""
+        """Test request returns silently when all retries exhausted"""
         # Arrange
-        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 1, "delay_in_seconds": 1}
-        http_base = HttpBase(**valid_http_config)
-
-        # Mock the requests library to always fail
-        with (
-            patch("flint.utils.http.requests.request") as mock_request,
-            patch("flint.utils.http.time.sleep"),
-        ):
-            mock_request.side_effect = requests.ConnectionError("Persistent network error")
-
-            # Assert
-            with pytest.raises(requests.ConnectionError):
-                # Act
-                http_base._make_http_request({"test": "data"})
-
-            # Verify total attempts (initial + retries)
-            assert mock_request.call_count == 2
-
-    def test_make_http_request__with_all_retries_exhausted_and_no_raise_on_error__returns_silently(
-        self, valid_http_config: dict[str, Any]
-    ) -> None:
-        """Test request returns silently when all retries exhausted and raise_on_error is False."""
-        # Arrange
-        valid_http_config["retry"] = {"raise_on_error": False, "max_attempts": 1, "delay_in_seconds": 1}
+        valid_http_config["retry"] = {"max_attempts": 1, "delay_in_seconds": 1}
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to always fail
@@ -384,32 +348,10 @@ class TestHttpBaseRetry:
             # Assert
             assert mock_request.call_count == 2
 
-    def test_make_http_request__with_no_retries_and_failure__fails_immediately(
-        self, valid_http_config: dict[str, Any]
-    ) -> None:
-        """Test request fails immediately when max_attempts is 0."""
+    def test_make_http_request__with_no_retries__returns_silently(self, valid_http_config: dict[str, Any]) -> None:
+        """Test request returns silently when max_attempts is 0."""
         # Arrange
-        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 0, "delay_in_seconds": 1}
-        http_base = HttpBase(**valid_http_config)
-
-        # Mock the requests library to fail
-        with patch("flint.utils.http.requests.request") as mock_request:
-            mock_request.side_effect = requests.ConnectionError("Network error")
-
-            # Assert
-            with pytest.raises(requests.ConnectionError):
-                # Act
-                http_base._make_http_request({"test": "data"})
-
-            # Verify only one attempt made
-            assert mock_request.call_count == 1
-
-    def test_make_http_request__with_no_retries_and_no_raise__returns_silently(
-        self, valid_http_config: dict[str, Any]
-    ) -> None:
-        """Test request returns silently when max_attempts is 0 and raise_on_error is False."""
-        # Arrange
-        valid_http_config["retry"] = {"raise_on_error": False, "max_attempts": 0, "delay_in_seconds": 1}
+        valid_http_config["retry"] = {"max_attempts": 0, "delay_in_seconds": 1}
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to fail
@@ -422,62 +364,12 @@ class TestHttpBaseRetry:
             # Verify only one attempt was made and no exception propagated
             assert mock_request.call_count == 1
 
-    def test_make_http_request__with_http_status_error__retries_appropriately(
-        self, valid_http_config: dict[str, Any]
-    ) -> None:
-        """Test request retries on HTTP status errors."""
-        # Arrange
-        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 1, "delay_in_seconds": 1}
-        http_base = HttpBase(**valid_http_config)
-
-        # Mock the requests library to return 500 error
-        with (
-            patch("flint.utils.http.requests.request") as mock_request,
-            patch("flint.utils.http.time.sleep"),
-        ):
-            mock_response = MagicMock()
-            mock_response.raise_for_status.side_effect = requests.HTTPError("500 Server Error")
-            mock_request.return_value = mock_response
-
-            # Assert
-            with pytest.raises(requests.HTTPError):
-                # Act
-                http_base._make_http_request({"test": "data"})
-
-            # Verify total attempts (initial + retries)
-            assert mock_request.call_count == 2
-
-    def test_make_http_request__with_timeout_error__retries_appropriately(
-        self, valid_http_config: dict[str, Any]
-    ) -> None:
-        """Test request retries on timeout errors."""
-        # Arrange
-        valid_http_config["retry"] = {"raise_on_error": True, "max_attempts": 2, "delay_in_seconds": 1}
-        http_base = HttpBase(**valid_http_config)
-
-        # Mock the requests library to timeout
-        with (
-            patch("flint.utils.http.requests.request") as mock_request,
-            patch("flint.utils.http.time.sleep") as mock_sleep,
-        ):
-            mock_request.side_effect = requests.Timeout("Request timeout")
-
-            # Assert
-            with pytest.raises(requests.Timeout):
-                # Act
-                http_base._make_http_request({"test": "data"})
-
-            # Verify total attempts and sleep calls
-            assert mock_request.call_count == 3  # initial + 2 retries
-            assert mock_sleep.call_count == 2  # sleep between retries
-            mock_sleep.assert_called_with(1)
-
     def test_make_http_request__with_delay_between_retries__sleeps_correct_duration(
         self, valid_http_config: dict[str, Any]
     ) -> None:
         """Test request waits correct duration between retry attempts."""
         # Arrange
-        valid_http_config["retry"] = {"raise_on_error": False, "max_attempts": 2, "delay_in_seconds": 5}
+        valid_http_config["retry"] = {"max_attempts": 2, "delay_in_seconds": 5}
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to always fail
@@ -499,7 +391,7 @@ class TestHttpBaseRetry:
     ) -> None:
         """Test request exhausts all attempts when max_attempts is at maximum (3) and all fail."""
         # Arrange - Use maximum allowed retries
-        valid_http_config["retry"] = {"raise_on_error": False, "max_attempts": 3, "delay_in_seconds": 1}
+        valid_http_config["retry"] = {"max_attempts": 3, "delay_in_seconds": 1}
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to always fail

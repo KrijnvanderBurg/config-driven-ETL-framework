@@ -12,7 +12,7 @@ class TestHttpAction:
     def test_execute__calls_execute_and_make_http_request(self) -> None:
         """Test that execute calls _execute which then calls _make_http_request."""
         # Arrange
-        retry = Retry(raise_on_error=True, max_attempts=2, delay_in_seconds=1)
+        retry = Retry(max_attempts=2, delay_in_seconds=1)
         action = HttpAction.model_construct(
             id_="test_http_action",
             description="Test HTTP action",
@@ -35,7 +35,7 @@ class TestHttpAction:
     def test_execute__with_empty_payload__calls_make_http_request_with_empty_dict(self) -> None:
         """Test that execute calls _make_http_request with empty dict when payload is not provided."""
         # Arrange
-        retry = Retry(raise_on_error=False, max_attempts=0, delay_in_seconds=1)
+        retry = Retry(max_attempts=0, delay_in_seconds=1)
         action = HttpAction.model_construct(
             id_="test_http_action",
             description="Test HTTP action",

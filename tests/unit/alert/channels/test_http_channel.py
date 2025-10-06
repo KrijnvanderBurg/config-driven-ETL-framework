@@ -12,7 +12,7 @@ class TestHttpChannel:
     def test_alert__calls_alert_and_make_http_request(self) -> None:
         """Test that alert calls _alert which then calls _make_http_request."""
         # Arrange
-        retry = Retry(raise_on_error=True, max_attempts=2, delay_in_seconds=1)
+        retry = Retry(max_attempts=2, delay_in_seconds=1)
         channel = HttpChannel.model_construct(
             id_="test_http_channel",
             description="Test HTTP channel",
@@ -36,7 +36,7 @@ class TestHttpChannel:
     def test_alert__with_empty_title_and_body__calls_make_http_request_with_empty_strings(self) -> None:
         """Test that alert calls _make_http_request with empty strings when title and body are empty."""
         # Arrange
-        retry = Retry(raise_on_error=False, max_attempts=0, delay_in_seconds=1)
+        retry = Retry(max_attempts=0, delay_in_seconds=1)
         channel = HttpChannel.model_construct(
             id_="test_http_channel",
             description="Test HTTP channel",

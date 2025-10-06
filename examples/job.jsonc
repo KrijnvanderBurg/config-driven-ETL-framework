@@ -28,7 +28,6 @@
                 },
                 "timeout": 30,
                 "retry": {
-                    "raise_on_error": true,
                     "max_attempts": 3,
                     "delay_in_seconds": 30
                 }       
@@ -136,7 +135,6 @@
                             "payload": {},
                             "timeout": 30,
                             "retry": {
-                                "raise_on_error": true,
                                 "max_attempts": 3,
                                 "delay_in_seconds": 30
                             }

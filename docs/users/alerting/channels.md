@@ -1,5 +1,4 @@
 # Alert Channels
-
 Channels define the destinations where alerts are sent. Each channel represents a specific communication method (email, HTTP webhook, file) configured with connection details and credentials.
 
 ## Overview
@@ -66,7 +65,6 @@ Sends alerts to HTTP endpoints as JSON POST requests. Automatically formats payl
     "headers": {"Content-Type": "application/json"},
     "timeout": 30,                         // Request timeout in seconds
     "retry": {
-        "raise_on_error": false,           // true: fail pipeline on alert failure, false: log and continue
         "max_attempts": 3,
         "delay_in_seconds": 30
     }
@@ -87,43 +85,5 @@ Appends alerts to local filesystem file. Creates file if doesn't exist. Opens fi
     "name": "audit-log",
     "description": "Audit trail of all pipeline errors",
     "file_path": "/var/log/flint/alerts.log"  // Can be relative or absolute
-}
-```
-
-## Channel Examples
-
-### Multiple Channels Configuration
-
-```jsonc
-{
-    "channels": [
-        {
-            "channel_id": "email",
-            "name": "ops-email",
-            "description": "",
-            "smtp_server": "smtp.company.com",
-            "smtp_port": 587,
-            "username": "alerts@company.com",
-            "password": "secret",
-            "from_email": "alerts@company.com",
-            "to_emails": ["ops@company.com"]
-        },
-        {
-            "channel_id": "http",
-            "name": "pagerduty",
-            "description": "",
-            "url": "https://events.pagerduty.com/v2/enqueue",
-            "method": "POST",
-            "headers": {"Content-Type": "application/json"},
-            "timeout": 30,
-            "retry": {"raise_on_error": false, "max_attempts": 3, "delay_in_seconds": 30}
-        },
-        {
-            "channel_id": "file",
-            "name": "audit",
-            "description": "",
-            "file_path": "/var/log/alerts.log"
-        }
-    ]
 }
 ```

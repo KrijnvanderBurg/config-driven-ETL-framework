@@ -25,12 +25,10 @@ class Retry(BaseModel):
     including retry logic and error escalation settings.
 
     Attributes:
-        raise_on_error: Whether to raise errors when HTTP request fails
         max_attempts: Maximum number of retry attempts for failed requests
         delay_in_seconds: Delay between retry attempts in seconds
     """
 
-    raise_on_error: bool = Field(..., description="Whether to raise errors when HTTP request fails")
     max_attempts: int = Field(..., description="Maximum number of retry attempts for failed requests", ge=0, le=3)
     delay_in_seconds: PositiveInt = Field(..., description="Delay between retry attempts in seconds", ge=1, le=30)
 
@@ -92,5 +90,3 @@ class HttpBase(BaseModel):
                     time.sleep(self.retry.delay_in_seconds)
                 else:
                     logger.error("HTTP request failed after %d attempts: %s", self.retry.max_attempts + 1, e)
-                    if self.retry.raise_on_error:
-                        raise e
