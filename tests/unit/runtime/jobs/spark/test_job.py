@@ -38,7 +38,7 @@ def fixture_job_config(tmp_path: Path) -> dict[str, Any]:
                 "data_format": "csv",
                 "options": {},
                 "location": str(tmp_in),
-                "schema_": "",
+                "schema": "",
             }
         ],
         "transforms": [{"id": "tr2", "upstream_id": "ex2", "options": {}, "functions": []}],

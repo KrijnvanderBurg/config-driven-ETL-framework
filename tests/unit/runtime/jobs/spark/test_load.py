@@ -13,7 +13,7 @@ from unittest.mock import Mock, patch
 import pytest
 from pydantic import ValidationError
 
-from flint.runtime.jobs.models.model_load import LoadFormat, LoadMethod, LoadMode
+from flint.runtime.jobs.models.model_load import LoadMethod
 from flint.runtime.jobs.spark.load import LoadFileSpark
 
 # =========================================================================== #
@@ -72,8 +72,8 @@ class TestLoadFileSparkValidation:
         assert load.id_ == "customer_data_output"
         assert load.upstream_id == "customer_transform"
         assert load.method == LoadMethod.BATCH
-        assert load.data_format == LoadFormat.JSON
-        assert load.mode == LoadMode.OVERWRITE
+        assert load.data_format == "json"
+        assert load.mode == "overwrite"
         assert load.options == {"header": True}
         assert isinstance(load.location, str) and load.location.endswith(".json")
         assert isinstance(load.schema_location, str) and load.schema_location.endswith(".json")
@@ -108,30 +108,6 @@ class TestLoadFileSparkValidation:
         """Test LoadFileSpark creation fails with invalid load method."""
         # Arrange
         valid_load_config["method"] = "invalid_method"
-
-        # Assert
-        with pytest.raises(ValidationError):
-            # Act
-            LoadFileSpark(**valid_load_config)
-
-    def test_create_load_file_spark__with_invalid_mode__raises_validation_error(
-        self, valid_load_config: dict[str, Any]
-    ) -> None:
-        """Test LoadFileSpark creation fails with invalid load mode."""
-        # Arrange
-        valid_load_config["mode"] = "invalid_mode"
-
-        # Assert
-        with pytest.raises(ValidationError):
-            # Act
-            LoadFileSpark(**valid_load_config)
-
-    def test_create_load_file_spark__with_invalid_format__raises_validation_error(
-        self, valid_load_config: dict[str, Any]
-    ) -> None:
-        """Test LoadFileSpark creation fails with invalid data format."""
-        # Arrange
-        valid_load_config["data_format"] = "invalid_format"
 
         # Assert
         with pytest.raises(ValidationError):
@@ -182,7 +158,7 @@ class TestLoadFileSparkValidation:
         load = LoadFileSpark(**valid_load_config)
 
         # Assert
-        assert load.data_format == LoadFormat.CSV
+        assert load.data_format == "csv"
 
     def test_create_load_file_spark__with_parquet_format__succeeds(self, valid_load_config: dict[str, Any]) -> None:
         """Test LoadFileSpark creation with Parquet data format."""
@@ -193,7 +169,7 @@ class TestLoadFileSparkValidation:
         load = LoadFileSpark(**valid_load_config)
 
         # Assert
-        assert load.data_format == LoadFormat.PARQUET
+        assert load.data_format == "parquet"
 
     def test_create_load_file_spark__with_empty_schema_location__succeeds(
         self, valid_load_config: dict[str, Any]

@@ -14,7 +14,7 @@ import pytest
 from pydantic import ValidationError
 from pyspark.sql.types import StringType, StructField, StructType
 
-from flint.runtime.jobs.models.model_extract import ExtractFormat, ExtractMethod
+from flint.runtime.jobs.models.model_extract import ExtractMethod
 from flint.runtime.jobs.spark.extract import ExtractFileSpark
 
 # =========================================================================== #
@@ -56,7 +56,7 @@ def fixture_valid_extract_config(tmp_path: Path) -> Generator[dict[str, Any], An
             "multiLine": True,
         },
         "location": str(data_file),
-        "schema_": str(schema_file),
+        "schema": str(schema_file),
     }
 
     yield config
@@ -78,7 +78,7 @@ class TestExtractFileSparkValidation:
         # Assert
         assert extract.id_ == "test_data"
         assert extract.method == ExtractMethod.BATCH
-        assert extract.data_format == ExtractFormat.JSON
+        assert extract.data_format == "json"
         assert extract.options == {"multiLine": True}
         assert isinstance(extract.location, str) and extract.location.endswith(".json")
         assert isinstance(extract.schema_, str) and extract.schema_.endswith(".json")
@@ -113,18 +113,6 @@ class TestExtractFileSparkValidation:
         """Test ExtractFileSpark creation fails with invalid extraction method."""
         # Arrange
         valid_extract_config["method"] = "invalid_method"
-
-        # Assert
-        with pytest.raises(ValidationError):
-            # Act
-            ExtractFileSpark(**valid_extract_config)
-
-    def test_create_extract_file_spark__with_invalid_format__raises_validation_error(
-        self, valid_extract_config: dict[str, Any]
-    ) -> None:
-        """Test ExtractFileSpark creation fails with invalid data format."""
-        # Arrange
-        valid_extract_config["data_format"] = "invalid_format"
 
         # Assert
         with pytest.raises(ValidationError):
@@ -178,7 +166,7 @@ class TestExtractFileSparkValidation:
         extract = ExtractFileSpark(**valid_extract_config)
 
         # Assert
-        assert extract.data_format == ExtractFormat.CSV
+        assert extract.data_format == "csv"
 
     def test_create_extract_file_spark__with_parquet_format__succeeds(
         self, valid_extract_config: dict[str, Any]
@@ -191,12 +179,12 @@ class TestExtractFileSparkValidation:
         extract = ExtractFileSpark(**valid_extract_config)
 
         # Assert
-        assert extract.data_format == ExtractFormat.PARQUET
+        assert extract.data_format == "parquet"
 
     def test_create_extract_file_spark__with_empty_schema__succeeds(self, valid_extract_config: dict[str, Any]) -> None:
         """Test ExtractFileSpark creation with empty schema."""
         # Arrange
-        valid_extract_config["schema_"] = ""
+        valid_extract_config["schema"] = ""
 
         # Act
         extract = ExtractFileSpark(**valid_extract_config)
@@ -209,7 +197,7 @@ class TestExtractFileSparkValidation:
     ) -> None:
         """Test ExtractFileSpark creation with JSON schema string."""
         # Arrange
-        valid_extract_config["schema_"] = '{"type":"struct","fields":[]}'
+        valid_extract_config["schema"] = '{"type":"struct","fields":[]}'
 
         # Act
         extract = ExtractFileSpark(**valid_extract_config)

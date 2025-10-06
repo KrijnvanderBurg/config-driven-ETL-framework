@@ -14,7 +14,7 @@ and provide a type-safe interface between configuration and implementation.
 
 import logging
 from abc import ABC
-from typing import Any, Generic, TypeVar
+from typing import Generic, TypeVar
 
 from pydantic import Field
 
@@ -35,8 +35,6 @@ class ArgsModel(BaseModel, ABC):
     All transformation argument models should inherit from this class
     to ensure a consistent interface throughout the framework.
     """
-
-    model_config = {"arbitrary_types_allowed": True}
 
 
 ArgsT = TypeVar("ArgsT", bound=ArgsModel)
@@ -85,4 +83,3 @@ class TransformModel(BaseModel):
 
     id_: str = Field(..., alias="id", description="Identifier for this transformation operation", min_length=1)
     upstream_id: str = Field(..., description="Identifier(s) of the upstream component(s) providing data", min_length=1)
-    options: dict[str, Any] = Field(..., description="Transformation options as key-value pairs")

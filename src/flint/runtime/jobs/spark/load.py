@@ -16,8 +16,9 @@ for writing processed data to target destinations.
 import json
 import logging
 from abc import ABC, abstractmethod
-from typing import ClassVar, Literal
+from typing import Any, ClassVar, Literal
 
+from pydantic import Field
 from pyspark.sql.streaming.query import StreamingQuery
 
 from flint.runtime.jobs.models.model_load import LoadMethod, LoadModel, LoadModelFile
@@ -39,6 +40,7 @@ class LoadSpark(LoadModel, ABC):
     spark: ClassVar[SparkHandler] = SparkHandler()
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     streaming_query_registry: ClassVar[StreamingQueryRegistry] = StreamingQueryRegistry()
+    options: dict[str, Any] = Field(..., description="Options for the sink input.")
 
     @abstractmethod
     def _load_batch(self) -> None:
@@ -120,8 +122,8 @@ class LoadFileSpark(LoadSpark, LoadModelFile):
         logger.debug(
             "Writing file in batch mode - path: %s, format: %s, mode: %s",
             self.location,
-            self.data_format.value,
-            self.mode.value,
+            self.data_format,
+            self.mode,
         )
 
         row_count = self.data_registry[self.id_].count()
@@ -129,8 +131,8 @@ class LoadFileSpark(LoadSpark, LoadModelFile):
 
         self.data_registry[self.id_].write.save(
             path=self.location,
-            format=self.data_format.value,
-            mode=self.mode.value,
+            format=self.data_format,
+            mode=self.mode,
             **self.options,
         )
 
@@ -146,14 +148,14 @@ class LoadFileSpark(LoadSpark, LoadModelFile):
         logger.debug(
             "Writing file in streaming mode - path: %s, format: %s, mode: %s",
             self.location,
-            self.data_format.value,
-            self.mode.value,
+            self.data_format,
+            self.mode,
         )
 
         streaming_query = self.data_registry[self.id_].writeStream.start(
             path=self.location,
-            format=self.data_format.value,
-            outputMode=self.mode.value,
+            format=self.data_format,
+            outputMode=self.mode,
             **self.options,
         )
 

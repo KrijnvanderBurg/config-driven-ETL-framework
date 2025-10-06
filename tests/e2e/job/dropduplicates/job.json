@@ -25,7 +25,7 @@
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema_": "tests/e2e/job/dropduplicates/extract-dropduplicates-test/input_schema.json"
+                        "schema": "tests/e2e/job/dropduplicates/extract-dropduplicates-test/input_schema.json"
                     }
                 ],
                 "transforms": [

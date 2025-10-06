@@ -25,7 +25,7 @@
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema_": "tests/e2e/job/join/extract-left/left_schema.json"
+                        "schema": "tests/e2e/job/join/extract-left/left_schema.json"
                     },
                     {
                         "data_format": "csv",
@@ -38,7 +38,7 @@
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema_": "tests/e2e/job/join/extract-right/right_schema.json"
+                        "schema": "tests/e2e/job/join/extract-right/right_schema.json"
                     }
                 ],
                 "transforms": [

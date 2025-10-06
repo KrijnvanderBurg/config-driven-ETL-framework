@@ -11,11 +11,15 @@ It includes:
 
 import logging
 from abc import ABC, abstractmethod
-from typing import ClassVar, Literal
+from pathlib import Path
+from typing import Any, ClassVar, Literal, Self
 
+from pydantic import Field, model_validator
 from pyspark.sql import DataFrame
+from pyspark.sql.types import StructType
 
 from flint.runtime.jobs.models.model_extract import ExtractFileModel, ExtractMethod, ExtractModel
+from flint.runtime.jobs.spark.schema import SchemaFilepathHandler, SchemaStringHandler
 from flint.runtime.jobs.spark.session import SparkHandler
 from flint.types import DataFrameRegistry
 from flint.utils.logger import get_logger
@@ -37,6 +41,36 @@ class ExtractSpark(ExtractModel, ABC):
 
     spark: ClassVar[SparkHandler] = SparkHandler()
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
+    options: dict[str, Any] = Field(..., description="PySpark reader options as key-value pairs")
+    _schema_parsed: StructType | None = None
+
+    @model_validator(mode="after")
+    def parse_schema(self) -> Self:
+        """Parse schema_ field into _schema_parsed after model creation.
+
+        This validator automatically converts the schema_ field value into a
+        PySpark StructType based on the input type:
+        - File path ending in .json: Uses SchemaFilepathHandler
+        - JSON string: Uses SchemaStringHandler
+
+        Returns:
+            Self: The model instance with _schema_parsed populated
+        """
+        if not self.schema_:
+            return self
+
+        # Convert to string for processing
+        schema_str = str(self.schema_).strip()
+
+        # Detect if it's a file path or JSON string
+        if schema_str.endswith(".json"):
+            # File path - use FilepathHandler
+            self._schema_parsed = SchemaFilepathHandler.parse(schema=Path(schema_str))
+        else:
+            # JSON string - use StringHandler
+            self._schema_parsed = SchemaStringHandler.parse(schema=schema_str)
+
+        return self
 
     def extract(self) -> None:
         """Main extraction method.
@@ -91,11 +125,11 @@ class ExtractFileSpark(ExtractSpark, ExtractFileModel):
         Returns:
             DataFrame: The extracted data as a DataFrame.
         """
-        logger.debug("Reading files in batch mode - path: %s, format: %s", self.location, self.data_format.value)
+        logger.debug("Reading files in batch mode - path: %s, format: %s", self.location, self.data_format)
 
         dataframe = self.spark.session.read.load(
             path=self.location,
-            format=self.data_format.value,
+            format=self.data_format,
             schema=self._schema_parsed,
             **self.options,
         )
@@ -109,11 +143,11 @@ class ExtractFileSpark(ExtractSpark, ExtractFileModel):
         Returns:
             DataFrame: The extracted data as a streaming DataFrame.
         """
-        logger.debug("Reading files in streaming mode - path: %s, format: %s", self.location, self.data_format.value)
+        logger.debug("Reading files in streaming mode - path: %s, format: %s", self.location, self.data_format)
 
         dataframe = self.spark.session.readStream.load(
             path=self.location,
-            format=self.data_format.value,
+            format=self.data_format,
             schema=self._schema_parsed,
             **self.options,
         )

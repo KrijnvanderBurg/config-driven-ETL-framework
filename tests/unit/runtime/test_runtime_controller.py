@@ -53,7 +53,7 @@ def fixture_runtime_config(tmp_path: Path) -> dict[str, Any]:
                         "data_format": "json",
                         "options": {},
                         "location": str(input_file),
-                        "schema_": "",
+                        "schema": "",
                     }
                 ],
                 "transforms": [

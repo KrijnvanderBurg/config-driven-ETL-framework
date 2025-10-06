@@ -15,7 +15,7 @@ from typing import Literal
 
 from pydantic import Field
 
-from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
+from flint.runtime.jobs.models.model_transform import ArgsModel
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -31,7 +31,7 @@ class SelectArgs(ArgsModel):
     columns: list[str] = Field(..., description="List of column names to select from the DataFrame", min_length=1)
 
 
-class SelectFunctionModel(FunctionModel[SelectArgs]):
+class SelectFunctionModel:
     """Configuration model for column selection transform operations.
 
     This model defines the structure for configuring a column selection

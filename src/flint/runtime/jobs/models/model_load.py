@@ -15,7 +15,7 @@ and provide a type-safe interface between configuration and implementation.
 import logging
 from abc import ABC
 from enum import Enum
-from typing import Any, Literal
+from typing import Literal
 
 from pydantic import Field
 
@@ -37,45 +37,6 @@ class LoadMethod(Enum):
 
     BATCH = "batch"
     STREAMING = "streaming"
-
-
-class LoadMode(Enum):
-    """Enumeration of supported data loading modes/behaviors.
-
-    Defines the different modes that can be used when writing data to destinations,
-    controlling behavior like appending vs. overwriting existing data.
-
-    Includes both batch and streaming write modes supported by PySpark.
-    These values are used in configuration files to specify the behavior
-    when data is written to the destination.
-    """
-
-    # pyspark batch
-    APPEND = "append"
-    OVERWRITE = "overwrite"
-    ERROR = "error"
-    ERROR_IF_EXISTS = "errorifexists"
-    IGNORE = "ignore"
-
-    # pyspark streaming
-    # APPEND = "append"  # already added above for pyspark batch
-    COMPLETE = "complete"
-    UPDATE = "update"
-
-
-class LoadFormat(Enum):
-    """Enumeration of supported data formats for loading operations.
-
-    Defines the different file formats that can be used when writing data
-    to destinations, such as Parquet, JSON, and CSV.
-
-    These values are used in configuration files to specify the format
-    of the output data.
-    """
-
-    PARQUET = "parquet"
-    JSON = "json"
-    CSV = "csv"
 
 
 class LoadModel(BaseModel, ABC):
@@ -103,7 +64,6 @@ class LoadModel(BaseModel, ABC):
         ..., description="URI that identifies where to load data in the modelified format.", min_length=1
     )
     schema_location: str = Field(..., description="URI that identifies where to load schema.")
-    options: dict[str, Any] = Field(..., description="Options for the sink input.")
 
 
 class LoadModelFile(LoadModel):
@@ -116,5 +76,5 @@ class LoadModelFile(LoadModel):
     """
 
     load_type: Literal["file"] = Field(..., description="Load type discriminator")
-    mode: LoadMode = Field(..., description="Write mode for the load operation")
-    data_format: LoadFormat = Field(..., description="Format of the output files")
+    mode: str = Field(..., description="Write mode for the load operation")
+    data_format: str = Field(..., description="Format of the output files")

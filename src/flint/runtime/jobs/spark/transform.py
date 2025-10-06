@@ -13,7 +13,9 @@ for manipulating data between extraction and loading.
 """
 
 import logging
-from typing import ClassVar
+from typing import Any, ClassVar
+
+from pydantic import Field
 
 from flint.runtime.jobs.models.model_transform import TransformModel
 from flint.runtime.jobs.spark.session import SparkHandler
@@ -31,9 +33,10 @@ class TransformSpark(TransformModel):
     This class provides functionality for transforming data.
     """
 
-    functions: list[TransformFunctionSparkUnion]
     spark: ClassVar[SparkHandler] = SparkHandler()
+    functions: list[TransformFunctionSparkUnion]
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
+    options: dict[str, Any] = Field(..., description="Transformation options as key-value pairs")
 
     def transform(self) -> None:
         """
