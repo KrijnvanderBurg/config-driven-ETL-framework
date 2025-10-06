@@ -8,16 +8,15 @@ the name 'withColumn', making it available for use in configuration files.
 """
 
 from collections.abc import Callable
-from typing import Literal
 
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
 
-from flint.runtime.jobs.models.transforms.model_withcolumn import WithColumnArgs
+from flint.runtime.jobs.models.transforms.model_withcolumn import WithColumnFunctionModel
 from flint.runtime.jobs.spark.function import Function
 
 
-class WithColumnFunction(Function):
+class WithColumnFunction(WithColumnFunctionModel, Function):
     """Function that adds or replaces a column in a DataFrame.
 
     This transform function allows for adding a new column or replacing an existing
@@ -44,9 +43,6 @@ class WithColumnFunction(Function):
         }
         ```
     """
-
-    function_type: Literal["withColumn"]
-    arguments: WithColumnArgs
 
     def transform(self) -> Callable:
         """Apply the withColumn transformation to the DataFrame.

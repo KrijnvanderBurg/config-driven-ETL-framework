@@ -9,18 +9,17 @@ the name 'filter', making it available for use in configuration files.
 
 import logging
 from collections.abc import Callable
-from typing import Literal
 
 from pyspark.sql import DataFrame
 
-from flint.runtime.jobs.models.transforms.model_filter import FilterArgs
+from flint.runtime.jobs.models.transforms.model_filter import FilterFunctionModel
 from flint.runtime.jobs.spark.function import Function
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
 
-class FilterFunction(Function):
+class FilterFunction(FilterFunctionModel, Function):
     """Function that filters rows from a DataFrame based on a condition.
 
     This transform function allows for filtering rows from a DataFrame
@@ -30,9 +29,6 @@ class FilterFunction(Function):
         function: The name of the function (always "filter")
         arguments: Container for the filter parameters
     """
-
-    function_type: Literal["filter"]
-    arguments: FilterArgs
 
     def transform(self) -> Callable:
         """Apply the filter transformation to the DataFrame.

@@ -21,13 +21,13 @@ def fixture_dropduplicates_config() -> dict[str, Any]:
 
     The config uses an explicit columns list to exercise the model parsing.
     """
-    return {"function_type": "dropduplicates", "arguments": {"columns": ["test_col"]}}
+    return {"function_type": "dropDuplicates", "arguments": {"columns": ["test_col"]}}
 
 
 def test_dropduplicates_creation__from_config__creates_valid_model(dropduplicates_config: dict[str, Any]) -> None:
     """Ensure DropDuplicatesFunction can be created from a config dict."""
     f = DropDuplicatesFunction(**dropduplicates_config)
-    assert f.function_type == "dropduplicates"
+    assert f.function_type == "dropDuplicates"
     assert isinstance(f.arguments, DropDuplicatesArgs)
     assert f.arguments.columns == ["test_col"]
 
@@ -48,7 +48,7 @@ def fixture_dropduplicates_func(dropduplicates_config: dict[str, Any]) -> DropDu
 
 def test_dropduplicates_fixture(dropduplicates_func: DropDuplicatesFunction) -> None:
     """Assert the instantiated fixture has the expected columns list."""
-    assert dropduplicates_func.function_type == "dropduplicates"
+    assert dropduplicates_func.function_type == "dropDuplicates"
     assert isinstance(dropduplicates_func.arguments, DropDuplicatesArgs)
     assert dropduplicates_func.arguments.columns == ["test_col"]
 

@@ -9,18 +9,17 @@ the name 'select', making it available for use in configuration files.
 
 import logging
 from collections.abc import Callable
-from typing import Literal
 
 from pyspark.sql import DataFrame
 
-from flint.runtime.jobs.models.transforms.model_select import SelectArgs
+from flint.runtime.jobs.models.transforms.model_select import SelectFunctionModel
 from flint.runtime.jobs.spark.function import Function
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
 
-class SelectFunction(Function):
+class SelectFunction(SelectFunctionModel, Function):
     """Function that selects specified columns from a DataFrame.
 
     This transform function allows for projecting specific columns from
@@ -46,9 +45,6 @@ class SelectFunction(Function):
         }
         ```
     """
-
-    function_type: Literal["select"]
-    arguments: SelectArgs
 
     def transform(self) -> Callable:
         """Apply the column selection transformation to the DataFrame.

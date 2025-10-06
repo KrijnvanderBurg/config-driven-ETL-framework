@@ -8,15 +8,14 @@ the name 'drop', making it available for use in configuration files.
 """
 
 from collections.abc import Callable
-from typing import Literal
 
 from pyspark.sql import DataFrame
 
-from flint.runtime.jobs.models.transforms.model_drop import DropArgs
+from flint.runtime.jobs.models.transforms.model_drop import DropFunctionModel
 from flint.runtime.jobs.spark.function import Function
 
 
-class DropFunction(Function):
+class DropFunction(DropFunctionModel, Function):
     """Function that drops specified columns from a DataFrame.
 
     This transform function allows for removing unwanted columns from
@@ -26,9 +25,6 @@ class DropFunction(Function):
         function: The name of the function (always "drop")
         arguments: Container for the drop parameters
     """
-
-    function_type: Literal["drop"]
-    arguments: DropArgs
 
     def transform(self) -> Callable:
         """Apply the column drop transformation to the DataFrame.

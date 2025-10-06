@@ -10,6 +10,8 @@ These models provide a type-safe interface for configuring filter operations
 from configuration files or dictionaries.
 """
 
+from typing import Literal
+
 from pydantic import Field
 
 from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
@@ -36,5 +38,5 @@ class FilterFunctionModel(FunctionModel[FilterArgs]):
         arguments: Container for the filter parameters
     """
 
-    function_type: str = "filter"
+    function_type: Literal["filter"] = "filter"
     arguments: FilterArgs = Field(..., description="Container for the filter parameters")

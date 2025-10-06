@@ -9,18 +9,17 @@ the name 'join', making it available for use in configuration files.
 
 import logging
 from collections.abc import Callable
-from typing import Literal
 
 from pyspark.sql import DataFrame
 
-from flint.runtime.jobs.models.transforms.model_join import JoinArgs
+from flint.runtime.jobs.models.transforms.model_join import JoinFunctionModel
 from flint.runtime.jobs.spark.function import Function
 from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
 
-class JoinFunction(Function):
+class JoinFunction(JoinFunctionModel, Function):
     """Function that joins DataFrames.
 
     This transform function allows for joining the current DataFrame with another
@@ -30,9 +29,6 @@ class JoinFunction(Function):
         function: The name of the function (always "join")
         arguments: Container for the join parameters
     """
-
-    function_type: Literal["join"]
-    arguments: JoinArgs
 
     def transform(self) -> Callable:
         """Apply the join transformation to the DataFrame.

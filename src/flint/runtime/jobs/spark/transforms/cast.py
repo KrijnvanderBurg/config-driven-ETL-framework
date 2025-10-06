@@ -8,16 +8,15 @@ the name 'cast', making it available for use in configuration files.
 """
 
 from collections.abc import Callable
-from typing import Literal
 
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
 
-from flint.runtime.jobs.models.transforms.model_cast import CastArgs
+from flint.runtime.jobs.models.transforms.model_cast import CastFunctionModel
 from flint.runtime.jobs.spark.function import Function
 
 
-class CastFunction(Function):
+class CastFunction(CastFunctionModel, Function):
     """Function that casts columns to specified data types in a DataFrame.
 
     This transform function allows for changing the data type of specific columns
@@ -29,9 +28,6 @@ class CastFunction(Function):
         function_type: The name of the function (always "cast")
         arguments: Container for the column casting parameters
     """
-
-    function_type: Literal["cast"]
-    arguments: CastArgs
 
     def transform(self) -> Callable:
         """Apply the column casting transformation to the DataFrame.

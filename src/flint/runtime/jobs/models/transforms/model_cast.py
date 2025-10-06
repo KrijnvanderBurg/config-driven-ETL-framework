@@ -10,6 +10,8 @@ These models provide a type-safe interface for configuring column type casting
 from configuration files or dictionaries.
 """
 
+from typing import Literal
+
 from pydantic import Field
 
 from flint import BaseModel
@@ -49,5 +51,5 @@ class CastFunctionModel(FunctionModel[CastArgs]):
         arguments: Container for the column casting parameters
     """
 
-    function_type: str = "cast"
+    function_type: Literal["cast"] = "cast"
     arguments: CastArgs = Field(..., description="Container for the column casting parameters")

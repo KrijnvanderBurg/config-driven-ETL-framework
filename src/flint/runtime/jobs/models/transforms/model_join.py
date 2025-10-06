@@ -11,6 +11,7 @@ from configuration files or dictionaries.
 """
 
 import logging
+from typing import Literal
 
 from pydantic import Field
 
@@ -52,5 +53,5 @@ class JoinFunctionModel(FunctionModel[JoinArgs]):
         arguments: Container for the join parameters
     """
 
-    function_type: str = "join"
+    function_type: Literal["join"] = "join"
     arguments: JoinArgs = Field(..., description="Container for the join parameters")

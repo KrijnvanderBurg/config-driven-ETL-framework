@@ -40,15 +40,6 @@ def test_cast_creation__from_config__creates_valid_model(cast_config: dict[str, 
 class TestCastFunctionValidation:
     """Test CastFunction model validation and instantiation."""
 
-    def test_create_cast_function__with_missing_function__raises_validation_error(
-        self, cast_config: dict[str, Any]
-    ) -> None:
-        """Test CastFunction creation fails without function field."""
-        del cast_config["function_type"]
-
-        with pytest.raises(ValidationError):
-            CastFunction(**cast_config)
-
     def test_create_cast_function__with_wrong_function_name__raises_validation_error(
         self, cast_config: dict[str, Any]
     ) -> None:

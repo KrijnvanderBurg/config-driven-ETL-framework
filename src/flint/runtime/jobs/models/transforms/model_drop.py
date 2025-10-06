@@ -10,6 +10,8 @@ These models provide a type-safe interface for configuring column removal
 from configuration files or dictionaries.
 """
 
+from typing import Literal
+
 from pydantic import Field
 
 from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
@@ -36,5 +38,5 @@ class DropFunctionModel(FunctionModel[DropArgs]):
         arguments: Container for the drop parameters
     """
 
-    function_type: str = "drop"
+    function_type: Literal["drop"] = "drop"
     arguments: DropArgs = Field(..., description="Container for the drop parameters")

@@ -8,15 +8,14 @@ the name 'dropduplicates', making it available for use in configuration files.
 """
 
 from collections.abc import Callable
-from typing import Literal
 
 from pyspark.sql import DataFrame
 
-from flint.runtime.jobs.models.transforms.model_dropduplicates import DropDuplicatesArgs
+from flint.runtime.jobs.models.transforms.model_dropduplicates import DropDuplicatesFunctionModel
 from flint.runtime.jobs.spark.function import Function
 
 
-class DropDuplicatesFunction(Function):
+class DropDuplicatesFunction(DropDuplicatesFunctionModel, Function):
     """Function that removes duplicate rows from a DataFrame.
 
     This transform function allows for removing duplicate rows based on all columns
@@ -26,9 +25,6 @@ class DropDuplicatesFunction(Function):
         function: The name of the function (always "dropduplicates")
         arguments: Container for the dropDuplicates parameters
     """
-
-    function_type: Literal["dropduplicates"]
-    arguments: DropDuplicatesArgs
 
     def transform(self) -> Callable:
         """Apply the duplicate removal transformation to the DataFrame.

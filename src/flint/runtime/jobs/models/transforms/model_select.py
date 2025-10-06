@@ -11,6 +11,7 @@ from configuration files or dictionaries.
 """
 
 import logging
+from typing import Literal
 
 from pydantic import Field
 
@@ -41,5 +42,5 @@ class SelectFunctionModel(FunctionModel[SelectArgs]):
         arguments: Container for the column selection parameters
     """
 
-    function_type: str = "select"
+    function_type: Literal["select"] = "select"
     arguments: SelectArgs = Field(..., description="Container for the column selection parameters")

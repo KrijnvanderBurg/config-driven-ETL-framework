@@ -10,6 +10,8 @@ These models provide a type-safe interface for configuring duplicate row removal
 from configuration files or dictionaries.
 """
 
+from typing import Literal
+
 from pydantic import Field
 
 from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
@@ -42,5 +44,5 @@ class DropDuplicatesFunctionModel(FunctionModel[DropDuplicatesArgs]):
         arguments: Container for the dropDuplicates parameters
     """
 
-    function_type: str = "dropDuplicates"
+    function_type: Literal["dropDuplicates"] = "dropDuplicates"
     arguments: DropDuplicatesArgs = Field(..., description="Container for the dropDuplicates parameters")

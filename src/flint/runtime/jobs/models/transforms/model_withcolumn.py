@@ -10,6 +10,8 @@ These models provide a type-safe interface for configuring column addition
 or replacement from configuration files or dictionaries.
 """
 
+from typing import Literal
+
 from pydantic import Field
 
 from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
@@ -38,5 +40,5 @@ class WithColumnFunctionModel(FunctionModel[WithColumnArgs]):
         arguments: Container for the withColumn parameters
     """
 
-    function_type: str = "withColumn"
+    function_type: Literal["withColumn"] = "withColumn"
     arguments: WithColumnArgs = Field(..., description="Container for the withColumn parameters")
