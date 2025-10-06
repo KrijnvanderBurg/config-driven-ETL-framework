@@ -27,9 +27,7 @@ class TestCommand:
         """Test Command.execute handles KeyboardInterrupt correctly."""
         command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
 
-        with (
-            patch.object(AlertController, "from_file", side_effect=KeyboardInterrupt),
-        ):
+        with patch.object(AlertController, "from_file", side_effect=KeyboardInterrupt):
             result = command.execute()
 
         assert result == ExitCode.KEYBOARD_INTERRUPT
