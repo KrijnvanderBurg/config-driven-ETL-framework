@@ -2,6 +2,27 @@
 
 This directory contains comprehensive documentation for using Flint, a configuration-driven data processing framework.
 
+## Components
+
+Flint's architecture consists of two integrated systems that work together through configuration:
+
+### Runtime System
+- **Extracts**: Read from sources (files, databases)
+- **Transforms**: Process data through function chains
+- **Loads**: Write to destinations
+- **Hooks**: Execute actions during pipeline lifecycle
+
+Runtime System Documentation
+
+### Alert System
+- **Channels**: Where alerts are sent (email, HTTP, files)
+- **Triggers**: When alerts are sent (rule-based conditions)
+- **Templates**: How alerts are formatted
+
+Alert System Documentation
+
+All components are configured through JSON files, following standardized schemas detailed in the complete documentation.
+
 ## Contents
 
 ### [Alerting](alerting/README.md)
