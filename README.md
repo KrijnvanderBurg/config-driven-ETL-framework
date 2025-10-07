@@ -163,13 +163,13 @@ Running this command executes a complete pipeline that showcases Flint's key cap
 ```
 
 ## 🚀 Getting Help
-- **Examples**: Explore working samples in the examples directory
-- **Documentation**: Refer to the Configuration Reference section for detailed syntax
+- [**Examples**](./examples/): Explore working samples in the examples directory
+- [**Documentation**](./docs/README.md): Refer to the Configuration Reference section for detailed syntax
 - **Community**: Ask questions and report issues on [GitHub Issues](https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues)
-- **Source Code**: Browse the implementation in the src/flint directory
+- [**Source Code**](./src/flint/): Browse the implementation in the src/flint directory
 
 ## 🤝 Contributing
-Contributions are welcome! Feel free to submit a pull request and message me.
+Contributions are welcome! Feel free to submit a pull request and message me on [linkedin](https://linkedin.com/in/krijnvanderburg/)
 
 ## 📄 License
 This project is licensed under the Creative Commons Attribution 4.0 International License (CC-BY-4.0) - see the LICENSE file for details.
