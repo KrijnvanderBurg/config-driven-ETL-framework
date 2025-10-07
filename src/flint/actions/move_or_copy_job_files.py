@@ -1,3 +1,29 @@
+# // {
+# //     "id": "archive-processed-files",
+# //     "description": "",
+# //     "enabled": true,
+# //     "action_type": "move_or_copy_job_files",
+# //     "operation": "move",                        // allowed: "move" | "copy"
+# //     "source_location": "incoming/daily/",       // filepath, directory, or "dataframe"
+# //     "destination_location": "archive/daily/",   // filepath or directory (base target)
+# //     "hierarchy_base_path": "incoming/daily/",   // optional; root used when preserving source hierarchy
+# //     "duplicate_handling": {
+# //         "dedupe_by": ["size", "checksum"],      // options: "checksum" | "size"
+# //         "on_match": "skip",                     // destination already exists and is identical -> allowed: "overwrite" | "version"
+# //         "on_mismatch": "version",               // destination already exists but is not identical -> allowed: "overwrite" | "version" | "fail" | "notify"
+# //         "checksum": {
+# //             "algorithm": "sha256",              // allowed: "md5", "sha1", "sha256"
+# //             "chunk_size_bytes": 65536,          // default 65536 (64 KiB)
+# //             "verify_checksum_after_transfer": false    // optional post-transfer verification
+# //         },
+# //         "version": {
+# //             "datetime_format": "yyyyMMddHHmmss", // format applied when creating versioned filenames
+# //             "timestamp_timezone": "UTC"
+# //         }
+# //     }
+# // }
+
+
 # """Module for moving files as an action in Flint runtime hooks."""
 
 # import hashlib

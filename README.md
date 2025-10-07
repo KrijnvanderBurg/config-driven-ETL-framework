@@ -33,9 +33,9 @@
 
 ---
 
-Flint transforms data engineering by shifting from custom code to declarative configuration for complete ETL pipeline workflows. The framework handles all execution details while you focus on what your data should do, not how to implement it.
+Flint transforms data engineering by shifting from custom code to declarative configuration for complete ETL pipeline workflows. The framework handles all execution details while you focus on what your data should do, not how to implement it. This configuration-driven approach standardizes pipeline patterns across teams, reduces complexity for ETL jobs, improves maintainability, and makes data workflows accessible to users with limited programming experience.
 
-This configuration-driven approach standardizes pipeline patterns across teams, reduces complexity for ETL jobs, improves maintainability, and makes data workflows accessible to users with limited programming experience.
+The processing engine is abstracted away through configuration, making it easy to switch engines or run the same pipeline in different environments. The current version supports Apache Spark, with Polars support in development.
 
 ## ⚡ Quick Start
 
@@ -54,7 +54,6 @@ poetry install
 python -m flint run \
   --alert-filepath="examples/join_select/alert.jsonc" \
   --runtime-filepath="examples/join_select/job.jsonc"
-# See full CLI options in docs/cli.md
 ```
 
 ## 📚 Documentation
@@ -88,7 +87,7 @@ Running this command executes a complete pipeline that showcases Flint's key cap
   - Output mode (overwrite/append) controlled by a simple parameter
   - Output to multiple formats or locations by creating another load entry
 
-#### Configuration: examples/join_select/job.jsonc
+#### Configuration: [`examples/join_select/job.jsonc`](./examples/join_select/job.jsonc)
 ```jsonc
 {
     "runtime": {
@@ -97,8 +96,8 @@ Running this command executes a complete pipeline that showcases Flint's key cap
         "enabled": true,
         "jobs": [
             {
-                "id": "bronze",
-                "description": "",
+                "id": "silver",
+                "description": "Combine customer and order source data into a single dataset",
                 "enabled": true,
                 "engine_type": "spark", // Specifies the processing engine to use
                 "extracts": [
