@@ -165,7 +165,7 @@ Running this command executes a complete pipeline that showcases Flint's key cap
 ## 🚀 Getting Help
 - [**Examples**](./examples/): Explore working samples in the examples directory
 - [**Documentation**](./docs/README.md): Refer to the Configuration Reference section for detailed syntax
-- **Community**: Ask questions and report issues on [GitHub Issues](https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues)
+- [**Community**](https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues): Ask questions and report issues on GitHub Issues
 - [**Source Code**](./src/flint/): Browse the implementation in the src/flint directory
 
 ## 🤝 Contributing
