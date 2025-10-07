@@ -65,9 +65,14 @@ poetry install                           # install dependencies
 
 The included example demonstrates a real-world ETL pipeline:
 
-- 📄 **Config**: `examples/job.json`
-- 🏃 **Execution**: `python -m flint run --alert-filepath="examples/job.jsonc" --runtime-filepath="examples/job.json"`
-- 📂 **Output**: `examples/customer_orders/output/`
+- 📄 **Config**: [`examples/join_select/job.json`](./examples/join_select/job.jsonc)
+- 🏃 **Execution**: 
+  ```bash
+  python -m flint run \
+    --alert-filepath="examples/join_select/job.jsonc" 
+    --runtime-filepath="examples/join_select/jobjson"
+  ```
+- 📂 **Output**: `examples/join_select/output/`
 
 Running this command executes a complete pipeline that showcases Flint's key capabilities:
 
@@ -76,71 +81,94 @@ Running this command executes a complete pipeline that showcases Flint's key cap
   - Schema validation ensures data type safety and consistency across all sources
 
 - **Flexible transformation chain**: Combines domain-specific and generic transforms
-  - First uses a custom `customers_orders` transform to join datasets and filter orders > $100
+  - First a join to combine both datasets on `customer_id`
   - Then applies the generic `select` transform to project only needed columns
   - Each transform function can be easily customized through its arguments
 
 - **Configurable loading**: Writes results as CSV with customizable settings
   - Easily change to Parquet, Delta, or other formats by modifying `data_format`
   - Output mode (overwrite/append) controlled by a simple parameter
+  - Output to multiple formats or locations by creating another load entry.
 
-#### Configuration: examples/job.json
+#### Configuration: examples/join_select/job.json
 
 ```jsonc
 {
-    // EXTRACT: Read from multiple data sources with different formats
-    "extracts": [
-        {
-            "name": "extract-customers",
-            "data_format": "csv",                                  // CSV format for customers
-            "location": "examples/customer_orders/customers.csv",
-            "method": "batch",
-            "options": {
-                "delimiter": ",",
-                "header": true,
-                "inferSchema": false
-            },
-            "schema": "examples/customer_orders/customers_schema.json"
-        },
-        {
-            "name": "extract-orders",
-            "data_format": "json",                                 // JSON format for orders
-            "location": "examples/customer_orders/orders.json",
-            "method": "batch",
-            "options": {},
-            "schema": "examples/customer_orders/orders_schema.json"
-        }
-    ],
-
-    // TRANSFORM: Apply business logic through transform functions
-    "transforms": [
-        {
-            "name": "transform-join-orders",
-            "upstream_name": "extract-customers",
-            "functions": [
-                // Use a custom transform to join datasets and filter for high-value orders
-                { "function": "customers_orders", "arguments": {"amount_minimum": 100} },
-                // Select only the fields we need for our report
-                { "function": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]} }
-            ]
-        }
-    ],
-
-    // LOAD: Write processed data to destination
-    "loads": [
-        {
-            "name": "load-customer-orders",
-            "upstream_name": "transform-join-orders",              // Use transformed data
-            "data_format": "csv",                                  // Output as CSV
-            "location": "examples/customer_orders/output",
-            "method": "batch",
-            "mode": "overwrite",                                   // Replace existing data
-            "options": {
-                "header": true
+{
+    "runtime": {
+        "id": "customer-orders-pipeline",
+        "description": "ETL pipeline for processing customer orders data",
+        "enabled": true,
+        "jobs": [
+            {
+                "id": "bronze",
+                "description": "",
+                "enabled": true,
+                "engine_type": "spark",
+                "extracts": [
+                    {
+                        "id": "extract-customers",
+                        "extract_type": "file",
+                        "data_format": "csv",
+                        "location": "examples/join_select/customers/",
+                        "method": "batch",
+                        "options": {
+                            "delimiter": ",",
+                            "header": true,
+                            "inferSchema": false
+                        },
+                        "schema": "examples/join_select/customers_schema.json"
+                    },
+                    {
+                        "id": "extract-orders",
+                        "extract_type": "file",
+                        "data_format": "json",
+                        "location": "examples/join_select/orders/",
+                        "method": "batch",
+                        "options": {
+                            "multiLine": true,
+                            "inferSchema": false
+                        },
+                        "schema": "examples/join_select/orders_schema.json"
+                    }
+                ],
+                "transforms": [
+                    {
+                        "id": "transform-join-orders",
+                        "upstream_id": "extract-customers",
+                        "options": {},
+                        "functions": [
+                            {"function_type": "join", "arguments": { "other_upstream_id": "extract-orders", "on": ["customer_id"], "how": "inner"}},
+                            {"function_type": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]}}
+                        ]
+                    }
+                ],
+                "loads": [
+                    {
+                        "id": "load-customer-orders",
+                        "upstream_id": "transform-join-orders",
+                        "load_type": "file",
+                        "data_format": "csv",
+                        "location": "examples/join_select/output",
+                        "method": "batch",
+                        "mode": "overwrite",
+                        "options": {
+                            "header": true
+                        },
+                        "schema_export": ""
+                    }
+                ],
+                "hooks": {
+                    "onStart": [],
+                    "onFailure": [],
+                    "onSuccess": [],
+                    "onFinally": []
+                }
             }
-        }
-    ]
+        ]
+    }
 }
+
 ```
 
 ### Built-in Transformations
@@ -158,15 +186,6 @@ Flint includes ready-to-use generic transformations to jumpstart your developmen
 | `filter` | Apply conditions to filter rows in a DataFrame | `{"function": "filter", "arguments": {"condition": "amount > 100"}}` |
 | `join` | Combine DataFrames using specified join conditions | `{"function": "join", "arguments": {"other_df": "orders_df", "on": ["customer_id"], "how": "inner"}}` |
 | `withcolumn` | Add or replace columns with computed values | `{"function": "withcolumn", "arguments": {"column_name": "full_name", "expression": "concat(first_name, ' ', last_name)"}}` |
-
-#### Sample Domain-Specific Transformations
-
-The following custom transformations are included to showcase how you can create your own domain-specific transformations:
-
-| Transform | Description | Use Case |
-|-----------|-------------|----------|
-| `calculate_birth_year` | Calculate birth year based on age | Demonstrates simple field derivation based on existing fields |
-| `customer_orders_bronze` | Join customer and order data with filtering | Shows how to combine multiple operations (join, filter, select) into a single reusable transform |
 
 > **💡 Tip:** You can create your own custom transformations for specific business needs following the pattern shown in the [Extending with Custom Transforms](#-extending-with-custom-transforms) section.
 
@@ -191,7 +210,7 @@ Each component has a standardized schema and connects through named references:
 
 ```jsonc
 {
-  "name": "extract-name",                    // Required: Unique identifier
+  "id": "extract-id",                    // Required: Unique identifier
   "method": "batch|stream",                  // Required: Processing method
   "data_format": "csv|json|parquet|...",     // Required: Source format
   "location": "path/to/source",              // Required: Source location
@@ -212,11 +231,11 @@ Each component has a standardized schema and connects through named references:
 
 ```jsonc
 {
-  "name": "transform-name",                  // Required: Unique identifier
-  "upstream_name": "previous-step-name",     // Required: Reference previous stage
+  "id": "transform-id",                  // Required: Unique identifier
+  "upstream_id": "previous-step-id",     // Required: Reference previous stage
   "functions": [                             // Required: List of transformations
     {
-      "function": "transform-function-name", // Required: Registered function name
+      "function_yupe": "transform-function-name", // Required: Registered function name
       "arguments": {                         // Required: Function-specific arguments
         "key1": "value1",
         "key2": "value2"
@@ -234,13 +253,14 @@ Each component has a standardized schema and connects through named references:
 
 ```jsonc
 {
-  "name": "load-name",                       // Required: Unique identifier
-  "upstream_name": "previous-step-name",     // Required: Reference previous stage
+  "id": "load-id",                       // Required: Unique identifier
+  "upstream_id": "previous-step-id",     // Required: Reference previous stage
   "method": "batch|stream",                  // Required: Processing method
   "data_format": "csv|json|parquet|...",     // Required: Destination format
   "location": "path/to/destination",         // Required: Output location
   "mode": "overwrite|append|ignore|error",   // Required: Write mode
-  "options": {}                              // Optional: PySpark writer options
+  "options": {},                             // Optional: PySpark writer options
+  "schema_export": "",
 }
 ```
 
@@ -286,43 +306,35 @@ Each component has a standardized schema and connects through named references:
 - **Plugin Architecture**: Extensions are registered with the framework without modifying core code
 - **Configuration as Code**: All pipeline behavior is defined declaratively in configuration files
 
-## 🧩 Extending with Custom Transforms
+## 🧩 Extending with new generic or Custom Transforms
 
 Flint's power comes from its extensibility. Create custom transformations to encapsulate your business logic. Let's look at a real example from Flint's codebase - the `select` transform:
 
 ### Step 1: Define the configuration model
 
 ```python
-# src/flint/models/transforms/model_select.py
+# src/flint/runtime/jobs/models/transforms/model_select.py
 
-@dataclass
-class SelectFunctionModel(FunctionModel):
-    function: str
-    arguments: "SelectFunctionModel.Args"
+class SelectArgs(ArgsModel):
+    """Arguments for column selection transform operations."""
 
-    @dataclass
-    class Args:
-        columns: list[Column]
+    columns: list[str] = Field(..., description="List of column names to select from the DataFrame", min_length=1)
 
-    @classmethod
-    def from_dict(cls, dict_: dict[str, Any]) -> Self:
-        """Convert JSON configuration to typed model."""
-        function_name = dict_[FUNCTION]
-        arguments_dict = dict_[ARGUMENTS]
-        
-        columns = arguments_dict["columns"]
-        arguments = cls.Args(columns=columns)
-        
-        return cls(function=function_name, arguments=arguments)
+
+class SelectFunctionModel:
+    """Configuration model for column selection transform operations."""
+
+    function_type: Literal["select"] = "select"
+    arguments: SelectArgs = Field(..., description="Container for the column selection parameters")
 ```
 
 ### Step 2: Create the transform function
 
 ```python
-# src/flint/core/transforms/select.py
+# src/flint/runtime/jobs/spark/transforms/select.py
 
 @TransformFunctionRegistry.register("select")
-class SelectFunction(Function[SelectFunctionModel]):
+class SelectFunction(SelectFunctionModel, Function):
     """Selects specified columns from a DataFrame."""
     model_cls = SelectFunctionModel
 
@@ -343,10 +355,10 @@ class SelectFunction(Function[SelectFunctionModel]):
   ],
   "transforms": [
     {
-      "name": "transform-user-data",
-      "upstream_name": "extract-users",
+      "id": "transform-user-data",
+      "upstream_id": "extract-users",
       "functions": [
-        { "function": "select", "arguments": { "columns": ["user_id", "email", "signup_date"] } }
+        { "function_type": "select", "arguments": { "columns": ["user_id", "email", "signup_date"] } }
       ]
     }
   ],
