@@ -33,9 +33,9 @@
 
 ---
 
-Flint transforms data engineering by shifting from custom code to declarative configuration for complete ETL pipeline workflows. The framework handles all execution details while you focus on what your data should do, not how to implement it.
+Flint transforms data engineering by shifting from custom code to declarative configuration for complete ETL pipeline workflows. The framework handles all execution details while you focus on what your data should do, not how to implement it. This configuration-driven approach standardizes pipeline patterns across teams, reduces complexity for ETL jobs, improves maintainability, and makes data workflows accessible to users with limited programming experience.
 
-This configuration-driven approach standardizes pipeline patterns across teams, reduces complexity for ETL jobs, improves maintainability, and makes data workflows accessible to users with limited programming experience.
+The processing engine is abstracted away through configuration, making it easy to switch engines or run the same pipeline in different environments. The current version supports Apache Spark, with Polars support in development.
 
 ## ⚡ Quick Start
 
