@@ -57,14 +57,19 @@ python -m flint run \
 # See full CLI options in docs/cli.md
 ```
 
-### 📚 Documentation
-Complete documentation is available to help you get the most out of Flint:
-- [Getting Started](./docs/getting_started.md) - Installation and first steps
-- [Configuration Reference](./docs/README.md) - Complete configuration syntax
-  - [Runtime System](./docs/runtime/README.md) - Data processing components
-  - [Alert System](./docs/alert/README.md) - Error handling and notifications
-- [CLI Reference](./docs/cli.md) - Command-line interface options
-- [Architecture](./docs/architecture.md) - Core concepts and design principles
+## 📚 Documentation
+Flint's documentation guides you through installation, configuration, and development:
+
+- **[Getting Started](./docs/getting_started.md)** - Installation and basic concepts
+- **[Example Pipelines](./examples/)** - Ready-to-run examples demonstrating key features
+- **[CLI Reference](./docs/cli.md)** - Command-line interface options and examples
+- **[Configuration Reference](./docs/README.md)** - Complete syntax guide for all configuration options
+- **[Runtime System](./docs/runtime/README.md)** - ETL pipeline configuration (extracts, transforms, loads)
+- **[Alert System](./docs/alert/README.md)** - Error handling and notification configuration
+- **[Architecture](./docs/architecture.md)** - Design principles and framework structure
+- **[Custom Extensions](./docs/architecture.md#extending-with-custom-transforms)** - Building your own transforms
+
+For complete documentation covering all aspects of Flint, visit the documentation home page.
 
 ## 🔍 Example: Customer Order Analysis
 Running this command executes a complete pipeline that showcases Flint's key capabilities:
@@ -174,16 +179,13 @@ Running this command executes a complete pipeline that showcases Flint's key cap
 ```
 
 ## 🚀 Getting Help
-- [**Documentation Home**](./docs/README.md): Main documentation hub
-  - [Configuration Reference](./docs/README.md#core-systems): Detailed configuration syntax
-  - [Architecture Guide](./docs/architecture.md): Framework design and concepts
-  - [CLI Reference](./docs/cli.md): Command-line usage options
+- [**Documentation**](./docs/README.md): Refer to the Configuration Reference section for detailed syntax
 - [**Examples**](./examples/): Explore working samples in the examples directory
 - [**Community**](https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues): Ask questions and report issues on GitHub Issues
 - [**Source Code**](./src/flint/): Browse the implementation in the src/flint directory
 
 ## 🤝 Contributing
-Contributions are welcome! Feel free to submit a pull request and message me on [linkedin](https://linkedin.com/in/krijnvanderburg/)
+Contributions are welcome! Feel free to submit a pull request and message Krijn van der Burg on [linkedin](https://linkedin.com/in/krijnvanderburg/).
 
 ## 📄 License
 This project is licensed under the Creative Commons Attribution 4.0 International License (CC-BY-4.0) - see the LICENSE file for details.
