@@ -1,73 +1,4 @@
 {
-    "alert": {
-        "channels": [
-            {
-                "id": "alert-operations-team",
-                "description": "",
-                "enabled": true,
-                "channel_type": "email",
-                "smtp_server": "smtp.company.com",
-                "smtp_port": 587,
-                "username": "username",
-                "password": "password",
-                "from_email": "etl-alerts@company.com",
-                "to_emails": [
-                    "ops@company.com",
-                    "data-team@company.com"
-                ]
-            },
-            {
-                "id": "alert-data-team-on-slack",
-                "description": "",
-                "enabled": true,
-                "channel_type": "http",
-                "url": "https://.slack.com",
-                "method": "POST",
-                "headers": {
-                    "Content-Type": "application/json"
-                },
-                "timeout": 30,
-                "retry": {
-                    "max_attempts": 3,
-                    "delay_in_seconds": 30
-                }       
-            }
-        ],
-        "triggers": [
-            {
-                "id": "production-external-errors",
-                "description": "",
-                "enabled": true,
-                "channel_ids": ["alert-operations-team", "alert-data-team-on-slack"],
-                "template": {
-                    "prepend_title": "ETL Pipeline Alert - ",
-                    "append_title": " - Team XYZ",
-                    "prepend_body": "Attention: ETL Pipeline Alert",
-                    "append_body": "Please take necessary actions."
-                },
-                "rules": [
-                    {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production"]},
-                ]
-            },  
-            {
-                "id": "dev-warnings",
-                "description": "",
-                "enabled": true,
-                "channel_ids": ["a-http-post-alert-name"],
-                "template": {
-                    "prepend_title": "",
-                    "append_title": "",
-                    "prepend_body": "",
-                    "append_body": ""
-                },
-                "rules": [
-                    {"rule_type": "exception_regex", "pattern": "validation|connection|database" },
-                    {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["development", "acceptance"]},
-                    {"rule_type": "env_vars_matches", "env_var_name": "APP_MODE", "env_var_values": ["live"]}
-                ]
-            }
-        ]
-    },
     "runtime": {
         "id": "customer-orders-pipeline",
         "description": "ETL pipeline for processing customer orders data",
@@ -83,14 +14,26 @@
                         "id": "extract-customers",
                         "extract_type": "file",
                         "data_format": "csv",
-                        "location": "examples/customer_orders/customers.csv",
+                        "location": "examples/join_select/customers/",
                         "method": "batch",
                         "options": {
                             "delimiter": ",",
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema": "examples/customer_orders/customers_schema.json"
+                        "schema": "examples/join_select/customers_schema.json"
+                    },
+                    {
+                        "id": "extract-orders",
+                        "extract_type": "file",
+                        "data_format": "json",
+                        "location": "examples/join_select/orders/",
+                        "method": "batch",
+                        "options": {
+                            "multiLine": true,
+                            "inferSchema": false
+                        },
+                        "schema": "examples/join_select/orders_schema.json"
                     }
                 ],
                 "transforms": [
@@ -99,8 +42,8 @@
                         "upstream_id": "extract-customers",
                         "options": {},
                         "functions": [
-                            { "function_type": "drop", "arguments": {"columns": ["temp_col"]} },
-                            { "function_type": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]} }
+                            {"function_type": "join", "arguments": { "other_upstream_id": "extract-orders", "on": ["customer_id"], "how": "inner"}},
+                            {"function_type": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]}}
                         ]
                     }
                 ],
@@ -110,12 +53,13 @@
                         "upstream_id": "transform-join-orders",
                         "load_type": "file",
                         "data_format": "csv",
-                        "location": "examples/customer_orders/output",
+                        "location": "examples/join_select/output",
                         "method": "batch",
                         "mode": "overwrite",
                         "options": {
                             "header": true
-                        }
+                        },
+                        "schema_location": ""
                     }
                 ],
                 "hooks": {

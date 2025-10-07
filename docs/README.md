@@ -13,6 +13,10 @@ Configure notifications and alerts for pipeline failures and exceptions. The ale
 
 **Quick Start**: See [alerting/README.md](alerting/README.md) for overview and [alerting/channels.md](alerting/channels.md) for channel configuration.
 
+
+### [Runtime](runtime/README.md)
+...
+
 ## Getting Started
 
 Flint enables you to build complete ETL pipelines through JSON configuration files. Instead of writing code, you define:
