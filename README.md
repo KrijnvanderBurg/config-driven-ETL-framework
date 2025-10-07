@@ -10,7 +10,7 @@
 
 <p align="center">
   <a href="https://pypi.org/project/flint/"><img src="https://img.shields.io/badge/python-3.11-informational" alt="Python Versions"></a>
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/LICENSE"><img src="https://img.shields.io/github/license/krijnvanderburg/config-driven-pyspark-framework?style=flat-square" alt="License"></a>
+  <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/blob/main/LICENSE"><img src="https://img.shields.io/github/license/krijnvanderburg/config-driven-ETL-framework?style=flat-square" alt="License"></a>
   <a href="https://spark.apache.org/docs/latest/"><img src="https://img.shields.io/badge/spark-3.5.0+-lightgrey" alt="Apache Spark"></a>
 </p>
 
@@ -19,16 +19,16 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/stargazers">⭐ Star this repo</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/stargazers">⭐ Star this repo</a> •
   <a href="./docs/README.md">📚 Documentation</a> •
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues">🐛 Report Issues</a> •
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/discussions">💬 Join Discussions</a>
+  <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/issues">🐛 Report Issues</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/discussions">💬 Join Discussions</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/releases">📥 Releases (TBD)</a> •
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CHANGELOG.md">📝 Changelog (TBD)</a> •
-  <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/blob/main/CONTRIBUTING.md">🤝 Contributing</a>
+  <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/releases">📥 Releases (TBD)</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/blob/main/CHANGELOG.md">📝 Changelog (TBD)</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/blob/main/CONTRIBUTING.md">🤝 Contributing</a>
 </p>
 
 ---
@@ -42,8 +42,8 @@ This configuration-driven approach standardizes pipeline patterns across teams, 
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/krijnvanderburg/config-driven-pyspark-framework.git
-cd config-driven-pyspark-framework
+git clone https://github.com/krijnvanderburg/config-driven-ETL-framework.git
+cd config-driven-ETL-framework
 
 # Install dependencies
 poetry install
@@ -181,7 +181,7 @@ Running this command executes a complete pipeline that showcases Flint's key cap
 ## 🚀 Getting Help
 - [**Documentation**](./docs/README.md): Refer to the Configuration Reference section for detailed syntax
 - [**Examples**](./examples/): Explore working samples in the examples directory
-- [**Community**](https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues): Ask questions and report issues on GitHub Issues
+- [**Community**](https://github.com/krijnvanderburg/config-driven-ETL-framework/issues): Ask questions and report issues on GitHub Issues
 - [**Source Code**](./src/flint/): Browse the implementation in the src/flint directory
 
 ## 🤝 Contributing
