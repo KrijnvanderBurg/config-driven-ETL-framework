@@ -54,7 +54,6 @@ poetry install
 python -m flint run \
   --alert-filepath="examples/join_select/alert.jsonc" \
   --runtime-filepath="examples/join_select/job.jsonc"
-# See full CLI options in docs/cli.md
 ```
 
 ## 📚 Documentation
