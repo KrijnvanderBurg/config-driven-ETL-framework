@@ -71,7 +71,7 @@ def fixture_runtime_config(tmp_path: Path) -> dict[str, Any]:
                         "load_type": "file",
                         "method": "batch",
                         "location": str(output_file),
-                        "schema_location": "",
+                        "schema_export": "",
                         "options": {},
                         "mode": "overwrite",
                         "data_format": "json",

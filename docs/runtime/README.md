@@ -102,7 +102,7 @@ Write data from upstream components to destinations.
     "method": "batch",
     "data_format": "parquet",
     "location": "output/processed/",
-    "schema_location": "output/schema.json",
+    "schema_export": "output/schema.json",
     "mode": "overwrite",                    // overwrite | append | ignore | error
     "options": {
         "compression": "snappy"
@@ -189,7 +189,7 @@ The hooks are still in development and will be documented in the future, but the
                         "method": "batch",
                         "data_format": "parquet",
                         "location": "output/customer_orders/",
-                        "schema_location": "output/schema.json",
+                        "schema_export": "output/schema.json",
                         "mode": "overwrite",
                         "options": {
                             "compression": "snappy"

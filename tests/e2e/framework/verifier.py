@@ -38,7 +38,7 @@ class ResultVerifier:
                 self._verify_single_output(
                     load_name=load["id"],
                     actual_data_path=Path(load["location"]),
-                    actual_schema_path=Path(load["schema_location"]),
+                    actual_schema_path=Path(load["schema_export"]),
                     expected_dir=expected_dir,
                 )
 

@@ -44,7 +44,7 @@ def fixture_valid_load_config(tmp_path: Path) -> Generator[dict[str, Any], Any, 
         "load_type": "file",
         "method": "batch",
         "location": str(output_file),
-        "schema_location": str(schema_file),
+        "schema_export": str(schema_file),
         "options": {
             "header": True,
         },
@@ -76,7 +76,7 @@ class TestLoadFileSparkValidation:
         assert load.mode == "overwrite"
         assert load.options == {"header": True}
         assert isinstance(load.location, str) and load.location.endswith(".json")
-        assert isinstance(load.schema_location, str) and load.schema_location.endswith(".json")
+        assert isinstance(load.schema_export, str) and load.schema_export.endswith(".json")
 
     def test_create_load_file_spark__with_missing_name__raises_validation_error(
         self, valid_load_config: dict[str, Any]
@@ -171,18 +171,18 @@ class TestLoadFileSparkValidation:
         # Assert
         assert load.data_format == "parquet"
 
-    def test_create_load_file_spark__with_empty_schema_location__succeeds(
+    def test_create_load_file_spark__with_empty_schema_export__succeeds(
         self, valid_load_config: dict[str, Any]
     ) -> None:
         """Test LoadFileSpark creation with empty schema location."""
         # Arrange
-        valid_load_config["schema_location"] = ""
+        valid_load_config["schema_export"] = ""
 
         # Act
         load = LoadFileSpark(**valid_load_config)
 
         # Assert
-        assert load.schema_location == ""
+        assert load.schema_export == ""
 
     def test_create_load_file_spark__with_empty_options__succeeds(self, valid_load_config: dict[str, Any]) -> None:
         """Test LoadFileSpark creation with empty options."""
@@ -271,10 +271,10 @@ class TestLoadFileSparkLoad:
                 # Act
                 load_file_spark.load()
 
-    def test_load__with_empty_schema_location__skips_schema_export(self, load_file_spark: LoadFileSpark) -> None:
-        """Test schema export is skipped when schema_location is empty."""
+    def test_load__with_empty_schema_export__skips_schema_export(self, load_file_spark: LoadFileSpark) -> None:
+        """Test schema export is skipped when schema_export is empty."""
         # Arrange
-        load_file_spark.schema_location = ""  # No schema export
+        load_file_spark.schema_export = ""  # No schema export
 
         mock_dataframe = Mock()
         mock_dataframe.count.return_value = 5
@@ -287,13 +287,13 @@ class TestLoadFileSparkLoad:
 
             # Assert - no exception should be raised, load should complete
 
-    def test_load__with_valid_schema_location__writes_schema_to_file(
+    def test_load__with_valid_schema_export__writes_schema_to_file(
         self, tmp_path: Path, load_file_spark: LoadFileSpark
     ) -> None:
-        """Test schema export writes schema to file when schema_location is provided."""
+        """Test schema export writes schema to file when schema_export is provided."""
         # Arrange
         schema_file = tmp_path / "test_schema.json"
-        load_file_spark.schema_location = str(schema_file)
+        load_file_spark.schema_export = str(schema_file)
 
         mock_dataframe = Mock()
         mock_dataframe.count.return_value = 5

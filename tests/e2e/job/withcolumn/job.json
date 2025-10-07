@@ -63,7 +63,7 @@
                         "options": {
                             "header": true
                         },
-                        "schema_location": "tests/e2e/job/withcolumn/schema_location.json"
+                        "schema_export": "tests/e2e/job/withcolumn/schema_export.json"
                     }
                 ],
                 "hooks": {

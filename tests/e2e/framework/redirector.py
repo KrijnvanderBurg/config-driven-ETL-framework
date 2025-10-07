@@ -31,7 +31,7 @@ class PathRedirector:
             # Redirect load paths (outputs) to tmp
             for load in job["loads"]:
                 load["location"] = self._redirect_output_path(load["location"])
-                load["schema_location"] = self._redirect_output_path(load["schema_location"])
+                load["schema_export"] = self._redirect_output_path(load["schema_export"])
 
         return config
 

@@ -72,7 +72,7 @@
                         "options": {
                             "header": true
                         },
-                        "schema_location": "tests/e2e/job/dropduplicates/schema_location.json"
+                        "schema_export": "tests/e2e/job/dropduplicates/schema_export.json"
                     }
                 ],
                 "hooks": {

@@ -55,7 +55,7 @@
                         "options": {
                             "header": true
                         },
-                        "schema_location": "tests/e2e/job/filter/schema_location.json"
+                        "schema_export": "tests/e2e/job/filter/schema_export.json"
                     }
                 ],
                 "hooks": {

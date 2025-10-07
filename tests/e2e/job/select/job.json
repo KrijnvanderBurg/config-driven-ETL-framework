@@ -56,7 +56,7 @@
                         "method": "batch",
                         "mode": "overwrite",
                         "options": {},
-                        "schema_location": "tests/e2e/job/select/schema_location.json"
+                        "schema_export": "tests/e2e/job/select/schema_export.json"
                     }
                 ],
                 "hooks": {

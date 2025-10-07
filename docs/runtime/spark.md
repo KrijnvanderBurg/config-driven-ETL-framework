@@ -109,7 +109,7 @@ Expression uses Spark SQL syntax with all built-in functions.
     "method": "batch",                      // batch | streaming
     "data_format": "parquet",
     "location": "output/processed/",
-    "schema_location": "output/schema.json", // Empty "" to skip schema export
+    "schema_export": "output/schema.json", // Empty "" to skip schema export
     "mode": "overwrite",                    // overwrite | append | ignore | error
     "options": {
         // CSV

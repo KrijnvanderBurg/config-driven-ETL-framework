@@ -59,7 +59,7 @@
                         "options": {
                             "header": true
                         },
-                        "schema_location": ""
+                        "schema_export": ""
                     }
                 ],
                 "hooks": {

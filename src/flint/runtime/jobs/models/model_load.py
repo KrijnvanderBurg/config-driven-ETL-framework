@@ -53,7 +53,7 @@ class LoadModel(BaseModel, ABC):
         upstream_id: Identifier of the upstream component providing data
         method: Loading method (batch or streaming)
         location (str): URI that identifies where to load data in the modelified format.
-        schema_location (str): URI that identifies where to load schema.
+        schema_export (str): URI that identifies where to load schema.
         options (dict[str, Any]): Options for the sink input.
     """
 
@@ -63,7 +63,7 @@ class LoadModel(BaseModel, ABC):
     location: str = Field(
         ..., description="URI that identifies where to load data in the modelified format.", min_length=1
     )
-    schema_location: str = Field(..., description="URI that identifies where to load schema.")
+    schema_export: str = Field(..., description="URI that identifies where to load schema.")
 
 
 class LoadModelFile(LoadModel):

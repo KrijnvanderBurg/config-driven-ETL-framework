@@ -76,7 +76,7 @@
                         "load_type": "file",
                         "id": "load-test",
                         "upstream_id": "transform-join",
-                        "schema_location": "tests/e2e/job/join/schema_location.json",
+                        "schema_export": "tests/e2e/job/join/schema_export.json",
                         "method": "batch",
                         "mode": "overwrite",
                         "options": {
