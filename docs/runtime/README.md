@@ -30,6 +30,81 @@ The structure is as follows, all of the following fields are required
 }
 ```
 
+
+## Configuration Reference
+
+### Pipeline Structure
+
+A Flint pipeline is defined by three core components in your configuration file:
+
+```
+Configuration
+├── Extracts - Read data from source systems (CSV, JSON, Parquet, etc.)
+├── Transforms - Apply business logic and data processing
+└── Loads - Write results to destination systems
+```
+
+Each component has a standardized schema and connects through named references:
+
+<details>
+<summary><b>Extract Configuration</b></summary>
+
+```jsonc
+{
+  "id": "extract-id",                        // Required: Unique identifier
+  "method": "batch|stream",                  // Required: Processing method
+  "data_format": "csv|json|parquet|...",     // Required: Source format
+  "location": "path/to/source",              // Required: Source location
+  "schema": "path/to/schema.json",           // Optional: Schema definition
+  "options": {                               // Optional: PySpark reader options
+    "header": true,
+    "delimiter": ",",
+    "inferSchema": false
+  }
+}
+```
+
+**Supported Formats:** CSV, JSON, Parquet, Avro, ORC, Text, JDBC, Delta (with appropriate dependencies)
+</details>
+
+<details>
+<summary><b>Transform Configuration</b></summary>
+
+```jsonc
+{
+  "id": "transform-id",                      // Required: Unique identifier
+  "upstream_id": "previous-step-id",         // Required: Reference previous stage
+  "functions": [                             // Required: List of transformations
+    {
+      "function_type": "transform-function-name", // Required: Registered function name
+      "arguments": {                         // Required: Function-specific arguments
+        "key1": "value1",
+        "key2": "value2"
+      }
+    }
+  ]
+}
+```
+
+**Function Application:** Transformations are applied in sequence, with each function's output feeding into the next.
+</details>
+
+<details>
+<summary><b>Load Configuration</b></summary>
+
+```jsonc
+{
+  "id": "load-id",                           // Required: Unique identifier
+  "upstream_id": "previous-step-id",         // Required: Reference previous stage
+  "method": "batch|stream",                  // Required: Processing method
+  "data_format": "csv|json|parquet|...",     // Required: Destination format
+  "location": "path/to/destination",         // Required: Output location
+  "mode": "overwrite|append|ignore|error|...",   // Required: Write mode
+  "options": {},                             // Optional: PySpark writer options
+  "schema_export": ""                        // Optional: Path to export schema
+}
+```
+
 ## Jobs
 
 Each job defines a complete ETL workflow. Jobs execute sequentially.
