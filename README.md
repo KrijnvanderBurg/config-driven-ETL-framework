@@ -54,7 +54,7 @@ poetry install
 ```bash
 python -m flint run \
   --alert-filepath="examples/join_select/job.jsonc" \
-  --runtime-filepath="examples/join_select/job.json"
+  --runtime-filepath="examples/join_select/job.jsonc"
 ```
 
 ## 🔍 Example: Customer Order Analysis
@@ -75,7 +75,7 @@ Running this command executes a complete pipeline that showcases Flint's key cap
   - Output mode (overwrite/append) controlled by a simple parameter
   - Output to multiple formats or locations by creating another load entry
 
-#### Configuration: examples/join_select/job.json
+#### Configuration: examples/join_select/job.jsonc
 
 ```jsonc
 {
