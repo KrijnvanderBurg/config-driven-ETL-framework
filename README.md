@@ -39,7 +39,6 @@ This configuration-driven approach standardizes pipeline patterns across teams, 
 ## ⚡ Quick Start
 
 ### Installation
-
 ```bash
 # Clone the repository
 git clone https://github.com/krijnvanderburg/config-driven-pyspark-framework.git
@@ -50,24 +49,22 @@ poetry install
 ```
 
 ### Run an example pipeline
-
 ```bash
 python -m flint run \
-  --alert-filepath="examples/join_select/job.jsonc" \
+  --alert-filepath="examples/join_select/alert.jsonc" \
   --runtime-filepath="examples/join_select/job.jsonc"
 ```
 
 ## 🔍 Example: Customer Order Analysis
-
 Running this command executes a complete pipeline that showcases Flint's key capabilities:
 
 - **Multi-format extraction**: Seamlessly reads from both CSV and JSON sources
   - Source options like delimiters and headers are configurable through the configuration file
   - Schema validation ensures data type safety and consistency across all sources
 
-- **Flexible transformation chain**: Combines domain-specific and generic transforms
-  - First a join to combine both datasets on `customer_id`
-  - Then applies the generic `select` transform to project only needed columns
+- **Flexible transformation chain**: Performed in order as given
+  - First a `join` to combine both datasets on `customer_id`
+  - Then applies a `select` transform to project only needed columns
   - Each transform function can be easily customized through its arguments
 
 - **Configurable loading**: Writes results as CSV with customizable settings
@@ -76,7 +73,6 @@ Running this command executes a complete pipeline that showcases Flint's key cap
   - Output to multiple formats or locations by creating another load entry
 
 #### Configuration: examples/join_select/job.jsonc
-
 ```jsonc
 {
     "runtime": {
@@ -167,16 +163,13 @@ Running this command executes a complete pipeline that showcases Flint's key cap
 ```
 
 ## 🚀 Getting Help
-
 - **Examples**: Explore working samples in the examples directory
 - **Documentation**: Refer to the Configuration Reference section for detailed syntax
 - **Community**: Ask questions and report issues on [GitHub Issues](https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues)
 - **Source Code**: Browse the implementation in the src/flint directory
 
 ## 🤝 Contributing
-
 Contributions are welcome! Feel free to submit a pull request and message me.
 
 ## 📄 License
-
 This project is licensed under the Creative Commons Attribution 4.0 International License (CC-BY-4.0) - see the LICENSE file for details.
