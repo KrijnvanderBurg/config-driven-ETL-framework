@@ -20,6 +20,7 @@
 
 <p align="center">
   <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/stargazers">⭐ Star this repo</a> •
+  <a href="./docs/README.md">📚 Documentation</a> •
   <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues">🐛 Report Issues</a> •
   <a href="https://github.com/krijnvanderburg/config-driven-pyspark-framework/discussions">💬 Join Discussions</a>
 </p>
@@ -53,7 +54,17 @@ poetry install
 python -m flint run \
   --alert-filepath="examples/join_select/alert.jsonc" \
   --runtime-filepath="examples/join_select/job.jsonc"
+# See full CLI options in docs/cli.md
 ```
+
+### 📚 Documentation
+Complete documentation is available to help you get the most out of Flint:
+- [Getting Started](./docs/getting_started.md) - Installation and first steps
+- [Configuration Reference](./docs/README.md) - Complete configuration syntax
+  - [Runtime System](./docs/runtime/README.md) - Data processing components
+  - [Alert System](./docs/alert/README.md) - Error handling and notifications
+- [CLI Reference](./docs/cli.md) - Command-line interface options
+- [Architecture](./docs/architecture.md) - Core concepts and design principles
 
 ## 🔍 Example: Customer Order Analysis
 Running this command executes a complete pipeline that showcases Flint's key capabilities:
@@ -163,8 +174,11 @@ Running this command executes a complete pipeline that showcases Flint's key cap
 ```
 
 ## 🚀 Getting Help
+- [**Documentation Home**](./docs/README.md): Main documentation hub
+  - [Configuration Reference](./docs/README.md#core-systems): Detailed configuration syntax
+  - [Architecture Guide](./docs/architecture.md): Framework design and concepts
+  - [CLI Reference](./docs/cli.md): Command-line usage options
 - [**Examples**](./examples/): Explore working samples in the examples directory
-- [**Documentation**](./docs/README.md): Refer to the Configuration Reference section for detailed syntax
 - [**Community**](https://github.com/krijnvanderburg/config-driven-pyspark-framework/issues): Ask questions and report issues on GitHub Issues
 - [**Source Code**](./src/flint/): Browse the implementation in the src/flint directory
 
