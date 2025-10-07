@@ -40,9 +40,9 @@ Each job defines a complete ETL workflow. Jobs execute sequentially.
     "description": "Job description",
     "enabled": true,
     "engine_type": "spark",
-    "extracts": [/* Read data */],
-    "transforms": [/* Process data */],
-    "loads": [/* Write data */],
+    "extracts": [/* data sources */],
+    "transforms": [/* processing steps */],
+    "loads": [/* destinations */],
     "hooks": {
         "onStart": [/* Actions on start */],
         "onFailure": [/* Actions on error */],
@@ -88,8 +88,6 @@ Apply functions to data from upstream components.
 }
 ```
 
-Functions: `select`, `filter`, `cast`, `drop`, `dropduplicates`, `join`, `withcolumn`
-
 ### Loads
 
 Write data from upstream components to destinations.
@@ -103,9 +101,9 @@ Write data from upstream components to destinations.
     "data_format": "parquet",
     "location": "output/processed/",
     "schema_export": "output/schema.json",
-    "mode": "overwrite",                    // overwrite | append | ignore | error
+    "mode": "overwrite",
     "options": {
-        "compression": "snappy"
+        // Spark options
     }
 }
 ```

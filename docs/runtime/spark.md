@@ -58,7 +58,6 @@ Condition uses Spark SQL syntax: `AND`, `OR`, `NOT`, `=`, `!=`, `>`, `<`, `>=`, 
 }
 ```
 
-
 ### Drop
 
 ```jsonc
@@ -127,7 +126,36 @@ Expression uses Spark SQL syntax with all built-in functions.
 }
 ```
 
-Streaming modes: `append` | `complete` | `update`
+## Common Options by Format
+
+**CSV**
+```jsonc
+"options": {
+    "header": true,
+    "delimiter": ",",
+    "inferSchema": false,
+    "dateFormat": "yyyy-MM-dd"
+}
+```
+
+**JSON**
+```jsonc
+"options": {
+    "multiLine": true,
+    "dateFormat": "yyyy-MM-dd'T'HH:mm:ss"
+}
+```
+
+**Parquet**
+```jsonc
+"options": {
+    "mergeSchema": false,
+    "pathGlobFilter": "*.parquet"
+}
+```
+
+For complete options, see [Spark Data Sources documentation](https://spark.apache.org/docs/latest/sql-data-sources.html).
+
 
 ## Complete Example
 

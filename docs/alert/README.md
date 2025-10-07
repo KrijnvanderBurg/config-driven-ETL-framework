@@ -233,6 +233,7 @@ This routing strategy ensures that each team receives only the alerts relevant t
                     "append_body": ""
                 },
                 "rules": [
+                    {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "prod"]}
                     {"rule": "exception_regex", "pattern": ".*database.*|.*sql.*|.*connection pool.*"}
                 ]
             }
