@@ -1,25 +1,39 @@
 # Flint Documentation
-This directory contains comprehensive documentation for Flint, a configuration-driven data processing framework. Flint's architecture consists of two integrated systems that work together through configuration:
+Welcome to the Flint documentation. Flint is a configuration-driven data processing framework that lets you define entire data pipelines through JSON configuration files rather than code.
 
-## [Getting started](./getting_started.md)
-Install Flint, run example pipelines, and learn how to create your own data pipelines using configuration files. Includes detailed examples of extract, transform, and load configurations with explanations of key fields.
+## [Getting Started](./getting_started.md)
+Install Flint, run example pipelines, and learn how to create your own data pipelines using configuration files. This guide provides step-by-step instructions for new users and includes examples of basic pipeline configurations.
 
-## [CLI arguments and exit codes](./cli.md)
-Reference for Flint's command-line interface with commands for validating configurations (`validate`) and executing pipelines (`run`). Includes supported options, environment variables, and a complete list of exit codes for troubleshooting.
+## [CLI Reference](./cli.md)
+Complete reference for Flint's command-line interface with commands for:
+- `validate` - Check configuration files and alerting before execution
+- `run` - Execute data pipelines
 
-## [Runtime System](runtime/README.md)
-Details about configuring and using the data processing pipeline components.
-- **Extracts**: Read data from sources (files, databases)
-- **Transforms**: Process data through function chains
-- **Loads**: Write data to destinations
-- **Hooks**: Execute actions during pipeline lifecycle
+Includes supported options, environment variables, and exit codes for troubleshooting.
 
-## [Alerting System](alerting/README.md)
-Configure notifications and alerts for pipeline failures and exceptions:
-- Define notification channels (email, HTTP webhooks, file logs)
-- Create conditional triggers based on exception patterns and environment variables
-- Route different errors to appropriate teams
-- Format alert messages with custom templates
-- **Channels**: Where alerts are sent (email, HTTP, files)
-- **Triggers**: When alerts are sent (rule-based conditions)
-- **Templates**: How alerts are formatted
+## Core Systems
+Flint's architecture consists of two integrated systems that work together through configuration:
+
+### [Runtime System](./runtime/README.md)
+The runtime system orchestrates ETL pipelines through configuration files:
+- **Extracts**: Configure data sources (CSV, JSON, databases)
+- **Transforms**: Chain operations through configuration
+- **Loads**: Define outputs with formats and parameters
+ 
+ETL engines and specific configurations:
+- **[Spark Engine](./runtime/spark.md)**: Spark-specific configuration options
+- **Polars Engine**: Under development.
+
+### [Alert System](./alert/README.md)
+Configure notifications when pipeline errors occur:
+- [**Channels**](./alert/channels.md): Configure where alerts are sent (email, HTTP webhooks, file logs)
+- [**Triggers**](./alert/triggers.md): Define when alerts are sent (rule-based conditions)
+- **Templates** (TBD): Format alert messages with custom templates
+
+## [Example Configurations](../examples/)
+The examples folder includes complete examples of:
+- Runtime pipeline configurations
+- Spark-specific configurations
+- Alert system configurations
+
+These examples demonstrate how to combine Flint's components to build complete data processing solutions without writing code.

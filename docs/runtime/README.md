@@ -1,28 +1,37 @@
 # Runtime
 
-The runtime system orchestrates ETL pipelines through configuration. Define your data sources, transformations, and destinations in JSON—no code required.
+The runtime system orchestrates ETL pipelines through configuration files. Define your data sources, transformations, and destinations in JSON—no coding required.
+
+## Overview
+
+Flint's runtime executes data pipelines defined entirely through configuration. This declarative approach transforms data engineering from a programming task to a configuration exercise, making pipelines more maintainable and accessible.
 
 ## How It Works
 
-1. Extract data from sources
-2. Transform data through function chains, referencing upstream components by ID
-3. Load processed data to destinations
+1. **Extract** data from various sources (CSV, JSON, databases, etc.)
+2. **Transform** data through function chains, referencing upstream components by ID
+3. **Load** processed data to destinations in specified formats
 
-## Configuration Structure
+## Running a Pipeline
+
+Execute a pipeline using the Flint CLI:
+
 ```bash
 python -m flint run \
-    --alert-filepath="examples/join_select/alert.jsonc" \
-    --runtime-filepath="examples/join_select/job.jsonc"
+    --runtime-filepath="examples/join_select/job.jsonc" \
+    --alert-filepath="examples/join_select/alert.jsonc"
 ```
 
-The structure is as follows, all of the following fields are required
+## Configuration Structure
+
+A Flint pipeline is defined by a JSON configuration file with this structure:
 
 ```jsonc
 {
     "runtime": {
-        "id": "unique-pipeline-id",
-        "description": "Pipeline description",
-        "enabled": true,                    // Disable entire runtime
+        "id": "unique-pipeline-id",         // Unique identifier
+        "description": "Pipeline description", 
+        "enabled": true,                    // Enable/disable the entire runtime
         "jobs": [
             /* Job definitions */
         ]
@@ -30,91 +39,16 @@ The structure is as follows, all of the following fields are required
 }
 ```
 
-
-## Configuration Reference
-
-### Pipeline Structure
-
-A Flint pipeline is defined by three core components in your configuration file:
-
-```
-Configuration
-├── Extracts - Read data from source systems (CSV, JSON, Parquet, etc.)
-├── Transforms - Apply business logic and data processing
-└── Loads - Write results to destination systems
-```
-
-Each component has a standardized schema and connects through named references:
-
-<details>
-<summary><b>Extract Configuration</b></summary>
-
-```jsonc
-{
-  "id": "extract-id",                        // Required: Unique identifier
-  "method": "batch|stream",                  // Required: Processing method
-  "data_format": "csv|json|parquet|...",     // Required: Source format
-  "location": "path/to/source",              // Required: Source location
-  "schema": "path/to/schema.json",           // Optional: Schema definition
-  "options": {                               // Optional: PySpark reader options
-    "header": true,
-    "delimiter": ",",
-    "inferSchema": false
-  }
-}
-```
-
-**Supported Formats:** CSV, JSON, Parquet, Avro, ORC, Text, JDBC, Delta (with appropriate dependencies)
-</details>
-
-<details>
-<summary><b>Transform Configuration</b></summary>
-
-```jsonc
-{
-  "id": "transform-id",                      // Required: Unique identifier
-  "upstream_id": "previous-step-id",         // Required: Reference previous stage
-  "functions": [                             // Required: List of transformations
-    {
-      "function_type": "transform-function-name", // Required: Registered function name
-      "arguments": {                         // Required: Function-specific arguments
-        "key1": "value1",
-        "key2": "value2"
-      }
-    }
-  ]
-}
-```
-
-**Function Application:** Transformations are applied in sequence, with each function's output feeding into the next.
-</details>
-
-<details>
-<summary><b>Load Configuration</b></summary>
-
-```jsonc
-{
-  "id": "load-id",                           // Required: Unique identifier
-  "upstream_id": "previous-step-id",         // Required: Reference previous stage
-  "method": "batch|stream",                  // Required: Processing method
-  "data_format": "csv|json|parquet|...",     // Required: Destination format
-  "location": "path/to/destination",         // Required: Output location
-  "mode": "overwrite|append|ignore|error|...",   // Required: Write mode
-  "options": {},                             // Optional: PySpark writer options
-  "schema_export": ""                        // Optional: Path to export schema
-}
-```
-
 ## Jobs
 
-Each job defines a complete ETL workflow. Jobs execute sequentially.
+Each job defines a complete ETL workflow with its own sources, transformations, and destinations. Jobs execute sequentially.
 
 ```jsonc
 {
-    "id": "job-id",
+    "id": "job-id",                         // Unique job identifier
     "description": "Job description",
-    "enabled": true,
-    "engine_type": "spark",
+    "enabled": true,                        // Enable/disable this specific job
+    "engine_type": "spark",                 // Processing engine to use
     "extracts": [/* data sources */],
     "transforms": [/* processing steps */],
     "loads": [/* destinations */],
@@ -127,71 +61,106 @@ Each job defines a complete ETL workflow. Jobs execute sequentially.
 }
 ```
 
+## Components
+
+A Flint pipeline consists of three core components:
+
+```
+Pipeline
+├── Extracts - Read data from source systems 
+├── Transforms - Apply business logic and data processing
+└── Loads - Write results to destination systems
+```
+
 ### Extracts
 
-Read data into the registry, identified by `id`.
+Extracts read data into the registry, identified by their unique `id`.
 
 ```jsonc
 {
-    "id": "extract-customers",
-    "extract_type": "file",
+    "id": "extract-customers",              // Unique identifier for this extract
+    "extract_type": "file",                 // Source type: file, database, etc.
     "method": "batch",                      // batch | streaming
-    "data_format": "csv",
-    "location": "path/to/data.csv",
-    "schema": "path/to/schema.json",        // JSON file or string
+    "data_format": "csv",                   // Format: csv, json, parquet, etc.
+    "location": "path/to/data.csv",         // Source path or connection string
+    "schema": "path/to/schema.json",        // Optional: JSON schema file or string
     "options": {
-        "header": true,
+        "header": true,                     // Format-specific reader options
         "delimiter": ","
     }
 }
 ```
 
+**Supported Formats:** CSV, JSON, Parquet, Avro, ORC, Text, JDBC, Delta (with appropriate dependencies)
+
 ### Transforms
 
-Apply functions to data from upstream components.
+Transforms apply functions to data from upstream components, creating a processing chain.
 
 ```jsonc
 {
-    "id": "transform-clean",
-    "upstream_id": "extract-customers",     // Reference extract or transform ID
-    "options": {},
-    "functions": [
-        {"function_type": "filter", "arguments": {"condition": "age > 18"}},
-        {"function_type": "select", "arguments": {"columns": ["name", "email"]}},
-        {"function_type": "cast", "arguments": {"columns": [{"column_name": "age", "cast_type": "IntegerType"}]}}
+    "id": "transform-clean",                // Unique identifier
+    "upstream_id": "extract-customers",     // Reference to input data source
+    "options": {},                          // Optional configuration
+    "functions": [                          // List of transformation functions
+        {
+            "function_type": "filter",      // Function name
+            "arguments": {                  // Function-specific parameters
+                "condition": "age > 18"
+            }
+        },
+        {
+            "function_type": "select",
+            "arguments": {
+                "columns": ["name", "email"]
+            }
+        },
+        {
+            "function_type": "cast",
+            "arguments": {
+                "columns": [{"column_name": "age", "cast_type": "IntegerType"}]
+            }
+        }
     ]
 }
 ```
 
+**Function Application:** Transformations are applied in sequence, with each function's output feeding into the next.
+
 ### Loads
 
-Write data from upstream components to destinations.
+Loads write data from upstream components to destinations.
 
 ```jsonc
 {
-    "id": "load-output",
-    "upstream_id": "transform-clean",
-    "load_type": "file",
-    "method": "batch",
-    "data_format": "parquet",
-    "location": "output/processed/",
-    "schema_export": "output/schema.json",
-    "mode": "overwrite",
+    "id": "load-output",                    // Unique identifier
+    "upstream_id": "transform-clean",       // Reference to input data source
+    "load_type": "file",                    // Destination type
+    "method": "batch",                      // batch | streaming
+    "data_format": "parquet",               // Output format
+    "location": "output/processed/",        // Destination path or connection
+    "schema_export": "output/schema.json",  // Optional: export schema to this path
+    "mode": "overwrite",                    // Write mode: overwrite, append, etc.
     "options": {
-        // Spark options
+        "compression": "snappy"             // Format-specific writer options
     }
 }
 ```
 
 ## Engine Support
 
-Currently supports Spark (`"engine_type": "spark"`). Framework designed for multi-engine support.
+Flint currently supports Apache Spark (`"engine_type": "spark"`) as its primary execution engine. The framework is designed for multi-engine support, with additional engines planned for future releases.
 
-See [Spark configuration](./spark.md) for engine-specific options.
+See Spark configuration for engine-specific options.
 
 ## Complete Example
 
-The hooks are still in development and will be documented in the future, but they are already required fields which may be kept empty.
+Below is a complete example of a pipeline that:
+- Extracts customer and order data from different sources and formats
+- Cleans customer data by removing duplicates and filtering for valid emails
+- Joins customer and order data
+- Selects relevant columns for output
+- Writes the result to Parquet files
 
 ```jsonc
 {
@@ -214,8 +183,8 @@ The hooks are still in development and will be documented in the future, but the
                         "location": "data/customers.csv",
                         "schema": "schemas/customers.json",
                         "options": {
-                            "header": true,
-                            "inferSchema": false
+                            "header": true,                // First row contains column names
+                            "inferSchema": false           // Use defined schema instead of inferring
                         }
                     },
                     {
@@ -265,15 +234,15 @@ The hooks are still in development and will be documented in the future, but the
                         "schema_export": "output/schema.json",
                         "mode": "overwrite",
                         "options": {
-                            "compression": "snappy"
+                            "compression": "snappy"         // Use Snappy compression for Parquet files
                         }
                     }
                 ],
                 "hooks": {
-                    "onStart": [],
-                    "onSuccess": [],
-                    "onFailure": [],
-                    "onFinally": []
+                    "onStart": [],                         // Actions before pipeline starts
+                    "onFailure": [],                       // Actions if pipeline fails
+                    "onSuccess": [],                       // Actions if pipeline succeeds
+                    "onFinally": []                        // Actions that always run
                 }
             }
         ]
@@ -281,3 +250,4 @@ The hooks are still in development and will be documented in the future, but the
 }
 ```
 
+Note: The event hooks system is still in development but the fields are required in the configuration structure. You can leave them as empty arrays for now.
