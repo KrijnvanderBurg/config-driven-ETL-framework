@@ -1,241 +1,260 @@
-"""Unit tests for the FileAlertChannel class.
+"""Tests for FileChannel alert functionality.
 
-This module contains comprehensive tests for the FileAlertChannel functionality,
-including file writing, error handling, and configuration parsing.
+These tests verify FileChannel creation, validation, alert sending,
+and error handling scenarios.
 """
 
-import tempfile
 from pathlib import Path
+from typing import Any
+from unittest.mock import mock_open, patch
 
 import pytest
+from pydantic import ValidationError
 
-from flint.alert.channels.file import FileAlertChannel
-from flint.exceptions import FlintConfigurationKeyError
+from flint.alert.channels.file import FileChannel
+
+# =========================================================================== #
+# ============================== CONFIG (dict) ============================== #
+# =========================================================================== #
 
 
-class TestFileAlertChannel:
-    """Test cases for FileAlertChannel class."""
+@pytest.fixture(name="valid_file_config")
+def fixture_valid_file_config(tmp_path: Path) -> dict[str, Any]:
+    """Provide a valid file channel configuration."""
+    return {
+        "id": "error-log-alerts",
+        "description": "Error logging to file",
+        "channel_type": "file",
+        "file_path": tmp_path / "alerts.log",
+        "enabled": True,
+    }
 
-    @pytest.fixture
-    def file_channel_config(self) -> dict:
-        """Provide a file channel configuration for testing."""
-        return {"file_path": "/tmp/test-alerts.log"}
 
-    @pytest.fixture
-    def file_channel(self, file_channel_config) -> FileAlertChannel:
-        """Create a FileAlertChannel instance for testing."""
-        return FileAlertChannel.from_dict(file_channel_config)
+# =========================================================================== #
+# ========================== VALIDATION TESTS ============================= #
+# =========================================================================== #
 
-    def test_from_dict_creates_channel_correctly(self, file_channel_config) -> None:
-        """Test that from_dict creates a FileAlertChannel correctly."""
-        channel = FileAlertChannel.from_dict(file_channel_config)
 
-        assert channel.file_path == "/tmp/test-alerts.log"
+class TestFileChannelValidation:
+    """Test FileChannel model validation and instantiation."""
 
-    def test_from_dict_raises_error_for_missing_file_path(self) -> None:
-        """Test that from_dict raises error when file_path is missing."""
-        config = {}
+    def test_create_file_channel__with_valid_config__succeeds(self, valid_file_config: dict[str, Any]) -> None:
+        """Test FileChannel creation with valid configuration."""
+        # Act
+        channel = FileChannel(**valid_file_config)
 
-        with pytest.raises(FlintConfigurationKeyError):
-            FileAlertChannel.from_dict(config)
+        # Assert
+        assert channel.id_ == "error-log-alerts"
+        assert channel.description == "Error logging to file"
+        assert channel.channel_type == "file"
+        assert isinstance(channel.file_path, Path)
+        assert channel.file_path.name == "alerts.log"
 
-    def test_alert_writes_to_file_successfully(self) -> None:
-        """Test that _alert writes alert to file successfully."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".log") as temp_file:
-            temp_file_path = temp_file.name
+    def test_create_file_channel__with_missing_name__raises_validation_error(
+        self, valid_file_config: dict[str, Any]
+    ) -> None:
+        """Test FileChannel creation fails when name is missing."""
+        # Arrange
+        del valid_file_config["id"]
+
+        # Assert
+        with pytest.raises(ValidationError):
+            # Act
+            FileChannel(**valid_file_config)
+
+    def test_create_file_channel__with_empty_name__raises_validation_error(
+        self, valid_file_config: dict[str, Any]
+    ) -> None:
+        """Test FileChannel creation fails when name is empty string."""
+        # Arrange
+        valid_file_config["id"] = ""
+
+        # Assert
+        with pytest.raises(ValidationError):
+            # Act
+            FileChannel(**valid_file_config)
+
+    def test_create_file_channel__with_missing_file_path__raises_validation_error(
+        self, valid_file_config: dict[str, Any]
+    ) -> None:
+        """Test FileChannel creation fails when file_path is missing."""
+        # Arrange
+        del valid_file_config["file_path"]
+
+        # Assert
+        with pytest.raises(ValidationError):
+            # Act
+            FileChannel(**valid_file_config)
+
+    def test_create_file_channel__with_string_file_path__converts_to_path(
+        self, valid_file_config: dict[str, Any]
+    ) -> None:
+        """Test FileChannel creation converts string file path to Path object."""
+        # Arrange
+        valid_file_config["file_path"] = "/tmp/alerts.log"
+
+        # Act
+        channel = FileChannel(**valid_file_config)
+
+        # Assert
+        assert isinstance(channel.file_path, Path)
+        assert str(channel.file_path) == "/tmp/alerts.log"
+
+    def test_create_file_channel__with_missing_description__raises_validation_error(
+        self, valid_file_config: dict[str, Any]
+    ) -> None:
+        """Test FileChannel creation fails when description is missing."""
+        # Arrange
+        del valid_file_config["description"]
+
+        # Act & Assert
+        with pytest.raises(ValidationError):
+            FileChannel(**valid_file_config)
+
+
+# =========================================================================== #
+# ============================= MODEL FIXTURE =============================== #
+# =========================================================================== #
+
+
+@pytest.fixture(name="file_channel")
+def fixture_file_channel(valid_file_config: dict[str, Any]) -> FileChannel:
+    """Create FileChannel instance from valid configuration."""
+    return FileChannel(**valid_file_config)
+
+
+# =========================================================================== #
+# ============================ ALERT TESTS ================================ #
+# =========================================================================== #
+
+
+class TestFileChannelAlert:
+    """Test FileChannel alert functionality."""
+
+    def test_alert__with_valid_inputs__writes_to_file_successfully(self, file_channel: FileChannel) -> None:
+        """Test successful alert writing to file."""
+        # Act
+        file_channel.alert("Critical System Alert", "Database connection failed")
+
+        # Assert
+        assert file_channel.file_path.exists()
+        content = file_channel.file_path.read_text(encoding="utf-8")
+        assert content == "Critical System Alert: Database connection failed\n"
+
+    def test_alert__with_multiple_alerts__appends_to_file(self, file_channel: FileChannel) -> None:
+        """Test that multiple alerts are appended to the same file."""
+        # Act
+        file_channel.alert("First Alert", "First message")
+        file_channel.alert("Second Alert", "Second message")
+
+        # Assert
+        content = file_channel.file_path.read_text(encoding="utf-8")
+        expected = "First Alert: First message\nSecond Alert: Second message\n"
+        assert content == expected
+
+    def test_alert__with_special_characters__handles_encoding_correctly(self, file_channel: FileChannel) -> None:
+        """Test alert handling with special characters in title and body."""
+        # Act
+        file_channel.alert("Ålørt: Üñíçødé Tëst", "Body with émojis 🔥 and spëcial chars: áéíóú")
+
+        # Assert
+        content = file_channel.file_path.read_text(encoding="utf-8")
+        expected = "Ålørt: Üñíçødé Tëst: Body with émojis 🔥 and spëcial chars: áéíóú\n"
+        assert content == expected
+
+    def test_alert__with_empty_title__writes_with_empty_prefix(self, file_channel: FileChannel) -> None:
+        """Test alert writing with empty title results in colon-prefixed body."""
+        # Act
+        file_channel.alert("", "Important alert body")
+
+        # Assert
+        content = file_channel.file_path.read_text(encoding="utf-8")
+        assert content == ": Important alert body\n"
+
+    def test_alert__with_empty_body__writes_with_title_only(self, file_channel: FileChannel) -> None:
+        """Test alert writing with empty body results in title with colon."""
+        # Act
+        file_channel.alert("Alert Title", "")
+
+        # Assert
+        content = file_channel.file_path.read_text(encoding="utf-8")
+        assert content == "Alert Title: \n"
+
+    def test_alert__with_newlines_in_content__preserves_formatting(self, file_channel: FileChannel) -> None:
+        """Test alert writing preserves newlines in title and body."""
+        # Act
+        file_channel.alert("Multi\nLine\nTitle", "Multi\nLine\nBody")
+
+        # Assert
+        content = file_channel.file_path.read_text(encoding="utf-8")
+        expected = "Multi\nLine\nTitle: Multi\nLine\nBody\n"
+        assert content == expected
+
+    def test_alert__with_existing_file__appends_to_existing_content(self, file_channel: FileChannel) -> None:
+        """Test alert appends to existing file content."""
+        # Arrange
+        existing_content = "Previous log entry\n"
+        file_channel.file_path.write_text(existing_content, encoding="utf-8")
+
+        # Act
+        file_channel.alert("New Alert", "New message")
+
+        # Assert
+        content = file_channel.file_path.read_text(encoding="utf-8")
+        expected = "Previous log entry\nNew Alert: New message\n"
+        assert content == expected
+
+    def test_alert__with_nonexistent_directory__raises_file_not_found_error(self, tmp_path: Path) -> None:
+        """Test alert raises FileNotFoundError when parent directories don't exist."""
+        # Arrange
+        nested_path = tmp_path / "logs" / "alerts" / "system.log"
+        config = {
+            "id": "nested-alerts",
+            "description": "Nested directory alerts",
+            "channel_type": "file",
+            "file_path": nested_path,
+            "enabled": True,
+        }
+        channel = FileChannel(**config)
+
+        # Assert
+        with pytest.raises(FileNotFoundError):
+            # Act
+            channel.alert("Test Alert", "Test message")
+
+    def test_alert__with_permission_error__raises_os_error(self, file_channel: FileChannel) -> None:
+        """Test alert handling when file writing fails due to permissions."""
+        # Mock open to simulate permission error
+        with patch("builtins.open", mock_open()) as mock_file:
+            mock_file.side_effect = PermissionError("Permission denied")
+
+            # Assert
+            with pytest.raises(PermissionError):
+                # Act
+                file_channel.alert("Test Alert", "Test Body")
+
+    def test_alert__with_disk_full_error__raises_os_error(self, file_channel: FileChannel) -> None:
+        """Test alert handling when file writing fails due to disk space."""
+        # Mock open to simulate disk full error
+        with patch("builtins.open", mock_open()) as mock_file:
+            mock_file.side_effect = OSError(28, "No space left on device")
+
+            # Assert
+            with pytest.raises(OSError):
+                # Act
+                file_channel.alert("Test Alert", "Test Body")
+
+    def test_alert__with_readonly_file__raises_os_error(self, file_channel: FileChannel) -> None:
+        """Test alert handling when file is read-only."""
+        # Arrange - create and make file read-only
+        file_channel.file_path.touch()
+        file_channel.file_path.chmod(0o444)
 
         try:
-            # Create channel with temporary file
-            channel = FileAlertChannel(file_path=temp_file_path)
-
-            # Send an alert
-            channel._alert("Test Alert", "This is a test alert message")
-
-            # Verify the content was written
-            with open(temp_file_path, "r", encoding="utf-8") as file:
-                content = file.read()
-
-            expected_content = "Test Alert: This is a test alert message\n"
-            assert content == expected_content
-
+            # Assert
+            with pytest.raises(PermissionError):
+                # Act
+                file_channel.alert("Test Alert", "Test Body")
         finally:
-            Path(temp_file_path).unlink(missing_ok=True)
-
-    def test_alert_appends_to_existing_file(self) -> None:
-        """Test that _alert appends to existing file content."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".log") as temp_file:
-            temp_file.write("Existing content\n")
-            temp_file_path = temp_file.name
-
-        try:
-            # Create channel with existing file
-            channel = FileAlertChannel(file_path=temp_file_path)
-
-            # Send an alert
-            channel._alert("New Alert", "New alert message")
-
-            # Verify both old and new content exist
-            with open(temp_file_path, "r", encoding="utf-8") as file:
-                content = file.read()
-
-            expected_content = "Existing content\nNew Alert: New alert message\n"
-            assert content == expected_content
-
-        finally:
-            Path(temp_file_path).unlink(missing_ok=True)
-
-    def test_alert_creates_file_if_not_exists(self) -> None:
-        """Test that _alert creates file if it doesn't exist."""
-        with tempfile.TemporaryDirectory() as temp_dir:
-            temp_file_path = Path(temp_dir) / "new_alerts.log"
-
-            # Ensure file doesn't exist
-            assert not temp_file_path.exists()
-
-            # Create channel with non-existent file
-            channel = FileAlertChannel(file_path=str(temp_file_path))
-
-            # Send an alert
-            channel._alert("First Alert", "First alert message")
-
-            # Verify file was created and content written
-            assert temp_file_path.exists()
-
-            with open(temp_file_path, "r", encoding="utf-8") as file:
-                content = file.read()
-
-            expected_content = "First Alert: First alert message\n"
-            assert content == expected_content
-
-    def test_alert_handles_empty_title_and_body(self) -> None:
-        """Test that _alert handles empty title and body gracefully."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".log") as temp_file:
-            temp_file_path = temp_file.name
-
-        try:
-            channel = FileAlertChannel(file_path=temp_file_path)
-
-            # Send alert with empty title and body
-            channel._alert("", "")
-
-            # Verify the content
-            with open(temp_file_path, "r", encoding="utf-8") as file:
-                content = file.read()
-
-            expected_content = ": \n"
-            assert content == expected_content
-
-        finally:
-            Path(temp_file_path).unlink(missing_ok=True)
-
-    def test_alert_handles_special_characters(self) -> None:
-        """Test that _alert handles special characters correctly."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".log") as temp_file:
-            temp_file_path = temp_file.name
-
-        try:
-            channel = FileAlertChannel(file_path=temp_file_path)
-
-            # Send alert with special characters
-            title = "Émergence Crítica!"
-            body = "Message with special chars: àáâãäåæçèé & symbols: @#$%^&*()"
-            channel._alert(title, body)
-
-            # Verify the content
-            with open(temp_file_path, "r", encoding="utf-8") as file:
-                content = file.read()
-
-            expected_content = f"{title}: {body}\n"
-            assert content == expected_content
-
-        finally:
-            Path(temp_file_path).unlink(missing_ok=True)
-
-    def test_alert_handles_multiline_messages(self) -> None:
-        """Test that _alert handles multiline messages correctly."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".log") as temp_file:
-            temp_file_path = temp_file.name
-
-        try:
-            channel = FileAlertChannel(file_path=temp_file_path)
-
-            # Send alert with multiline body
-            title = "Multi-line Alert"
-            body = "Line 1\nLine 2\nLine 3"
-            channel._alert(title, body)
-
-            # Verify the content
-            with open(temp_file_path, "r", encoding="utf-8") as file:
-                content = file.read()
-
-            expected_content = f"{title}: {body}\n"
-            assert content == expected_content
-
-        finally:
-            Path(temp_file_path).unlink(missing_ok=True)
-
-    def test_alert_raises_error_for_invalid_path(self) -> None:
-        """Test that _alert raises OSError for invalid file paths."""
-        # Use an invalid path (directory that doesn't exist)
-        channel = FileAlertChannel(file_path="/non/existent/directory/alerts.log")
-
-        with pytest.raises(OSError):
-            channel._alert("Test Alert", "Test message")
-
-    def test_alert_raises_error_for_permission_denied(self):
-        """Test that _alert raises OSError when permission is denied."""
-        # Try to write to a read-only directory (if available on system)
-        channel = FileAlertChannel(file_path="/proc/alerts.log")
-
-        with pytest.raises(OSError):
-            channel._alert("Test Alert", "Test message")
-
-    def test_multiple_alerts_to_same_file(self) -> None:
-        """Test multiple sequential alerts to the same file."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".log") as temp_file:
-            temp_file_path = temp_file.name
-
-        try:
-            channel = FileAlertChannel(file_path=temp_file_path)
-
-            # Send multiple alerts
-            channel._alert("Alert 1", "Message 1")
-            channel._alert("Alert 2", "Message 2")
-            channel._alert("Alert 3", "Message 3")
-
-            # Verify all content
-            with open(temp_file_path, "r", encoding="utf-8") as file:
-                content = file.read()
-
-            expected_lines = [
-                "Alert 1: Message 1",
-                "Alert 2: Message 2",
-                "Alert 3: Message 3",
-                "",  # Final newline creates empty string when split
-            ]
-            actual_lines = content.split("\n")
-            assert actual_lines == expected_lines
-
-        finally:
-            Path(temp_file_path).unlink(missing_ok=True)
-
-    def test_alert_method_delegates_to_internal_alert(self) -> None:
-        """Test that the public alert method delegates to _alert correctly."""
-        with tempfile.NamedTemporaryFile(mode="w", delete=False, suffix=".log") as temp_file:
-            temp_file_path = temp_file.name
-
-        try:
-            channel = FileAlertChannel(file_path=temp_file_path)
-
-            # Use the public alert method
-            channel.alert("Public Alert", "Public message")
-
-            # Verify the content was written
-            with open(temp_file_path, "r", encoding="utf-8") as file:
-                content = file.read()
-
-            expected_content = "Public Alert: Public message\n"
-            assert content == expected_content
-
-        finally:
-            Path(temp_file_path).unlink(missing_ok=True)
+            # Cleanup - restore write permissions for cleanup
+            file_channel.file_path.chmod(0o644)

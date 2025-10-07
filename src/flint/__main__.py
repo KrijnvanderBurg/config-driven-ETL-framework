@@ -3,16 +3,14 @@
 Handles CLI argument parsing, command dispatch, and process exit.
 """
 
-import logging
 import sys
 from argparse import ArgumentParser
 from importlib.metadata import version
 
-from flint.cli import JobCommand, ValidateCommand
-from flint.utils.logger import get_logger, set_logger
+from flint.cli import RunCommand, ValidateCommand
+from flint.utils.logger import get_logger
 
-set_logger()  # Configure root logger for all modules
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 def main() -> int:
@@ -37,7 +35,7 @@ def main() -> int:
 
     # Register subcommands
     ValidateCommand.add_subparser(subparsers=subparsers)
-    JobCommand.add_subparser(subparsers=subparsers)
+    RunCommand.add_subparser(subparsers=subparsers)
     args = parser.parse_args()
 
     if args.command == "validate":
@@ -47,10 +45,10 @@ def main() -> int:
 
     if args.command == "run":
         logger.info("Running 'run' command...")
-        run_command = JobCommand.from_args(args)
+        run_command = RunCommand.from_args(args)
         return run_command.execute()
 
-    raise NotImplementedError(f"Unknown command '{args.command}'.")
+    raise ValueError(f"Unknown command '{args.command}'.")
 
 
 if __name__ == "__main__":

@@ -1,49 +1,87 @@
 {
-    "job": {
-        "extracts": [
-            {
-                "name": "extract-dropduplicates-test",
-                "data_format": "csv",
-                "location": "tests/e2e/job/dropduplicates/input_data.csv",
-                "method": "batch",
-                "options": {
-                    "delimiter": ",",
-                    "header": true,
-                    "inferSchema": false
-                },
-                "schema": "tests/e2e/job/dropduplicates/input_schema.json"
-            }
-        ],
-        "transforms": [
-            {
-                "name": "transform-dropduplicates-test",
-                "upstream_name": "extract-dropduplicates-test",
-                "options": {},
-                "functions": [
-                    { "function": "dropDuplicates", "arguments": { 
-                            "columns": ["category", "product", "customer_region"]
-                        }
-                    }
-                ]
-            }
-        ],
-        "loads": [
-            {
-                "name": "load-test",
-                "upstream_name": "transform-dropduplicates-test",
-                "data_format": "csv",
-                "location": "tests/e2e/job/dropduplicates/load-test",
-                "method": "batch",
-                "mode": "overwrite",
-                "options": {
-                    "header": true
-                },
-                "schema_location": "tests/e2e/job/dropduplicates/schema_output.json"
-            }
-        ]
-    },
     "alert": {
         "channels": [],
         "triggers": []
+    },
+    "runtime": {
+        "id": "test-runtime",
+        "description": "",
+        "enabled": true,
+        "jobs": [
+            {
+                "id": "test-job",
+                "description": "",
+                "enabled": true,
+                "engine_type": "spark",
+                "extracts": [
+                    {
+                        "id": "extract-dropduplicates-test",
+                        "extract_type": "file",
+                        "data_format": "csv",
+                        "location": "tests/e2e/job/dropduplicates/extract-dropduplicates-test/input_data.csv",
+                        "method": "batch",
+                        "options": {
+                            "delimiter": ",",
+                            "header": true,
+                            "inferSchema": false
+                        },
+                        "schema": "tests/e2e/job/dropduplicates/extract-dropduplicates-test/input_schema.json"
+                    }
+                ],
+                "transforms": [
+                    {
+                        "id": "transform-dropduplicates-with-columns",
+                        "upstream_id": "extract-dropduplicates-test",
+                        "options": {},
+                        "functions": [
+                            {
+                                "function_type": "dropDuplicates",
+                                "arguments": {
+                                    "columns": [
+                                        "category",
+                                        "product",
+                                        "customer_region"
+                                    ]
+                                }
+                            }
+                        ]
+                    },
+                    {
+                        "id": "transform-dropduplicates-test",
+                        "upstream_id": "transform-dropduplicates-with-columns",
+                        "options": {},
+                        "functions": [
+                            {
+                                "function_type": "dropDuplicates",
+                                "arguments": {
+                                    "columns": []
+                                }
+                            }
+                        ]
+                    }
+                ],
+                "loads": [
+                    {
+                        "id": "load-test",
+                        "upstream_id": "transform-dropduplicates-test",
+                        "load_type": "file",
+                        "data_format": "csv",
+                        "location": "tests/e2e/job/dropduplicates/load-test",
+                        "method": "batch",
+                        "mode": "overwrite",
+                        "options": {
+                            "header": true
+                        },
+                        "schema_export": "tests/e2e/job/dropduplicates/schema_export.json"
+                    }
+                ],
+                "hooks": {
+                    "onStart": [],
+                    "onError": [],
+                    "onSuccess": [],
+                    "onFinally": []
+                }
+            }
+        ]
     }
 }

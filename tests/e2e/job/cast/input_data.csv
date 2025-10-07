@@ -1,5 +1,0 @@
-id,name,age,price,is_active,join_date
-1,John,25.0,19.99,true,2022-01-15
-2,Sarah,30.5,49.95,true,2022-03-20
-3,Mike,42.0,9.99,false,2022-02-10
-4,Lisa,28.0,29.99,true,2022-04-05

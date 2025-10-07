@@ -1,82 +1,31 @@
-"""
-Test module for the main function.
-"""
+"""E2E test module for job execution."""
 
-import argparse
 import glob
-import json
 from pathlib import Path
-from unittest import mock
 
 import pytest
-from pyspark.sql.types import StructType
-from pyspark.testing import assertDataFrameEqual
 
-from flint.__main__ import main
-from flint.job.core.job import JOB, LOADS
-from flint.job.core.load import DATA_FORMAT, LOCATION, SCHEMA_LOCATION
-from flint.utils.spark import SparkHandler
+from tests.e2e.framework.executor import JobTestExecutor
+from tests.e2e.framework.verifier import ResultVerifier
 
 
-@pytest.mark.parametrize("job_path", glob.glob("tests/e2e/job/**/job.json", recursive=True))
-def test_job_command(tmp_path: Path, job_path: str) -> None:
-    """Test main function with different configurations."""
-    # Arrange
-    job_tmp_path = Path(tmp_path, "job.json")
+class TestJobExecution:
+    """E2E tests for job execution via CLI."""
 
-    # Step 1: Read the original JSON file
-    with open(file=job_path, mode="r", encoding="utf-8") as file:
-        data: dict = json.load(file)
+    @pytest.mark.parametrize("job_path", glob.glob("tests/e2e/job/**/job.json", recursive=True))
+    def test_job_command__execute_and_verify__matches_expected_output(self, tmp_path: Path, job_path: str) -> None:
+        """Test job execution produces expected outputs.
 
-    # Step 2: Prepend the load location filepath with tmp_path to write results to temporary directory
-    for load in data[JOB][LOADS]:
-        load[LOCATION] = str(Path(tmp_path, load[LOCATION]))
-        load[SCHEMA_LOCATION] = str(Path(tmp_path, load[SCHEMA_LOCATION]))
+        Args:
+            tmp_path: Pytest temporary directory fixture
+            job_path: Path to job.json configuration file
+        """
+        job_path_obj = Path(job_path)
 
-    # Step 3: Overwrite the modified data to the existing JSON file
-    with open(file=job_tmp_path, mode="w", encoding="utf-8") as file:
-        json.dump(data, file)
+        # Execute job in isolated environment
+        executor = JobTestExecutor(job_path_obj, tmp_path)
+        isolated_config = executor.execute()
 
-    # Step 4: Use the modified file path for the test
-    # Include the command="run" argument to match the new CLI structure
-    args = argparse.Namespace(config_filepath=str(job_tmp_path), command="run", log_level="INFO")
-
-    with mock.patch.object(argparse.ArgumentParser, "parse_args", return_value=args):
-        # Act
-        main()
-
-        # Assert
-        for load in data[JOB][LOADS]:
-            test_output_path_relative = Path(load[LOCATION]).relative_to(tmp_path)
-
-            load_output_actual = Path(load[LOCATION])
-            load_output_expected = Path(test_output_path_relative, "expected_output").with_suffix(
-                f".{load[DATA_FORMAT]}"
-            )
-
-            # Step 5: Read the content of both files into DataFrames
-            schema_path_actual = Path(load[SCHEMA_LOCATION])
-            with open(schema_path_actual, "r", encoding="utf-8") as file:
-                json_content = json.load(fp=file)
-            schema_actual = StructType.fromJson(json=json_content)
-
-            expected_schema_path = Path(test_output_path_relative, "expected_schema").with_suffix(".json")
-            with open(expected_schema_path, "r", encoding="utf-8") as file:
-                json_content = json.load(fp=file)
-            schema_expected = StructType.fromJson(json=json_content)
-
-            # Step 6: Compare actual and expected DataFrames
-            df_actual = (
-                SparkHandler()
-                .session.read.format(load[DATA_FORMAT])
-                .schema(schema_actual)
-                .load(str(load_output_actual))
-            )
-            df_expected = (
-                SparkHandler()
-                .session.read.format(load[DATA_FORMAT])
-                .schema(schema_expected)
-                .load(str(load_output_expected))
-            )
-
-            assertDataFrameEqual(actual=df_actual, expected=df_expected)
+        # Verify outputs match expected results
+        verifier = ResultVerifier(job_path_obj.parent)
+        verifier.verify_outputs(isolated_config)
