@@ -8,30 +8,30 @@
                 "id": "bronze",
                 "description": "",
                 "enabled": true,
-                "engine_type": "spark",
+                "engine_type": "spark", // Specifies the processing engine to use
                 "extracts": [
                     {
                         "id": "extract-customers",
-                        "extract_type": "file",
-                        "data_format": "csv",
-                        "location": "examples/join_select/customers/",
-                        "method": "batch",
+                        "extract_type": "file", // Read from file system
+                        "data_format": "csv", // CSV input format
+                        "location": "examples/join_select/customers/", // Source directory
+                        "method": "batch", // Process all files at once
                         "options": {
-                            "delimiter": ",",
-                            "header": true,
-                            "inferSchema": false
+                            "delimiter": ",", // CSV delimiter character
+                            "header": true, // First row contains column names
+                            "inferSchema": false // Use provided schema instead of inferring
                         },
-                        "schema": "examples/join_select/customers_schema.json"
+                        "schema": "examples/join_select/customers_schema.json" // Path to schema definition
                     },
                     {
                         "id": "extract-orders",
                         "extract_type": "file",
-                        "data_format": "json",
+                        "data_format": "json", // JSON input format
                         "location": "examples/join_select/orders/",
                         "method": "batch",
                         "options": {
-                            "multiLine": true,
-                            "inferSchema": false
+                            "multiLine": true, // Each JSON object may span multiple lines
+                            "inferSchema": false // Use provided schema instead of inferring
                         },
                         "schema": "examples/join_select/orders_schema.json"
                     }
@@ -39,33 +39,45 @@
                 "transforms": [
                     {
                         "id": "transform-join-orders",
-                        "upstream_id": "extract-customers",
+                        "upstream_id": "extract-customers", // First input dataset from extract stage
                         "options": {},
                         "functions": [
-                            {"function_type": "join", "arguments": { "other_upstream_id": "extract-orders", "on": ["customer_id"], "how": "inner"}},
-                            {"function_type": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]}}
+                            {
+                                "function_type": "join", // Join customers with orders
+                                "arguments": { 
+                                    "other_upstream_id": "extract-orders", // Second dataset to join
+                                    "on": ["customer_id"], // Join key
+                                    "how": "inner" // Join type (inner, left, right, full)
+                                }
+                            },
+                            {
+                                "function_type": "select", // Select only specific columns
+                                "arguments": {
+                                    "columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]
+                                }
+                            }
                         ]
                     }
                 ],
                 "loads": [
                     {
                         "id": "load-customer-orders",
-                        "upstream_id": "transform-join-orders",
-                        "load_type": "file",
-                        "data_format": "csv",
-                        "location": "examples/join_select/output",
-                        "method": "batch",
-                        "mode": "overwrite",
+                        "upstream_id": "transform-join-orders", // Input dataset for this load
+                        "load_type": "file", // Write to file system
+                        "data_format": "csv", // Output as CSV
+                        "location": "examples/join_select/output", // Output directory
+                        "method": "batch", // Write all data at once
+                        "mode": "overwrite", // Replace existing files if any
                         "options": {
-                            "header": true
+                            "header": true // Include header row with column names
                         },
-                        "schema_export": ""
+                        "schema_export": "" // No schema export
                     }
                 ],
                 "hooks": {
-                    "onStart": [],
-                    "onFailure": [],
-                    "onSuccess": [
+                    "onStart": [], // Actions to execute before pipeline starts
+                    "onFailure": [], // Actions to execute if pipeline fails
+                    "onSuccess": [  // Actions to execute if pipeline succeeds
                         {
                             "id": "notify-data-is-ready",
                             "description": "",
@@ -84,32 +96,7 @@
                             }
                         }
                     ],
-                    "onFinally": [
-                        // {
-                        //     "id": "archive-processed-files",
-                        //     "description": "",
-                        //     "enabled": true,
-                        //     "action_type": "move_or_copy_job_files",
-                        //     "operation": "move",                        // allowed: "move" | "copy"
-                        //     "source_location": "incoming/daily/",       // filepath, directory, or "dataframe"
-                        //     "destination_location": "archive/daily/",   // filepath or directory (base target)
-                        //     "hierarchy_base_path": "incoming/daily/",   // optional; root used when preserving source hierarchy
-                        //     "duplicate_handling": {
-                        //         "dedupe_by": ["size", "checksum"],      // options: "checksum" | "size"
-                        //         "on_match": "skip",                     // destination already exists and is identical -> allowed: "overwrite" | "version"
-                        //         "on_mismatch": "version",               // destination already exists but is not identical -> allowed: "overwrite" | "version" | "fail" | "notify"
-                        //         "checksum": {
-                        //             "algorithm": "sha256",              // allowed: "md5", "sha1", "sha256"
-                        //             "chunk_size_bytes": 65536,          // default 65536 (64 KiB)
-                        //             "verify_checksum_after_transfer": false    // optional post-transfer verification
-                        //         },
-                        //         "version": {
-                        //             "datetime_format": "yyyyMMddHHmmss", // format applied when creating versioned filenames
-                        //             "timestamp_timezone": "UTC"
-                        //         }
-                        //     }
-                        // }
-                    ]
+                    "onFinally": [] // Actions to execute after pipeline completes (success or failure)
                 }
             }
         ]
