@@ -11,6 +11,13 @@ Complete reference for Flint's command-line interface with commands for:
 
 Includes supported options, environment variables, and exit codes for troubleshooting.
 
+## [Architecture](./architecture.md)
+Understand Flint's design principles and how the framework processes pipelines:
+- Design Principles: Type safety, engine agnosticism, composability, and other core concepts
+- Pipeline Execution Flow: How configurations are parsed and executed
+- Component Structure: Class relationships and system organization
+- Extension Mechanisms: How to extend Flint with custom transforms
+
 ## Core Systems
 Flint's architecture consists of two integrated systems that work together through configuration:
 
