@@ -4,8 +4,8 @@ This document explains how to install the framework, run your first data pipelin
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/krijnvanderburg/config-driven-pyspark-framework.git
-cd config-driven-pyspark-framework
+git clone https://github.com/krijnvanderburg/config-driven-ETL-framework.git
+cd config-driven-ETL-framework
 
 # Install dependencies
 poetry install
