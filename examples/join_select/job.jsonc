@@ -1,0 +1,117 @@
+{
+    "runtime": {
+        "id": "customer-orders-pipeline",
+        "description": "ETL pipeline for processing customer orders data",
+        "enabled": true,
+        "jobs": [
+            {
+                "id": "bronze",
+                "description": "",
+                "enabled": true,
+                "engine_type": "spark",
+                "extracts": [
+                    {
+                        "id": "extract-customers",
+                        "extract_type": "file",
+                        "data_format": "csv",
+                        "location": "examples/join_select/customers/",
+                        "method": "batch",
+                        "options": {
+                            "delimiter": ",",
+                            "header": true,
+                            "inferSchema": false
+                        },
+                        "schema": "examples/join_select/customers_schema.json"
+                    },
+                    {
+                        "id": "extract-orders",
+                        "extract_type": "file",
+                        "data_format": "json",
+                        "location": "examples/join_select/orders/",
+                        "method": "batch",
+                        "options": {
+                            "multiLine": true,
+                            "inferSchema": false
+                        },
+                        "schema": "examples/join_select/orders_schema.json"
+                    }
+                ],
+                "transforms": [
+                    {
+                        "id": "transform-join-orders",
+                        "upstream_id": "extract-customers",
+                        "options": {},
+                        "functions": [
+                            {"function_type": "join", "arguments": { "other_upstream_id": "extract-orders", "on": ["customer_id"], "how": "inner"}},
+                            {"function_type": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]}}
+                        ]
+                    }
+                ],
+                "loads": [
+                    {
+                        "id": "load-customer-orders",
+                        "upstream_id": "transform-join-orders",
+                        "load_type": "file",
+                        "data_format": "csv",
+                        "location": "examples/join_select/output",
+                        "method": "batch",
+                        "mode": "overwrite",
+                        "options": {
+                            "header": true
+                        },
+                        "schema_export": ""
+                    }
+                ],
+                "hooks": {
+                    "onStart": [],
+                    "onFailure": [],
+                    "onSuccess": [
+                        {
+                            "id": "notify-data-is-ready",
+                            "description": "",
+                            "enabled": true,
+                            "action_type": "http",
+                            "url": "https://hooks.slack.com",
+                            "method": "POST",
+                            "headers": {
+                                "Content-Type": "application/json"
+                            },
+                            "payload": {},
+                            "timeout": 30,
+                            "retry": {
+                                "max_attempts": 3,
+                                "delay_in_seconds": 30
+                            }
+                        }
+                    ],
+                    "onFinally": [
+                        // {
+                        //     "id": "archive-processed-files",
+                        //     "description": "",
+                        //     "enabled": true,
+                        //     "action_type": "move_or_copy_job_files",
+                        //     "operation": "move",                        // allowed: "move" | "copy"
+                        //     "source_location": "incoming/daily/",       // filepath, directory, or "dataframe"
+                        //     "destination_location": "archive/daily/",   // filepath or directory (base target)
+                        //     "hierarchy_base_path": "incoming/daily/",   // optional; root used when preserving source hierarchy
+                        //     "duplicate_handling": {
+                        //         "dedupe_by": ["size", "checksum"],      // options: "checksum" | "size"
+                        //         "on_match": "skip",                     // destination already exists and is identical -> allowed: "overwrite" | "version"
+                        //         "on_mismatch": "version",               // destination already exists but is not identical -> allowed: "overwrite" | "version" | "fail" | "notify"
+                        //         "checksum": {
+                        //             "algorithm": "sha256",              // allowed: "md5", "sha1", "sha256"
+                        //             "chunk_size_bytes": 65536,          // default 65536 (64 KiB)
+                        //             "verify_checksum_after_transfer": false    // optional post-transfer verification
+                        //         },
+                        //         "version": {
+                        //             "datetime_format": "yyyyMMddHHmmss", // format applied when creating versioned filenames
+                        //             "timestamp_timezone": "UTC"
+                        //         }
+                        //     }
+                        // }
+                    ]
+                }
+            }
+        ]
+    }
+}

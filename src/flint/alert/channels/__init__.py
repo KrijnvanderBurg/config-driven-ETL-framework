@@ -5,13 +5,27 @@ including email, HTTP webhooks, and file-based alerts. Each channel
 implements a common interface for consistent configuration and usage.
 
 Available Channels:
-- EmailAlertChannel: SMTP-based email alerts
-- HttpAlertChannel: HTTP webhook alerts
-- FileAlertChannel: File-based logging alerts
+- EmailChannel: SMTP-based email alerts
+- HttpChannel: HTTP webhook alerts
+- FileChannel: File-based logging alerts
 """
 
-from flint.alert.channels.email import EmailAlertChannel
-from flint.alert.channels.file import FileAlertChannel
-from flint.alert.channels.http import HttpAlertChannel
+import logging
+from typing import Annotated
 
-__all__ = ["EmailAlertChannel", "HttpAlertChannel", "FileAlertChannel"]
+from pydantic import Discriminator
+
+from flint.alert.channels.base import ChannelModel
+from flint.alert.channels.email import EmailChannel
+from flint.alert.channels.file import FileChannel
+from flint.alert.channels.http import HttpChannel
+from flint.utils.logger import get_logger
+
+logger: logging.Logger = get_logger(__name__)
+
+__all__ = ["ChannelModel", "ChannelUnion"]
+
+ChannelUnion = Annotated[
+    EmailChannel | HttpChannel | FileChannel,
+    Discriminator("channel_type"),
+]

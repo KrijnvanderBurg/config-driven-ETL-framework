@@ -1,8 +1,8 @@
 id,category,product,quantity,customer_region
 1,Electronics,Laptop,1,North
-2,Electronics,Laptop,2,South
 4,Furniture,Chair,4,East
-5,Furniture,Table,1,West
 6,Furniture,Chair,2,North
+2,Electronics,Laptop,2,South
 7,Electronics,Phone,3,South
 8,Clothing,Shirt,2,East
+5,Furniture,Table,1,West

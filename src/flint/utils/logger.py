@@ -1,60 +1,44 @@
-"""Logging utilities for the ingestion framework.
-
-This module provides standardized logging configuration for the framework,
-with support for both console and file-based logging with rotation.
-"""
+"""Structured logging utilities for the Flint framework."""
 
 import logging
 import os
-from logging.handlers import RotatingFileHandler
-from sys import stdout
+from typing import Any
 
-FORMATTER = logging.Formatter("%(asctime)s — %(name)s — %(levelname)s — %(message)s")
+import structlog
 
 
-def set_logger(name: str | None = None, filename: str = "flint.log", level: str | None = None) -> logging.Logger:
-    """
-    Configure and return a logger with file and console handlers.
+def set_logger(name: str | None = None, level: str | None = None) -> structlog.BoundLogger:
+    """Configure and return a structured logger with console output only."""
+    # Get log level from environment variables with fallback
+    log_level = level or os.environ.get("FLINT_LOG_LEVEL") or os.environ.get("LOG_LEVEL") or "INFO"
 
-    Args:
-        name: The name for the logger, or None for the root logger.
-        filename: Path to the log file (defaults to "flint.log").
-        level: The logging level as a string (e.g., "INFO", "DEBUG"). If not provided, uses environment
-            variables or defaults to "INFO".
-
-    Returns:
-        logging.Logger: A configured Logger instance ready to use.
-    """
-    level = level or os.getenv("FLINT_LOG_LEVEL") or os.getenv("LOG_LEVEL") or "INFO"
-    logger = logging.getLogger(name)
-    logger.setLevel(level)
-
-    if not logger.handlers:
-        rotating_handler = RotatingFileHandler(
-            filename=filename,
-            maxBytes=5 * 1024 * 1024,
-            backupCount=10,
+    # Configure structlog only once
+    if not structlog.is_configured():
+        structlog.configure(
+            processors=[
+                structlog.contextvars.merge_contextvars,
+                structlog.processors.TimeStamper(fmt="ISO"),
+                structlog.processors.add_log_level,
+                structlog.dev.ConsoleRenderer(colors=True),
+            ],
+            wrapper_class=structlog.make_filtering_bound_logger(log_level),
+            logger_factory=structlog.PrintLoggerFactory(),
+            cache_logger_on_first_use=True,
         )
-        rotating_handler.setFormatter(FORMATTER)
-        rotating_handler.setLevel(level)
-        logger.addHandler(rotating_handler)
 
-        console_handler = logging.StreamHandler(stream=stdout)
-        console_handler.setLevel(level)
-        console_handler.setFormatter(FORMATTER)
-        logger.addHandler(console_handler)
-
-    return logger
+    return structlog.get_logger(name)
 
 
 def get_logger(name: str) -> logging.Logger:
-    """
-    Get an existing logger instance by name.
+    """Get a structured logger instance."""
+    return structlog.get_logger(name)
 
-    Args:
-        name (str): Name of the logger to retrieve.
 
-    Returns:
-        logging.Logger: The requested logger instance.
-    """
-    return logging.getLogger(name)
+def bind_context(**context: Any) -> None:
+    """Bind context variables to all subsequent log messages."""
+    structlog.contextvars.bind_contextvars(**context)
+
+
+def clear_context() -> None:
+    """Clear all bound context variables."""
+    structlog.contextvars.clear_contextvars()

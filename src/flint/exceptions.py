@@ -11,7 +11,7 @@ Custom exceptions help with:
 """
 
 import enum
-from typing import Any, TypeVar
+from typing import TypeVar
 
 K = TypeVar("K")  # Key type
 
@@ -33,7 +33,10 @@ class ExitCode(enum.IntEnum):
     INVALID_ARGUMENTS = 10
     IO_ERROR = 20
     CONFIGURATION_ERROR = 30
+    ALERT_CONFIGURATION_ERROR = 31
+    RUNTIME_CONFIGURATION_ERROR = 32
     VALIDATION_ERROR = 40
+    ALERT_TEST_ERROR = 41
     JOB_ERROR = 50
     KEYBOARD_INTERRUPT = 98
     UNEXPECTED_ERROR = 99
@@ -90,7 +93,7 @@ class FlintIOError(FlintError):
         super().__init__(message=message, exit_code=ExitCode.IO_ERROR)
 
 
-class FlintConfigurationError(FlintError):
+class FlintAlertConfigurationError(FlintError):
     """Exception raised for configuration-related errors."""
 
     def __init__(self, message: str) -> None:
@@ -102,27 +105,16 @@ class FlintConfigurationError(FlintError):
         super().__init__(message=message, exit_code=ExitCode.CONFIGURATION_ERROR)
 
 
-class FlintConfigurationKeyError(FlintConfigurationError):
-    """Exception raised when a key is missing from configuration dictionaries.
+class FlintRuntimeConfigurationError(FlintError):
+    """Exception raised for configuration-related errors."""
 
-    This exception provides more detailed context about missing keys in configuration
-    dictionaries, showing all available keys to help diagnose configuration issues.
-
-    Attributes:
-        key: The key that was not found
-        available_keys: List of keys that are available in the dictionary
-    """
-
-    def __init__(self, key: K, dict_: dict[K, Any]) -> None:
-        """Initialize ConfigurationKeyError with the missing key and available keys.
+    def __init__(self, message: str) -> None:
+        """Initialize ConfigurationError.
 
         Args:
-            key: The key that was not found
-            dict_: The dictionary that was being accessed
+            message: The exception message
         """
-        self.key = key
-        self.available_keys = list(dict_.keys())
-        super().__init__(f"Missing configuration key: '{key}'. Available keys: {self.available_keys}")
+        super().__init__(message=message, exit_code=ExitCode.CONFIGURATION_ERROR)
 
 
 class FlintValidationError(FlintError):
@@ -135,6 +127,18 @@ class FlintValidationError(FlintError):
             message: The exception message
         """
         super().__init__(message=message, exit_code=ExitCode.VALIDATION_ERROR)
+
+
+class FlintAlertTestError(FlintError):
+    """Exception raised for validation failures."""
+
+    def __init__(self, message: str) -> None:
+        """Initialize ValidationError.
+
+        Args:
+            message: The exception message
+        """
+        super().__init__(message=message, exit_code=ExitCode.ALERT_TEST_ERROR)
 
 
 class FlintJobError(FlintError):

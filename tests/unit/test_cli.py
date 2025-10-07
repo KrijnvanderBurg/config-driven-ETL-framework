@@ -1,435 +1,346 @@
-"""
-Unit tests for Flint CLI commands.
+"""Unit tests for the Flint CLI module."""
 
-This module tests the CLI command structure, argument parsing, error handling,
-and command execution workflow. Tests are organized to minimize duplication
-and maximize maintainability.
-"""
-
+import os
 from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
 
-from flint.__main__ import main
-from flint.cli import Command, JobCommand, ValidateCommand
-from flint.exceptions import ExitCode, FlintConfigurationError, FlintIOError, FlintJobError, FlintValidationError
-
-
-# Test fixtures to reduce duplication
-@pytest.fixture
-def mock_config_path() -> Path:
-    """Provide a standard config file path for testing."""
-    return Path("/tmp/test_config.json")
-
-
-@pytest.fixture
-def mock_alert_manager():
-    """Provide a mocked AlertManager for testing."""
-    with patch("flint.cli.AlertManager") as mock_class:
-        mock_instance = Mock()
-        mock_class.from_file.return_value = mock_instance
-        yield mock_instance
-
-
-@pytest.fixture
-def mock_job():
-    """Provide a mocked Job for testing."""
-    with patch("flint.cli.Job") as mock_class:
-        mock_instance = Mock()
-        mock_class.from_file.return_value = mock_instance
-        yield mock_instance
-
-
-@pytest.fixture
-def sample_namespace() -> Namespace:
-    """Provide a sample Namespace for argument testing."""
-    return Namespace(config_filepath="/tmp/test.json")
-
-
-class TestCommandBase:
-    """Base test class for common command testing patterns."""
-
-    def _test_command_init(self, command_class: type[Command], config_path: Path) -> None:
-        """Helper to test command initialization."""
-        cmd = command_class(config_filepath=config_path)
-        assert cmd.config_filepath == config_path
-
-    def _test_from_args(self, command_class: type[Command], namespace: Namespace) -> None:
-        """Helper to test command creation from args."""
-        cmd = command_class.from_args(namespace)
-        assert isinstance(cmd, command_class)
-        assert cmd.config_filepath == Path(namespace.config_filepath)
+from flint.alert import AlertController
+from flint.cli import RunCommand, ValidateCommand
+from flint.exceptions import (
+    ExitCode,
+    FlintAlertConfigurationError,
+    FlintIOError,
+    FlintJobError,
+    FlintRuntimeConfigurationError,
+    FlintValidationError,
+)
+from flint.runtime.controller import RuntimeController
 
 
 class TestCommand:
-    """Unit tests for the abstract Command base class."""
+    """Test cases for the base Command class."""
 
-    def test_command_is_abstract(self) -> None:
-        """Test that Command cannot be instantiated directly."""
-        with pytest.raises(TypeError, match="Can't instantiate abstract class Command"):
-            Command()  # type: ignore
+    def test_execute__with_keyboard_interrupt__returns_keyboard_interrupt_exit_code(self) -> None:
+        """Test Command.execute handles KeyboardInterrupt correctly."""
+        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
 
-    @pytest.mark.parametrize(
-        "exception,expected_exit_code",
-        [
-            (NotImplementedError("Test not implemented"), ExitCode.UNEXPECTED_ERROR),
-            (KeyboardInterrupt("User cancelled"), ExitCode.KEYBOARD_INTERRUPT),
-            (ValueError("Unexpected error"), ExitCode.UNEXPECTED_ERROR),
-            (RuntimeError("Runtime error"), ExitCode.UNEXPECTED_ERROR),
-        ],
-    )
-    def test_execute_handles_exceptions(self, exception: Exception, expected_exit_code: ExitCode) -> None:
-        """Test that execute handles various exceptions correctly."""
+        with patch.object(AlertController, "from_file", side_effect=KeyboardInterrupt):
+            result = command.execute()
 
-        class TestCommand(Command):
-            @staticmethod
-            def add_subparser(subparsers):
-                pass
+        assert result == ExitCode.KEYBOARD_INTERRUPT
 
-            @classmethod
-            def from_args(cls, args):
-                return cls()
+    def test_execute__with_unexpected_exception__returns_unexpected_error_exit_code(self) -> None:
+        """Test Command.execute handles unexpected exceptions correctly."""
+        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
 
-            def _execute(self) -> ExitCode:
-                raise exception
+        with patch.object(AlertController, "from_file", side_effect=RuntimeError):
+            result = command.execute()
 
-        cmd = TestCommand()
-        result = cmd.execute()
-        assert result == expected_exit_code
+        assert result == ExitCode.UNEXPECTED_ERROR
 
-    def test_execute_returns_success_code(self) -> None:
-        """Test that execute returns the success code from _execute."""
+    def test_execute__with_not_implemented_error__returns_unexpected_error_exit_code(self) -> None:
+        """Test Command.execute handles NotImplementedError correctly."""
+        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
 
-        class TestCommand(Command):
-            @staticmethod
-            def add_subparser(subparsers):
-                pass
+        with patch.object(AlertController, "from_file", side_effect=NotImplementedError):
+            result = command.execute()
 
-            @classmethod
-            def from_args(cls, args):
-                return cls()
-
-            def _execute(self) -> ExitCode:
-                return ExitCode.SUCCESS
-
-        cmd = TestCommand()
-        result = cmd.execute()
-        assert result == ExitCode.SUCCESS
+        assert result == ExitCode.UNEXPECTED_ERROR
 
 
-class TestJobCommand(TestCommandBase):
-    """Unit tests for JobCommand."""
+class TestValidateCommand:
+    """Test cases for ValidateCommand."""
 
-    def test_init_sets_config_filepath(self, mock_config_path: Path) -> None:
-        """Test config_filepath is set on init."""
-        self._test_command_init(JobCommand, mock_config_path)
+    def test_validate_command_add_subparser__registers_correctly(self) -> None:
+        """Test ValidateCommand.add_subparser registers the validate subcommand correctly."""
 
-    def test_from_args_sets_config_filepath(self, sample_namespace: Namespace) -> None:
-        """Test from_args sets config_filepath."""
-        self._test_from_args(JobCommand, sample_namespace)
-
-    def test_add_subparser_registers_run_command(self) -> None:
-        """Test that add_subparser properly registers the run command."""
         parser = ArgumentParser()
-        subparsers = parser.add_subparsers(dest="command")
+        subparsers = parser.add_subparsers()
 
-        JobCommand.add_subparser(subparsers)
+        ValidateCommand.add_subparser(subparsers)
 
-        # Test that 'run' command is registered
-        args = parser.parse_args(["run", "--config-filepath", "/test/config.json"])
-        assert args.command == "run"
-        assert args.config_filepath == "/test/config.json"
+        # Parse arguments to verify the subcommand was registered correctly
+        args = parser.parse_args(
+            ["validate", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
+        )
 
-    def test_execute_success(self, mock_config_path: Path, mock_alert_manager: Mock, mock_job: Mock) -> None:
-        """Test successful execution of JobCommand."""
-        cmd = JobCommand(config_filepath=mock_config_path)
-        result = cmd._execute()
+        assert args.alert_filepath == "/test/alert.json"
+        assert args.runtime_filepath == "/test/runtime.json"
+
+    def test_from_args__with_basic_args__creates_command_correctly(self) -> None:
+        """Test ValidateCommand.from_args creates command with basic arguments."""
+        args = Namespace(
+            alert_filepath="/path/to/alert.json",
+            runtime_filepath="/path/to/runtime.json",
+            test_exception=None,
+            test_env_var=None,
+        )
+
+        command = ValidateCommand.from_args(args)
+
+        assert command.alert_filepath == Path("/path/to/alert.json")
+        assert command.runtime_filepath == Path("/path/to/runtime.json")
+        assert command.test_exception_message is None
+        assert command.test_env_vars is None
+
+    def test_from_args__with_test_exception__creates_command_correctly(self) -> None:
+        """Test ValidateCommand.from_args with test exception message."""
+        args = Namespace(
+            alert_filepath="/path/to/alert.json",
+            runtime_filepath="/path/to/runtime.json",
+            test_exception="Test error message",
+            test_env_var=None,
+        )
+
+        command = ValidateCommand.from_args(args)
+
+        assert command.test_exception_message == "Test error message"
+
+    def test_from_args__with_test_env_vars__creates_command_correctly(self) -> None:
+        """Test ValidateCommand.from_args with environment variables."""
+        args = Namespace(
+            alert_filepath="/path/to/alert.json",
+            runtime_filepath="/path/to/runtime.json",
+            test_exception=None,
+            test_env_var=["ENV1=value1", "ENV2=value2"],
+        )
+
+        command = ValidateCommand.from_args(args)
+
+        assert command.test_env_vars == {"ENV1": "value1", "ENV2": "value2"}
+
+    def test_execute__with_successful_validation__returns_success(self) -> None:
+        """Test ValidateCommand executes successfully with valid configuration."""
+        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+
+        mock_alert = Mock()
+        mock_runtime = Mock()
+
+        with (
+            patch.object(AlertController, "from_file", return_value=mock_alert),
+            patch.object(RuntimeController, "from_file", return_value=mock_runtime),
+        ):
+            result = command.execute()
 
         assert result == ExitCode.SUCCESS
-        mock_job.validate.assert_called_once()
-        mock_job.execute.assert_called_once()
+
+    def test_execute__with_alert_io_error__returns_io_error(self) -> None:
+        """Test ValidateCommand handles AlertController IO error."""
+        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+
+        with patch.object(AlertController, "from_file", side_effect=FlintIOError("test")):
+            result = command.execute()
+
+        assert result == ExitCode.IO_ERROR
+
+    def test_execute__with_alert_configuration_error__returns_configuration_error(self) -> None:
+        """Test ValidateCommand handles AlertController configuration error."""
+        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+
+        with patch.object(AlertController, "from_file", side_effect=FlintAlertConfigurationError("test")):
+            result = command.execute()
+
+        assert result == ExitCode.CONFIGURATION_ERROR
+
+    def test_execute__with_runtime_io_error__returns_io_error(self) -> None:
+        """Test ValidateCommand handles RuntimeController IO error."""
+        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+
+        mock_alert = Mock()
+
+        with (
+            patch.object(AlertController, "from_file", return_value=mock_alert),
+            patch.object(RuntimeController, "from_file", side_effect=FlintIOError("test")),
+        ):
+            result = command.execute()
+
+        assert result == ExitCode.IO_ERROR
+
+    def test_execute__with_runtime_configuration_error__returns_configuration_error(self) -> None:
+        """Test ValidateCommand handles RuntimeController configuration error."""
+        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+
+        mock_alert = Mock()
+
+        with (
+            patch.object(AlertController, "from_file", return_value=mock_alert),
+            patch.object(RuntimeController, "from_file", side_effect=FlintRuntimeConfigurationError("test")),
+        ):
+            result = command.execute()
+
+        assert result == ExitCode.CONFIGURATION_ERROR
+
+    def test_execute__with_validation_error__returns_validation_error(self) -> None:
+        """Test ValidateCommand handles validation error."""
+        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+
+        mock_alert = Mock()
+
+        with (
+            patch.object(AlertController, "from_file", return_value=mock_alert),
+            patch.object(RuntimeController, "from_file", side_effect=FlintValidationError("test")),
+        ):
+            result = command.execute()
+
+        assert result == ExitCode.VALIDATION_ERROR
+
+    def test_execute__with_test_env_vars__sets_environment_variables(self) -> None:
+        """Test ValidateCommand sets test environment variables during execution."""
+        command = ValidateCommand(
+            alert_filepath=Path("/test/alert.json"),
+            runtime_filepath=Path("/test/runtime.json"),
+            test_env_vars={"TEST_VAR": "test_value", "ANOTHER_VAR": "another_value"},
+        )
+
+        mock_alert = Mock()
+        mock_runtime = Mock()
+
+        # Mock os.environ to capture what was set
+        with (
+            patch.object(AlertController, "from_file", return_value=mock_alert),
+            patch.object(RuntimeController, "from_file", return_value=mock_runtime),
+            patch.dict("os.environ") as mock_environ,
+        ):
+            result = command.execute()
+
+            # Verify environment variables were set (even though it triggers test alert)
+            assert mock_environ["TEST_VAR"] == "test_value"
+            assert mock_environ["ANOTHER_VAR"] == "another_value"
+            assert result == ExitCode.ALERT_TEST_ERROR
+
+    def test_execute__with_test_exception_message__triggers_test_alert(self) -> None:
+        """Test ValidateCommand triggers test alert when test_exception_message is provided."""
+        command = ValidateCommand(
+            alert_filepath=Path("/test/alert.json"),
+            runtime_filepath=Path("/test/runtime.json"),
+            test_exception_message="Test exception message",
+        )
+
+        mock_alert = Mock()
+        mock_runtime = Mock()
+
+        with (
+            patch.object(AlertController, "from_file", return_value=mock_alert),
+            patch.object(RuntimeController, "from_file", return_value=mock_runtime),
+        ):
+            result = command.execute()
+
+        # Should trigger alert and return alert test error exit code
+        assert result == ExitCode.ALERT_TEST_ERROR
+        mock_alert.evaluate_trigger_and_alert.assert_called_once()
+
+    def test_execute__with_test_env_vars_only__triggers_test_alert(self) -> None:
+        """Test ValidateCommand triggers test alert when only test_env_vars are provided."""
+        command = ValidateCommand(
+            alert_filepath=Path("/test/alert.json"),
+            runtime_filepath=Path("/test/runtime.json"),
+            test_env_vars={"TEST_VAR": "test_value"},
+        )
+
+        mock_alert = Mock()
+        mock_runtime = Mock()
+
+        with (
+            patch.object(AlertController, "from_file", return_value=mock_alert),
+            patch.object(RuntimeController, "from_file", return_value=mock_runtime),
+            patch.dict(os.environ, {}, clear=False),
+        ):
+            result = command.execute()
+
+        # Should trigger alert and return alert test error exit code
+        assert result == ExitCode.ALERT_TEST_ERROR
+        mock_alert.evaluate_trigger_and_alert.assert_called_once()
+
+
+class TestRunCommand:
+    """Test cases for RunCommand."""
+
+    def test_run_command_add_subparser__registers_correctly(self) -> None:
+        """Test RunCommand.add_subparser registers the run subcommand correctly."""
+
+        parser = ArgumentParser()
+        subparsers = parser.add_subparsers()
+
+        RunCommand.add_subparser(subparsers)
+
+        # Parse arguments to verify the subcommand was registered correctly
+        args = parser.parse_args(
+            ["run", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
+        )
+
+        assert args.alert_filepath == "/test/alert.json"
+        assert args.runtime_filepath == "/test/runtime.json"
+
+    def test_from_args__creates_command_correctly(self) -> None:
+        """Test RunCommand.from_args creates command correctly using base Command.from_args."""
+        args = Namespace(
+            alert_filepath="/path/to/alert.json",
+            runtime_filepath="/path/to/runtime.json",
+        )
+
+        command = RunCommand.from_args(args)
+
+        assert command.alert_filepath == Path("/path/to/alert.json")
+        assert command.runtime_filepath == Path("/path/to/runtime.json")
+
+    def test_execute__with_successful_run__returns_success(self) -> None:
+        """Test RunCommand executes successfully."""
+        command = RunCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+
+        mock_alert = Mock()
+        mock_runtime = Mock()
+
+        with (
+            patch.object(AlertController, "from_file", return_value=mock_alert),
+            patch.object(RuntimeController, "from_file", return_value=mock_runtime),
+        ):
+            result = command.execute()
+
+        assert result == ExitCode.SUCCESS
+        mock_runtime.execute_all.assert_called_once()
+
+    def test_execute__with_alert_io_error__returns_io_error(self) -> None:
+        """Test RunCommand handles AlertController IO error."""
+        command = RunCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+
+        with patch.object(AlertController, "from_file", side_effect=FlintIOError("test")):
+            result = command.execute()
+
+        assert result == ExitCode.IO_ERROR
+
+    def test_execute__with_alert_configuration_error__returns_configuration_error(self) -> None:
+        """Test RunCommand handles AlertController configuration error."""
+        command = RunCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+
+        with patch.object(AlertController, "from_file", side_effect=FlintAlertConfigurationError("test")):
+            result = command.execute()
+
+        assert result == ExitCode.CONFIGURATION_ERROR
 
     @pytest.mark.parametrize(
-        "exception_type,expected_exit_code",
+        "exception_class,expected_exit_code",
         [
             (FlintIOError, ExitCode.IO_ERROR),
-            (FlintConfigurationError, ExitCode.CONFIGURATION_ERROR),
+            (FlintRuntimeConfigurationError, ExitCode.CONFIGURATION_ERROR),
             (FlintValidationError, ExitCode.VALIDATION_ERROR),
             (FlintJobError, ExitCode.JOB_ERROR),
         ],
     )
-    def test_execute_handles_business_exceptions(
-        self,
-        mock_config_path: Path,
-        mock_alert_manager: Mock,
-        mock_job: Mock,
-        exception_type: type[Exception],
-        expected_exit_code: ExitCode,
+    def test_execute__with_runtime_errors__returns_correct_exit_codes(
+        self, exception_class, expected_exit_code
     ) -> None:
-        """Test JobCommand handles various business exceptions correctly."""
-        if exception_type == FlintIOError:
-            # Test AlertManager IO error
-            with patch("flint.cli.AlertManager") as mock_alert_class:
-                mock_alert_class.from_file.side_effect = exception_type("Test error")
-                cmd = JobCommand(config_filepath=mock_config_path)
-                result = cmd._execute()
-                assert result == expected_exit_code
-        else:
-            # Test Job-related errors
-            if exception_type == FlintConfigurationError:
-                mock_job.validate.side_effect = exception_type("Test error")
-            elif exception_type == FlintValidationError:
-                mock_job.validate.side_effect = exception_type("Test error")
-            elif exception_type == FlintJobError:
-                mock_job.execute.side_effect = exception_type("Test error")
+        """Test RunCommand handles various runtime errors correctly."""
+        command = RunCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
 
-            cmd = JobCommand(config_filepath=mock_config_path)
-            result = cmd._execute()
-            assert result == expected_exit_code
+        mock_alert = Mock()
 
-            # Verify alert was processed for non-IO errors
-            if exception_type != FlintIOError:
-                mock_alert_manager.evaluate_trigger_and_alert.assert_called_once()
+        with (
+            patch.object(AlertController, "from_file", return_value=mock_alert),
+            patch.object(RuntimeController, "from_file", side_effect=exception_class("Test error")),
+        ):
+            result = command.execute()
 
-    def test_execute_handles_job_io_error_after_alert_manager_success(
-        self, mock_config_path: Path, mock_alert_manager: Mock
-    ) -> None:
-        """Test JobCommand handles Job IO error when AlertManager succeeds."""
-        # Mock Job.from_file to raise FlintIOError
-        with patch("flint.cli.Job.from_file") as mock_job_from_file:
-            mock_job_from_file.side_effect = FlintIOError("Failed to read job config")
-            cmd = JobCommand(config_filepath=mock_config_path)
-            result = cmd._execute()
-
-            assert result == ExitCode.IO_ERROR
-            # AlertManager should not process alert for IO errors
-            mock_alert_manager.evaluate_trigger_and_alert.assert_not_called()
-
-    def test_execute_handles_configuration_error_with_alert(
-        self, mock_config_path: Path, mock_alert_manager: Mock, mock_job: Mock
-    ) -> None:
-        """Test JobCommand handles configuration error and processes alert."""
-        mock_job.validate.side_effect = FlintConfigurationError("Configuration error")
-        cmd = JobCommand(config_filepath=mock_config_path)
-        result = cmd._execute()
-
-        assert result == ExitCode.CONFIGURATION_ERROR
-        mock_alert_manager.evaluate_trigger_and_alert.assert_called_once_with(
-            body="Configuration error occurred",
-            title="ETL Pipeline Configuration Error",
-            exception=mock_job.validate.side_effect,
-        )
-
-
-class TestValidateCommand(TestCommandBase):
-    """Unit tests for ValidateCommand."""
-
-    def test_init_sets_config_filepath(self, mock_config_path: Path) -> None:
-        """Test config_filepath is set on init."""
-        self._test_command_init(ValidateCommand, mock_config_path)
-
-    def test_from_args_sets_config_filepath(self, sample_namespace: Namespace) -> None:
-        """Test from_args sets config_filepath."""
-        self._test_from_args(ValidateCommand, sample_namespace)
-
-    def test_add_subparser_registers_validate_command(self) -> None:
-        """Test that add_subparser properly registers the validate command."""
-        parser = ArgumentParser()
-        subparsers = parser.add_subparsers(dest="command")
-
-        ValidateCommand.add_subparser(subparsers)
-
-        # Test that 'validate' command is registered
-        args = parser.parse_args(["validate", "--config-filepath", "/test/config.json"])
-        assert args.command == "validate"
-        assert args.config_filepath == "/test/config.json"
-
-    def test_execute_success(self, mock_config_path: Path, mock_alert_manager: Mock, mock_job: Mock) -> None:
-        """Test successful execution of ValidateCommand.
-
-        CRITICAL: ValidateCommand should call job.execute() for validation,
-        not just validate(). This tests the actual implementation.
-        """
-        cmd = ValidateCommand(config_filepath=mock_config_path)
-        result = cmd._execute()
-
-        assert result == ExitCode.SUCCESS
-        mock_job.validate.assert_called_once()
-        mock_job.execute.assert_called_once()  # This is the current implementation
-
-    @pytest.mark.parametrize(
-        "exception_type,expected_exit_code",
-        [
-            (FlintIOError, ExitCode.IO_ERROR),
-            (FlintConfigurationError, ExitCode.CONFIGURATION_ERROR),
-            (FlintValidationError, ExitCode.VALIDATION_ERROR),
-        ],
-    )
-    def test_execute_handles_business_exceptions(
-        self,
-        mock_config_path: Path,
-        mock_alert_manager: Mock,
-        mock_job: Mock,
-        exception_type: type[Exception],
-        expected_exit_code: ExitCode,
-    ) -> None:
-        """Test ValidateCommand handles various business exceptions correctly.
-
-        Note: ValidateCommand should not encounter FlintJobError since it's validation only.
-        """
-        if exception_type == FlintIOError:
-            # Test AlertManager IO error
-            with patch("flint.cli.AlertManager") as mock_alert_class:
-                mock_alert_class.from_file.side_effect = exception_type("Test error")
-                cmd = ValidateCommand(config_filepath=mock_config_path)
-                result = cmd._execute()
-                assert result == expected_exit_code
-        else:
-            # Test Job-related errors
-            if exception_type == FlintConfigurationError:
-                mock_job.validate.side_effect = exception_type("Test error")
-            elif exception_type == FlintValidationError:
-                # In ValidateCommand, validation errors can come from execute()
-                mock_job.execute.side_effect = exception_type("Test error")
-
-            cmd = ValidateCommand(config_filepath=mock_config_path)
-            result = cmd._execute()
-            assert result == expected_exit_code
-
-            # Verify alert was processed for non-IO errors
-            if exception_type != FlintIOError:
-                mock_alert_manager.evaluate_trigger_and_alert.assert_called_once()
-
-    def test_execute_handles_job_io_error_after_alert_manager_success(
-        self, mock_config_path: Path, mock_alert_manager: Mock
-    ) -> None:
-        """Test ValidateCommand handles Job IO error when AlertManager succeeds."""
-        # Mock Job.from_file to raise FlintIOError
-        with patch("flint.cli.Job.from_file") as mock_job_from_file:
-            mock_job_from_file.side_effect = FlintIOError("Failed to read job config")
-            cmd = ValidateCommand(config_filepath=mock_config_path)
-            result = cmd._execute()
-
-            assert result == ExitCode.IO_ERROR
-            # AlertManager should not process alert for IO errors
-            mock_alert_manager.evaluate_trigger_and_alert.assert_not_called()
-
-    def test_execute_handles_configuration_error_with_alert(
-        self, mock_config_path: Path, mock_alert_manager: Mock, mock_job: Mock
-    ) -> None:
-        """Test ValidateCommand handles configuration error and processes alert."""
-        mock_job.validate.side_effect = FlintConfigurationError("Configuration error")
-        cmd = ValidateCommand(config_filepath=mock_config_path)
-        result = cmd._execute()
-
-        assert result == ExitCode.CONFIGURATION_ERROR
-        mock_alert_manager.evaluate_trigger_and_alert.assert_called_once_with(
-            body="Configuration error occurred",
-            title="ETL Pipeline Configuration Error",
-            exception=mock_job.validate.side_effect,
-        )
-
-
-class TestMainFunction:
-    """Unit tests for the main CLI entry point function."""
-
-    @pytest.mark.parametrize(
-        "command,command_class",
-        [
-            ("validate", "ValidateCommand"),
-            ("run", "JobCommand"),
-        ],
-    )
-    @patch("flint.__main__.ValidateCommand")
-    @patch("flint.__main__.JobCommand")
-    @patch("flint.__main__.ArgumentParser.parse_args")
-    def test_main_command_success(
-        self,
-        mock_parse_args: Mock,
-        mock_job_command_class: Mock,
-        mock_validate_command_class: Mock,
-        command: str,
-        command_class: str,
-    ) -> None:
-        """Test main function with various commands returns success."""
-        mock_args = Mock()
-        mock_args.command = command
-        mock_parse_args.return_value = mock_args
-
-        mock_command_instance = Mock()
-        mock_command_instance.execute.return_value = ExitCode.SUCCESS
-
-        if command_class == "ValidateCommand":
-            mock_validate_command_class.from_args.return_value = mock_command_instance
-            expected_mock = mock_validate_command_class
-        else:
-            mock_job_command_class.from_args.return_value = mock_command_instance
-            expected_mock = mock_job_command_class
-
-        result = main()
-
-        assert result == ExitCode.SUCCESS
-        expected_mock.from_args.assert_called_once_with(mock_args)
-        mock_command_instance.execute.assert_called_once()
-
-    @patch("flint.__main__.ArgumentParser.parse_args")
-    def test_main_unknown_command_raises_not_implemented(self, mock_parse_args: Mock) -> None:
-        """Test main function with unknown command raises NotImplementedError."""
-        mock_args = Mock()
-        mock_args.command = "unknown-command"
-        mock_parse_args.return_value = mock_args
-
-        with pytest.raises(NotImplementedError, match="Unknown command 'unknown-command'"):
-            main()
-
-    @pytest.mark.parametrize(
-        "argv,expected_exit_code",
-        [
-            (["flint", "--version"], 0),
-            (["flint", "--help"], 0),
-            (["flint"], 2),  # No command provided
-            (["flint", "validate"], 2),  # Missing required argument
-        ],
-    )
-    def test_main_argument_parsing_edge_cases(self, argv: list[str], expected_exit_code: int) -> None:
-        """Test main function handles various argument parsing scenarios."""
-        with patch("sys.argv", argv):
-            with pytest.raises(SystemExit) as exc_info:
-                main()
-            assert exc_info.value.code == expected_exit_code
-
-    @pytest.mark.parametrize(
-        "command,error_code",
-        [
-            ("validate", ExitCode.CONFIGURATION_ERROR),
-            ("run", ExitCode.JOB_ERROR),
-        ],
-    )
-    @patch("flint.__main__.ValidateCommand")
-    @patch("flint.__main__.JobCommand")
-    @patch("flint.__main__.ArgumentParser.parse_args")
-    def test_main_command_error_codes(
-        self,
-        mock_parse_args: Mock,
-        mock_job_command_class: Mock,
-        mock_validate_command_class: Mock,
-        command: str,
-        error_code: ExitCode,
-    ) -> None:
-        """Test main function propagates error codes correctly."""
-        mock_args = Mock()
-        mock_args.command = command
-        mock_parse_args.return_value = mock_args
-
-        mock_command_instance = Mock()
-        mock_command_instance.execute.return_value = error_code
-
-        if command == "validate":
-            mock_validate_command_class.from_args.return_value = mock_command_instance
-        else:
-            mock_job_command_class.from_args.return_value = mock_command_instance
-
-        result = main()
-        assert result == error_code
+        assert result == expected_exit_code

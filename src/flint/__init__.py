@@ -13,7 +13,7 @@ Example:
 
     ```python
     from pathlib import Path
-    from flint.job.core.job import Job
+    from flint.runtime.etl.spark.job import Job
 
     # Create a job from configuration
     job = Job.from_file(filepath=Path("config.json"))
@@ -30,3 +30,30 @@ __license__ = "Creative Commons BY-NC-ND 4.0 DEED Attribution-NonCommercial-NoDe
 __maintainer__ = "Krijn van der Burg"
 __email__ = ""
 __status__ = "Prototype"
+
+
+from abc import ABC
+
+from pydantic import BaseModel as PydanticBaseModel
+
+from flint.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+
+class BaseModel(PydanticBaseModel, ABC):
+    """Abstract base class for all configuration models in the framework.
+
+    Defines the common interface that all model classes must implement using Pydantic v2.
+    Model classes are responsible for converting dictionary-based configuration
+    into strongly-typed objects that can be used by the framework components.
+    """
+
+    # class Config:
+    # """Pydantic configuration."""
+
+    # extra = "forbid"
+    # validate_assignment = True
+    # str_strip_whitespace = True
+    # validate_default = True
+    # arbitrary_types_allowed = True

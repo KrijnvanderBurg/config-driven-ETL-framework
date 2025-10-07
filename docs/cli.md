@@ -1,0 +1,88 @@
+# Flint CLI Reference
+
+This document describes the command-line interface (CLI) for Flint, providing details on available commands, options, and environment variables.
+
+## Overview
+
+Flint provides a command-line interface to validate configurations and execute data pipelines. All commands follow the pattern `python -m flint [command] [options]`.
+
+## Commands
+
+### validate
+
+Validates configuration files and optionally tests alert routing rules without executing the pipeline. This is useful for checking configuration integrity and alert functionality before deployment.
+
+```bash
+python -m flint validate \
+    --alert-filepath="path/to/alerts.jsonc" \  # Path to alert configuration file
+    --runtime-filepath="path/to/job.jsonc" \   # Path to pipeline runtime configuration
+    [--test-exception="error message"] \     # Optional: Simulates an error to test alert routing
+    [--test-env-var="KEY=VALUE"]               # Optional: Set environment variables for testing triggers
+```
+
+Example:
+```bash
+python -m flint validate \
+    --alert-filepath="examples/join_select/alert.jsonc" \
+    --runtime-filepath="examples/join_select/job.jsonc" \
+    --test-exception="Failed to connect to database" \
+    --test-env-var="ENVIRONMENT=PROD"
+```
+
+### run
+
+Executes the configured data pipeline using the provided configuration files.
+
+```bash
+python -m flint run \
+    --alert-filepath path/to/alerts.jsonc \  # Path to alert configuration file
+    --runtime-filepath path/to/job.jsonc \   # Path to pipeline runtime configuration
+    [--log-level LEVEL]                      # Optional: Override logging level
+```
+
+Example:
+```bash
+python -m flint run \
+    --alert-filepath="examples/join_select/slack_alerts.jsonc" \
+    --runtime-filepath="examples/join_select/job.jsonc" \
+    --log-level="DEBUG"
+```
+
+## Global Options
+
+The following options can be used with any command:
+
+```bash
+--log-level LEVEL     # Set logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
+-v, --version         # Show version information and exit
+```
+
+## Environment Variables
+
+Flint respects the following environment variables:
+
+- `FLINT_LOG_LEVEL`: Sets the logging level for the application
+- `LOG_LEVEL`: Used as fallback if `FLINT_LOG_LEVEL` is not set
+
+Both variables accept standard Python logging levels: `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`. If neither is set, Flint defaults to `INFO` level.
+
+Example:
+```bash
+# Set logging level via environment variable
+export FLINT_LOG_LEVEL=DEBUG
+python -m flint run --alert-filepath config/alerts.jsonc --runtime-filepath config/pipeline.jsonc
+```
+
+## Exit Codes
+
+- `0`: SUCCESS - Command executed successfully
+- `10`: INVALID_ARGUMENTS - Invalid command line arguments
+- `20`: IO_ERROR - Input/output error (file access issues)
+- `30`: CONFIGURATION_ERROR - General configuration error
+- `31`: ALERT_CONFIGURATION_ERROR - Alert configuration specific error
+- `32`: RUNTIME_CONFIGURATION_ERROR - Runtime configuration specific error
+- `40`: VALIDATION_ERROR - Configuration validation failed
+- `41`: ALERT_TEST_ERROR - Alert testing functionality failed
+- `50`: JOB_ERROR - Error during pipeline execution
+- `98`: KEYBOARD_INTERRUPT - User interrupted the operation
+- `99`: UNEXPECTED_ERROR - Unhandled exception or unexpected error

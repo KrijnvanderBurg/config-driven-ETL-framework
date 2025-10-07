@@ -1,6 +1,16 @@
 ---
 applyTo: "**/*.py"
 ---
+# Design patterns and principles
+Focus on maintaining clean architecture, readability, and clean code principles. Always adhere to design patterns and principles like:
+- Single Responsibility Principle (SRP)
+- Open/Closed Principle (OCP)
+- Dependency Inversion
+- Don't Repeat Yourself (DRY)
+- SOLID principles
+- Composition over Inheritance
+- Separation of concerns
+
 # Python Coding Principles
 
 ## Type Annotations
@@ -42,8 +52,7 @@ applyTo: "**/*.py"
 - Handle exceptions at appropriate levels, use built-in exceptions.
 
 ## Don´t
-- Do not use `print` for debugging, use logging
-- Do not use `assert` for runtime checks, use exceptions
+- Do not use `print`, use logging
 - Do not use `isinstance`, `hasattr`, or `getattr`.
 - Do not use `eval` or `exec` for dynamic code execution
 - Do not use `from module import *`, import explicitly
