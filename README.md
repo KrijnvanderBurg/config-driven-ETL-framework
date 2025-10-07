@@ -64,8 +64,8 @@ Flint's documentation guides you through installation, configuration, and develo
 - **[Example Pipelines](./examples/)** - Ready-to-run examples demonstrating key features
 - **[CLI Reference](./docs/cli.md)** - Command-line interface options and examples
 - **[Configuration Reference](./docs/README.md)** - Complete syntax guide for all configuration options
-- **[Runtime System](./docs/runtime/README.md)** - ETL pipeline configuration (extracts, transforms, loads)
-- **[Alert System](./docs/alert/README.md)** - Error handling and notification configuration
+  - **[Runtime System](./docs/runtime/README.md)** - ETL pipeline configuration (extracts, transforms, loads)
+  - **[Alert System](./docs/alert/README.md)** - Error handling and notification configuration
 - **[Architecture](./docs/architecture.md)** - Design principles and framework structure
 - **[Custom Extensions](./docs/architecture.md#extending-with-custom-transforms)** - Building your own transforms
 
