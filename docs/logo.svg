@@ -83,5 +83,5 @@
   </g>
   
   <!-- Modern tagline - moved up 20px -->
-  <text x="250" y="418" text-anchor="middle" font-family="Helvetica" font-weight="bold" font-size="18" fill="#9EAFC0" filter="url(#textShadow)">CONFIG-DRIVEN PYSPARK FRAMEWORK</text>
+  <text x="250" y="418" text-anchor="middle" font-family="Helvetica" font-weight="bold" font-size="18" fill="#9EAFC0" filter="url(#textShadow)">CONFIG-DRIVEN ETL FRAMEWORK</text>
 </svg>
