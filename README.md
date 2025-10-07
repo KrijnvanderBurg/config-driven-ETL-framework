@@ -96,8 +96,8 @@ Running this command executes a complete pipeline that showcases Flint's key cap
         "enabled": true,
         "jobs": [
             {
-                "id": "bronze",
-                "description": "",
+                "id": "silver",
+                "description": "Combine customer and order source data into a single dataset",
                 "enabled": true,
                 "engine_type": "spark", // Specifies the processing engine to use
                 "extracts": [

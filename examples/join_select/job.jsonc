@@ -5,8 +5,8 @@
         "enabled": true,
         "jobs": [
             {
-                "id": "bronze",
-                "description": "",
+                "id": "silver",
+                "description": "Combine customer and order source data into a single dataset",
                 "enabled": true,
                 "engine_type": "spark", // Specifies the processing engine to use
                 "extracts": [
@@ -42,20 +42,8 @@
                         "upstream_id": "extract-customers", // First input dataset from extract stage
                         "options": {},
                         "functions": [
-                            {
-                                "function_type": "join", // Join customers with orders
-                                "arguments": { 
-                                    "other_upstream_id": "extract-orders", // Second dataset to join
-                                    "on": ["customer_id"], // Join key
-                                    "how": "inner" // Join type (inner, left, right, full)
-                                }
-                            },
-                            {
-                                "function_type": "select", // Select only specific columns
-                                "arguments": {
-                                    "columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]
-                                }
-                            }
+                            {"function_type": "join", "arguments": {"other_upstream_id": "extract-orders", "on": ["customer_id"], "how": "inner"}},
+                            {"function_type": "select", "arguments": {"columns": ["name", "email", "signup_date", "order_id", "order_date", "amount"]}}
                         ]
                     }
                 ],
@@ -80,7 +68,7 @@
                     "onSuccess": [  // Actions to execute if pipeline succeeds
                         {
                             "id": "notify-data-is-ready",
-                            "description": "",
+                            "description": "Send notification to Slack that data is ready",
                             "enabled": true,
                             "action_type": "http",
                             "url": "https://hooks.slack.com",
