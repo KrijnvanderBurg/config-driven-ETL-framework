@@ -87,7 +87,7 @@ Running this command executes a complete pipeline that showcases Flint's key cap
   - Output mode (overwrite/append) controlled by a simple parameter
   - Output to multiple formats or locations by creating another load entry
 
-#### Configuration: examples/join_select/job.jsonc
+#### Configuration: [`examples/join_select/job.jsonc`](./examples/join_select/job.jsonc)
 ```jsonc
 {
     "runtime": {
