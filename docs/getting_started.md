@@ -106,6 +106,33 @@ For more information on configuration options, see:
 - Transform Functions
 - Load Options
 
+## IDE Support with JSON Schema
+
+Flint can export a JSON schema that enables autocompletion, validation, and inline documentation in your IDE when editing configuration files.
+
+**Export the schema:**
+
+```bash
+python -m flint export-schema --output-filepath="./runtime_schema.json"
+```
+
+**Reference it in your configuration:**
+
+```jsonc
+{
+    "$schema": "./runtime_schema.json",
+    "runtime": {
+        "id": "my-pipeline",
+        // Your IDE now provides:
+        // - Autocompletion of field names
+        // - Validation of required fields
+        // - Documentation tooltips
+        // - Type checking
+    }
+}
+```
+
+This dramatically improves the configuration authoring experience, catching errors before execution and providing guidance through inline documentation.
 
 ## Running the Example Pipeline
 The quickest way to start is by running the provided example:

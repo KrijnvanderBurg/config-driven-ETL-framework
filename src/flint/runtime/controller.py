@@ -9,6 +9,7 @@ from pathlib import Path
 from typing import Any, Final, Self
 
 from pydantic import Field, ValidationError
+from pydantic.json_schema import GenerateJsonSchema, JsonSchemaValue
 
 from flint import BaseModel
 from flint.exceptions import FlintIOError, FlintRuntimeConfigurationError
@@ -19,6 +20,26 @@ from flint.utils.logger import get_logger
 logger = get_logger(__name__)
 
 RUNTIME: Final = "runtime"
+
+
+class PreserveFieldOrderJsonSchema(GenerateJsonSchema):
+    """Custom JSON schema generator that preserves field order as defined in code.
+
+    By default, Pydantic sorts JSON schema keys alphabetically. This custom generator
+    disables sorting to preserve the order of fields as they appear in the model definition.
+    """
+
+    def sort(self, value: JsonSchemaValue, parent_key: str | None = None) -> JsonSchemaValue:
+        """No-op sort to preserve field definition order.
+
+        Args:
+            value: The JSON schema value to sort (not sorted in this implementation).
+            parent_key: Optional parent key context.
+
+        Returns:
+            The unmodified value, preserving original field order.
+        """
+        return value
 
 
 class RuntimeController(BaseModel):
@@ -72,6 +93,29 @@ class RuntimeController(BaseModel):
             raise FlintRuntimeConfigurationError(f"Missing 'runtime' section in configuration file '{filepath}'") from e
         except ValidationError as e:
             raise FlintRuntimeConfigurationError(f"Invalid runtime configuration in file '{filepath}': {e}") from e
+
+    @classmethod
+    def export_schema(cls) -> dict[str, Any]:
+        """Export the JSON schema for the RuntimeController model.
+
+        Returns the complete JSON schema definition for the RuntimeController,
+        including all nested models and their validation rules. This schema
+        can be used for documentation, validation, or generating configuration
+        templates.
+
+        The schema preserves the order of fields as they are defined in the model,
+        rather than sorting them alphabetically.
+
+        Returns:
+            dict[str, Any]: The JSON schema dictionary conforming to JSON Schema Draft 2020-12.
+
+        Example:
+            >>> schema = RuntimeController.export_schema()
+            >>> print(schema['properties']['id']['type'])
+            'string'
+        """
+        logger.debug("Exporting RuntimeController JSON schema")
+        return cls.model_json_schema(schema_generator=PreserveFieldOrderJsonSchema)
 
     def execute_all(self) -> None:
         """Execute all jobs in the ETL pipeline.

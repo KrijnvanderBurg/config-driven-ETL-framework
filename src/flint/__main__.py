@@ -7,7 +7,7 @@ import sys
 from argparse import ArgumentParser
 from importlib.metadata import version
 
-from flint.cli import RunCommand, ValidateCommand
+from flint.cli import ExportSchemaCommand, RunCommand, ValidateCommand
 from flint.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -36,6 +36,7 @@ def main() -> int:
     # Register subcommands
     ValidateCommand.add_subparser(subparsers=subparsers)
     RunCommand.add_subparser(subparsers=subparsers)
+    ExportSchemaCommand.add_subparser(subparsers=subparsers)
     args = parser.parse_args()
 
     if args.command == "validate":
@@ -47,6 +48,11 @@ def main() -> int:
         logger.info("Running 'run' command...")
         run_command = RunCommand.from_args(args)
         return run_command.execute()
+
+    if args.command == "export-schema":
+        logger.info("Running 'export-schema' command...")
+        export_schema_command = ExportSchemaCommand.from_args(args)
+        return export_schema_command.execute()
 
     raise ValueError(f"Unknown command '{args.command}'.")
 
