@@ -8,6 +8,7 @@ Install Flint, run example pipelines, and learn how to create your own data pipe
 Complete reference for Flint's command-line interface with commands for:
 - `validate` - Check configuration files and alerting before execution
 - `run` - Execute data pipelines
+- `export-schema` - Generate JSON schema for IDE autocompletion and validation
 
 Includes supported options, environment variables, and exit codes for troubleshooting.
 

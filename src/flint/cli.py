@@ -4,6 +4,7 @@ Contains Command base class, command implementations, and command registry.
 No CLI argument parsing or dispatch logic is present here.
 """
 
+import json
 import logging
 import os
 from abc import ABC, abstractmethod
@@ -234,3 +235,67 @@ class RunCommand(Command):
                 title="ETL Execution Error", body="Runtime error during ETL execution", exception=e
             )
             return e.exit_code
+
+
+@dataclass
+class ExportSchemaCommand(Command):
+    """Command to export the runtime configuration JSON schema."""
+
+    output_filepath: Path
+
+    @staticmethod
+    def add_subparser(subparsers: _SubParsersAction) -> None:
+        """Register the 'export-schema' subcommand and its arguments.
+
+        Args:
+            subparsers: The subparsers action from argparse.
+        """
+        parser = subparsers.add_parser("export-schema", help="Export the runtime configuration JSON schema")
+        parser.add_argument(
+            "--output-filepath", required=True, type=str, help="Path where the JSON schema file will be saved"
+        )
+        # Alert filepath not used for schema export, but required by base class
+        parser.add_argument("--alert-filepath", required=False, type=str, help="Not used for export-schema command")
+        parser.add_argument("--runtime-filepath", required=False, type=str, help="Not used for export-schema command")
+
+    @classmethod
+    def from_args(cls, args: Namespace) -> Self:
+        """Create ExportSchemaCommand from parsed arguments.
+
+        Args:
+            args: Parsed CLI arguments.
+
+        Returns:
+            ExportSchemaCommand: An instance of ExportSchemaCommand.
+        """
+        output_filepath = Path(args.output_filepath)
+
+        # Provide dummy paths for alert and runtime since they're not used
+        return cls(
+            alert_filepath=Path(""),
+            runtime_filepath=Path(""),
+            output_filepath=output_filepath,
+        )
+
+    def _execute(self) -> ExitCode:
+        """Export the runtime configuration JSON schema to a file."""
+        logger.info("Exporting runtime configuration schema to: %s", self.output_filepath)
+
+        try:
+            schema = RuntimeController.export_schema()
+
+            # Ensure parent directory exists
+            self.output_filepath.parent.mkdir(parents=True, exist_ok=True)
+
+            # Write schema to file with pretty formatting
+            with open(self.output_filepath, "w", encoding="utf-8") as f:
+                json.dump(schema, f, indent=4, ensure_ascii=False)
+
+            logger.info("Runtime configuration schema exported successfully to: %s", self.output_filepath)
+            return ExitCode.SUCCESS
+        except OSError as e:
+            logger.error("Failed to write schema file: %s", e)
+            return ExitCode.IO_ERROR
+        except Exception as e:  # pylint: disable=broad-except
+            logger.error("Unexpected error during schema export: %s", e)
+            return ExitCode.UNEXPECTED_ERROR

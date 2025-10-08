@@ -48,6 +48,40 @@ python -m flint run \
     --log-level="DEBUG"
 ```
 
+### export-schema
+
+Exports the runtime configuration JSON schema to a file. This schema enables IDE features like autocompletion, validation, and inline documentation when editing configuration files.
+
+```bash
+python -m flint export-schema \
+    --output-filepath="path/to/runtime_schema.json"  # Path where the JSON schema will be saved
+```
+
+Example:
+```bash
+python -m flint export-schema --output-filepath="dist/runtime_schema.json"
+```
+
+**Using the exported schema:**
+
+Once exported, reference the schema in your configuration files to enable IDE support:
+
+```jsonc
+{
+    "$schema": "path/to/runtime_schema.json",
+    "runtime": {
+        "id": "my-pipeline",
+        // IDE now provides autocompletion and validation
+    }
+}
+```
+
+This provides:
+- **Autocompletion** of field names and values as you type
+- **Inline validation** showing errors for invalid configurations
+- **Documentation tooltips** displaying field descriptions and constraints
+- **Type checking** ensuring values match expected types
+
 ## Global Options
 
 The following options can be used with any command:

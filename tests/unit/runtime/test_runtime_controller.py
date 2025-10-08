@@ -268,3 +268,97 @@ class TestRuntimeControllerExecuteAll:
 
         with pytest.raises(Exception):
             runtime_controller.execute_all()
+
+
+# =========================================================================== #
+# =========================== EXPORT_SCHEMA TESTS ========================= #
+# =========================================================================== #
+
+
+class TestRuntimeControllerExportSchema:
+    """Test RuntimeController.export_schema() method."""
+
+    def test_export_schema__returns_dict(self) -> None:
+        """Test export_schema returns a dictionary."""
+        schema = RuntimeController.export_schema()
+
+        assert isinstance(schema, dict)
+
+    def test_export_schema__contains_required_top_level_keys(self) -> None:
+        """Test export_schema contains standard JSON Schema keys."""
+        schema = RuntimeController.export_schema()
+
+        assert "properties" in schema
+        assert "required" in schema
+        assert "title" in schema
+        assert "type" in schema
+
+    def test_export_schema__has_correct_type(self) -> None:
+        """Test export_schema indicates object type."""
+        schema = RuntimeController.export_schema()
+
+        assert schema["type"] == "object"
+
+    def test_export_schema__contains_all_field_properties(self) -> None:
+        """Test export_schema includes all RuntimeController fields."""
+        schema = RuntimeController.export_schema()
+
+        properties = schema["properties"]
+        assert "id" in properties
+        assert "description" in properties
+        assert "enabled" in properties
+        assert "jobs" in properties
+
+    def test_export_schema__id_field_has_correct_type_and_constraints(self) -> None:
+        """Test export_schema defines id field correctly."""
+        schema = RuntimeController.export_schema()
+
+        id_field = schema["properties"]["id"]
+        assert id_field["type"] == "string"
+        assert id_field["minLength"] == 1
+        assert "description" in id_field
+
+    def test_export_schema__description_field_has_correct_type(self) -> None:
+        """Test export_schema defines description field correctly."""
+        schema = RuntimeController.export_schema()
+
+        description_field = schema["properties"]["description"]
+        assert description_field["type"] == "string"
+
+    def test_export_schema__enabled_field_has_correct_type(self) -> None:
+        """Test export_schema defines enabled field correctly."""
+        schema = RuntimeController.export_schema()
+
+        enabled_field = schema["properties"]["enabled"]
+        assert enabled_field["type"] == "boolean"
+
+    def test_export_schema__jobs_field_is_array(self) -> None:
+        """Test export_schema defines jobs field as array."""
+        schema = RuntimeController.export_schema()
+
+        jobs_field = schema["properties"]["jobs"]
+        assert jobs_field["type"] == "array"
+
+    def test_export_schema__all_fields_are_required(self) -> None:
+        """Test export_schema marks all fields as required."""
+        schema = RuntimeController.export_schema()
+
+        required_fields = schema["required"]
+        assert "id" in required_fields
+        assert "description" in required_fields
+        assert "enabled" in required_fields
+        assert "jobs" in required_fields
+
+    def test_export_schema__includes_nested_definitions(self) -> None:
+        """Test export_schema includes definitions for nested models."""
+        schema = RuntimeController.export_schema()
+
+        # Schema should contain definitions or $defs for nested models
+        assert "$defs" in schema or "definitions" in schema
+
+    def test_export_schema__is_idempotent(self) -> None:
+        """Test export_schema returns same result when called multiple times."""
+        schema1 = RuntimeController.export_schema()
+        schema2 = RuntimeController.export_schema()
+
+        assert schema1 == schema2
