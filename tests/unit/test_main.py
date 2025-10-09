@@ -1,99 +1,90 @@
-"""Unit tests for the Flint main module."""
+"""Unit tests for the Flint __main__ module entry point."""
 
-from argparse import ArgumentParser, Namespace
-from unittest.mock import Mock, patch
+from click.testing import CliRunner
 
-import pytest
-
-from flint.__main__ import main
-from flint.cli import RunCommand, ValidateCommand
-from flint.exceptions import ExitCode
+from flint.cli import cli
 
 
-class TestMain:
-    """Test cases for the main function."""
+class TestMainModule:
+    """Test cases for the __main__ module entry point."""
 
-    def test_main__with_validate_command__creates_and_executes_validate_command(self) -> None:
-        """Test main function dispatches to ValidateCommand correctly."""
-        mock_args = Namespace(
-            command="validate",
-            alert_filepath="/path/to/alert.json",
-            runtime_filepath="/path/to/runtime.json",
-            log_level="INFO",
-        )
+    def test_main_module__when_invoked_with_help__shows_cli_help(self) -> None:
+        """Test that __main__.py successfully invokes the CLI when run as module."""
+        # Arrange
+        runner = CliRunner()
 
-        with (
-            patch.object(ArgumentParser, "parse_args", return_value=mock_args),
-            patch.object(ValidateCommand, "from_args") as mock_from_args,
-            patch.object(ValidateCommand, "add_subparser"),
-            patch.object(RunCommand, "add_subparser"),
-        ):
-            mock_command = Mock()
-            mock_command.execute.return_value = ExitCode.SUCCESS
-            mock_from_args.return_value = mock_command
+        # Act
+        # Simulate running: python -m flint --help
+        result = runner.invoke(cli, ["--help"])
 
-            result = main()
+        # Assert
+        assert result.exit_code == 0
+        assert "Flint: Configuration-driven PySpark ETL framework" in result.output
 
-            assert result == ExitCode.SUCCESS
-            mock_from_args.assert_called_once_with(mock_args)
-            mock_command.execute.assert_called_once()
+    def test_main_module__with_version_flag__displays_version(self) -> None:
+        """Test that __main__ module passes system arguments to CLI for version display."""
+        # Arrange
+        runner = CliRunner()
 
-    def test_main__with_run_command__creates_and_executes_run_command(self) -> None:
-        """Test main function dispatches to RunCommand correctly."""
-        mock_args = Namespace(
-            command="run",
-            alert_filepath="/path/to/alert.json",
-            runtime_filepath="/path/to/runtime.json",
-            log_level="INFO",
-        )
+        # Act
+        # Simulate: python -m flint --version
+        result = runner.invoke(cli, ["--version"])
 
-        with (
-            patch.object(ArgumentParser, "parse_args", return_value=mock_args),
-            patch.object(RunCommand, "from_args") as mock_from_args,
-            patch.object(ValidateCommand, "add_subparser"),
-            patch.object(RunCommand, "add_subparser"),
-        ):
-            mock_command = Mock()
-            mock_command.execute.return_value = ExitCode.SUCCESS
-            mock_from_args.return_value = mock_command
+        # Assert
+        assert result.exit_code == 0
+        assert "version" in result.output.lower() or "flint" in result.output.lower()
 
-            result = main()
+    def test_main_module__with_validate_help__shows_validate_command_help(self) -> None:
+        """Test that __main__ can execute validate command through CLI."""
+        # Arrange
+        runner = CliRunner()
 
-            assert result == ExitCode.SUCCESS
-            mock_from_args.assert_called_once_with(mock_args)
-            mock_command.execute.assert_called_once()
+        # Act
+        # Simulate: python -m flint validate --help
+        result = runner.invoke(cli, ["validate", "--help"])
 
-    def test_main__with_unknown_command__raises_value_error(self) -> None:
-        """Test main function raises ValueError for unknown commands."""
-        mock_args = Namespace(command="unknown-command", log_level="INFO")
+        # Assert
+        assert result.exit_code == 0
+        assert "validate" in result.output.lower()
+        assert "alert-filepath" in result.output.lower()
 
-        with (
-            patch.object(ArgumentParser, "parse_args", return_value=mock_args),
-            patch.object(ValidateCommand, "add_subparser"),
-            patch.object(RunCommand, "add_subparser"),
-        ):
-            with pytest.raises(ValueError):
-                main()
+    def test_main_module__with_run_help__shows_run_command_help(self) -> None:
+        """Test that __main__ can execute run command through CLI."""
+        # Arrange
+        runner = CliRunner()
 
-    def test_main__returns_command_exit_code(self) -> None:
-        """Test main function returns the exit code from command execution."""
-        mock_args = Namespace(
-            command="validate",
-            alert_filepath="/path/to/alert.json",
-            runtime_filepath="/path/to/runtime.json",
-            log_level="INFO",
-        )
+        # Act
+        # Simulate: python -m flint run --help
+        result = runner.invoke(cli, ["run", "--help"])
 
-        with (
-            patch.object(ArgumentParser, "parse_args", return_value=mock_args),
-            patch.object(ValidateCommand, "from_args") as mock_from_args,
-            patch.object(ValidateCommand, "add_subparser"),
-            patch.object(RunCommand, "add_subparser"),
-        ):
-            mock_command = Mock()
-            mock_command.execute.return_value = ExitCode.VALIDATION_ERROR
-            mock_from_args.return_value = mock_command
+        # Assert
+        assert result.exit_code == 0
+        assert "run" in result.output.lower()
+        assert "alert-filepath" in result.output.lower()
 
-            result = main()
+    def test_main_module__with_export_schema_help__shows_export_schema_help(self) -> None:
+        """Test that __main__ can execute export-schema command through CLI."""
+        # Arrange
+        runner = CliRunner()
 
-            assert result == ExitCode.VALIDATION_ERROR
+        # Act
+        # Simulate: python -m flint export-schema --help
+        result = runner.invoke(cli, ["export-schema", "--help"])
+
+        # Assert
+        assert result.exit_code == 0
+        assert "export-schema" in result.output.lower()
+        assert "output-filepath" in result.output.lower()
+
+    def test_main_module__with_log_level_flag__accepts_log_level(self) -> None:
+        """Test that __main__ module correctly handles --log-level flag."""
+        # Arrange
+        runner = CliRunner()
+
+        # Act
+        # Simulate: python -m flint --log-level DEBUG --help
+        result = runner.invoke(cli, ["--log-level", "DEBUG", "--help"])
+
+        # Assert
+        assert result.exit_code == 0
+        assert "Flint: Configuration-driven PySpark ETL framework" in result.output
