@@ -1,14 +1,14 @@
 """Unit tests for the Flint CLI module."""
 
 import os
-from argparse import ArgumentParser, Namespace
 from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
+from click.testing import CliRunner
 
 from flint.alert import AlertController
-from flint.cli import RunCommand, ValidateCommand
+from flint.cli import cli
 from flint.exceptions import (
     ExitCode,
     FlintAlertConfigurationError,
@@ -20,305 +20,228 @@ from flint.exceptions import (
 from flint.runtime.controller import RuntimeController
 
 
-class TestCommand:
-    """Test cases for the base Command class."""
-
-    def test_execute__with_keyboard_interrupt__returns_keyboard_interrupt_exit_code(self) -> None:
-        """Test Command.execute handles KeyboardInterrupt correctly."""
-        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
-
-        with patch.object(AlertController, "from_file", side_effect=KeyboardInterrupt):
-            result = command.execute()
-
-        assert result == ExitCode.KEYBOARD_INTERRUPT
-
-    def test_execute__with_unexpected_exception__returns_unexpected_error_exit_code(self) -> None:
-        """Test Command.execute handles unexpected exceptions correctly."""
-        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
-
-        with patch.object(AlertController, "from_file", side_effect=RuntimeError):
-            result = command.execute()
-
-        assert result == ExitCode.UNEXPECTED_ERROR
-
-    def test_execute__with_not_implemented_error__returns_unexpected_error_exit_code(self) -> None:
-        """Test Command.execute handles NotImplementedError correctly."""
-        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
-
-        with patch.object(AlertController, "from_file", side_effect=NotImplementedError):
-            result = command.execute()
-
-        assert result == ExitCode.UNEXPECTED_ERROR
-
-
 class TestValidateCommand:
-    """Test cases for ValidateCommand."""
+    """Test cases for validate command."""
 
-    def test_validate_command_add_subparser__registers_correctly(self) -> None:
-        """Test ValidateCommand.add_subparser registers the validate subcommand correctly."""
-
-        parser = ArgumentParser()
-        subparsers = parser.add_subparsers()
-
-        ValidateCommand.add_subparser(subparsers)
-
-        # Parse arguments to verify the subcommand was registered correctly
-        args = parser.parse_args(
-            ["validate", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
-        )
-
-        assert args.alert_filepath == "/test/alert.json"
-        assert args.runtime_filepath == "/test/runtime.json"
-
-    def test_from_args__with_basic_args__creates_command_correctly(self) -> None:
-        """Test ValidateCommand.from_args creates command with basic arguments."""
-        args = Namespace(
-            alert_filepath="/path/to/alert.json",
-            runtime_filepath="/path/to/runtime.json",
-            test_exception=None,
-            test_env_var=None,
-        )
-
-        command = ValidateCommand.from_args(args)
-
-        assert command.alert_filepath == Path("/path/to/alert.json")
-        assert command.runtime_filepath == Path("/path/to/runtime.json")
-        assert command.test_exception_message is None
-        assert command.test_env_vars is None
-
-    def test_from_args__with_test_exception__creates_command_correctly(self) -> None:
-        """Test ValidateCommand.from_args with test exception message."""
-        args = Namespace(
-            alert_filepath="/path/to/alert.json",
-            runtime_filepath="/path/to/runtime.json",
-            test_exception="Test error message",
-            test_env_var=None,
-        )
-
-        command = ValidateCommand.from_args(args)
-
-        assert command.test_exception_message == "Test error message"
-
-    def test_from_args__with_test_env_vars__creates_command_correctly(self) -> None:
-        """Test ValidateCommand.from_args with environment variables."""
-        args = Namespace(
-            alert_filepath="/path/to/alert.json",
-            runtime_filepath="/path/to/runtime.json",
-            test_exception=None,
-            test_env_var=["ENV1=value1", "ENV2=value2"],
-        )
-
-        command = ValidateCommand.from_args(args)
-
-        assert command.test_env_vars == {"ENV1": "value1", "ENV2": "value2"}
-
-    def test_execute__with_successful_validation__returns_success(self) -> None:
-        """Test ValidateCommand executes successfully with valid configuration."""
-        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
-
+    def test_validate__with_valid_configuration__exits_with_success(self) -> None:
+        """Test validate command completes successfully when both configuration files are valid."""
+        # Arrange
+        runner = CliRunner()
+        # Mock controllers to avoid file I/O during validation
         mock_alert = Mock()
         mock_runtime = Mock()
 
+        # Act
         with (
             patch.object(AlertController, "from_file", return_value=mock_alert),
             patch.object(RuntimeController, "from_file", return_value=mock_runtime),
         ):
-            result = command.execute()
+            result = runner.invoke(
+                cli,
+                ["validate", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"],
+            )
 
-        assert result == ExitCode.SUCCESS
+        # Assert
+        assert result.exit_code == 0
 
-    def test_execute__with_alert_io_error__returns_io_error(self) -> None:
-        """Test ValidateCommand handles AlertController IO error."""
-        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+    def test_validate__when_alert_configuration_fails__exits_with_error(self) -> None:
+        """Test validate command returns error when alert configuration fails to load."""
+        # Arrange
+        runner = CliRunner()
 
+        # Act
+        # Mock alert configuration failure
         with patch.object(AlertController, "from_file", side_effect=FlintIOError("test")):
-            result = command.execute()
+            result = runner.invoke(
+                cli,
+                ["validate", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"],
+            )
 
-        assert result == ExitCode.IO_ERROR
+        # Assert
+        assert result.exit_code == ExitCode.IO_ERROR
 
-    def test_execute__with_alert_configuration_error__returns_configuration_error(self) -> None:
-        """Test ValidateCommand handles AlertController configuration error."""
-        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+    def test_validate__when_alert_configuration_is_invalid__exits_with_configuration_error(self) -> None:
+        """Test validate command returns configuration error when alert configuration is malformed."""
+        # Arrange
+        runner = CliRunner()
 
+        # Act
+        # Mock invalid alert configuration
         with patch.object(AlertController, "from_file", side_effect=FlintAlertConfigurationError("test")):
-            result = command.execute()
+            result = runner.invoke(
+                cli,
+                ["validate", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"],
+            )
 
-        assert result == ExitCode.CONFIGURATION_ERROR
+        # Assert
+        assert result.exit_code == ExitCode.CONFIGURATION_ERROR
 
-    def test_execute__with_runtime_io_error__returns_io_error(self) -> None:
-        """Test ValidateCommand handles RuntimeController IO error."""
-        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
-
+    def test_validate__when_runtime_configuration_is_invalid__exits_with_configuration_error(self) -> None:
+        """Test validate command returns configuration error when runtime configuration is malformed."""
+        # Arrange
+        runner = CliRunner()
         mock_alert = Mock()
 
-        with (
-            patch.object(AlertController, "from_file", return_value=mock_alert),
-            patch.object(RuntimeController, "from_file", side_effect=FlintIOError("test")),
-        ):
-            result = command.execute()
-
-        assert result == ExitCode.IO_ERROR
-
-    def test_execute__with_runtime_configuration_error__returns_configuration_error(self) -> None:
-        """Test ValidateCommand handles RuntimeController configuration error."""
-        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
-
-        mock_alert = Mock()
-
+        # Act
+        # Mock invalid runtime configuration
         with (
             patch.object(AlertController, "from_file", return_value=mock_alert),
             patch.object(RuntimeController, "from_file", side_effect=FlintRuntimeConfigurationError("test")),
         ):
-            result = command.execute()
+            result = runner.invoke(
+                cli,
+                ["validate", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"],
+            )
 
-        assert result == ExitCode.CONFIGURATION_ERROR
+        # Assert
+        assert result.exit_code == ExitCode.CONFIGURATION_ERROR
 
-    def test_execute__with_validation_error__returns_validation_error(self) -> None:
-        """Test ValidateCommand handles validation error."""
-        command = ValidateCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
-
+    def test_validate__when_runtime_io_error_occurs__exits_with_io_error(self) -> None:
+        """Test validate command returns IO error when runtime configuration file cannot be accessed."""
+        # Arrange
+        runner = CliRunner()
+        # Mock alert controller to avoid file I/O
         mock_alert = Mock()
 
+        # Act
+        # Mock runtime file access failure
+        with (
+            patch.object(AlertController, "from_file", return_value=mock_alert),
+            patch.object(RuntimeController, "from_file", side_effect=FlintIOError("test")),
+        ):
+            result = runner.invoke(
+                cli,
+                ["validate", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"],
+            )
+
+        # Assert
+        assert result.exit_code == ExitCode.IO_ERROR
+
+    def test_validate__when_runtime_configuration_fails__exits_with_error(self) -> None:
+        """Test validate command returns error when runtime configuration fails to load."""
+        # Arrange
+        runner = CliRunner()
+        # Mock alert controller to avoid file I/O
+        mock_alert = Mock()
+
+        # Act
+        # Mock runtime configuration failure
         with (
             patch.object(AlertController, "from_file", return_value=mock_alert),
             patch.object(RuntimeController, "from_file", side_effect=FlintValidationError("test")),
         ):
-            result = command.execute()
+            result = runner.invoke(
+                cli,
+                ["validate", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"],
+            )
 
-        assert result == ExitCode.VALIDATION_ERROR
+        # Assert
+        assert result.exit_code == ExitCode.VALIDATION_ERROR
 
-    def test_execute__with_test_env_vars__sets_environment_variables(self) -> None:
-        """Test ValidateCommand sets test environment variables during execution."""
-        command = ValidateCommand(
-            alert_filepath=Path("/test/alert.json"),
-            runtime_filepath=Path("/test/runtime.json"),
-            test_env_vars={"TEST_VAR": "test_value", "ANOTHER_VAR": "another_value"},
-        )
-
+    def test_validate__when_test_alert_triggered__sets_env_vars_and_exits_with_alert_error(self) -> None:
+        """Test validate command triggers test alert when --test-exception or --test-env-var provided."""
+        # Arrange
+        runner = CliRunner()
+        # Mock controllers to avoid file I/O
         mock_alert = Mock()
         mock_runtime = Mock()
 
-        # Mock os.environ to capture what was set
+        # Act
         with (
             patch.object(AlertController, "from_file", return_value=mock_alert),
             patch.object(RuntimeController, "from_file", return_value=mock_runtime),
-            patch.dict("os.environ") as mock_environ,
+            patch.dict("os.environ", {}, clear=False),
         ):
-            result = command.execute()
+            result = runner.invoke(
+                cli,
+                [
+                    "validate",
+                    "--alert-filepath",
+                    "/test/alert.json",
+                    "--runtime-filepath",
+                    "/test/runtime.json",
+                    "--test-exception",
+                    "Test exception",
+                    "--test-env-var",
+                    "TEST_VAR=test_value",
+                ],
+            )
 
-            # Verify environment variables were set (even though it triggers test alert)
-            assert mock_environ["TEST_VAR"] == "test_value"
-            assert mock_environ["ANOTHER_VAR"] == "another_value"
-            assert result == ExitCode.ALERT_TEST_ERROR
+            # Assert
+            assert os.environ["TEST_VAR"] == "test_value"
+            assert result.exit_code == ExitCode.ALERT_TEST_ERROR
+            mock_alert.evaluate_trigger_and_alert.assert_called_once()
 
-    def test_execute__with_test_exception_message__triggers_test_alert(self) -> None:
-        """Test ValidateCommand triggers test alert when test_exception_message is provided."""
-        command = ValidateCommand(
-            alert_filepath=Path("/test/alert.json"),
-            runtime_filepath=Path("/test/runtime.json"),
-            test_exception_message="Test exception message",
-        )
+    def test_validate__when_unexpected_error_occurs__exits_with_unexpected_error_code(self) -> None:
+        """Test validate command returns unexpected error code when an unhandled exception occurs."""
+        # Arrange
+        runner = CliRunner()
 
-        mock_alert = Mock()
-        mock_runtime = Mock()
+        # Act
+        # Mock unexpected exception to test general error handling
+        with patch.object(AlertController, "from_file", side_effect=RuntimeError):
+            result = runner.invoke(
+                cli,
+                ["validate", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"],
+            )
 
-        with (
-            patch.object(AlertController, "from_file", return_value=mock_alert),
-            patch.object(RuntimeController, "from_file", return_value=mock_runtime),
-        ):
-            result = command.execute()
-
-        # Should trigger alert and return alert test error exit code
-        assert result == ExitCode.ALERT_TEST_ERROR
-        mock_alert.evaluate_trigger_and_alert.assert_called_once()
-
-    def test_execute__with_test_env_vars_only__triggers_test_alert(self) -> None:
-        """Test ValidateCommand triggers test alert when only test_env_vars are provided."""
-        command = ValidateCommand(
-            alert_filepath=Path("/test/alert.json"),
-            runtime_filepath=Path("/test/runtime.json"),
-            test_env_vars={"TEST_VAR": "test_value"},
-        )
-
-        mock_alert = Mock()
-        mock_runtime = Mock()
-
-        with (
-            patch.object(AlertController, "from_file", return_value=mock_alert),
-            patch.object(RuntimeController, "from_file", return_value=mock_runtime),
-            patch.dict(os.environ, {}, clear=False),
-        ):
-            result = command.execute()
-
-        # Should trigger alert and return alert test error exit code
-        assert result == ExitCode.ALERT_TEST_ERROR
-        mock_alert.evaluate_trigger_and_alert.assert_called_once()
+        # Assert
+        assert result.exit_code == ExitCode.UNEXPECTED_ERROR
 
 
 class TestRunCommand:
-    """Test cases for RunCommand."""
+    """Test cases for run command."""
 
-    def test_run_command_add_subparser__registers_correctly(self) -> None:
-        """Test RunCommand.add_subparser registers the run subcommand correctly."""
-
-        parser = ArgumentParser()
-        subparsers = parser.add_subparsers()
-
-        RunCommand.add_subparser(subparsers)
-
-        # Parse arguments to verify the subcommand was registered correctly
-        args = parser.parse_args(
-            ["run", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
-        )
-
-        assert args.alert_filepath == "/test/alert.json"
-        assert args.runtime_filepath == "/test/runtime.json"
-
-    def test_from_args__creates_command_correctly(self) -> None:
-        """Test RunCommand.from_args creates command correctly using base Command.from_args."""
-        args = Namespace(
-            alert_filepath="/path/to/alert.json",
-            runtime_filepath="/path/to/runtime.json",
-        )
-
-        command = RunCommand.from_args(args)
-
-        assert command.alert_filepath == Path("/path/to/alert.json")
-        assert command.runtime_filepath == Path("/path/to/runtime.json")
-
-    def test_execute__with_successful_run__returns_success(self) -> None:
-        """Test RunCommand executes successfully."""
-        command = RunCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
-
+    def test_run__with_valid_configuration__executes_pipeline_and_exits_with_success(self) -> None:
+        """Test run command successfully executes ETL pipeline with valid configuration."""
+        # Arrange
+        runner = CliRunner()
+        # Mock controllers to avoid file I/O and actual pipeline execution
         mock_alert = Mock()
         mock_runtime = Mock()
 
+        # Act
         with (
             patch.object(AlertController, "from_file", return_value=mock_alert),
             patch.object(RuntimeController, "from_file", return_value=mock_runtime),
         ):
-            result = command.execute()
+            result = runner.invoke(
+                cli, ["run", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
+            )
 
-        assert result == ExitCode.SUCCESS
+        # Assert
+        assert result.exit_code == 0
         mock_runtime.execute_all.assert_called_once()
 
-    def test_execute__with_alert_io_error__returns_io_error(self) -> None:
-        """Test RunCommand handles AlertController IO error."""
-        command = RunCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+    def test_run__when_alert_configuration_fails__exits_with_error(self) -> None:
+        """Test run command returns error when alert configuration fails to load."""
+        # Arrange
+        runner = CliRunner()
 
+        # Act
+        # Mock alert configuration failure
         with patch.object(AlertController, "from_file", side_effect=FlintIOError("test")):
-            result = command.execute()
+            result = runner.invoke(
+                cli, ["run", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
+            )
 
-        assert result == ExitCode.IO_ERROR
+        # Assert
+        assert result.exit_code == ExitCode.IO_ERROR
 
-    def test_execute__with_alert_configuration_error__returns_configuration_error(self) -> None:
-        """Test RunCommand handles AlertController configuration error."""
-        command = RunCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
+    def test_run__when_alert_configuration_is_invalid__exits_with_configuration_error(self) -> None:
+        """Test run command returns configuration error when alert configuration is malformed."""
+        # Arrange
+        runner = CliRunner()
 
+        # Act
+        # Mock invalid alert configuration
         with patch.object(AlertController, "from_file", side_effect=FlintAlertConfigurationError("test")):
-            result = command.execute()
+            result = runner.invoke(
+                cli, ["run", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
+            )
 
-        assert result == ExitCode.CONFIGURATION_ERROR
+        # Assert
+        assert result.exit_code == ExitCode.CONFIGURATION_ERROR
 
     @pytest.mark.parametrize(
         "exception_class,expected_exit_code",
@@ -329,18 +252,193 @@ class TestRunCommand:
             (FlintJobError, ExitCode.JOB_ERROR),
         ],
     )
-    def test_execute__with_runtime_errors__returns_correct_exit_codes(
+    def test_run__when_runtime_error_occurs__triggers_alert_and_exits_with_correct_code(
         self, exception_class, expected_exit_code
     ) -> None:
-        """Test RunCommand handles various runtime errors correctly."""
-        command = RunCommand(alert_filepath=Path("/test/alert.json"), runtime_filepath=Path("/test/runtime.json"))
-
+        """Test run command triggers alert and returns correct exit code for various runtime errors."""
+        # Arrange
+        runner = CliRunner()
+        # Mock alert controller to test alerting behavior
         mock_alert = Mock()
 
+        # Act
+        # Mock runtime errors to test error handling and alerting
         with (
             patch.object(AlertController, "from_file", return_value=mock_alert),
             patch.object(RuntimeController, "from_file", side_effect=exception_class("Test error")),
         ):
-            result = command.execute()
+            result = runner.invoke(
+                cli, ["run", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
+            )
 
-        assert result == expected_exit_code
+        # Assert
+        assert result.exit_code == expected_exit_code
+        mock_alert.evaluate_trigger_and_alert.assert_called_once()
+
+    def test_run__when_unexpected_error_occurs__exits_with_unexpected_error_code(self) -> None:
+        """Test run command returns unexpected error code when an unhandled exception occurs."""
+        # Arrange
+        runner = CliRunner()
+
+        # Act
+        # Mock unexpected exception to test general error handling
+        with patch.object(AlertController, "from_file", side_effect=RuntimeError):
+            result = runner.invoke(
+                cli, ["run", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
+            )
+
+        # Assert
+        assert result.exit_code == ExitCode.UNEXPECTED_ERROR
+
+
+class TestExportSchemaCommand:
+    """Test cases for export-schema command."""
+
+    def test_export_schema__with_valid_output_path__creates_schema_file_and_exits_with_success(self) -> None:
+        """Test export-schema command successfully creates schema file with parent directories."""
+        # Arrange
+        runner = CliRunner()
+        mock_schema = {"type": "object", "properties": {}}
+
+        # Act
+        # Mock schema generation to avoid dependency on actual schema definition
+        with (
+            patch.object(RuntimeController, "export_schema", return_value=mock_schema),
+            runner.isolated_filesystem(),
+        ):
+            # Test with nested path to verify directory creation
+            result = runner.invoke(cli, ["export-schema", "--output-filepath", "subdir/nested/schema.json"])
+
+            # Assert
+            assert result.exit_code == 0
+            assert Path("subdir/nested/schema.json").exists()
+
+    def test_export_schema__when_file_write_fails__exits_with_io_error(self) -> None:
+        """Test export-schema command returns IO error when file cannot be written."""
+        # Arrange
+        runner = CliRunner()
+        mock_schema = {"type": "object", "properties": {}}
+
+        # Act
+        # Mock file write failure to test error handling without requiring actual permission issues
+        with (
+            patch.object(RuntimeController, "export_schema", return_value=mock_schema),
+            patch("builtins.open", side_effect=OSError("Permission denied")),
+        ):
+            result = runner.invoke(cli, ["export-schema", "--output-filepath", "/invalid/path/schema.json"])
+
+            # Assert
+            assert result.exit_code == ExitCode.IO_ERROR
+
+    def test_export_schema__when_unexpected_error_occurs__exits_with_unexpected_error_code(self) -> None:
+        """Test export-schema command returns unexpected error code when an unhandled exception occurs."""
+        # Arrange
+        runner = CliRunner()
+
+        # Act
+        # Mock unexpected exception to test general error handling
+        with patch.object(RuntimeController, "export_schema", side_effect=RuntimeError("Unexpected error")):
+            result = runner.invoke(cli, ["export-schema", "--output-filepath", "schema.json"])
+
+        # Assert
+        assert result.exit_code == ExitCode.UNEXPECTED_ERROR
+
+
+class TestCliGroup:
+    """Test cases for the CLI group."""
+
+    def test_cli__when_help_flag_provided__displays_all_commands(self) -> None:
+        """Test CLI displays help information with all available commands when --help flag is used."""
+        # Arrange
+        runner = CliRunner()
+
+        # Act
+        result = runner.invoke(cli, ["--help"])
+
+        # Assert
+        assert result.exit_code == 0
+        assert "validate" in result.output
+        assert "run" in result.output
+        assert "export-schema" in result.output
+
+    def test_cli__when_log_level_specified__accepts_valid_level(self) -> None:
+        """Test CLI accepts valid log level option without crashing."""
+        # Arrange
+        runner = CliRunner()
+        # Mock controllers to avoid file I/O
+        mock_alert = Mock()
+        mock_runtime = Mock()
+
+        # Act
+        # Testing one valid level is sufficient - Click validates the choice constraint
+        with (
+            patch.object(AlertController, "from_file", return_value=mock_alert),
+            patch.object(RuntimeController, "from_file", return_value=mock_runtime),
+        ):
+            result = runner.invoke(
+                cli,
+                [
+                    "--log-level",
+                    "DEBUG",
+                    "validate",
+                    "--alert-filepath",
+                    "/test/alert.json",
+                    "--runtime-filepath",
+                    "/test/runtime.json",
+                ],
+            )
+
+        # Assert
+        assert result.exit_code == 0
+
+    def test_cli__when_invalid_log_level_specified__exits_with_error(self) -> None:
+        """Test CLI rejects invalid log level values and displays error."""
+        # Arrange
+        runner = CliRunner()
+
+        # Act
+        result = runner.invoke(
+            cli,
+            [
+                "--log-level",
+                "INVALID",
+                "validate",
+                "--alert-filepath",
+                "/test/alert.json",
+                "--runtime-filepath",
+                "/test/runtime.json",
+            ],
+        )
+
+        # Assert
+        assert result.exit_code != 0
+
+    def test_cli__when_no_command_provided__displays_help_text(self) -> None:
+        """Test CLI displays help text when invoked without any command."""
+        # Arrange
+        runner = CliRunner()
+
+        # Act
+        result = runner.invoke(cli, [])
+
+        # Assert
+        # Click shows help when no command is given, which exits with code 0
+        assert result.exit_code == 0
+        assert "Commands:" in result.output
+
+    def test_cli__when_user_interrupts__exits_gracefully(self) -> None:
+        """Test CLI exits gracefully when user sends keyboard interrupt signal."""
+        # Arrange
+        runner = CliRunner(mix_stderr=False)
+
+        # Act
+        # Mock KeyboardInterrupt to simulate Ctrl+C from user
+        with patch.object(AlertController, "from_file", side_effect=KeyboardInterrupt):
+            result = runner.invoke(
+                cli,
+                ["validate", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"],
+            )
+
+        # Assert
+        # Click intercepts KeyboardInterrupt and converts to exit code 1
+        assert result.exit_code == 1
