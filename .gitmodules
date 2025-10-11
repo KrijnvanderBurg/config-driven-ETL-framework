@@ -12,3 +12,6 @@
 	path = .azuredevops
 	url = https://github.com/KrijnvanderBurg/.azuredevops.git
 	branch = main
+
+[submodule ".github/.dotfiles"]
+	path = .github/.dotfiles

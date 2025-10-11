@@ -1,0 +1,35 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  mypy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      
+      - name: Install Python
+        uses: ./.github/actions/setup-python
+        with:
+          python-version: 3.12
+      
+      - name: Install Poetry
+        uses: ./.github/actions/setup-poetry
+      
+      - name: Install project dependencies
+        run: poetry install --no-interaction --no-ansi
+      
+      - name: Run mypy
+        run: |
+          .github/.dotfiles/python/scripts/mypy.sh \
+            . \
+            .github/.dotfiles/python/mypy.ini
