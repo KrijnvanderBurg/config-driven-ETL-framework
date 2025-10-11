@@ -15,3 +15,5 @@
 
 [submodule ".github/.dotfiles"]
 	path = .github/.dotfiles
+	url = https://github.com/KrijnvanderBurg/.dotfiles.git
+	branch = main
