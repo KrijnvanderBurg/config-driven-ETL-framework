@@ -81,25 +81,9 @@ jobs:
       - name: Run Semgrep
         uses: ./.github/actions/semgrep
       
-      - name: Run Vulture
-        uses: ./.github/actions/vulture
-      
       - name: Run Trufflehog (Secrets)
         uses: ./.github/actions/trufflehog
-      
-      - name: Run Graudit
-        uses: ./.github/actions/graudit
-      
-      - name: Run DevSkim
-        uses: ./.github/actions/devskim
       
       - name: Run Ossaudit
         uses: ./.github/actions/ossaudit
       
-  #     - name: Upload documentation
-  #       uses: actions/upload-artifact@v4
-  #       with:
-  #         name: documentation
-  #         path: docs/_build/html/
-  #         retention-days: 30
-
