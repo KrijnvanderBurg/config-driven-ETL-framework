@@ -1,5 +1,5 @@
-name: Setup Poetry
-description: Install and configure Poetry without virtualenv
+name: Poetry Install
+description: Install project dependencies using Poetry
 inputs:
   target-path:
     description: Path to the directory containing pyproject.toml
@@ -8,8 +8,8 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Setup Poetry and Install Dependencies
+    - name: Install Dependencies
       shell: bash
       run: |
-        sh ${{ github.workspace }}/scripts/setup-poetry.sh \
+        sh ${{ github.workspace }}/scripts/poetry-install.sh \
           "${{ inputs.target-path }}"

@@ -278,34 +278,15 @@
 							"label": "build",
 							"dependsOn": [
 								"poetry install"
-								// "build package"
-								// "install package"
 							],
 							"dependsOrder": "sequence",
 							"problemMatcher": []
 						},
 						{
-							"label": "poetry lock",
-							"type": "shell",
-							"command": "poetry",
-							"args": [
-								"lock"
-							],
-							"presentation": {
-								"showReuseMessage": false
-							},
-							"problemMatcher": []
-						},
-						{
 							"label": "poetry install",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/setup-poetry.sh",
-							"args": [
-								"${workspaceFolder}" // target dirpath
-							],
-							"dependsOn": [
-								"poetry lock"
-							],
+							"command": "${workspaceFolder}/scripts/poetry-install.sh",
+							"args": [],
 							"presentation": {
 								"panel": "shared"
 							},
@@ -314,12 +295,8 @@
 						{
 							"label": "build package",
 							"type": "shell",
-							"command": "poetry",
-							"args": [
-								"build",
-								"--output",
-								"./dist/"
-							],
+							"command": "${workspaceFolder}/scripts/poetry-build.sh",
+							"args": [],
 							"presentation": {
 								"showReuseMessage": false
 							},
@@ -328,12 +305,8 @@
 						{
 							"label": "install package",
 							"type": "shell",
-							"command": "pip",
-							"args": [
-								"install",
-								"./dist/*.whl",
-								"--force-reinstall"
-							],
+							"command": "${workspaceFolder}/scripts/install-package.sh",
+							"args": [],
 							"dependsOn": [
 								"build package"
 							],
@@ -369,20 +342,22 @@
 						{
 							"label": "test",
 							"dependsOn": [
-								// "coverage-gutters watch",
+								// test build
+								"build package",
 								"sphinx build docs",
+								// code quality
 								"ruff formatter",
 								"ruff linter",
 								"pylint",
 								"flake8",
 								"mypy",
 								"pyright",
+								//security
 								"trufflehog",
 								"bandit",
 								"vulture",
-								// dependency checks
 								"semgrep",
-								// unit tests
+								// tests
 								"pytest and coverage"
 							],
 							"problemMatcher": []

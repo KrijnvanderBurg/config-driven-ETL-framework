@@ -21,8 +21,11 @@ jobs:
         with:
           python-version: 3.12
       
-      - name: Install Poetry
-        uses: ./.github/actions/setup-poetry
+      - name: Setup Poetry
+        uses: ./.github/actions/poetry-setup
+      
+      - name: Install Dependencies
+        uses: ./.github/actions/poetry-install
       
       # Formatters
       - name: Run Ruff Formatter
@@ -68,8 +71,11 @@ jobs:
         with:
           python-version: 3.12
       
-      - name: Install Poetry
-        uses: ./.github/actions/setup-poetry
+      - name: Setup Poetry
+        uses: ./.github/actions/poetry-setup
+      
+      - name: Install Dependencies
+        uses: ./.github/actions/poetry-install
       
       - name: Run Bandit
         uses: ./.github/actions/run-bandit
