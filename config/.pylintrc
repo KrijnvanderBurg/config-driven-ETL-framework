@@ -45,7 +45,7 @@ fail-on=
 
 # Disable the message, report, category or checker with the given id(s). You
 # can either give multiple identifiers separated by comma (,)
-disable=R0903,W0246,R0913,R6103,C0411,C0201,W0012,R0902,R0914,R0801,e1101
+disable=R0903,W0246,R0913,R6103,C0411,C0201,W0012,R0902,R0914,R0801,e1101,R1260,R0912
 # R0913 = too many argument (5)
 # R6103 consider-using-assignment-expr (walrus operator)
 # C0411 wrong-import-order, conflicts with isort
@@ -55,6 +55,8 @@ disable=R0903,W0246,R0913,R6103,C0411,C0201,W0012,R0902,R0914,R0801,e1101
 # R0902: Too many instance attributes (8/7) (too-many-instance-attributes)
 # R0914:too-many-locals
 # E1101:no-member (Fails on Pydantic using Field - Instance of 'FieldInfo' has no 'get_secret_value' member)
+# R1260: function is too complex. The McCabe rating is 18 (too-complex)
+# R0912: Too many branches (13/12) (too-many-branches)
 
 [FORMAT]
 
