@@ -22,7 +22,6 @@ runs:
           "${{ inputs.target-path }}" \
           "${{ inputs.config-file }}" \
           "${{ inputs.sarif-output-file }}"
-      continue-on-error: true
     
     - name: Upload SARIF to GitHub Security
       if: always()
@@ -30,4 +29,3 @@ runs:
       with:
         sarif_file: ${{ inputs.sarif-output-file }}
         category: semgrep
-      continue-on-error: true
