@@ -1,6 +1,6 @@
 #!/bin/bash
 target_path="${1:-$PWD/src}" && echo "Scanning folder: $target_path"
-config_filepath="${2:-$PWD/pyproject.toml}" && echo "Config file: $config_filepath"
+config_filepath="${2:-$PWD/config/pyrightconfig.json}" && echo "Config file: $config_filepath"
 
 # Install pyright if not already installed
 if ! command -v pyright &> /dev/null; then

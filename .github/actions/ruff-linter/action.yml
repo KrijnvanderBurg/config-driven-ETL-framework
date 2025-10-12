@@ -1,15 +1,15 @@
-name: 'Ruff Linter'
-description: 'Run Ruff linter on Python code'
+name: Ruff Linter
+description: Run Ruff linter on Python code
 inputs:
   target-path:
-    description: 'Path to the directory to lint (default: entire repo)'
+    description: Path to the directory to lint (default: entire repo)
     required: false
   config-file:
-    description: 'Path to the Ruff configuration file'
+    description: Path to the Ruff configuration file
     required: false
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Run Ruff linter
       shell: bash

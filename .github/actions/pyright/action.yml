@@ -1,15 +1,15 @@
-name: 'Pyright'
-description: 'Run Pyright type checker on Python code'
+name: Pyright
+description: Run Pyright type checker on Python code
 inputs:
   target-path:
-    description: 'Path to the directory to type-check (default: src/)'
+    description: Path to the directory to type-check (default: src/)
     required: false
   config-file:
-    description: 'Path to the Pyright configuration file'
+    description: Path to the Pyright configuration file
     required: false
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Run Pyright
       shell: bash

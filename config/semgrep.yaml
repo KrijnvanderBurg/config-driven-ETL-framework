@@ -1,0 +1,12 @@
+# Put semgrep-specific rules here.
+# Put general OCaml or Python rules in the semgrep-rules repository
+# under ocaml/ or python/.
+
+rules:
+  - id: docs-use-re2
+    languages:
+      - python
+    message: The default 're' module is vulnerable to denial of services. Use 're2'
+      instead.
+    pattern: import re
+    severity: WARNING

@@ -6,7 +6,7 @@
 target_dirpath="${1:-$PWD}" 
 echo "Target dirpath: $target_dirpath"
 
-config_filepath="${2:-$PWD/pyproject.toml}" 
+config_filepath="${2:-$PWD/config/ossaudit.ini}" 
 echo "Config filepath: $config_filepath"
 
 # Set temporary directory parameter with default to /tmp

@@ -1,0 +1,12 @@
+# Trufflehog configuration
+# https://github.com/trufflesecurity/trufflehog
+
+[detectors]
+
+[verify]
+# Enable verification of credentials
+enabled = true
+
+[output]
+# Output format
+format = "json"

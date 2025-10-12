@@ -1,15 +1,15 @@
-name: 'Ruff Formatter'
-description: 'Run Ruff formatter on Python code'
+name: Ruff Formatter
+description: Run Ruff formatter on Python code
 inputs:
   target-path:
-    description: 'Path to the directory to format (default: entire repo)'
+    description: Path to the directory to format (default: entire repo)
     required: false
   config-file:
-    description: 'Path to the Ruff configuration file'
+    description: Path to the Ruff configuration file
     required: false
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Run Ruff formatter
       shell: bash

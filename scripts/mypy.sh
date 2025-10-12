@@ -1,6 +1,6 @@
 #!/bin/bash
 target_path="${1:-$PWD/src}" && echo "Scanning folder: $target_path"
-config_filepath="${2:-$PWD/pyproject.toml}" && echo "Config file: $config_filepath"
+config_filepath="${2:-$PWD/config/mypy.ini}" && echo "Config file: $config_filepath"
 
 # Install mypy if not already installed
 if ! command -v mypy &> /dev/null; then

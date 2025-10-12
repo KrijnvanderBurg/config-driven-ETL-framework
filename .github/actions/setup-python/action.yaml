@@ -1,19 +1,19 @@
-name: 'Setup Python'
-description: 'Install and configure Python'
+name: Setup Python
+description: Install and configure Python
 inputs:
   python-version:
-    description: 'Python version to install'
+    description: Python version to install
     required: false
-    default: '3.12'
+    default: 3.12
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Set up Python ${{ inputs.python-version }}
       uses: actions/setup-python@v5
       with:
         python-version: ${{ inputs.python-version }}
-        cache: 'pip'
+        cache: pip
     
     - name: Upgrade pip
       shell: bash

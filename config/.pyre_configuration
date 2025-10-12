@@ -1,0 +1,18 @@
+{
+    "exclude": [
+        ".*/docs/.*",
+        ".*/build/.*",
+        ".*/pyre-check/stubs/.*",
+        ".devcontainer/.*",
+        ".azuredevops/.*"
+    ],
+    "ignore_all_errors": [],
+    "site_package_search_strategy": "pep561",
+    "strict": false,
+    "search_path": [
+        "src",
+        {
+            "site-package": ""
+        }
+    ]
+}

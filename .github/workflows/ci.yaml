@@ -65,128 +65,54 @@ jobs:
         uses: ./.github/actions/vulture
         continue-on-error: false
 
-  # security:
-  #   name: Security Scans
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #       with:
-  #         fetch-depth: 0  # Full history for secret scanning
-  #         submodules: recursive
+  security:
+    name: Security Scans
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for secret scanning
+          submodules: recursive
       
-  #     - name: Install Python
-  #       uses: ./.github/actions/setup-python
-  #       with:
-  #         python-version: 3.12
+      - name: Install Python
+        uses: ./.github/actions/setup-python
+        with:
+          python-version: 3.12
       
-  #     - name: Install Poetry
-  #       uses: ./.github/actions/setup-poetry
+      - name: Install Poetry
+        uses: ./.github/actions/setup-poetry
       
-  #     - name: Install project dependencies
-  #       run: poetry install --no-interaction --no-ansi
+      - name: Install project dependencies
+        run: poetry install --no-interaction --no-ansi
       
-  #     - name: Run Bandit
-  #       uses: ./.github/actions/bandit
-  #       continue-on-error: false
+      - name: Run Bandit
+        uses: ./.github/actions/bandit
+        continue-on-error: false
       
-  #     - name: Run Semgrep
-  #       uses: ./.github/actions/semgrep
-  #       continue-on-error: false
+      - name: Run Semgrep
+        uses: ./.github/actions/semgrep
+        continue-on-error: false
       
-
+      - name: Run Vulture
+        uses: ./.github/actions/vulture
+        continue-on-error: false
       
-  #     - name: Run Trufflehog (Secrets)
-  #       uses: ./.github/actions/trufflehog
-  #       continue-on-error: false
+      - name: Run Trufflehog (Secrets)
+        uses: ./.github/actions/trufflehog
+        continue-on-error: false
       
-  #     - name: Run Ossaudit
-  #       uses: ./.github/actions/ossaudit
-  #       continue-on-error: true  # Can be flaky
-  
-  # tests:
-  #   name: Tests & Coverage
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #       with:
-  #         submodules: recursive
+      - name: Run Graudit
+        uses: ./.github/actions/graudit
+        continue-on-error: true
       
-  #     - name: Install Python
-  #       uses: ./.github/actions/setup-python
-  #       with:
-  #         python-version: 3.12
+      - name: Run DevSkim
+        uses: ./.github/actions/devskim
+        continue-on-error: true
       
-  #     - name: Install Poetry
-  #       uses: ./.github/actions/setup-poetry
-      
-  #     - name: Install project dependencies
-  #       run: poetry install --no-interaction --no-ansi
-      
-  #     - name: Run Pytest with Coverage
-  #       uses: ./.github/actions/pytest
-      
-  #     # - name: Upload coverage reports
-  #     #   if: always()
-  #     #   uses: actions/upload-artifact@v4
-  #     #   with:
-  #     #     name: coverage-report
-  #     #     path: |
-  #     #       coverage.xml
-  #     #       JUNIT-TEST.xml
-  #     #     retention-days: 30
-  
-  # build:
-  #   name: Build Package
-  #   runs-on: ubuntu-latest
-  #   needs: [formatters-and-linters, security, tests]
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #       with:
-  #         submodules: recursive
-      
-  #     - name: Install Python
-  #       uses: ./.github/actions/setup-python
-  #       with:
-  #         python-version: 3.12
-      
-  #     - name: Install Poetry
-  #       uses: ./.github/actions/setup-poetry
-      
-  #     - name: Build Python Wheel
-  #       uses: ./.github/actions/build-wheel
-      
-  #     # - name: Upload wheel artifact
-  #     #   uses: actions/upload-artifact@v4
-  #     #   with:
-  #     #     name: python-wheel
-  #     #     path: dist/*.whl
-  #     #     retention-days: 7
-  
-  # documentation:
-  #   name: Build Documentation
-  #   runs-on: ubuntu-latest
-  #   steps:
-  #     - name: Checkout code
-  #       uses: actions/checkout@v4
-  #       with:
-  #         submodules: recursive
-      
-  #     - name: Install Python
-  #       uses: ./.github/actions/setup-python
-  #       with:
-  #         python-version: '3.12'
-      
-  #     - name: Install Poetry
-  #       uses: ./.github/actions/setup-poetry
-      
-  #     - name: Install project dependencies
-  #       run: poetry install --no-interaction --no-ansi
-      
-  #     - name: Build Sphinx Documentation
-  #       uses: ./.github/actions/sphinx
+      - name: Run Ossaudit
+        uses: ./.github/actions/ossaudit
+        continue-on-error: true  # Can be flaky
       
   #     - name: Upload documentation
   #       uses: actions/upload-artifact@v4

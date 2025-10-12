@@ -1,15 +1,15 @@
-name: 'Pyre'
-description: 'Run Pyre type checker on Python code'
+name: Pyre
+description: Run Pyre type checker on Python code
 inputs:
   target-path:
-    description: 'Path to the directory to type-check (default: src/)'
+    description: Path to the directory to type-check (default: src/)
     required: false
   config-file:
-    description: 'Path to the Pyre configuration file'
+    description: Path to the Pyre configuration file
     required: false
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Run Pyre
       shell: bash

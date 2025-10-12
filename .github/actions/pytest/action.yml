@@ -1,29 +1,29 @@
-name: 'Pytest and Coverage'
-description: 'Run Pytest tests with coverage reporting'
+name: Pytest and Coverage
+description: Run Pytest tests with coverage reporting
 inputs:
   tests-path:
-    description: 'Path to the tests directory'
+    description: Path to the tests directory
     required: true
   coverage-path:
-    description: 'Path to the source code for coverage'
+    description: Path to the source code for coverage
     required: true
   pytest-config:
-    description: 'Path to the Pytest configuration file'
+    description: Path to the Pytest configuration file
     required: false
   coverage-config:
-    description: 'Path to the Coverage configuration file'
+    description: Path to the Coverage configuration file
     required: false
   coverage-xml-output:
-    description: 'Path to the coverage XML output file'
+    description: Path to the coverage XML output file
     required: false
-    default: 'coverage.xml'
+    default: coverage.xml
   junit-xml-output:
-    description: 'Path to the JUnit XML output file'
+    description: Path to the JUnit XML output file
     required: false
-    default: 'JUNIT-TEST.xml'
+    default: JUNIT-TEST.xml
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Install pytest and coverage
       shell: bash

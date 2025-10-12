@@ -1,15 +1,15 @@
-name: 'Bandit Security Scanner'
-description: 'Run Bandit security scanner on Python code'
+name: Bandit Security Scanner
+description: Run Bandit security scanner on Python code
 inputs:
   target-path:
-    description: 'Path to the directory to scan (default: src/)'
+    description: Path to the directory to scan (default: src/)
     required: false
   config-file:
-    description: 'Path to the Bandit configuration file (default: pyproject.toml - auto-discovered)'
+    description: Path to the Bandit configuration file (default: pyproject.toml - auto-discovered)
     required: false
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Run Bandit
       shell: bash
