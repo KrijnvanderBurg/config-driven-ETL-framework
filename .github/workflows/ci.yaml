@@ -9,7 +9,8 @@ on:
       - main
 
 jobs:
-  mypy:
+  formatters-and-linters:
+    name: Formatters & Linters
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -18,18 +19,179 @@ jobs:
           submodules: recursive
       
       - name: Install Python
-        uses: ./.github/actions/setup-python
+        uses: ./.github/actions/python/setup-python
         with:
           python-version: 3.12
       
       - name: Install Poetry
-        uses: ./.github/actions/setup-poetry
+        uses: ./.github/actions/python/setup-poetry
       
       - name: Install project dependencies
         run: poetry install --no-interaction --no-ansi
       
-      - name: Run mypy
+      # Formatters
+      - name: Run Ruff Formatter
+        uses: ./.github/actions/ruff-formatter
+        continue-on-error: false
+      
+      # Linters
+      - name: Run Ruff Linter
+        uses: ./.github/actions/ruff-linter
+        continue-on-error: false
+      
+      - name: Run Flake8
+        uses: ./.github/actions/flake8
+        continue-on-error: false
+      
+      - name: Run Pylint
+        uses: ./.github/actions/pylint
+        continue-on-error: false
+      
+      # Type Checkers
+      - name: Run Mypy
         uses: ./.github/actions/mypy
+        continue-on-error: false
+      
+      - name: Run Pyright
+        uses: ./.github/actions/pyright
+        continue-on-error: false
+      
+      - name: Run Pyre
+        uses: ./.github/actions/pyre
+        continue-on-error: true  # Pyre can be difficult
+  
+      # Dead Code Detector
+      - name: Run Vulture (Dead Code)
+        uses: ./.github/actions/vulture
+        continue-on-error: false
 
-      - name: Run bandit
-        uses: ./.github/actions/bandit
+  # security:
+  #   name: Security Scans
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         fetch-depth: 0  # Full history for secret scanning
+  #         submodules: recursive
+      
+  #     - name: Install Python
+  #       uses: ./.github/actions/python/setup-python
+  #       with:
+  #         python-version: 3.12
+      
+  #     - name: Install Poetry
+  #       uses: ./.github/actions/python/setup-poetry
+      
+  #     - name: Install project dependencies
+  #       run: poetry install --no-interaction --no-ansi
+      
+  #     - name: Run Bandit
+  #       uses: ./.github/actions/bandit
+  #       continue-on-error: false
+      
+  #     - name: Run Semgrep
+  #       uses: ./.github/actions/semgrep
+  #       continue-on-error: false
+      
+
+      
+  #     - name: Run Trufflehog (Secrets)
+  #       uses: ./.github/actions/trufflehog
+  #       continue-on-error: false
+      
+  #     - name: Run Ossaudit
+  #       uses: ./.github/actions/ossaudit
+  #       continue-on-error: true  # Can be flaky
+  
+  # tests:
+  #   name: Tests & Coverage
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+      
+  #     - name: Install Python
+  #       uses: ./.github/actions/python/setup-python
+  #       with:
+  #         python-version: 3.12
+      
+  #     - name: Install Poetry
+  #       uses: ./.github/actions/python/setup-poetry
+      
+  #     - name: Install project dependencies
+  #       run: poetry install --no-interaction --no-ansi
+      
+  #     - name: Run Pytest with Coverage
+  #       uses: ./.github/actions/pytest
+      
+  #     # - name: Upload coverage reports
+  #     #   if: always()
+  #     #   uses: actions/upload-artifact@v4
+  #     #   with:
+  #     #     name: coverage-report
+  #     #     path: |
+  #     #       coverage.xml
+  #     #       JUNIT-TEST.xml
+  #     #     retention-days: 30
+  
+  # build:
+  #   name: Build Package
+  #   runs-on: ubuntu-latest
+  #   needs: [formatters-and-linters, security, tests]
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+      
+  #     - name: Install Python
+  #       uses: ./.github/actions/python/setup-python
+  #       with:
+  #         python-version: 3.12
+      
+  #     - name: Install Poetry
+  #       uses: ./.github/actions/python/setup-poetry
+      
+  #     - name: Build Python Wheel
+  #       uses: ./.github/actions/python/build-wheel
+      
+  #     # - name: Upload wheel artifact
+  #     #   uses: actions/upload-artifact@v4
+  #     #   with:
+  #     #     name: python-wheel
+  #     #     path: dist/*.whl
+  #     #     retention-days: 7
+  
+  # documentation:
+  #   name: Build Documentation
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout code
+  #       uses: actions/checkout@v4
+  #       with:
+  #         submodules: recursive
+      
+  #     - name: Install Python
+  #       uses: ./.github/actions/python/setup-python
+  #       with:
+  #         python-version: '3.12'
+      
+  #     - name: Install Poetry
+  #       uses: ./.github/actions/python/setup-poetry
+      
+  #     - name: Install project dependencies
+  #       run: poetry install --no-interaction --no-ansi
+      
+  #     - name: Build Sphinx Documentation
+  #       uses: ./.github/actions/python/sphinx
+      
+  #     - name: Upload documentation
+  #       uses: actions/upload-artifact@v4
+  #       with:
+  #         name: documentation
+  #         path: docs/_build/html/
+  #         retention-days: 30
+
