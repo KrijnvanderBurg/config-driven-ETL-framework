@@ -411,7 +411,8 @@ class TestCliGroup:
         )
 
         # Assert
-        assert result.exit_code != 0
+        # Click returns exit code 2 for usage errors (invalid arguments)
+        assert result.exit_code == ExitCode.USAGE_ERROR
 
     def test_cli__when_no_command_provided__displays_help_text(self) -> None:
         """Test CLI displays help text when invoked without any command."""
@@ -429,7 +430,7 @@ class TestCliGroup:
     def test_cli__when_user_interrupts__exits_gracefully(self) -> None:
         """Test CLI exits gracefully when user sends keyboard interrupt signal."""
         # Arrange
-        runner = CliRunner(mix_stderr=False)
+        runner = CliRunner()
 
         # Act
         # Mock KeyboardInterrupt to simulate Ctrl+C from user
@@ -440,5 +441,5 @@ class TestCliGroup:
             )
 
         # Assert
-        # Click intercepts KeyboardInterrupt and converts to exit code 1
-        assert result.exit_code == 1
+        # CLI intercepts KeyboardInterrupt and converts to exit code 98
+        assert result.exit_code == ExitCode.KEYBOARD_INTERRUPT

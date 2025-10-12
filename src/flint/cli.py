@@ -26,7 +26,7 @@ from flint.utils.logger import get_logger, set_logger
 logger: logging.Logger = get_logger(__name__)
 
 
-@click.group()
+@click.group(invoke_without_command=True)
 @click.version_option(package_name="flint")
 @click.option(
     "--log-level",
@@ -34,9 +34,14 @@ logger: logging.Logger = get_logger(__name__)
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False),
     help="Set the logging level (default: INFO).",
 )
-def cli(log_level: str | None = None) -> None:
+@click.pass_context
+def cli(ctx: click.Context, log_level: str | None = None) -> None:
     """Flint: Configuration-driven PySpark ETL framework."""
     set_logger(level=log_level)
+
+    # Show help when no command is provided
+    if ctx.invoked_subcommand is None:
+        click.echo(ctx.get_help())
 
 
 @cli.command()
@@ -125,6 +130,9 @@ def validate(
     except click.exceptions.Exit:
         # Re-raise Click's Exit exceptions (these are our controlled exits with proper codes)
         raise
+    except KeyboardInterrupt:
+        logger.warning("Process interrupted by user")
+        raise click.exceptions.Exit(ExitCode.KEYBOARD_INTERRUPT)
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Unexpected exception %s: %s", type(e).__name__, str(e))
         logger.error("Exception details:", exc_info=True)
@@ -194,6 +202,9 @@ def run(alert_filepath: Path, runtime_filepath: Path) -> None:
     except click.exceptions.Exit:
         # Re-raise Click's Exit exceptions (these are our controlled exits with proper codes)
         raise
+    except KeyboardInterrupt:
+        logger.warning("Process interrupted by user")
+        raise click.exceptions.Exit(ExitCode.KEYBOARD_INTERRUPT)
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Unexpected exception %s: %s", type(e).__name__, str(e))
         logger.error("Exception details:", exc_info=True)
@@ -234,6 +245,9 @@ def export_schema(output_filepath: Path) -> None:
     except click.exceptions.Exit:
         # Re-raise Click's Exit exceptions (these are our controlled exits with proper codes)
         raise
+    except KeyboardInterrupt:
+        logger.warning("Process interrupted by user")
+        raise click.exceptions.Exit(ExitCode.KEYBOARD_INTERRUPT)
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Unexpected exception %s: %s", type(e).__name__, str(e))
         logger.error("Exception details:", exc_info=True)
