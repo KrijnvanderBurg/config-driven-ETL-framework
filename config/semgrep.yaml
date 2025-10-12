@@ -3,6 +3,7 @@
 # under ocaml/ or python/.
 
 rules:
+  # example rule to show how to add more
   - id: docs-use-re2
     languages:
       - python
@@ -10,3 +11,11 @@ rules:
       instead.
     pattern: import re
     severity: WARNING
+
+  - id: is-comparison
+    languages:
+      - python
+    message: The operator 'is' is for reference equality, not value equality! Use
+    `==` instead!
+    pattern: $SOMEVAR is "..."
+    severity: ERROR
