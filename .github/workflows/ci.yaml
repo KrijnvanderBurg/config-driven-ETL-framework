@@ -85,3 +85,54 @@ jobs:
       
       - name: Run Trufflehog
         uses: ./.github/actions/run-trufflehog
+
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Python
+        uses: ./.github/actions/setup-python
+        with:
+          python-version: 3.12
+      
+      - name: Setup Poetry
+        uses: ./.github/actions/poetry-setup
+      
+      - name: Build Wheel
+        uses: ./.github/actions/poetry-build
+      
+      - name: Upload Wheel Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: wheel
+          path: dist/*.whl
+          retention-days: 1
+
+  test-wheel:
+    name: Test Installed Wheel
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Python
+        uses: ./.github/actions/setup-python
+        with:
+          python-version: 3.12
+      
+      - name: Download Wheel Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: wheel
+          path: dist/
+      
+      - name: Install Package
+        uses: ./.github/actions/install-package
+      
+      - name: Run Tests
+        uses: ./.github/actions/run-pytest
+
