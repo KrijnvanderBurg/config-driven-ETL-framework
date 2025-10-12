@@ -31,39 +31,47 @@ jobs:
       
       # Formatters
       - name: Run Ruff Formatter
+        id: ruff-formatter
         uses: ./.github/actions/ruff-formatter
-        continue-on-error: false
+        continue-on-error: true
       
       # Linters
       - name: Run Ruff Linter
+        id: ruff-linter
         uses: ./.github/actions/ruff-linter
-        continue-on-error: false
+        continue-on-error: true
       
       - name: Run Flake8
+        id: flake8
         uses: ./.github/actions/flake8
-        continue-on-error: false
+        continue-on-error: true
       
       - name: Run Pylint
+        id: pylint
         uses: ./.github/actions/pylint
-        continue-on-error: false
+        continue-on-error: true
       
       # Type Checkers
       - name: Run Mypy
+        id: mypy
         uses: ./.github/actions/mypy
-        continue-on-error: false
+        continue-on-error: true
       
       - name: Run Pyright
+        id: pyright
         uses: ./.github/actions/pyright
-        continue-on-error: false
+        continue-on-error: true
       
       - name: Run Pyre
+        id: pyre
         uses: ./.github/actions/pyre
-        continue-on-error: true  # Pyre can be difficult
+        continue-on-error: true
   
       # Dead Code Detector
       - name: Run Vulture (Dead Code)
+        id: vulture-linters
         uses: ./.github/actions/vulture
-        continue-on-error: false
+        continue-on-error: true
 
   security:
     name: Security Scans
@@ -87,32 +95,45 @@ jobs:
         run: poetry install --no-interaction --no-ansi
       
       - name: Run Bandit
+        id: bandit
         uses: ./.github/actions/bandit
-        continue-on-error: false
+        continue-on-error: true
       
       - name: Run Semgrep
+        id: semgrep
         uses: ./.github/actions/semgrep
-        continue-on-error: false
+        continue-on-error: true
       
       - name: Run Vulture
+        id: vulture-security
         uses: ./.github/actions/vulture
-        continue-on-error: false
+        continue-on-error: true
       
       - name: Run Trufflehog (Secrets)
+        id: trufflehog
         uses: ./.github/actions/trufflehog
-        continue-on-error: false
+        continue-on-error: true
       
       - name: Run Graudit
+        id: graudit
         uses: ./.github/actions/graudit
         continue-on-error: true
       
       - name: Run DevSkim
+        id: devskim
         uses: ./.github/actions/devskim
         continue-on-error: true
       
       - name: Run Ossaudit
+        id: ossaudit
         uses: ./.github/actions/ossaudit
-        continue-on-error: true  # Can be flaky
+        continue-on-error: true
+      
+      - name: Check for failures
+        if: steps.bandit.outcome == 'failure' || steps.semgrep.outcome == 'failure' || steps.vulture-security.outcome == 'failure' || steps.trufflehog.outcome == 'failure'
+        run: |
+          echo "One or more critical security scan steps failed"
+          exit 1
       
   #     - name: Upload documentation
   #       uses: actions/upload-artifact@v4
