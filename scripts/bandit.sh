@@ -9,5 +9,9 @@ if ! command -v bandit &> /dev/null; then
 fi
 echo -n "bandit version: " && bandit --version
 
-bandit -r "$target_path" \
-  -c "$config_filepath"
+# Bandit auto-discovers pyproject.toml, so don't pass -c flag for it
+if [[ "$config_filepath" == *"pyproject.toml"* ]]; then
+    bandit -r "$target_path"
+else
+    bandit -r "$target_path" -c "$config_filepath"
+fi
