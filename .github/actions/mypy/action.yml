@@ -2,7 +2,7 @@ name: Mypy
 description: Run Mypy type checker on Python code
 inputs:
   target-path:
-    description: Path to the directory to type-check (default: src/)
+    description: Path to the directory to type-check
     required: false
   config-file:
     description: Path to the Mypy configuration file

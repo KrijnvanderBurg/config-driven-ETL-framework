@@ -2,7 +2,7 @@ name: Pylint
 description: Run Pylint linter on Python code
 inputs:
   target-path:
-    description: Path to the directory to lint (default: src/)
+    description: Path to the directory to lint
     required: false
   config-file:
     description: Path to the Pylint configuration file

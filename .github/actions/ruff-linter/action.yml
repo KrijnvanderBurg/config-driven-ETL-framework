@@ -2,7 +2,7 @@ name: Ruff Linter
 description: Run Ruff linter on Python code
 inputs:
   target-path:
-    description: Path to the directory to lint (default: entire repo)
+    description: Path to the directory to lint 
     required: false
   config-file:
     description: Path to the Ruff configuration file

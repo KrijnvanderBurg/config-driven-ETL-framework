@@ -2,7 +2,7 @@ name: Vulture Dead Code Scanner
 description: Run Vulture dead code scanner on Python code
 inputs:
   target-path:
-    description: Path to the directory to scan (default: src/)
+    description: Path to the directory to scan
     required: false
   config-file:
     description: Path to the Vulture configuration file

@@ -2,7 +2,7 @@ name: Flake8
 description: Run Flake8 linter on Python code
 inputs:
   target-path:
-    description: Path to the directory to lint (default: src/)
+    description: Path to the directory to lint
     required: false
   config-file:
     description: Path to configuration file (.flake8 - auto-discovered)

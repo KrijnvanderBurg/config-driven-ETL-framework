@@ -2,7 +2,7 @@ name: Ruff Formatter
 description: Run Ruff formatter on Python code
 inputs:
   target-path:
-    description: Path to the directory to format (default: entire repo)
+    description: Path to the directory to format 
     required: false
   config-file:
     description: Path to the Ruff configuration file
