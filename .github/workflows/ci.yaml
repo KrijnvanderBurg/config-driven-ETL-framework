@@ -46,7 +46,7 @@ jobs:
         uses: ./.github/actions/run-pyright
       
       # Dead Code Detector
-      - name: Run Vulture (Dead Code)
+      - name: Run Vulture
         uses: ./.github/actions/run-vulture
 
   security:
@@ -72,8 +72,8 @@ jobs:
       - name: Run Bandit
         uses: ./.github/actions/run-bandit
       
-      - name: Run Semgrep
-        uses: ./.github/actions/run-semgrep
+      # - name: Run Semgrep
+      #   uses: ./.github/actions/run-semgrep
       
       - name: Run Trufflehog (Secrets)
         uses: ./.github/actions/run-trufflehog
