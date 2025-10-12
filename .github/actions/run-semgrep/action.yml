@@ -21,3 +21,11 @@ runs:
           "${{ inputs.target-path }}" \
           "${{ inputs.config-file }}" \
           "${{ inputs.output-file }}"
+    
+    - name: Upload Semgrep Results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: semgrep-results
+        path: ${{ inputs.output-file }}
+        if-no-files-found: error

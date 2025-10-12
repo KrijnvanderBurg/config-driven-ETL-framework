@@ -51,7 +51,12 @@ jobs:
 
   security:
     name: Security Scans
+    needs: formatters-and-linters
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # Required for uploading SARIF to Code Scanning
+      actions: read
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -66,15 +71,11 @@ jobs:
       - name: Install Poetry
         uses: ./.github/actions/setup-poetry
       
-      - name: Install Poetry
-        uses: ./.github/actions/setup-poetry
-      
       - name: Run Bandit
         uses: ./.github/actions/run-bandit
       
-      # - name: Run Semgrep
-      #   uses: ./.github/actions/run-semgrep
+      - name: Run Semgrep
+        uses: ./.github/actions/run-semgrep
       
       - name: Run Trufflehog
         uses: ./.github/actions/run-trufflehog
-      
