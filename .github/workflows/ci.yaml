@@ -135,4 +135,10 @@ jobs:
       
       - name: Run Tests
         uses: ./.github/actions/run-pytest
+        with:
+          tests-path: tests/unit
 
+      - name: Run Tests
+        uses: ./.github/actions/run-pytest
+        with:
+          tests-path: tests/e2e
