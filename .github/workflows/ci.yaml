@@ -21,7 +21,7 @@ jobs:
       - name: Install Python
         uses: ./.github/actions/setup-python
         with:
-          python-version: 3.1243
+          python-version: 3.12
       
       - name: Install Poetry
         uses: ./.github/actions/setup-poetry
@@ -32,39 +32,31 @@ jobs:
       # Formatters
       - name: Run Ruff Formatter
         uses: ./.github/actions/ruff-formatter
-        if: success() || failure()
       
       # Linters
       - name: Run Ruff Linter
         uses: ./.github/actions/ruff-linter
-        if: success() || failure()
       
       - name: Run Flake8
         uses: ./.github/actions/flake8
-        if: success() || failure()
       
       - name: Run Pylint
         uses: ./.github/actions/pylint
-        if: success() || failure()
       
       # Type Checkers
       - name: Run Mypy
         uses: ./.github/actions/mypy
-        if: success() || failure()
       
       - name: Run Pyright
         uses: ./.github/actions/pyright
-        if: success() || failure()
       
       - name: Run Pyre
         uses: ./.github/actions/pyre
-        if: success() || failure()
         continue-on-error: true
   
       # Dead Code Detector
       - name: Run Vulture (Dead Code)
         uses: ./.github/actions/vulture
-        if: success() || failure()
 
   security:
     name: Security Scans
@@ -89,31 +81,24 @@ jobs:
       
       - name: Run Bandit
         uses: ./.github/actions/bandit
-        if: success() || failure()
       
       - name: Run Semgrep
         uses: ./.github/actions/semgrep
-        if: success() || failure()
       
       - name: Run Vulture
         uses: ./.github/actions/vulture
-        if: success() || failure()
       
       - name: Run Trufflehog (Secrets)
         uses: ./.github/actions/trufflehog
-        if: success() || failure()
       
       - name: Run Graudit
         uses: ./.github/actions/graudit
-        if: success() || failure()
       
       - name: Run DevSkim
         uses: ./.github/actions/devskim
-        if: success() || failure()
       
       - name: Run Ossaudit
         uses: ./.github/actions/ossaudit
-        if: success() || failure()
       
   #     - name: Upload documentation
   #       uses: actions/upload-artifact@v4
