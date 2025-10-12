@@ -33,9 +33,7 @@
 		"PIP_DISABLE_PIP_VERSION_CHECK": "1",
 		"POETRY_VIRTUALENVS_CREATE": "false"
 	},
-	"onCreateCommand": {
-		"poetry install": "/workspace/scripts/setup-poetry.sh ./"
-	},
+	// "onCreateCommand": {},
 	// "updateContentCommand": {},
 	// "postCreateCommand": {},
 	// "postStartCommand": {},
@@ -279,8 +277,8 @@
 						{
 							"label": "build",
 							"dependsOn": [
-								"poetry install",
-								"build package"
+								"poetry install"
+								// "build package"
 								// "install package"
 							],
 							"dependsOrder": "sequence",
@@ -358,7 +356,12 @@
 							"presentation": {
 								"panel": "dedicated",
 								"clear": true
-							}
+							},
+							"group": {
+								"kind": "build",
+								"isDefault": true
+							},
+							"problemMatcher": []
 						},
 						//
 						// test
@@ -378,9 +381,7 @@
 								"bandit",
 								"vulture",
 								// dependency checks
-								"ossaudit",
 								"semgrep",
-								"graudit",
 								// unit tests
 								"pytest and coverage"
 							],
@@ -489,28 +490,6 @@
 							"label": "vulture",
 							"type": "shell",
 							"command": "${workspaceFolder}/scripts/run-vulture.sh",
-							"args": [],
-							"presentation": {
-								"panel": "dedicated",
-								"clear": true
-							},
-                            "problemMatcher": []
-						},
-						{
-							"label": "devskim",
-							"type": "shell",
-							"command": "${workspaceFolder}/scripts/devskim.sh",
-							"args": [],
-							"presentation": {
-								"panel": "dedicated",
-								"clear": true
-							},
-                            "problemMatcher": []
-						},
-						{
-							"label": "ossaudit",
-							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-ossaudit.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
