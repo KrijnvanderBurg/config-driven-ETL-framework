@@ -1,3 +1,0 @@
-[bandit]
-exclude_dirs = tests,.venv,.devcontainer,.azuredevops,.github
-skips = B101,B601,B608
