@@ -2,6 +2,7 @@
 poetry.lock
 *.puml
 JUNIT-TEST.xml
+semgrep.sarif
 semgrep-junit.xml
 requirements.txt
 **/output/*
