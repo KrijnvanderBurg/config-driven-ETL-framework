@@ -26,8 +26,8 @@ jobs:
       - name: Install Poetry
         uses: ./.github/actions/setup-poetry
       
-      - name: Install project dependencies
-        run: poetry install --no-interaction --no-ansi
+      # - name: Install project dependencies
+      #   run: poetry install --no-interaction --no-ansi
       
       # Formatters
       - name: Run Ruff Formatter
