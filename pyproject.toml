@@ -142,11 +142,10 @@ line-ending = "auto"
 
 [tool.black]
 line-length = 120
-target-version = ['py311']
+target-version = ["py311"]
 include = '\.pyi?$'
 extend-exclude = '''
-/(
-  # directories
+(
   \.eggs
   | \.git
   | \.hg
@@ -158,10 +157,10 @@ extend-exclude = '''
   | build
   | dist
   | docs
-  | .devcontainer
-  | .azuredevops
-  | .github
-)/
+  | \.devcontainer
+  | \.azuredevops
+  | \.github
+)
 '''
 
 # ===========================
