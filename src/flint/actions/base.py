@@ -1,3 +1,4 @@
+"""Actions base"""
 from abc import abstractmethod
 
 from pydantic import Field
