@@ -1,0 +1,15 @@
+name: Trufflehog Secrets Scanner
+description: Run Trufflehog to scan for secrets in the repository
+inputs:
+  target-path:
+    description: Path to the repository to scan (file:// prefix will be added)
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Run Trufflehog
+      shell: bash
+      run: |
+        sh ${{ github.workspace }}/scripts/run-trufflehog.sh \
+          "${{ inputs.target-path }}"

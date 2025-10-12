@@ -66,8 +66,8 @@ jobs:
       - name: Install Poetry
         uses: ./.github/actions/setup-poetry
       
-      - name: Install project dependencies
-        run: poetry install --no-interaction --no-ansi
+      - name: Install Poetry
+        uses: ./.github/actions/setup-poetry
       
       - name: Run Bandit
         uses: ./.github/actions/run-bandit
@@ -75,7 +75,7 @@ jobs:
       - name: Run Semgrep
         uses: ./.github/actions/run-semgrep
       
-      - name: Run Trufflehog (Secrets)
+      - name: Run Trufflehog
         uses: ./.github/actions/run-trufflehog
       
       - name: Run Ossaudit
