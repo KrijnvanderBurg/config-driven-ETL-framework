@@ -34,7 +34,7 @@
 		"POETRY_VIRTUALENVS_CREATE": "false"
 	},
 	"onCreateCommand": {
-		"poetry install": "/workspace/scripts/poetry-install-pyproject.sh ./"
+		"poetry install": "/workspace/scripts/setup-poetry.sh ./"
 	},
 	// "updateContentCommand": {},
 	// "postCreateCommand": {},
@@ -301,7 +301,7 @@
 						{
 							"label": "poetry install",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/poetry-install-pyproject.sh",
+							"command": "${workspaceFolder}/scripts/setup-poetry.sh",
 							"args": [
 								"${workspaceFolder}" // target dirpath
 							],
@@ -351,7 +351,7 @@
 						{
 							"label": "sphinx build docs",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/sphinx.sh",
+							"command": "${workspaceFolder}/scripts/run-sphinx.sh",
 							"args": [
 								"${workspaceFolder}/docs/" // docs dirpath
 							],
@@ -389,7 +389,7 @@
 						{
 							"label": "ruff formatter",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/ruff_formatter.sh",
+							"command": "${workspaceFolder}/scripts/run-ruff-formatter.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -400,7 +400,7 @@
 						{
 							"label": "ruff linter",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/ruff_linter.sh",
+							"command": "${workspaceFolder}/scripts/run-ruff-linter.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -411,7 +411,7 @@
 						{
 							"label": "pylint",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/pylint.sh",
+							"command": "${workspaceFolder}/scripts/run-pylint.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -422,7 +422,7 @@
 						{
 							"label": "flake8",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/flake8.sh",
+							"command": "${workspaceFolder}/scripts/run-flake8.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -433,7 +433,7 @@
 						{
 							"label": "mypy",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/mypy.sh",
+							"command": "${workspaceFolder}/scripts/run-mypy.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -444,7 +444,7 @@
 						{
 							"label": "pyright",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/pyright.sh",
+							"command": "${workspaceFolder}/scripts/run-pyright.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -455,7 +455,7 @@
 						{
 							"label": "trufflehog",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/trufflehog.sh",
+							"command": "${workspaceFolder}/scripts/run-trufflehog.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -466,7 +466,7 @@
 						{
 							"label": "bandit",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/bandit.sh",
+							"command": "${workspaceFolder}/scripts/run-bandit.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -477,7 +477,7 @@
 						{
 							"label": "semgrep",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/semgrep.sh",
+							"command": "${workspaceFolder}/scripts/run-semgrep.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -488,7 +488,7 @@
 						{
 							"label": "vulture",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/vulture.sh",
+							"command": "${workspaceFolder}/scripts/run-vulture.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -521,7 +521,7 @@
 						{
 							"label": "ossaudit",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/ossaudit.sh",
+							"command": "${workspaceFolder}/scripts/run-ossaudit.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -532,7 +532,7 @@
 						{
 							"label": "pytest and coverage",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/pytest_and_coverage.sh",
+							"command": "${workspaceFolder}/scripts/run-pytest.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
