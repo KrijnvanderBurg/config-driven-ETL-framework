@@ -9,17 +9,16 @@ if ! command -v semgrep &> /dev/null; then
     pip install semgrep --quiet
 fi
 
-# add to run custom rules
-# --config "$config_filepath" \
 
 semgrep scan "$target_path" \
   --config "p/default" \
   --config "p/python" \
+  --config "$config_filepath" \
   --sarif \
   -o "$sarif_output" \
+  --no-autofix \
   --error \
   --text \
-  --no-autofix \
   --force-color \
   --metrics "off" \
   --oss-only
