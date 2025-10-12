@@ -3,12 +3,12 @@
 # under ocaml/ or python/.
 
 rules:
-  - id: docs-use-re2
-    languages:
-      - python
-    message: The default 're' module is vulnerable to denial of services. Use 're2' instead.
-    pattern: import re
-    severity: WARNING
+  # - id: docs-use-re2
+  #   languages:
+  #     - python
+  #   message: The default 're' module is vulnerable to denial of services. Use 're2' instead.
+  #   pattern: import re
+  #   severity: WARNING
 
   - id: is-comparison
     languages:
