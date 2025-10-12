@@ -9,7 +9,6 @@ if ! command -v semgrep &> /dev/null; then
     pip install semgrep --quiet
 fi
 
-
 semgrep scan "$target_path" \
   --config "p/default" \
   --config "p/python" \
@@ -17,8 +16,6 @@ semgrep scan "$target_path" \
   --sarif \
   -o "$sarif_output" \
   --no-autofix \
-  --error \
-  --text \
   --force-color \
   --metrics "off" \
   --oss-only
