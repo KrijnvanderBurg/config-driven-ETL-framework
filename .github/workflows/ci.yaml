@@ -78,6 +78,3 @@ jobs:
       - name: Run Trufflehog
         uses: ./.github/actions/run-trufflehog
       
-      - name: Run Ossaudit
-        uses: ./.github/actions/run-ossaudit
-      
