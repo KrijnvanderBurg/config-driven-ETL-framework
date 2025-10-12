@@ -1,0 +1,23 @@
+name: Semgrep Security Scanner
+description: Run Semgrep security scanner on Python code
+inputs:
+  target-path:
+    description: Path to the directory to scan
+    required: false
+  config-file:
+    description: Path to the Semgrep configuration file
+    required: false
+  output-file:
+    description: Path to the JUnit XML output file
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Run Semgrep
+      shell: bash
+      run: |
+        sh ${{ github.workspace }}/scripts/run-semgrep.sh \
+          "${{ inputs.target-path }}" \
+          "${{ inputs.config-file }}" \
+          "${{ inputs.output-file }}"
