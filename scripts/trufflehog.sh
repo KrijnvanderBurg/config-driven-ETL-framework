@@ -1,6 +1,6 @@
 #!/bin/bash
 target_path="${1:-file://$PWD}" && echo "Scanning repository: $target_path"
-config_filepath="${2:-$PWD/config/trufflehog.toml}" && echo "Config file: $config_filepath"
+# config_filepath="${2:-$PWD/config/trufflehog.toml}" && echo "Config file: $config_filepath"
 
 # Install trufflehog if not already installed
 if ! command -v trufflehog &> /dev/null; then
@@ -14,7 +14,7 @@ if ! command -v trufflehog &> /dev/null; then
 fi
 echo -n "trufflehog version: " && trufflehog --version
 
+# --config "$config_filepath" \
 trufflehog filesystem "$target_path" \
-  --config "$config_filepath" \
   --fail \
   --no-update
