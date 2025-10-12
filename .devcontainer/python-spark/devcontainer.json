@@ -508,17 +508,6 @@
                             "problemMatcher": []
 						},
 						{
-							"label": "graudit",
-							"type": "shell",
-							"command": "${workspaceFolder}/scripts/graudit.sh",
-							"args": [],
-							"presentation": {
-								"panel": "dedicated",
-								"clear": true
-							},
-                            "problemMatcher": []
-						},
-						{
 							"label": "ossaudit",
 							"type": "shell",
 							"command": "${workspaceFolder}/scripts/run-ossaudit.sh",
