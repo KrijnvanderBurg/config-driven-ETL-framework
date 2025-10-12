@@ -19,12 +19,12 @@ jobs:
           submodules: recursive
       
       - name: Install Python
-        uses: ./.github/actions/python/setup-python
+        uses: ./.github/actions/setup-python
         with:
           python-version: 3.12
       
       - name: Install Poetry
-        uses: ./.github/actions/python/setup-poetry
+        uses: ./.github/actions/setup-poetry
       
       - name: Install project dependencies
         run: poetry install --no-interaction --no-ansi
@@ -76,12 +76,12 @@ jobs:
   #         submodules: recursive
       
   #     - name: Install Python
-  #       uses: ./.github/actions/python/setup-python
+  #       uses: ./.github/actions/setup-python
   #       with:
   #         python-version: 3.12
       
   #     - name: Install Poetry
-  #       uses: ./.github/actions/python/setup-poetry
+  #       uses: ./.github/actions/setup-poetry
       
   #     - name: Install project dependencies
   #       run: poetry install --no-interaction --no-ansi
@@ -114,12 +114,12 @@ jobs:
   #         submodules: recursive
       
   #     - name: Install Python
-  #       uses: ./.github/actions/python/setup-python
+  #       uses: ./.github/actions/setup-python
   #       with:
   #         python-version: 3.12
       
   #     - name: Install Poetry
-  #       uses: ./.github/actions/python/setup-poetry
+  #       uses: ./.github/actions/setup-poetry
       
   #     - name: Install project dependencies
   #       run: poetry install --no-interaction --no-ansi
@@ -148,15 +148,15 @@ jobs:
   #         submodules: recursive
       
   #     - name: Install Python
-  #       uses: ./.github/actions/python/setup-python
+  #       uses: ./.github/actions/setup-python
   #       with:
   #         python-version: 3.12
       
   #     - name: Install Poetry
-  #       uses: ./.github/actions/python/setup-poetry
+  #       uses: ./.github/actions/setup-poetry
       
   #     - name: Build Python Wheel
-  #       uses: ./.github/actions/python/build-wheel
+  #       uses: ./.github/actions/build-wheel
       
   #     # - name: Upload wheel artifact
   #     #   uses: actions/upload-artifact@v4
@@ -175,18 +175,18 @@ jobs:
   #         submodules: recursive
       
   #     - name: Install Python
-  #       uses: ./.github/actions/python/setup-python
+  #       uses: ./.github/actions/setup-python
   #       with:
   #         python-version: '3.12'
       
   #     - name: Install Poetry
-  #       uses: ./.github/actions/python/setup-poetry
+  #       uses: ./.github/actions/setup-poetry
       
   #     - name: Install project dependencies
   #       run: poetry install --no-interaction --no-ansi
       
   #     - name: Build Sphinx Documentation
-  #       uses: ./.github/actions/python/sphinx
+  #       uses: ./.github/actions/sphinx
       
   #     - name: Upload documentation
   #       uses: actions/upload-artifact@v4
