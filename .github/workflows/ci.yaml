@@ -29,9 +29,7 @@ jobs:
         run: poetry install --no-interaction --no-ansi
       
       - name: Run mypy
-        run: |
-          ./scripts/mypy.sh
+        uses: ./.github/actions/mypy
 
       - name: Run bandit
-        run: |
-          ./scripts/bandit.sh
+        uses: ./.github/actions/bandit
