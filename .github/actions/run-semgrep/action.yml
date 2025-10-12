@@ -10,6 +10,7 @@ inputs:
   output-file:
     description: Path to the JUnit XML output file
     required: false
+    default: semgrep-junit.xml
 
 runs:
   using: composite

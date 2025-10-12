@@ -51,7 +51,7 @@ jobs:
 
   security:
     name: Security Scans
-    needs: formatters-and-linters
+    # needs: formatters-and-linters
     runs-on: ubuntu-latest
     permissions:
       contents: read
