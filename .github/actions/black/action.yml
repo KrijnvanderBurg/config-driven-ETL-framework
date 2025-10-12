@@ -1,0 +1,19 @@
+name: 'Black Formatter'
+description: 'Run Black formatter on Python code'
+inputs:
+  target-path:
+    description: 'Path to the directory to format (default: entire repo)'
+    required: false
+  config-file:
+    description: 'Path to the Black configuration file'
+    required: false
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Run Black formatter
+      shell: bash
+      run: |
+        sh ${{ github.workspace }}/scripts/black.sh \
+          "${{ inputs.target-path }}" \
+          "${{ inputs.config-file }}"

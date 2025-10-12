@@ -30,3 +30,273 @@ pytest-xdist = ">=3.6.1"
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+# ===========================
+# Testing & Coverage
+# ===========================
+
+[tool.pytest.ini_options]
+addopts = "-n 1"
+filterwarnings = [
+    "ignore::DeprecationWarning",
+    "ignore::PendingDeprecationWarning"
+]
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_functions = ["test_*"]
+log_cli_level = "INFO"
+
+[tool.coverage.run]
+branch = true
+parallel = true
+omit = [
+    "*/tests/*",
+    "/build/*",
+    "*/__init__.py",
+    ".devcontainer/*",
+    ".azuredevops/*",
+    ".github/*"
+]
+
+[tool.coverage.report]
+show_missing = true
+ignore_errors = true
+omit = [
+    "*/tests/*",
+    "*/build/*",
+    "*/__init__.py"
+]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "if self.debug",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if 0:",
+    "if __name__ == .__main__.:",
+    "from",
+    "import"
+]
+
+# ===========================
+# Ruff (Formatter & Linter)
+# ===========================
+
+[tool.ruff]
+exclude = [
+    ".azuredevops",
+    ".devcontainer",
+    ".github",
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".git-rewrite",
+    ".hg",
+    ".ipynb_checkpoints",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pyenv",
+    ".pytest_cache",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    ".vscode",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "site-packages",
+    "venv",
+    "docs"
+]
+line-length = 120
+indent-width = 4
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F"]
+ignore = []
+fixable = ["ALL"]
+unfixable = []
+dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
+
+[tool.ruff.lint.isort]
+known-first-party = ["flint"]
+known-third-party = ["pyspark", "pandas"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# ===========================
+# Black (Formatter)
+# ===========================
+
+[tool.black]
+line-length = 120
+target-version = ['py311']
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  # directories
+  \.eggs
+  | \.git
+  | \.hg
+  | \.mypy_cache
+  | \.tox
+  | \.venv
+  | _build
+  | buck-out
+  | build
+  | dist
+  | docs
+  | .devcontainer
+  | .azuredevops
+  | .github
+)/
+'''
+
+# ===========================
+# isort (Import Formatter)
+# ===========================
+
+[tool.isort]
+profile = "black"
+line_length = 120
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+skip_glob = [
+    "*/build/*",
+    "*/.venv/*",
+    "*/docs/*",
+    "*/.devcontainer/*",
+    "*/.azuredevops/*",
+    "*/.github/*"
+]
+known_first_party = ["flint"]
+known_third_party = ["pyspark", "pandas", "pyarrow", "numpy", "yaml", "requests", "structlog", "pydantic", "click"]
+
+# ===========================
+# Mypy (Type Checker)
+# ===========================
+
+[tool.mypy]
+python_version = "3.11"
+warn_return_any = true
+warn_unused_configs = true
+ignore_missing_imports = true
+disable_error_code = ["type-abstract"]
+exclude = [
+    "build",
+    "tests",
+    "docs",
+    ".devcontainer",
+    ".azuredevops",
+    ".github"
+]
+
+[[tool.mypy.overrides]]
+module = "yaml.*"
+ignore_missing_imports = true
+
+# ===========================
+# Pylint (Linter)
+# ===========================
+
+[tool.pylint.main]
+source-roots = ["src/"]
+ignore = ["build", ".venv", "docs", "tests", ".devcontainer", ".azuredevops", ".github"]
+load-plugins = [
+    "pylint.extensions.check_elif",
+    "pylint.extensions.bad_builtin",
+    "pylint.extensions.docparams",
+    "pylint.extensions.for_any_all",
+    "pylint.extensions.set_membership",
+    "pylint.extensions.code_style",
+    "pylint.extensions.overlapping_exceptions",
+    "pylint.extensions.typing",
+    "pylint.extensions.redefined_variable_type",
+    "pylint.extensions.comparison_placement",
+    "pylint.extensions.mccabe"
+]
+limit-inference-results = 100
+fail-under = 10.0
+
+[tool.pylint."messages control"]
+disable = [
+    "R0903",  # too-few-public-methods
+    "W0246",  # useless-parent-delegation
+    "R0913",  # too-many-arguments
+    "R6103",  # consider-using-assignment-expr
+    "C0411",  # wrong-import-order (conflicts with isort)
+    "C0201",  # consider-iterating-dictionary
+    "W0012",  # unknown-option-value
+    "R0902",  # too-many-instance-attributes
+    "R0914",  # too-many-locals
+    "R0801",  # duplicate-code
+    "E1101"   # no-member
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.pylint.miscellaneous]
+notes = ["FIXME", "XXX"]
+
+[tool.pylint.imports]
+known-third-party = ["pyspark", "pandas"]
+
+# ===========================
+# Bandit (Security Scanner)
+# ===========================
+
+[tool.bandit]
+exclude_dirs = ["tests", ".venv", ".devcontainer", ".azuredevops", ".github"]
+skips = ["B101", "B601", "B608"]
+
+# ===========================
+# Vulture (Dead Code Scanner)
+# ===========================
+
+[tool.vulture]
+exclude = [".venv", "docs", ".devcontainer", ".azuredevops", ".github"]
+ignore_decorators = ["@app.route", "@require_*"]
+ignore_names = ["visit_*", "do_*"]
+make_whitelist = true
+min_confidence = 80
+sort_by_size = true
+verbose = false
+
+# ===========================
+# Pyright (Type Checker)
+# ===========================
+
+[tool.pyright]
+include = ["src"]
+exclude = [
+    "**/node_modules",
+    "**/__pycache__",
+    "build",
+    "dist",
+    "docs",
+    "tests",
+    ".devcontainer",
+    ".azuredevops",
+    ".github"
+]
+pythonVersion = "3.11"
+pythonPlatform = "Linux"
+typeCheckingMode = "basic"
+reportMissingImports = true
+reportMissingTypeStubs = false
