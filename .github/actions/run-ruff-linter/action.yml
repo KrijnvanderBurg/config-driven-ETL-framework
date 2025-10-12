@@ -1,8 +1,8 @@
-name: Ruff Formatter
-description: Run Ruff formatter on Python code
+name: Ruff Linter
+description: Run Ruff linter on Python code
 inputs:
   target-path:
-    description: Path to the directory to format 
+    description: Path to the directory to lint 
     required: false
   config-file:
     description: Path to the Ruff configuration file
@@ -11,9 +11,9 @@ inputs:
 runs:
   using: composite
   steps:
-    - name: Run Ruff formatter
+    - name: Run Ruff linter
       shell: bash
       run: |
-        sh ${{ github.workspace }}/scripts/ruff_formatter.sh \
+        sh ${{ github.workspace }}/scripts/run-ruff-linter.sh \
           "${{ inputs.target-path }}" \
           "${{ inputs.config-file }}"

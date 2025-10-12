@@ -26,33 +26,30 @@ jobs:
       - name: Install Poetry
         uses: ./.github/actions/setup-poetry
       
-      - name: Install project dependencies
-        run: poetry install --no-interaction --no-ansi
-      
       # Formatters
       - name: Run Ruff Formatter
-        uses: ./.github/actions/ruff-formatter
+        uses: ./.github/actions/run-ruff-formatter
       
       # Linters
       - name: Run Ruff Linter
-        uses: ./.github/actions/ruff-linter
+        uses: ./.github/actions/run-ruff-linter
       
       - name: Run Flake8
-        uses: ./.github/actions/flake8
+        uses: ./.github/actions/run-flake8
       
       - name: Run Pylint
-        uses: ./.github/actions/pylint
+        uses: ./.github/actions/run-pylint
       
       # Type Checkers
       - name: Run Mypy
-        uses: ./.github/actions/mypy
+        uses: ./.github/actions/run-mypy
       
       - name: Run Pyright
-        uses: ./.github/actions/pyright
+        uses: ./.github/actions/run-pyright
       
       # Dead Code Detector
       - name: Run Vulture (Dead Code)
-        uses: ./.github/actions/vulture
+        uses: ./.github/actions/run-vulture
 
   security:
     name: Security Scans
@@ -76,14 +73,14 @@ jobs:
         run: poetry install --no-interaction --no-ansi
       
       - name: Run Bandit
-        uses: ./.github/actions/bandit
+        uses: ./.github/actions/run-bandit
       
       - name: Run Semgrep
-        uses: ./.github/actions/semgrep
+        uses: ./.github/actions/run-semgrep
       
       - name: Run Trufflehog (Secrets)
-        uses: ./.github/actions/trufflehog
+        uses: ./.github/actions/run-trufflehog
       
       - name: Run Ossaudit
-        uses: ./.github/actions/ossaudit
+        uses: ./.github/actions/run-ossaudit
       

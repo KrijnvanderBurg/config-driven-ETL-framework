@@ -1,24 +1,15 @@
 name: Setup Poetry
 description: Install and configure Poetry without virtualenv
 inputs:
-  poetry-version:
-    description: Poetry version to install
+  target-path:
+    description: Path to the directory containing pyproject.toml
     required: false
-    default: latest
 
 runs:
   using: composite
   steps:
-    - name: Install Poetry
+    - name: Setup Poetry and Install Dependencies
       shell: bash
       run: |
-        python -m pip install --user pipx
-        python -m pipx ensurepath
-        pipx install poetry${{ inputs.poetry-version != 'latest' && format('=={0}', inputs.poetry-version) || '' }}
-    
-    - name: Configure Poetry
-      shell: bash
-      run: |
-        poetry config virtualenvs.create false
-        poetry config virtualenvs.in-project false
-        poetry --version
+        sh ${{ github.workspace }}/scripts/setup-poetry.sh \
+          "${{ inputs.target-path }}"
