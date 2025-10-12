@@ -18,12 +18,12 @@ jobs:
           submodules: recursive
       
       - name: Install Python
-        uses: ./.github/actions/python/setup-python
+        uses: ./.github/actions/setup-python
         with:
           python-version: 3.12
       
       - name: Install Poetry
-        uses: ./.github/actions/python/setup-poetry
+        uses: ./.github/actions/setup-poetry
       
       - name: Install project dependencies
         run: poetry install --no-interaction --no-ansi
