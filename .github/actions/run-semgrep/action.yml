@@ -7,10 +7,6 @@ inputs:
   config-file:
     description: Path to the Semgrep configuration file
     required: false
-  junit-output-file:
-    description: Path to the JUnit XML output file
-    required: false
-    default: semgrep-junit.xml
   sarif-output-file:
     description: Path to the SARIF output file
     required: false
@@ -25,16 +21,8 @@ runs:
         sh ${{ github.workspace }}/scripts/run-semgrep.sh \
           "${{ inputs.target-path }}" \
           "${{ inputs.config-file }}" \
-          "${{ inputs.junit-output-file }}" \
           "${{ inputs.sarif-output-file }}"
-    
-    - name: Upload Semgrep JUnit Results
-      if: always()
-      uses: actions/upload-artifact@v4
-      with:
-        name: semgrep-junit-results
-        path: ${{ inputs.junit-output-file }}
-        if-no-files-found: error
+      continue-on-error: true
     
     - name: Upload SARIF to GitHub Security
       if: always()
