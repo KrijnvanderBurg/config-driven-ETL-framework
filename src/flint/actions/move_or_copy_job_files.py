@@ -9,9 +9,9 @@
 # //     "hierarchy_base_path": "incoming/daily/",   // optional; root used when preserving source hierarchy
 # //     "duplicate_handling": {
 # //         "dedupe_by": ["size", "checksum"],      // options: "checksum" | "size"
-# //         "on_match": "skip",                     
+# //         "on_match": "skip",
 # // destination already exists and is identical -> allowed: "overwrite" | "version"
-# //         "on_mismatch": "version",               
+# //         "on_mismatch": "version",
 # // destination already exists but is not identical -> allowed: "overwrite" | "version" | "fail" | "notify"
 # //         "checksum": {
 # //             "algorithm": "sha256",              // allowed: "md5", "sha1", "sha256"
