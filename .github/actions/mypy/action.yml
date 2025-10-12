@@ -1,15 +1,15 @@
-name: 'Mypy'
-description: 'Run Mypy type checker on Python code'
+name: Mypy
+description: Run Mypy type checker on Python code
 inputs:
   target-path:
-    description: 'Path to the directory to type-check (default: src/)'
+    description: Path to the directory to type-check (default: src/)
     required: false
   config-file:
-    description: 'Path to the Mypy configuration file'
+    description: Path to the Mypy configuration file
     required: false
 
 runs:
-  using: 'composite'
+  using: composite
   steps:
     - name: Run Mypy
       shell: bash
