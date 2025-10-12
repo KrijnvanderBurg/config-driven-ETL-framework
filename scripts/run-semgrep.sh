@@ -16,6 +16,7 @@ semgrep scan "$target_path" \
   --sarif \
   -o "$sarif_output" \
   --no-autofix \
+  --error \
   --force-color \
   --metrics "off" \
   --oss-only
