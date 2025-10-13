@@ -288,7 +288,8 @@
 							"command": "${workspaceFolder}/scripts/poetry-install.sh",
 							"args": [],
 							"presentation": {
-								"panel": "shared"
+								"panel": "dedicated",
+								"clear": true
 							},
 							"problemMatcher": []
 						},
@@ -298,7 +299,9 @@
 							"command": "${workspaceFolder}/scripts/poetry-build.sh",
 							"args": [],
 							"presentation": {
-								"showReuseMessage": false
+								"showReuseMessage": false,
+								"panel": "dedicated",
+								"clear": true
 							},
 							"problemMatcher": []
 						},
@@ -311,7 +314,8 @@
 								"build package"
 							],
 							"presentation": {
-								"panel": "shared"
+								"panel": "dedicated",
+								"clear": true
 							},
 							"group": {
 								"kind": "build",
