@@ -8,7 +8,8 @@ if ! command -v trufflehog &> /dev/null; then
     # Install trufflehog from GitHub releases
     TRUFFLEHOG_VERSION="3.63.2"
     wget -q "https://github.com/trufflesecurity/trufflehog/releases/download/v${TRUFFLEHOG_VERSION}/trufflehog_${TRUFFLEHOG_VERSION}_linux_amd64.tar.gz"
-    tar -xzf "trufflehog_${TRUFFLEHOG_VERSION}_linux_amd64.tar.gz"
+    # Extract only the trufflehog binary to avoid overwriting project files
+    tar -xzf "trufflehog_${TRUFFLEHOG_VERSION}_linux_amd64.tar.gz" trufflehog
     sudo mv trufflehog /usr/local/bin/
     rm "trufflehog_${TRUFFLEHOG_VERSION}_linux_amd64.tar.gz"
 fi
