@@ -5,7 +5,7 @@ target_path="${1:-file://$PWD}" && echo "Scanning repository: $target_path"
 # Install trufflehog if not already installed
 if ! command -v trufflehog &> /dev/null; then
     echo "Installing trufflehog..."
-    curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
+    curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b $HOME/.local/bin
 fi
 echo -n "TruffleHog version: " && trufflehog --version
 
