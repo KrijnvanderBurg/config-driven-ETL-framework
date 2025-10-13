@@ -5,17 +5,12 @@ target_path="${1:-file://$PWD}" && echo "Scanning repository: $target_path"
 # Install trufflehog if not already installed
 if ! command -v trufflehog &> /dev/null; then
     echo "Installing trufflehog..."
-    # Install trufflehog from GitHub releases
-    TRUFFLEHOG_VERSION="3.63.2"
-    wget -q "https://github.com/trufflesecurity/trufflehog/releases/download/v${TRUFFLEHOG_VERSION}/trufflehog_${TRUFFLEHOG_VERSION}_linux_amd64.tar.gz"
-    # Extract only the trufflehog binary to avoid overwriting project files
-    tar -xzf "trufflehog_${TRUFFLEHOG_VERSION}_linux_amd64.tar.gz" trufflehog
-    sudo mv trufflehog /usr/local/bin/
-    rm "trufflehog_${TRUFFLEHOG_VERSION}_linux_amd64.tar.gz"
+    curl -sSfL https://raw.githubusercontent.com/trufflesecurity/trufflehog/main/scripts/install.sh | sh -s -- -b /usr/local/bin
 fi
-echo -n "trufflehog version: " && trufflehog --version
+echo -n "TruffleHog version: " && trufflehog --version
 
 # --config "$config_filepath" \
 trufflehog filesystem "$target_path" \
-  --fail \
-  --no-update
+    --fail \
+    --no-update \
+    --include-detectors="all"

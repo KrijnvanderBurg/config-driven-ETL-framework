@@ -11,14 +11,14 @@ RUN ZSH_SNIPPET="export HISTFILE=/commandhistory/.zsh_history && export HISTSIZE
 # Install Java and other dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
-    openjdk-11-jdk \
+    openjdk-17-jdk \
     wget \
     procps \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
 # Set environment variables
-ENV JAVA_HOME=/usr/lib/jvm/java-11-openjdk-amd64
+ENV JAVA_HOME=/usr/lib/jvm/java-17-openjdk-amd64
 
 # Arguments for Spark setup
 ARG SPARK_VERSION=4.0.1
