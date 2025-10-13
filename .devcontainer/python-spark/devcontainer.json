@@ -235,7 +235,7 @@
 						{
 							"label": "git clean",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/git_clean.sh",
+							"command": "${workspaceFolder}/.github/scripts/git_clean.sh",
 							"runOptions": {
 								"runOn": "default"
 							},
@@ -285,7 +285,7 @@
 						{
 							"label": "poetry install",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/poetry-install.sh",
+							"command": "${workspaceFolder}/.github/scripts/poetry-install.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -296,7 +296,7 @@
 						{
 							"label": "build package",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/poetry-build.sh",
+							"command": "${workspaceFolder}/.github/scripts/poetry-build.sh",
 							"args": [],
 							"presentation": {
 								"showReuseMessage": false,
@@ -308,7 +308,7 @@
 						{
 							"label": "install package",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/install-package.sh",
+							"command": "${workspaceFolder}/.github/scripts/install-package.sh",
 							"args": [],
 							"dependsOn": [
 								"build package"
@@ -326,7 +326,7 @@
 						{
 							"label": "sphinx build docs",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-sphinx.sh",
+							"command": "${workspaceFolder}/.github/scripts/run-sphinx.sh",
 							"args": [
 								"${workspaceFolder}/docs/" // docs dirpath
 							],
@@ -369,7 +369,7 @@
 						{
 							"label": "ruff formatter",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-ruff-formatter.sh",
+							"command": "${workspaceFolder}/.github/scripts/run-ruff-formatter.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -380,7 +380,7 @@
 						{
 							"label": "ruff linter",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-ruff-linter.sh",
+							"command": "${workspaceFolder}/.github/scripts/run-ruff-linter.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -391,7 +391,7 @@
 						{
 							"label": "pylint",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-pylint.sh",
+							"command": "${workspaceFolder}/.github/scripts/run-pylint.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -402,7 +402,7 @@
 						{
 							"label": "flake8",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-flake8.sh",
+							"command": "${workspaceFolder}/.github/scripts/run-flake8.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -413,7 +413,7 @@
 						{
 							"label": "mypy",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-mypy.sh",
+							"command": "${workspaceFolder}/.github/scripts/run-mypy.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -424,7 +424,7 @@
 						{
 							"label": "pyright",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-pyright.sh",
+							"command": "${workspaceFolder}/.github/scripts/run-pyright.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -435,7 +435,7 @@
 						{
 							"label": "trufflehog",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-trufflehog.sh",
+							"command": "${workspaceFolder}/.github/scripts/run-trufflehog.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -446,7 +446,7 @@
 						{
 							"label": "bandit",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-bandit.sh",
+							"command": "${workspaceFolder}/.github/scripts/run-bandit.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -457,7 +457,7 @@
 						{
 							"label": "semgrep",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-semgrep.sh",
+							"command": "${workspaceFolder}/.github/scripts/run-semgrep.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -468,7 +468,7 @@
 						{
 							"label": "vulture",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-vulture.sh",
+							"command": "${workspaceFolder}/.github/scripts/run-vulture.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
@@ -479,7 +479,7 @@
 						{
 							"label": "pytest and coverage",
 							"type": "shell",
-							"command": "${workspaceFolder}/scripts/run-pytest.sh",
+							"command": "${workspaceFolder}/.github/scripts/run-pytest.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",

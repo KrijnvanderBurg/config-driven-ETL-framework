@@ -33,7 +33,7 @@ runs:
     - name: Run Pytest with Coverage
       shell: bash
       run: |
-        sh ${{ github.workspace }}/scripts/run-pytest.sh \
+        sh ${{ github.workspace }}/.github/scripts/run-pytest.sh \
           "${{ inputs.tests-path }}" \
           "${{ inputs.coverage-path }}" \
           "${{ inputs.pytest-config }}" \

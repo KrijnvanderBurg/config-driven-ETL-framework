@@ -18,7 +18,7 @@ runs:
     - name: Run Semgrep
       shell: bash
       run: |
-        sh ${{ github.workspace }}/scripts/run-semgrep.sh \
+        sh ${{ github.workspace }}/.github/scripts/run-semgrep.sh \
           "${{ inputs.target-path }}" \
           "${{ inputs.config-file }}" \
           "${{ inputs.sarif-output-file }}"

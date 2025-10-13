@@ -11,5 +11,5 @@ runs:
     - name: Install Dependencies
       shell: bash
       run: |
-        sh ${{ github.workspace }}/scripts/poetry-install.sh \
+        sh ${{ github.workspace }}/.github/scripts/poetry-install.sh \
           "${{ inputs.target-path }}"

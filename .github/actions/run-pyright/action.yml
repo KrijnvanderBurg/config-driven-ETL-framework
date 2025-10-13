@@ -14,6 +14,6 @@ runs:
     - name: Run Pyright
       shell: bash
       run: |
-        sh ${{ github.workspace }}/scripts/run-pyright.sh \
+        sh ${{ github.workspace }}/.github/scripts/run-pyright.sh \
           "${{ inputs.target-path }}" \
           "${{ inputs.config-file }}"

@@ -6,4 +6,4 @@ runs:
   steps:
     - name: Install Poetry
       shell: bash
-      run: sh ${{ github.workspace }}/scripts/poetry-setup.sh
+      run: sh ${{ github.workspace }}/.github/scripts/poetry-setup.sh
