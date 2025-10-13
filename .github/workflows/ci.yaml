@@ -88,7 +88,6 @@ jobs:
 
   build:
     name: Build Package
-    needs: formatters-and-linters
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
