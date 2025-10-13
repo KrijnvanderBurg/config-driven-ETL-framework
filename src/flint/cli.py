@@ -26,7 +26,7 @@ from flint.utils.logger import get_logger, set_logger
 logger: logging.Logger = get_logger(__name__)
 
 
-@click.group(invoke_without_command=True)
+@click.group()
 @click.version_option(package_name="flint")
 @click.option(
     "--log-level",
@@ -34,14 +34,9 @@ logger: logging.Logger = get_logger(__name__)
     type=click.Choice(["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"], case_sensitive=False),
     help="Set the logging level (default: INFO).",
 )
-@click.pass_context
-def cli(ctx: click.Context, log_level: str | None = None) -> None:
+def cli(log_level: str | None = None) -> None:
     """Flint: Configuration-driven PySpark ETL framework."""
     set_logger(level=log_level)
-
-    # Show help when no command is provided
-    if ctx.invoked_subcommand is None:
-        click.echo(ctx.get_help())
 
 
 @cli.command()
