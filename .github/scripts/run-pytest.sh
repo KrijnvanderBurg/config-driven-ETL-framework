@@ -1,8 +1,8 @@
 #!/bin/bash
 tests_path="${1:-$PWD/tests/}" && echo "Tests path: $tests_path"
 coverage_path="${2:-$PWD/src/}" && echo "Coverage path: $coverage_path"
-config_filepath_pytest="${3:-$PWD/config/pytest.ini}" && echo "Config file pytest: $config_filepath_pytest"
-config_filepath_coverage="${4:-$PWD/config/.coveragerc}" && echo "Config file coverage: $config_filepath_coverage"
+config_filepath_pytest="${3:-$PWD/.github/config/pytest.ini}" && echo "Config file pytest: $config_filepath_pytest"
+config_filepath_coverage="${4:-$PWD/.github/config/.coveragerc}" && echo "Config file coverage: $config_filepath_coverage"
 output_coverage_filepath="${5:-$PWD/coverage.xml}" && echo "Coverage output will be saved to: $output_coverage_filepath"
 output_junit_filepath="${6:-$PWD/JUNIT-TEST.xml}" && echo "Pytest junit output will be saved to: $output_junit_filepath"
 

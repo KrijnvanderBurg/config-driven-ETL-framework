@@ -113,7 +113,7 @@
 				// `--config` flag must either be a path to a `.toml` configuration file or ...`
 				// It should have been fixed but it still happens for me. 
 				// https://github.com/astral-sh/ruff-vscode/issues/413
-				"ruff.configuration": "${workspaceFolder}/config/ruff.toml",
+				"ruff.configuration": "${workspaceFolder}/.github/config/ruff.toml",
 				"ruff.organizeImports": true,
 				"ruff.fixAll": true,
 				//
@@ -125,14 +125,14 @@
 				"python.testing.pytestEnabled": true,
 				"python.testing.pytestArgs": [
 					"-c",
-					"${workspaceFolder}/config/pytest.ini",
+					"${workspaceFolder}/.github/config/pytest.ini",
 					"-o",
 					"cache_dir=${workspaceFolder}/.pytest_cache",
 					"-s",
 					"--cov=${workspaceFolder}/src/",
 					"--cov-report=xml:${workspaceFolder}/coverage.xml",
 					"--cov-report=term-missing",
-					"--cov-config=${workspaceFolder}/config/.coveragerc",
+					"--cov-config=${workspaceFolder}/.github/config/.coveragerc",
 					"--junit-xml=${workspaceFolder}/JUNIT-TEST.xml",
 					"--durations=0",
 					"--durations-min=0.01"
@@ -163,7 +163,7 @@
 				//
 				"pylint.args": [
 					"--rcfile",
-					"${workspaceFolder}/config/.pylintrc"
+					"${workspaceFolder}/.github/config/.pylintrc"
 				],
 				"pylint.path": [
 					"${interpreter}",
@@ -189,7 +189,7 @@
 				//
 				"mypy-type-checker.args": [
 					"--config-file",
-					"${workspaceFolder}/config/mypy.ini"
+					"${workspaceFolder}/.github/config/mypy.ini"
 				],
 				"mypy-type-checker.cwd": "${workspaceFolder}",
 				"mypy-type-checker.enabled": true,
@@ -201,7 +201,7 @@
 				//
 				"bandit.args": [
 					"-c",
-					"${workspaceFolder}/config/bandit.ini"
+					"${workspaceFolder}/.github/config/bandit.ini"
 				],
 				"bandit.cwd": "${workspaceFolder}",
 				"bandit.logLevel": "warning", // 'error' (default), 'warning'

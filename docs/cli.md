@@ -104,12 +104,13 @@ Example:
 ```bash
 # Set logging level via environment variable
 export FLINT_LOG_LEVEL=DEBUG
-python -m samara run --alert-filepath config/alerts.jsonc --runtime-filepath config/pipeline.jsonc
+python -m samara run --alert-filepath ./alerts.jsonc --runtime-filepath ./pipeline.jsonc
 ```
 
 ## Exit Codes
 
 - `0`: SUCCESS - Command executed successfully
+- `2`: USAGE_ERROR - Command line usage error
 - `10`: INVALID_ARGUMENTS - Invalid command line arguments
 - `20`: IO_ERROR - Input/output error (file access issues)
 - `30`: CONFIGURATION_ERROR - General configuration error
