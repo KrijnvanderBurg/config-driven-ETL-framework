@@ -9,6 +9,7 @@ from unittest.mock import Mock
 
 import pytest
 from pydantic import ValidationError
+
 from samara.exceptions import FlintIOError, FlintRuntimeConfigurationError
 from samara.runtime.controller import RuntimeController
 
@@ -165,6 +166,117 @@ class TestRuntimeControllerValidation:
         controller = RuntimeController(**runtime_config)
 
         assert controller.enabled is False
+
+    def test_create_runtime_controller__with_duplicate_extract_ids__raises_validation_error(
+        self, runtime_config: dict[str, Any], tmp_path: Path
+    ) -> None:
+        """Test RuntimeController creation fails with duplicate extract IDs."""
+        input_file = tmp_path / "input2.json"
+        input_file.write_text("[]", encoding="utf-8")
+
+        runtime_config["jobs"][0]["extracts"].append(
+            {
+                "id": "extract1",  # Duplicate ID
+                "extract_type": "file",
+                "method": "batch",
+                "data_format": "json",
+                "options": {},
+                "location": str(input_file),
+                "schema": "",
+            }
+        )
+
+        with pytest.raises(ValidationError):
+            RuntimeController(**runtime_config)
+
+    def test_create_runtime_controller__with_duplicate_transform_ids__raises_validation_error(
+        self, runtime_config: dict[str, Any]
+    ) -> None:
+        """Test RuntimeController creation fails with duplicate transform IDs."""
+        runtime_config["jobs"][0]["transforms"].append(
+            {
+                "id": "transform1",  # Duplicate ID
+                "upstream_id": "extract1",
+                "options": {},
+                "functions": [],
+            }
+        )
+
+        with pytest.raises(ValidationError):
+            RuntimeController(**runtime_config)
+
+    def test_create_runtime_controller__with_duplicate_load_ids__raises_validation_error(
+        self, runtime_config: dict[str, Any], tmp_path: Path
+    ) -> None:
+        """Test RuntimeController creation fails with duplicate load IDs."""
+        output_file = tmp_path / "output2.json"
+        output_file.write_text("[]", encoding="utf-8")
+
+        runtime_config["jobs"][0]["loads"].append(
+            {
+                "id": "load1",  # Duplicate ID
+                "upstream_id": "transform1",
+                "load_type": "file",
+                "method": "batch",
+                "location": str(output_file),
+                "schema_export": "",
+                "options": {},
+                "mode": "overwrite",
+                "data_format": "json",
+            }
+        )
+
+        with pytest.raises(ValidationError):
+            RuntimeController(**runtime_config)
+
+    def test_create_runtime_controller__with_duplicate_ids_across_types__raises_validation_error(
+        self, runtime_config: dict[str, Any]
+    ) -> None:
+        """Test RuntimeController creation fails when same ID used across extract/transform/load."""
+        runtime_config["jobs"][0]["transforms"][0]["id"] = "extract1"
+
+        with pytest.raises(ValidationError):
+            RuntimeController(**runtime_config)
+
+    def test_create_runtime_controller__with_extract_and_load_same_id__raises_validation_error(
+        self, runtime_config: dict[str, Any]
+    ) -> None:
+        """Test RuntimeController creation fails when extract and load share the same ID."""
+        runtime_config["jobs"][0]["loads"][0]["id"] = "extract1"
+
+        with pytest.raises(ValidationError):
+            RuntimeController(**runtime_config)
+
+    def test_create_runtime_controller__with_multiple_duplicate_ids__raises_validation_error(
+        self, runtime_config: dict[str, Any], tmp_path: Path
+    ) -> None:
+        """Test RuntimeController creation fails with multiple duplicate IDs."""
+        input_file = tmp_path / "input2.json"
+        input_file.write_text("[]", encoding="utf-8")
+
+        runtime_config["jobs"][0]["extracts"].append(
+            {
+                "id": "extract1",
+                "extract_type": "file",
+                "method": "batch",
+                "data_format": "json",
+                "options": {},
+                "location": str(input_file),
+                "schema": "",
+            }
+        )
+
+        runtime_config["jobs"][0]["transforms"].append(
+            {
+                "id": "transform1",
+                "upstream_id": "extract1",
+                "options": {},
+                "functions": [],
+            }
+        )
+
+        with pytest.raises(ValidationError):
+            RuntimeController(**runtime_config)
 
 
 # =========================================================================== #
