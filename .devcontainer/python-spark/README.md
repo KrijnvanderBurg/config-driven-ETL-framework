@@ -21,8 +21,11 @@ This DevContainer includes 20+ carefully curated industry-standard Python develo
 
 ### Two Modes of Operation
 
-#### Primary: Real-time Code Analysis (Opened Files)
-Extensions provide instant feedback as you code, showing issues directly in the editor and Problems tab for the currently open file.
+#### Primary: Real-time Code Analysis
+
+**Workspace-Wide (All Files)**: Type checkers (Pylance, Mypy) continuously analyze your entire repository, showing issues across all files in the Problems tab.
+
+**Open Files Only**: Linters and formatters (Ruff, Pylint, Flake8, Bandit) provide instant feedback for currently open files in the editor and Problems tab.
 
 !["Preview of live problems tab showing issues"](./docs/preview_live_problems_tab.gif)
 
@@ -32,7 +35,8 @@ Code Coverage can be seen directly in the editor after running tests. The `if` l
 
 
 #### Secondary: Complete Repository Validation (All Files)
-VS Code tasks run comprehensive analysis across your entire repository, simulating CI/CD pipeline checks locally.
+
+VS Code tasks run comprehensive analysis across your entire repository for tools that don't support workspace-wide scanning via extensions. This simulates CI/CD pipeline checks locally.
 
 !["Run all Code Quality tools as VSCode Tasks"](./docs/run_all_vscode_tasks.gif)
 
@@ -177,6 +181,10 @@ This DevContainer automatically installs and configures all necessary VS Code ex
 Extensions improve your development workflow by providing real-time feedback, automated formatting, security scanning, and advanced code navigation—all directly in your editor. Properly configuring these extensions ensures that every team member benefits from consistent tooling, immediate issue detection, and seamless integration with your DevContainer setup.
 
 !["Preview of live problems tab showing issues"](./docs/preview_live_problems_tab.gif)
+
+**Workspace-Wide Analysis**: Type checkers (Pylance with Pyright, Mypy) are configured to continuously analyze the entire workspace, reporting issues across all files in the Problems tab.
+
+**Open Files Only**: Linters (Ruff, Pylint, Flake8) and security scanners (Bandit, DevSkim) analyze only currently opened files. Use VS Code tasks for repository-wide validation with these tools.
 
 #### 🎨 Formatting Extensions
 
@@ -327,43 +335,27 @@ Microsoft's security analysis framework. Shows security issues in editor.
 #### 🔧 Type Checking Extensions
 
 ##### Mypy
-Static type checker. Shows type issues in editor and Problems tab.
+Static type checker. Analyzes the entire workspace for type issues shown in Problems tab.
 
 ```json
 "extensions": [
-    "ms-python.flake8"
+    "ms-python.mypy-type-checker"
 ],
 "settings": {
-    "flake8.args": [
-        "--config",
-        "${workspaceFolder}/path/to/.flake8"
+    "mypy-type-checker.args": [
+        "--config-file",
+        "${workspaceFolder}/path/to/mypy.ini"
     ],
-    "flake8.cwd": "${workspaceFolder}",
-    "flake8.showNotification": "onError",
-    "flake8.enabled": true,
-    // ...
+    "mypy-type-checker.cwd": "${workspaceFolder}",
+    "mypy-type-checker.enabled": true,
+    "mypy-type-checker.showNotifications": "onError",
+    "mypy-type-checker.reportingScope": "workspace",
+    "mypy-type-checker.preferDaemon": true
 },
 ```
 
-#### 🧪 Testing Extensions
-
-##### Pytest
-Test discovery and execution. Access via Testing panel in VS Code sidebar.
-
-```json
-"extensions": [],
-"settings": {
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true,
-    "python.testing.pytestArgs": [
-        "-c",
-        "${workspaceFolder}/path/to/pytest.ini"
-    ],
-    "python.languageServer": "Default",
-```
-
-##### Pylance (IntelliSense)
-Microsoft's Python language server. Provides IntelliSense, type checking, and code navigation.
+##### Pylance (IntelliSense & Type Checking)
+Microsoft's Python language server. Analyzes the entire workspace providing IntelliSense, type checking (via Pyright), and code navigation.
 
 ```json
 "extensions": [
@@ -387,6 +379,23 @@ Microsoft's Python language server. Provides IntelliSense, type checking, and co
     "python.analysis.inlayHints.callArgumentName": true,
     "python.analysis.inlayHints.pytestParameters": true,
 },
+```
+
+#### 🧪 Testing Extensions
+
+##### Pytest
+Test discovery and execution. Access via Testing panel in VS Code sidebar.
+
+```json
+"extensions": [],
+"settings": {
+    "python.testing.unittestEnabled": false,
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestArgs": [
+        "-c",
+        "${workspaceFolder}/path/to/pytest.ini"
+    ],
+    "python.languageServer": "Default",
 ```
 
 ## 📊 Code Coverage Visualization
@@ -428,9 +437,11 @@ This DevContainer includes a comprehensive task automation system that mirrors y
 
 ### Why Use Tasks?
 
-**Repository-Wide Analysis**: Unlike live editor feedback (limited to open files), tasks scan your entire codebase for comprehensive validation.  
+**Repository-Wide Analysis for Linters**: Most linter extensions (Ruff, Pylint, Flake8, Bandit) only analyze open files. Tasks scan your entire codebase for comprehensive validation.  
 **Pre-Push Confidence**: Catch issues locally using the same tools and configurations as your production CI/CD pipeline.  
 **Parallel Execution**: Independent tasks can run simultaneously for faster feedback.
+
+**Note**: Type checkers (Pylance, Mypy) are configured to analyze the entire workspace via their extensions, so they don't require separate tasks.
 
 !["Run all Code Quality tools as VSCode Tasks"](./docs/run_all_vscode_tasks.gif)
 
@@ -455,13 +466,12 @@ This DevContainer includes a comprehensive task automation system that mirrors y
 - **ruff linter**: Lint with Ruff
 - **pylint**: Lint with Pylint
 - **flake8**: Lint with Flake8
-- **mypy**: Type check with MyPy
-- **pyright**: Type check with Pyright
-- **pyre**: Type check with Pyre
 - **bandit**: Security scan with Bandit
 - **semgrep**: Security scan with Semgrep
 - **trufflehog**: Secret detection
 - **pytest and coverage**: Run tests with coverage
+
+**Note**: Mypy and Pyright type checking tasks have been removed as these tools are configured to analyze the entire workspace via VS Code extensions (Mypy extension and Pylance, respectively).
 
 ### Results & Output
 - **Terminal Panels**: Each task runs in a dedicated terminal

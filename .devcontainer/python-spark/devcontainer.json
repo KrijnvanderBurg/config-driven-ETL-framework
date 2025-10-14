@@ -142,7 +142,7 @@
 				// Pylance - https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance
 				//
 				"python.analysis.typeCheckingMode": "strict", // 'off' (default), 'basic', 'strict'
-				"python.analysis.diagnosticMode": "openFilesOnly", // 'openFilesOnly' (default), 'workspace'
+				"python.analysis.diagnosticMode": "workspace", // 'openFilesOnly' (default), 'workspace'
 				"python.analysis.diagnosticSeverityOverrides": {
 					// https://github.com/microsoft/pyright/blob/main/docs/configuration.md#type-check-diagnostics-settings
 					"reportUnknownParameterType": false,
@@ -194,8 +194,8 @@
 				"mypy-type-checker.cwd": "${workspaceFolder}",
 				"mypy-type-checker.enabled": true,
 				"mypy-type-checker.showNotifications": "onError", // 'off' (default), 'onWarning', 'onError', 'always'
-				"mypy-type-checker.reportingScope": "file", // 'file' (default), 'workspace'
-				"mypy-type-checker.preferDaemon": false, // set to true if reportingScope is workspace
+				"mypy-type-checker.reportingScope": "workspace", // 'file' (default), 'workspace'
+				"mypy-type-checker.preferDaemon": true, // set to true if reportingScope is workspace
 				//
 				// Bandit - https://marketplace.visualstudio.com/items?itemName=nwghbandit.ini
 				//
@@ -354,8 +354,6 @@
 								"ruff linter",
 								"pylint",
 								"flake8",
-								"mypy",
-								"pyright",
 								//security
 								"trufflehog",
 								"bandit",
@@ -403,28 +401,6 @@
 							"label": "flake8",
 							"type": "shell",
 							"command": "${workspaceFolder}/.github/scripts/run-flake8.sh",
-							"args": [],
-							"presentation": {
-								"panel": "dedicated",
-								"clear": true
-							},
-                            "problemMatcher": []
-						},
-						{
-							"label": "mypy",
-							"type": "shell",
-							"command": "${workspaceFolder}/.github/scripts/run-mypy.sh",
-							"args": [],
-							"presentation": {
-								"panel": "dedicated",
-								"clear": true
-							},
-                            "problemMatcher": []
-						},
-						{
-							"label": "pyright",
-							"type": "shell",
-							"command": "${workspaceFolder}/.github/scripts/run-pyright.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",
