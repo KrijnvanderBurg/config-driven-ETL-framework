@@ -1,12 +1,12 @@
 name: CI
 
 on:
-  # push:
-  #   branches:
-  #     - main
-  # pull_request:
-  #   branches:
-  #     - main
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
 jobs:
   formatters-and-linters:
@@ -20,34 +20,34 @@ jobs:
         uses: ./.github/actions/setup-python
         with:
           python-version: 3.13
-      
+
       - name: Setup Poetry
         uses: ./.github/actions/poetry-setup
-      
+
       - name: Install Dependencies
         uses: ./.github/actions/poetry-install
-      
+
       # Formatters
       - name: Run Ruff Formatter
         uses: ./.github/actions/run-ruff-formatter
-      
+
       # Linters
       - name: Run Ruff Linter
         uses: ./.github/actions/run-ruff-linter
-      
+
       - name: Run Flake8
         uses: ./.github/actions/run-flake8
-      
+
       - name: Run Pylint
         uses: ./.github/actions/run-pylint
-      
+
       # Type Checkers
       - name: Run Mypy
         uses: ./.github/actions/run-mypy
-      
+
       - name: Run Pyright
         uses: ./.github/actions/run-pyright
-      
+
       # Dead Code Detector
       - name: Run Vulture
         uses: ./.github/actions/run-vulture
@@ -65,80 +65,26 @@ jobs:
         uses: actions/checkout@v4
         with:
           fetch-depth: 0  # Full history for secret scanning
-      
+
       - name: Install Python
         uses: ./.github/actions/setup-python
         with:
           python-version: 3.13
-      
+
       - name: Setup Poetry
         uses: ./.github/actions/poetry-setup
-      
+
       - name: Install Dependencies
         uses: ./.github/actions/poetry-install
-      
+
       - name: Run Bandit
         uses: ./.github/actions/run-bandit
-      
+
       - name: Run Semgrep
         uses: ./.github/actions/run-semgrep
-      
+
       - name: Run Trufflehog
         uses: ./.github/actions/run-trufflehog
 
-  build:
-    name: Build Package
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Install Python
-        uses: ./.github/actions/setup-python
-        with:
-          python-version: 3.13
-      
-      - name: Setup Poetry
-        uses: ./.github/actions/poetry-setup
-      
-      - name: Build Wheel
-        uses: ./.github/actions/poetry-build
-      
-      - name: Upload Wheel Artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: wheel
-          path: dist/*.whl
-          retention-days: 1
-
-  test-wheel:
-    name: Test Installed Wheel
-    needs: build
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-      
-      - name: Install Python
-        uses: ./.github/actions/setup-python
-        with:
-          python-version: 3.13
-      
-      - name: Download Wheel Artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: wheel
-          path: dist/
-      
-      - name: Install Package
-        uses: ./.github/actions/install-package
-      
-      - name: Run Tests
-        uses: ./.github/actions/run-pytest
-        with:
-          tests-path: tests/unit
-
-      - name: Run Tests
-        uses: ./.github/actions/run-pytest
-        with:
-          tests-path: tests/e2e
+  build-and-test:
+    uses: ./.github/workflows/build-and-test.yml

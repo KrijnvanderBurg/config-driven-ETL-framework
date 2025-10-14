@@ -1,12 +1,6 @@
 name: Release Python App
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
 
 permissions:
@@ -14,29 +8,25 @@ permissions:
   packages: write
 
 jobs:
+  build-and-test:
+    uses: ./.github/workflows/build-and-test.yml
+
   release:
+    needs: build-and-test
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
-      - name: Install Python
-        uses: ./.github/actions/setup-python
-        with:
-          python-version: 3.13
-      
-      - name: Setup Poetry
-        uses: ./.github/actions/poetry-setup
-      
-      - name: Get version from pyproject.toml
-        id: get_version
-        run: |
-          VERSION=$(sh ${{ github.workspace }}/.github/scripts/poetry-get-version.sh)
-          echo "version=${VERSION}" >> $GITHUB_OUTPUT
-      
+
       - name: Display version
-        run: echo "Version from pyproject.toml is ${{ steps.get_version.outputs.version }}"
-      
+        run: echo "Version to release is ${{ needs.build-and-test.outputs.version }}"
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
       # Add release steps here
-      # Use ${{ steps.get_version.outputs.version }} to access the version
+      # Use ${{ needs.build-and-test.outputs.version }} to access the version
