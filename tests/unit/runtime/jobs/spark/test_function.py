@@ -6,9 +6,8 @@ from collections.abc import Callable
 from typing import Any, Literal
 
 import pytest
-
-from flint.runtime.jobs.models.model_transform import ArgsModel
-from flint.runtime.jobs.spark.function import Function
+from samara.runtime.jobs.models.model_transform import ArgsModel
+from samara.runtime.jobs.spark.function import Function
 
 
 class _DummyArgs(ArgsModel):

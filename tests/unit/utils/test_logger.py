@@ -1,8 +1,7 @@
 """Unit tests for logging utility functions."""
 
 import pytest
-
-from flint.utils.logger import bind_context, clear_context, get_logger, set_logger
+from samara.utils.logger import bind_context, clear_context, get_logger, set_logger
 
 
 class TestSetLogger:

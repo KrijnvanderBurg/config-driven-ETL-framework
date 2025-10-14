@@ -13,8 +13,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from pydantic import ValidationError
-
-from flint.runtime.jobs.spark.transform import TransformSpark
+from samara.runtime.jobs.spark.transform import TransformSpark
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #
@@ -211,7 +210,7 @@ class TestTransformSparkTransform:
         with (
             patch.object(TransformSpark, "data_registry", {transform.upstream_id: mock_dataframe}),
             patch(
-                "flint.runtime.jobs.spark.transforms.select.SelectFunction.transform",
+                "samara.runtime.jobs.spark.transforms.select.SelectFunction.transform",
                 return_value=mock_callable,
             ) as mock_transform_func,
         ):
@@ -247,11 +246,11 @@ class TestTransformSparkTransform:
         with (
             patch.object(TransformSpark, "data_registry", {transform.upstream_id: mock_df_original}),
             patch(
-                "flint.runtime.jobs.spark.transforms.select.SelectFunction.transform",
+                "samara.runtime.jobs.spark.transforms.select.SelectFunction.transform",
                 return_value=mock_select_callable,
             ),
             patch(
-                "flint.runtime.jobs.spark.transforms.filter.FilterFunction.transform",
+                "samara.runtime.jobs.spark.transforms.filter.FilterFunction.transform",
                 return_value=mock_filter_callable,
             ),
         ):

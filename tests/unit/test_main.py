@@ -1,8 +1,7 @@
-"""Unit tests for the Flint __main__ module entry point."""
+"""Unit tests for the Samara __main__ module entry point."""
 
 from click.testing import CliRunner
-
-from flint.cli import cli
+from samara.cli import cli
 
 
 class TestMainModule:
@@ -14,12 +13,12 @@ class TestMainModule:
         runner = CliRunner()
 
         # Act
-        # Simulate running: python -m flint --help
+        # Simulate running: python -m samara --help
         result = runner.invoke(cli, ["--help"])
 
         # Assert
         assert result.exit_code == 0
-        assert "Flint: Configuration-driven PySpark ETL framework" in result.output
+        assert "Samara: Configuration-driven PySpark ETL framework" in result.output
 
     def test_main_module__with_version_flag__displays_version(self) -> None:
         """Test that __main__ module passes system arguments to CLI for version display."""
@@ -27,12 +26,12 @@ class TestMainModule:
         runner = CliRunner()
 
         # Act
-        # Simulate: python -m flint --version
+        # Simulate: python -m samara --version
         result = runner.invoke(cli, ["--version"])
 
         # Assert
         assert result.exit_code == 0
-        assert "version" in result.output.lower() or "flint" in result.output.lower()
+        assert "version" in result.output.lower() or "samara" in result.output.lower()
 
     def test_main_module__with_validate_help__shows_validate_command_help(self) -> None:
         """Test that __main__ can execute validate command through CLI."""
@@ -40,7 +39,7 @@ class TestMainModule:
         runner = CliRunner()
 
         # Act
-        # Simulate: python -m flint validate --help
+        # Simulate: python -m samara validate --help
         result = runner.invoke(cli, ["validate", "--help"])
 
         # Assert
@@ -54,7 +53,7 @@ class TestMainModule:
         runner = CliRunner()
 
         # Act
-        # Simulate: python -m flint run --help
+        # Simulate: python -m samara run --help
         result = runner.invoke(cli, ["run", "--help"])
 
         # Assert
@@ -68,7 +67,7 @@ class TestMainModule:
         runner = CliRunner()
 
         # Act
-        # Simulate: python -m flint export-schema --help
+        # Simulate: python -m samara export-schema --help
         result = runner.invoke(cli, ["export-schema", "--help"])
 
         # Assert
@@ -82,9 +81,9 @@ class TestMainModule:
         runner = CliRunner()
 
         # Act
-        # Simulate: python -m flint --log-level DEBUG --help
+        # Simulate: python -m samara --log-level DEBUG --help
         result = runner.invoke(cli, ["--log-level", "DEBUG", "--help"])
 
         # Assert
         assert result.exit_code == 0
-        assert "Flint: Configuration-driven PySpark ETL framework" in result.output
+        assert "Samara: Configuration-driven PySpark ETL framework" in result.output

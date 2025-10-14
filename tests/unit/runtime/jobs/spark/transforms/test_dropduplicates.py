@@ -6,9 +6,8 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
-
-from flint.runtime.jobs.models.transforms.model_dropduplicates import DropDuplicatesArgs
-from flint.runtime.jobs.spark.transforms.dropduplicates import DropDuplicatesFunction
+from samara.runtime.jobs.models.transforms.model_dropduplicates import DropDuplicatesArgs
+from samara.runtime.jobs.spark.transforms.dropduplicates import DropDuplicatesFunction
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

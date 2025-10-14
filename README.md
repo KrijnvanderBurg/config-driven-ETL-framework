@@ -1,15 +1,15 @@
 <p align="center">
-  <img src="docs/logo.svg" alt="Flint Logo" width="250"/>
+  <img src="docs/logo.svg" alt="Samara Logo" width="250"/>
 </p>
 
-<h1 align="center">Flint</h1>
+<h1 align="center">Samara</h1>
 
 <p align="center">
   <b>A lightweight, extensible framework for configuration-driven data pipelines</b>
 </p>
 
 <p align="center">
-  <a href="https://pypi.org/project/flint/"><img src="https://img.shields.io/badge/python-3.11-informational" alt="Python Versions"></a>
+  <a href="https://pypi.org/project/samara/"><img src="https://img.shields.io/badge/python-3.11-informational" alt="Python Versions"></a>
   <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/blob/main/LICENSE"><img src="https://img.shields.io/github/license/krijnvanderburg/config-driven-ETL-framework?style=flat-square" alt="License"></a>
   <a href="https://spark.apache.org/docs/latest/"><img src="https://img.shields.io/badge/spark-3.5.0+-lightgrey" alt="Apache Spark"></a>
 </p>
@@ -33,7 +33,7 @@
 
 ---
 
-Flint transforms data engineering by shifting from custom code to declarative configuration for complete ETL pipeline workflows. The framework handles all execution details while you focus on what your data should do, not how to implement it. This configuration-driven approach standardizes pipeline patterns across teams, reduces complexity for ETL jobs, improves maintainability, and makes data workflows accessible to users with limited programming experience.
+Samara transforms data engineering by shifting from custom code to declarative configuration for complete ETL pipeline workflows. The framework handles all execution details while you focus on what your data should do, not how to implement it. This configuration-driven approach standardizes pipeline patterns across teams, reduces complexity for ETL jobs, improves maintainability, and makes data workflows accessible to users with limited programming experience.
 
 The processing engine is abstracted away through configuration, making it easy to switch engines or run the same pipeline in different environments. The current version supports Apache Spark, with Polars support in development.
 
@@ -51,13 +51,13 @@ poetry install
 
 ### Run an example pipeline
 ```bash
-python -m flint run \
+python -m samara run \
   --alert-filepath="examples/join_select/alert.jsonc" \
   --runtime-filepath="examples/join_select/job.jsonc"
 ```
 
 ## 📚 Documentation
-Flint's documentation guides you through installation, configuration, and development:
+Samara's documentation guides you through installation, configuration, and development:
 
 - **[Getting Started](./docs/getting_started.md)** - Installation and basic concepts
 - **[Example Pipelines](./examples/)** - Ready-to-run examples demonstrating key features
@@ -68,10 +68,10 @@ Flint's documentation guides you through installation, configuration, and develo
 - **[Architecture](./docs/architecture.md)** - Design principles and framework structure
 - **[Custom Extensions](./docs/architecture.md#extending-with-custom-transforms)** - Building your own transforms
 
-For complete documentation covering all aspects of Flint, visit the documentation home page.
+For complete documentation covering all aspects of Samara, visit the documentation home page.
 
 ## 🔍 Example: Customer Order Analysis
-Running this command executes a complete pipeline that showcases Flint's key capabilities:
+Running this command executes a complete pipeline that showcases Samara's key capabilities:
 
 - **Multi-format extraction**: Seamlessly reads from both CSV and JSON sources
   - Source options like delimiters and headers are configurable through the configuration file
@@ -181,7 +181,7 @@ Running this command executes a complete pipeline that showcases Flint's key cap
 - [**Documentation**](./docs/README.md): Refer to the Configuration Reference section for detailed syntax
 - [**Examples**](./examples/): Explore working samples in the examples directory
 - [**Community**](https://github.com/krijnvanderburg/config-driven-ETL-framework/issues): Ask questions and report issues on GitHub Issues
-- [**Source Code**](./src/flint/): Browse the implementation in the src/flint directory
+- [**Source Code**](./src/samara/): Browse the implementation in the src/samara directory
 
 ## 🤝 Contributing
 Contributions are welcome! Feel free to submit a pull request and message Krijn van der Burg on [linkedin](https://linkedin.com/in/krijnvanderburg/).

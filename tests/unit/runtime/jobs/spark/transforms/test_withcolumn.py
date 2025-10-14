@@ -6,9 +6,8 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
-
-from flint.runtime.jobs.models.transforms.model_withcolumn import WithColumnArgs
-from flint.runtime.jobs.spark.transforms.withcolumn import WithColumnFunction
+from samara.runtime.jobs.models.transforms.model_withcolumn import WithColumnArgs
+from samara.runtime.jobs.spark.transforms.withcolumn import WithColumnFunction
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

@@ -6,9 +6,8 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
-
-from flint.runtime.jobs.models.transforms.model_join import JoinArgs
-from flint.runtime.jobs.spark.transforms.join import JoinFunction
+from samara.runtime.jobs.models.transforms.model_join import JoinArgs
+from samara.runtime.jobs.spark.transforms.join import JoinFunction
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

@@ -1,11 +1,11 @@
-# Flint Documentation
-Welcome to the Flint documentation. Flint is a configuration-driven data processing framework that lets you define entire data pipelines through JSON configuration files rather than code.
+# Samara Documentation
+Welcome to the Samara documentation. Samara is a configuration-driven data processing framework that lets you define entire data pipelines through JSON configuration files rather than code.
 
 ## [Getting Started](./getting_started.md)
-Install Flint, run example pipelines, and learn how to create your own data pipelines using configuration files. This guide provides step-by-step instructions for new users and includes examples of basic pipeline configurations.
+Install Samara, run example pipelines, and learn how to create your own data pipelines using configuration files. This guide provides step-by-step instructions for new users and includes examples of basic pipeline configurations.
 
 ## [CLI Reference](./cli.md)
-Complete reference for Flint's command-line interface with commands for:
+Complete reference for Samara's command-line interface with commands for:
 - `validate` - Check configuration files and alerting before execution
 - `run` - Execute data pipelines
 - `export-schema` - Generate JSON schema for IDE autocompletion and validation
@@ -13,14 +13,14 @@ Complete reference for Flint's command-line interface with commands for:
 Includes supported options, environment variables, and exit codes for troubleshooting.
 
 ## [Architecture](./architecture.md)
-Understand Flint's design principles and how the framework processes pipelines:
+Understand Samara's design principles and how the framework processes pipelines:
 - Design Principles: Type safety, engine agnosticism, composability, and other core concepts
 - Pipeline Execution Flow: How configurations are parsed and executed
 - Component Structure: Class relationships and system organization
-- Extension Mechanisms: How to extend Flint with custom transforms
+- Extension Mechanisms: How to extend Samara with custom transforms
 
 ## Core Systems
-Flint's architecture consists of two integrated systems that work together through configuration:
+Samara's architecture consists of two integrated systems that work together through configuration:
 
 ### [Runtime System](./runtime/README.md)
 The runtime system orchestrates ETL pipelines through configuration files:
@@ -44,4 +44,4 @@ The examples folder includes complete examples of:
 - Spark-specific configurations
 - Alert system configurations
 
-These examples demonstrate how to combine Flint's components to build complete data processing solutions without writing code.
+These examples demonstrate how to combine Samara's components to build complete data processing solutions without writing code.

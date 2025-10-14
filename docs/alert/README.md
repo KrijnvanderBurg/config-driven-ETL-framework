@@ -15,7 +15,7 @@ Alert configuration can be defined inline within your job or in a separate file 
 
 ```bash
 # Separate alert configuration for reuse
-python -m flint run \
+python -m samara run \
     --alert-filepath="examples/alerts.jsonc" \
     --runtime-filepath="examples/job.jsonc"
 ```
@@ -126,7 +126,7 @@ See [triggers documentation](triggers.md) for rule types and configuration detai
 Test alert configuration without running a full pipeline using the `validate` command:
 
 ```bash
-python -m flint validate \
+python -m samara validate \
     --alert-filepath="examples/alerts.jsonc" \
     --runtime-filepath="examples/job.jsonc" \
     --test-exception="database connection failed" \

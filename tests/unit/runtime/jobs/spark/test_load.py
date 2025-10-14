@@ -12,9 +12,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 from pydantic import ValidationError
-
-from flint.runtime.jobs.models.model_load import LoadMethod
-from flint.runtime.jobs.spark.load import LoadFileSpark
+from samara.runtime.jobs.models.model_load import LoadMethod
+from samara.runtime.jobs.spark.load import LoadFileSpark
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

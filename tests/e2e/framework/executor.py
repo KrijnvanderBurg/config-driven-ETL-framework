@@ -64,7 +64,7 @@ class JobTestExecutor:
                 "--branch",
                 "--source=src",
                 "-m",
-                "flint",
+                "samara",
                 "run",
                 "--runtime-filepath",
                 str(self.isolated_config_path),

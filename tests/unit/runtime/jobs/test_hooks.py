@@ -3,9 +3,8 @@
 from unittest.mock import patch
 
 import pytest
-
-from flint.actions.base import ActionBase
-from flint.runtime.jobs.hooks import Hooks
+from samara.actions.base import ActionBase
+from samara.runtime.jobs.hooks import Hooks
 
 
 class MockAction(ActionBase):

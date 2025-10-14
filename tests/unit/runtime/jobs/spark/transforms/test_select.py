@@ -6,9 +6,8 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
-
-from flint.runtime.jobs.models.transforms.model_select import SelectArgs
-from flint.runtime.jobs.spark.transforms.select import SelectFunction
+from samara.runtime.jobs.models.transforms.model_select import SelectArgs
+from samara.runtime.jobs.spark.transforms.select import SelectFunction
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

@@ -8,9 +8,8 @@ from unittest.mock import Mock
 
 import pytest
 from pydantic import ValidationError
-
-from flint.exceptions import FlintJobError
-from flint.runtime.jobs.spark.job import JobSpark
+from samara.exceptions import FlintJobError
+from samara.runtime.jobs.spark.job import JobSpark
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

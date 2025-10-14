@@ -1,4 +1,4 @@
-name: flint-CD
+name: samara-CD
 
 on:
   workflow_dispatch:
@@ -49,3 +49,10 @@ jobs:
           prerelease: ${{ inputs.prerelease }}
           generate_release_notes: true
           make_latest: ${{ inputs.make_latest }}
+      
+      - name: Publish to PyPI
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          password: ${{ secrets.PYPI_TOKEN }}
+          packages-dir: dist/
+          skip-existing: true

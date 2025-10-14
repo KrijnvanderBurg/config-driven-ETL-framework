@@ -1,4 +1,4 @@
-"""Unit tests for the Flint CLI module."""
+"""Unit tests for the Samara CLI module."""
 
 import os
 from pathlib import Path
@@ -6,10 +6,9 @@ from unittest.mock import Mock, patch
 
 import pytest
 from click.testing import CliRunner
-
-from flint.alert import AlertController
-from flint.cli import cli
-from flint.exceptions import (
+from samara.alert import AlertController
+from samara.cli import cli
+from samara.exceptions import (
     ExitCode,
     FlintAlertConfigurationError,
     FlintIOError,
@@ -17,7 +16,7 @@ from flint.exceptions import (
     FlintRuntimeConfigurationError,
     FlintValidationError,
 )
-from flint.runtime.controller import RuntimeController
+from samara.runtime.controller import RuntimeController
 
 
 class TestValidateCommand:

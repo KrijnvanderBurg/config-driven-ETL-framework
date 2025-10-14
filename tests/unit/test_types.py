@@ -5,8 +5,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
-
-from flint.types import DataFrameRegistry, RegistryDecorator, RegistryInstance, Singleton, StreamingQueryRegistry
+from samara.types import DataFrameRegistry, RegistryDecorator, RegistryInstance, Singleton, StreamingQueryRegistry
 
 
 class TestSingleton:

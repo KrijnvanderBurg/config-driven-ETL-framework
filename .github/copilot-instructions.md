@@ -1,6 +1,6 @@
-# Flint: Configuration-Driven Data Processing Framework
+# Samara: Configuration-Driven Data Processing Framework
 
-Flint is a framework that lets you **define entire data pipelines through configuration files rather than code**. This declarative approach is the core approach - transforming data engineering from a programming task to a configuration exercise.
+Samara is a framework that lets you **define entire data pipelines through configuration files rather than code**. This declarative approach is the core approach - transforming data engineering from a programming task to a configuration exercise.
 
 ## Core Concept
 
@@ -33,4 +33,4 @@ Flint is a framework that lets you **define entire data pipelines through config
 - **Version Control**: Pipeline definitions evolve with clear diffs in version control
 - **Reduced Development Time**: Eliminate boilerplate code for common operations
 
-By moving pipeline definition from code to configuration, Flint makes data processing more accessible, consistent, and maintainable while providing the flexibility to extend with custom transforms when needed.
+By moving pipeline definition from code to configuration, Samara makes data processing more accessible, consistent, and maintainable while providing the flexibility to extend with custom transforms when needed.

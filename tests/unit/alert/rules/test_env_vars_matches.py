@@ -10,8 +10,7 @@ from unittest.mock import patch
 
 import pytest
 from pydantic import ValidationError
-
-from flint.alert.rules.env_vars_matches import EnvVarsMatchesRule
+from samara.alert.rules.env_vars_matches import EnvVarsMatchesRule
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

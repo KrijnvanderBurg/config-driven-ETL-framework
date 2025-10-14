@@ -7,9 +7,8 @@ from unittest.mock import Mock
 
 import pytest
 from pydantic import ValidationError
-
-from flint.runtime.jobs.models.transforms.model_cast import CastArgs
-from flint.runtime.jobs.spark.transforms.cast import CastFunction
+from samara.runtime.jobs.models.transforms.model_cast import CastArgs
+from samara.runtime.jobs.spark.transforms.cast import CastFunction
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

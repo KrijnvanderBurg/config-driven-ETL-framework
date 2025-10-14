@@ -10,8 +10,7 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 from pydantic import ValidationError
-
-from flint.alert.channels.email import EmailChannel
+from samara.alert.channels.email import EmailChannel
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #
@@ -178,7 +177,7 @@ class TestEmailChannelAlert:
     def test_alert__with_valid_inputs__sends_email_successfully(self, email_channel: EmailChannel) -> None:
         """Test successful email alert sending with proper SMTP calls."""
         # Mock the SMTP client because we don't want to make real network calls
-        with patch("flint.alert.channels.email.smtplib.SMTP") as mock_smtp:
+        with patch("samara.alert.channels.email.smtplib.SMTP") as mock_smtp:
             mock_server = MagicMock()
             mock_smtp.return_value.__enter__.return_value = mock_server
 
@@ -202,7 +201,7 @@ class TestEmailChannelAlert:
     def test_alert__with_multiple_recipients__includes_all_recipients(self, email_channel: EmailChannel) -> None:
         """Test that alert sends to all configured recipients."""
         # Mock the SMTP client because we don't want to make real network calls
-        with patch("flint.alert.channels.email.smtplib.SMTP") as mock_smtp:
+        with patch("samara.alert.channels.email.smtplib.SMTP") as mock_smtp:
             mock_server = MagicMock()
             mock_smtp.return_value.__enter__.return_value = mock_server
 
@@ -218,7 +217,7 @@ class TestEmailChannelAlert:
     def test_alert__with_special_characters__handles_encoding_correctly(self, email_channel: EmailChannel) -> None:
         """Test alert handling with special characters in title and body."""
         # Mock the SMTP client because we don't want to make real network calls
-        with patch("flint.alert.channels.email.smtplib.SMTP") as mock_smtp:
+        with patch("samara.alert.channels.email.smtplib.SMTP") as mock_smtp:
             mock_server = MagicMock()
             mock_smtp.return_value.__enter__.return_value = mock_server
 
@@ -234,7 +233,7 @@ class TestEmailChannelAlert:
     def test_alert__with_empty_title__sends_with_empty_subject(self, email_channel: EmailChannel) -> None:
         """Test alert sending with empty title results in empty subject."""
         # Mock the SMTP client because we don't want to make real network calls
-        with patch("flint.alert.channels.email.smtplib.SMTP") as mock_smtp:
+        with patch("samara.alert.channels.email.smtplib.SMTP") as mock_smtp:
             mock_server = MagicMock()
             mock_smtp.return_value.__enter__.return_value = mock_server
 
@@ -250,7 +249,7 @@ class TestEmailChannelAlert:
     def test_alert__with_empty_body__sends_with_empty_content(self, email_channel: EmailChannel) -> None:
         """Test alert sending with empty body results in empty message content."""
         # Mock the SMTP client because we don't want to make real network calls
-        with patch("flint.alert.channels.email.smtplib.SMTP") as mock_smtp:
+        with patch("samara.alert.channels.email.smtplib.SMTP") as mock_smtp:
             mock_server = MagicMock()
             mock_smtp.return_value.__enter__.return_value = mock_server
 
@@ -267,7 +266,7 @@ class TestEmailChannelAlert:
     def test_alert__with_smtp_authentication_error__raises_smtp_exception(self, email_channel: EmailChannel) -> None:
         """Test alert handling when SMTP authentication fails."""
         # Mock the SMTP client to simulate authentication failure
-        with patch("flint.alert.channels.email.smtplib.SMTP") as mock_smtp:
+        with patch("samara.alert.channels.email.smtplib.SMTP") as mock_smtp:
             mock_server = MagicMock()
             mock_server.login.side_effect = smtplib.SMTPAuthenticationError(535, "Authentication failed")
             mock_smtp.return_value.__enter__.return_value = mock_server
@@ -280,7 +279,7 @@ class TestEmailChannelAlert:
     def test_alert__with_smtp_server_error__raises_smtp_exception(self, email_channel: EmailChannel) -> None:
         """Test alert handling when SMTP server returns error."""
         # Mock the SMTP client to simulate server error during send
-        with patch("flint.alert.channels.email.smtplib.SMTP") as mock_smtp:
+        with patch("samara.alert.channels.email.smtplib.SMTP") as mock_smtp:
             mock_server = MagicMock()
             mock_server.sendmail.side_effect = smtplib.SMTPServerDisconnected("Connection lost")
             mock_smtp.return_value.__enter__.return_value = mock_server
@@ -296,7 +295,7 @@ class TestEmailChannelAlert:
     def test_alert__with_smtp_recipient_refused__raises_smtp_exception(self, email_channel: EmailChannel) -> None:
         """Test alert handling when SMTP server refuses recipients."""
         # Mock the SMTP client to simulate recipient refusal
-        with patch("flint.alert.channels.email.smtplib.SMTP") as mock_smtp:
+        with patch("samara.alert.channels.email.smtplib.SMTP") as mock_smtp:
             mock_server = MagicMock()
             refused_recipients = {"admin@company.com": (550, b"User unknown")}
             mock_server.sendmail.side_effect = smtplib.SMTPRecipientsRefused(refused_recipients)
@@ -310,7 +309,7 @@ class TestEmailChannelAlert:
     def test_alert__with_smtp_connection_error__raises_smtp_exception(self, email_channel: EmailChannel) -> None:
         """Test alert handling when SMTP connection fails."""
         # Mock the SMTP client to simulate connection failure
-        with patch("flint.alert.channels.email.smtplib.SMTP") as mock_smtp:
+        with patch("samara.alert.channels.email.smtplib.SMTP") as mock_smtp:
             mock_smtp.side_effect = smtplib.SMTPConnectError(421, "Service not available")
 
             # Assert

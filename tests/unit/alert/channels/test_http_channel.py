@@ -2,8 +2,8 @@
 
 from unittest.mock import patch
 
-from flint.alert.channels.http import HttpChannel
-from flint.utils.http import Retry
+from samara.alert.channels.http import HttpChannel
+from samara.utils.http import Retry
 
 
 class TestHttpChannel:

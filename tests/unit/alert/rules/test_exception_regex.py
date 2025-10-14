@@ -9,8 +9,7 @@ from typing import Any
 
 import pytest
 from pydantic import ValidationError
-
-from flint.alert.rules.exception_regex import ExceptionRegexRule
+from samara.alert.rules.exception_regex import ExceptionRegexRule
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

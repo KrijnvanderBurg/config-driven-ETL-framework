@@ -10,8 +10,7 @@ from unittest.mock import mock_open, patch
 
 import pytest
 from pydantic import ValidationError
-
-from flint.alert.channels.file import FileChannel
+from samara.alert.channels.file import FileChannel
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

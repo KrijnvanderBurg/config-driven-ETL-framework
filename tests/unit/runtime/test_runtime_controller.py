@@ -9,9 +9,8 @@ from unittest.mock import Mock
 
 import pytest
 from pydantic import ValidationError
-
-from flint.exceptions import FlintIOError, FlintRuntimeConfigurationError
-from flint.runtime.controller import RuntimeController
+from samara.exceptions import FlintIOError, FlintRuntimeConfigurationError
+from samara.runtime.controller import RuntimeController
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

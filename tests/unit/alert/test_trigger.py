@@ -10,8 +10,7 @@ from unittest.mock import patch
 
 import pytest
 from pydantic import ValidationError
-
-from flint.alert.trigger import AlertTrigger
+from samara.alert.trigger import AlertTrigger
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

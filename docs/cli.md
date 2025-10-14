@@ -1,10 +1,10 @@
-# Flint CLI Reference
+# Samara CLI Reference
 
-This document describes the command-line interface (CLI) for Flint, providing details on available commands, options, and environment variables.
+This document describes the command-line interface (CLI) for Samara, providing details on available commands, options, and environment variables.
 
 ## Overview
 
-Flint provides a command-line interface to validate configurations and execute data pipelines. All commands follow the pattern `python -m flint [command] [options]`.
+Samara provides a command-line interface to validate configurations and execute data pipelines. All commands follow the pattern `python -m samara [command] [options]`.
 
 ## Commands
 
@@ -13,7 +13,7 @@ Flint provides a command-line interface to validate configurations and execute d
 Validates configuration files and optionally tests alert routing rules without executing the pipeline. This is useful for checking configuration integrity and alert functionality before deployment.
 
 ```bash
-python -m flint validate \
+python -m samara validate \
     --alert-filepath="path/to/alerts.jsonc" \  # Path to alert configuration file
     --runtime-filepath="path/to/job.jsonc" \   # Path to pipeline runtime configuration
     [--test-exception="error message"] \     # Optional: Simulates an error to test alert routing
@@ -22,7 +22,7 @@ python -m flint validate \
 
 Example:
 ```bash
-python -m flint validate \
+python -m samara validate \
     --alert-filepath="examples/join_select/alert.jsonc" \
     --runtime-filepath="examples/join_select/job.jsonc" \
     --test-exception="Failed to connect to database" \
@@ -34,7 +34,7 @@ python -m flint validate \
 Executes the configured data pipeline using the provided configuration files.
 
 ```bash
-python -m flint run \
+python -m samara run \
     --alert-filepath path/to/alerts.jsonc \  # Path to alert configuration file
     --runtime-filepath path/to/job.jsonc \   # Path to pipeline runtime configuration
     [--log-level LEVEL]                      # Optional: Override logging level
@@ -42,7 +42,7 @@ python -m flint run \
 
 Example:
 ```bash
-python -m flint run \
+python -m samara run \
     --alert-filepath="examples/join_select/slack_alerts.jsonc" \
     --runtime-filepath="examples/join_select/job.jsonc" \
     --log-level="DEBUG"
@@ -53,13 +53,13 @@ python -m flint run \
 Exports the runtime configuration JSON schema to a file. This schema enables IDE features like autocompletion, validation, and inline documentation when editing configuration files.
 
 ```bash
-python -m flint export-schema \
+python -m samara export-schema \
     --output-filepath="path/to/runtime_schema.json"  # Path where the JSON schema will be saved
 ```
 
 Example:
 ```bash
-python -m flint export-schema --output-filepath="dist/runtime_schema.json"
+python -m samara export-schema --output-filepath="dist/runtime_schema.json"
 ```
 
 **Using the exported schema:**
@@ -93,18 +93,18 @@ The following options can be used with any command:
 
 ## Environment Variables
 
-Flint respects the following environment variables:
+Samara respects the following environment variables:
 
 - `FLINT_LOG_LEVEL`: Sets the logging level for the application
 - `LOG_LEVEL`: Used as fallback if `FLINT_LOG_LEVEL` is not set
 
-Both variables accept standard Python logging levels: `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`. If neither is set, Flint defaults to `INFO` level.
+Both variables accept standard Python logging levels: `DEBUG`, `INFO`, `WARNING`, `ERROR`, or `CRITICAL`. If neither is set, Samara defaults to `INFO` level.
 
 Example:
 ```bash
 # Set logging level via environment variable
 export FLINT_LOG_LEVEL=DEBUG
-python -m flint run --alert-filepath config/alerts.jsonc --runtime-filepath config/pipeline.jsonc
+python -m samara run --alert-filepath config/alerts.jsonc --runtime-filepath config/pipeline.jsonc
 ```
 
 ## Exit Codes
