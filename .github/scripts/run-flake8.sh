@@ -1,6 +1,6 @@
 #!/bin/bash
 target_path="${1:-$PWD/src}" && echo "Scanning folder: $target_path"
-config_filepath="${2:-$PWD/config/.flake8}" && echo "Config file: $config_filepath"
+config_filepath="${2:-$PWD/.github/config/.flake8}" && echo "Config file: $config_filepath"
 
 # Install flake8 if not already installed
 if ! command -v flake8 &> /dev/null; then

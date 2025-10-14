@@ -95,7 +95,7 @@ When you run a tool locally in VS Code it uses a script and config file from `.d
    "command": "${workspaceFolder}/scripts/pylint.sh", // ← Same script
    "args": [
       "${workspaceFolder}/src",                                                 // ← Same target dirpath
-      "--config ${workspaceFolder}/config/.pylintrc"    // ← Same config file
+      "--config ${workspaceFolder}/.github/config/.pylintrc"    // ← Same config file
    ],
    ...
 }

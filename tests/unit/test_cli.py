@@ -6,6 +6,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from click.testing import CliRunner
+
 from samara.alert import AlertController
 from samara.cli import cli
 from samara.exceptions import (
@@ -274,6 +275,45 @@ class TestRunCommand:
         assert result.exit_code == expected_exit_code
         mock_alert.evaluate_trigger_and_alert.assert_called_once()
 
+    def test_run__when_job_execution_fails__triggers_alert_and_exits_with_job_error(self) -> None:
+        """Test run command triggers alert and returns job error code when execute_all() raises FlintJobError."""
+        # Arrange
+        runner = CliRunner()
+        # Mock alert controller to test alerting behavior
+        mock_alert = Mock()
+        mock_runtime = Mock()
+        # Configure execute_all to raise FlintJobError
+        mock_runtime.execute_all.side_effect = FlintJobError("Job execution failed")
+
+        # Act
+        with (
+            patch.object(AlertController, "from_file", return_value=mock_alert),
+            patch.object(RuntimeController, "from_file", return_value=mock_runtime),
+        ):
+            result = runner.invoke(
+                cli, ["run", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
+            )
+
+        # Assert
+        assert result.exit_code == ExitCode.JOB_ERROR
+        mock_alert.evaluate_trigger_and_alert.assert_called_once()
+
+    def test_run__when_user_interrupts__exits_gracefully(self) -> None:
+        """Test run command exits gracefully when user sends keyboard interrupt signal."""
+        # Arrange
+        runner = CliRunner()
+
+        # Act
+        # Mock KeyboardInterrupt to simulate Ctrl+C from user
+        with patch.object(AlertController, "from_file", side_effect=KeyboardInterrupt):
+            result = runner.invoke(
+                cli, ["run", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
+            )
+
+        # Assert
+        # CLI intercepts KeyboardInterrupt and converts to exit code 98
+        assert result.exit_code == ExitCode.KEYBOARD_INTERRUPT
+
     def test_run__when_unexpected_error_occurs__exits_with_unexpected_error_code(self) -> None:
         """Test run command returns unexpected error code when an unhandled exception occurs."""
         # Arrange
@@ -341,6 +381,20 @@ class TestExportSchemaCommand:
 
         # Assert
         assert result.exit_code == ExitCode.UNEXPECTED_ERROR
+
+    def test_export_schema__when_user_interrupts__exits_gracefully(self) -> None:
+        """Test export-schema command exits gracefully when user sends keyboard interrupt signal."""
+        # Arrange
+        runner = CliRunner()
+
+        # Act
+        # Mock KeyboardInterrupt to simulate Ctrl+C from user
+        with patch.object(RuntimeController, "export_schema", side_effect=KeyboardInterrupt):
+            result = runner.invoke(cli, ["export-schema", "--output-filepath", "schema.json"])
+
+        # Assert
+        # CLI intercepts KeyboardInterrupt and converts to exit code 98
+        assert result.exit_code == ExitCode.KEYBOARD_INTERRUPT
 
 
 class TestCliGroup:

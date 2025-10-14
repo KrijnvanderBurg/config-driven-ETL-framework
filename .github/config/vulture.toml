@@ -1,5 +1,5 @@
 [tool.vulture]
-exclude = [".venv", "docs", ".devcontainer", ".azuredevops"]
+exclude = [".venv", "docs", ".devcontainer", ".azuredevops", ".github"]
 ignore_decorators = ["@app.route", "@require_*"]
 ignore_names = ["visit_*", "do_*"]
 make_whitelist = true
