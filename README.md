@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/logo.svg" alt="Samara Logo" width="250"/>
+  <img src="docs/logo.svg" width="250"/>
 </p>
 
 <h1 align="center">Samara</h1>
@@ -15,7 +15,7 @@
 </p>
 
 <p align="center">
-  <b>Built by Krijn van der Burg for the data engineering community</b>
+  <b>Built by Krijn van der Burg for the Data Engineering community</b>
 </p>
 
 <p align="center">
@@ -26,7 +26,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/releases">📥 Releases (TBD)</a> •
+  <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/releases">📥 Releases</a> •
   <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/blob/main/CHANGELOG.md">📝 Changelog (TBD)</a> •
   <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/blob/main/CONTRIBUTING.md">🤝 Contributing</a>
 </p>
