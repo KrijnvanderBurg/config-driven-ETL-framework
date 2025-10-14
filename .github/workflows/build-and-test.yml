@@ -71,9 +71,30 @@ jobs:
         with:
           tests-path: tests/unit
           coverage-path: samara
+          coverage-xml-output: coverage-unit.xml
 
       - name: Run E2E Tests
         uses: ./.github/actions/run-pytest
         with:
           tests-path: tests/e2e
           coverage-path: samara
+          coverage-xml-output: coverage-e2e.xml
+
+      - name: Combine Coverage Data
+        shell: bash
+        run: |
+          # Combine all .coverage.* files from parallel runs (unit, e2e, and subprocess calls)
+          coverage combine
+          
+          # Generate combined XML report
+          coverage xml -o coverage.xml
+          
+          # Generate terminal report for logs
+          coverage report --show-missing
+
+      - name: Upload Coverage Report
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage.xml
+          retention-days: 7

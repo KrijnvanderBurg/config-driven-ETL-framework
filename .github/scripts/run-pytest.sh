@@ -25,3 +25,4 @@ cd "$PWD" && pytest "$tests_path" \
     --cov-config="$config_filepath_coverage" \
     --junit-xml="$output_junit_filepath"
     # --verbose
+
