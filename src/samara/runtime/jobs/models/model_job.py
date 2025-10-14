@@ -104,7 +104,7 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
         """Validate all upstream_id references exist.
 
         Ensures that:
-        - All transform upstream_ids reference existing extract IDs
+        - All transform upstream_ids reference existing extract or transform IDs
         - All load upstream_ids reference existing extract or transform IDs
 
         Returns:
@@ -117,16 +117,16 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
         extract_ids = {extract.id_ for extract in self.extracts}
         transform_ids = {transform.id_ for transform in self.transforms}
 
-        # Validate transform upstream_ids reference existing extracts
+        # Validate transform upstream_ids reference existing extracts or transforms
+        valid_upstream_ids = extract_ids | transform_ids
         for transform in self.transforms:
-            if transform.upstream_id not in extract_ids:
+            if transform.upstream_id not in valid_upstream_ids:
                 raise ValueError(
                     f"Transform '{transform.id_}' references non-existent upstream_id '{transform.upstream_id}' "
-                    f"in job '{self.id_}'. upstream_id must reference an existing extract."
+                    f"in job '{self.id_}'. upstream_id must reference an existing extract or transform."
                 )
 
         # Validate load upstream_ids reference existing extracts or transforms
-        valid_upstream_ids = extract_ids | transform_ids
         for load in self.loads:
             if load.upstream_id not in valid_upstream_ids:
                 raise ValueError(

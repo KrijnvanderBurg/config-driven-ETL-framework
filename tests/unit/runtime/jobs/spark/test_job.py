@@ -215,14 +215,38 @@ class TestJobSparkValidation:
         with pytest.raises(ValidationError):
             JobSpark(**job_config)
 
-    def test_create_job_spark__with_transform_referencing_nonexistent_extract__raises_validation_error(
+    def test_create_job_spark__with_transform_referencing_nonexistent_upstream__raises_validation_error(
         self, job_config: dict[str, Any]
     ) -> None:
-        """Test JobSpark creation fails when transform references non-existent extract ID."""
-        job_config["transforms"][0]["upstream_id"] = "nonexistent_extract"
+        """Test JobSpark creation fails when transform references non-existent upstream ID."""
+        job_config["transforms"][0]["upstream_id"] = "nonexistent_upstream"
 
         with pytest.raises(ValidationError):
             JobSpark(**job_config)
+
+    def test_create_job_spark__with_transform_referencing_extract__succeeds(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation succeeds when transform references an extract ID."""
+        # Default config already has transform referencing extract
+        job_spark = JobSpark(**job_config)
+        assert job_spark.transforms[0].upstream_id == "ex2"
+
+    def test_create_job_spark__with_transform_referencing_another_transform__succeeds(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation succeeds when transform references another transform ID."""
+        job_config["transforms"].append(
+            {
+                "id": "tr3",
+                "upstream_id": "tr2",  # Reference another transform
+                "options": {},
+                "functions": [],
+            }
+        )
+
+        job_spark = JobSpark(**job_config)
+        assert job_spark.transforms[1].upstream_id == "tr2"
 
     def test_create_job_spark__with_load_referencing_nonexistent_upstream__raises_validation_error(
         self, job_config: dict[str, Any]
