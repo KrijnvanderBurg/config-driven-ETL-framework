@@ -10,9 +10,7 @@ of the appropriate Extract, Transform, and Load components based on the configur
 
 import logging
 import time
-from typing import Self
 
-from pydantic import Field, model_validator
 from typing_extensions import override
 
 from samara.runtime.jobs.models.model_job import JobBase, JobEngine
@@ -25,7 +23,7 @@ from samara.utils.logger import get_logger
 logger: logging.Logger = get_logger(__name__)
 
 
-class JobSpark(JobBase):
+class JobSpark(JobBase[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion]):
     """A complete ETL job that orchestrates extract, transform, and load operations.
 
     The Job class is the main entry point for the ingestion framework. It coordinates
@@ -53,32 +51,6 @@ class JobSpark(JobBase):
     """
 
     engine_type: JobEngine = JobEngine.SPARK
-    extracts: list[ExtractSparkUnion] = Field(..., description="Collection of Extract components")
-    transforms: list[TransformSparkUnion] = Field(
-        ..., description="Collection of Transform components to process the data"
-    )
-    loads: list[LoadSparkUnion] = Field(..., description="Collection of Load components")
-
-    @model_validator(mode="after")
-    def validate_unique_ids(self) -> Self:
-        """Validate that extract, transform, and load IDs are unique within this job.
-
-        Returns:
-            Self: The validated instance.
-
-        Raises:
-            ValueError: If any duplicate IDs are found within the job.
-        """
-        job_ids = []
-        job_ids.extend(extract.id_ for extract in self.extracts)
-        job_ids.extend(transform.id_ for transform in self.transforms)
-        job_ids.extend(load.id_ for load in self.loads)
-
-        duplicates = {id_ for id_ in job_ids if job_ids.count(id_) > 1}
-        if duplicates:
-            raise ValueError(f"Duplicate IDs found in job '{self.id_}': {', '.join(sorted(duplicates))}")
-
-        return self
 
     @override
     def _execute(self) -> None:

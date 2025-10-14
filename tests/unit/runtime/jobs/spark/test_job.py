@@ -215,6 +215,54 @@ class TestJobSparkValidation:
         with pytest.raises(ValidationError):
             JobSpark(**job_config)
 
+    def test_create_job_spark__with_transform_referencing_nonexistent_extract__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when transform references non-existent extract ID."""
+        job_config["transforms"][0]["upstream_id"] = "nonexistent_extract"
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_load_referencing_nonexistent_upstream__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when load references non-existent upstream ID."""
+        job_config["loads"][0]["upstream_id"] = "nonexistent_id"
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_load_referencing_extract__succeeds(
+        self, job_config: dict[str, Any], tmp_path: Path
+    ) -> None:
+        """Test JobSpark creation succeeds when load references an extract ID."""
+        output_file = tmp_path / "output2.json"
+        output_file.write_text("[]", encoding="utf-8")
+
+        job_config["loads"].append(
+            {
+                "id": "ld3",
+                "upstream_id": "ex2",  # Reference extract directly
+                "load_type": "file",
+                "method": "batch",
+                "location": str(output_file),
+                "schema_export": "",
+                "options": {},
+                "mode": "overwrite",
+                "data_format": "json",
+            }
+        )
+
+        job_spark = JobSpark(**job_config)
+        assert job_spark is not None
+
+    def test_create_job_spark__with_load_referencing_transform__succeeds(self, job_config: dict[str, Any]) -> None:
+        """Test JobSpark creation succeeds when load references a transform ID."""
+        # Default config already has load referencing transform
+        job_spark = JobSpark(**job_config)
+        assert job_spark.loads[0].upstream_id == "tr2"
+
 
 # =========================================================================== #
 # ============================= MODEL FIXTURE =============================== #
