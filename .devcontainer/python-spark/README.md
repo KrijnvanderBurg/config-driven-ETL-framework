@@ -395,7 +395,8 @@ Test discovery and execution. Access via Testing panel in VS Code sidebar.
         "-c",
         "${workspaceFolder}/path/to/pytest.ini"
     ],
-    "python.languageServer": "Default",
+    "python.languageServer": "Default"
+}
 ```
 
 ## 📊 Code Coverage Visualization
