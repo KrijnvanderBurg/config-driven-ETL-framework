@@ -70,8 +70,10 @@ jobs:
         uses: ./.github/actions/run-pytest
         with:
           tests-path: tests/unit
+          coverage-path: samara
 
       - name: Run E2E Tests
         uses: ./.github/actions/run-pytest
         with:
           tests-path: tests/e2e
+          coverage-path: samara
