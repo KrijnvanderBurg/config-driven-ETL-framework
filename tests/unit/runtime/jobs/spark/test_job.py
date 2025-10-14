@@ -4,10 +4,11 @@ from __future__ import annotations
 
 from pathlib import Path
 from typing import Any
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 import pytest
 from pydantic import ValidationError
+
 from samara.exceptions import FlintJobError
 from samara.runtime.jobs.spark.job import JobSpark
 
@@ -99,6 +100,117 @@ class TestJobSparkValidation:
     def test_create_job_spark__with_invalid_engine__raises_validation_error(self, job_config: dict[str, Any]) -> None:
         """Test JobSpark creation fails with invalid engine value."""
         job_config["engine_type"] = "invalid_engine"
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_duplicate_extract_ids__raises_validation_error(
+        self, job_config: dict[str, Any], tmp_path: Path
+    ) -> None:
+        """Test JobSpark creation fails with duplicate extract IDs."""
+        input_file = tmp_path / "input2.json"
+        input_file.write_text("[]", encoding="utf-8")
+
+        job_config["extracts"].append(
+            {
+                "id": "ex2",  # Duplicate ID
+                "extract_type": "file",
+                "method": "batch",
+                "data_format": "json",
+                "options": {},
+                "location": str(input_file),
+                "schema": "",
+            }
+        )
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_duplicate_transform_ids__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails with duplicate transform IDs."""
+        job_config["transforms"].append(
+            {
+                "id": "tr2",  # Duplicate ID
+                "upstream_id": "ex2",
+                "options": {},
+                "functions": [],
+            }
+        )
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_duplicate_load_ids__raises_validation_error(
+        self, job_config: dict[str, Any], tmp_path: Path
+    ) -> None:
+        """Test JobSpark creation fails with duplicate load IDs."""
+        output_file = tmp_path / "output2.json"
+        output_file.write_text("[]", encoding="utf-8")
+
+        job_config["loads"].append(
+            {
+                "id": "ld2",  # Duplicate ID
+                "upstream_id": "tr2",
+                "load_type": "file",
+                "method": "batch",
+                "location": str(output_file),
+                "schema_export": "",
+                "options": {},
+                "mode": "overwrite",
+                "data_format": "json",
+            }
+        )
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_duplicate_ids_across_types__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when same ID used across extract/transform/load."""
+        job_config["transforms"][0]["id"] = "ex2"
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_extract_and_load_same_id__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when extract and load share the same ID."""
+        job_config["loads"][0]["id"] = "ex2"
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_multiple_duplicate_ids__raises_validation_error(
+        self, job_config: dict[str, Any], tmp_path: Path
+    ) -> None:
+        """Test JobSpark creation fails with multiple duplicate IDs."""
+        input_file = tmp_path / "input2.json"
+        input_file.write_text("[]", encoding="utf-8")
+
+        job_config["extracts"].append(
+            {
+                "id": "ex2",
+                "extract_type": "file",
+                "method": "batch",
+                "data_format": "json",
+                "options": {},
+                "location": str(input_file),
+                "schema": "",
+            }
+        )
+
+        job_config["transforms"].append(
+            {
+                "id": "tr2",
+                "upstream_id": "ex2",
+                "options": {},
+                "functions": [],
+            }
+        )
 
         with pytest.raises(ValidationError):
             JobSpark(**job_config)
@@ -223,3 +335,29 @@ class TestJobSparkPhases:
 
         mock_load1.load.assert_called_once()
         mock_load2.load.assert_called_once()
+
+
+class TestJobSparkClearRegistries:
+    """Test JobSpark registry clearing behavior."""
+
+    def test_execute__clears_dataframe_and_streaming_registries(self, job_spark: JobSpark) -> None:
+        """Test execute clears both DataFrame and StreamingQuery registries after execution."""
+        with (
+            patch("samara.runtime.jobs.spark.job.DataFrameRegistry") as mock_df_registry_cls,
+            patch("samara.runtime.jobs.spark.job.StreamingQueryRegistry") as mock_sq_registry_cls,
+        ):
+            mock_df_registry = Mock()
+            mock_sq_registry = Mock()
+            mock_df_registry_cls.return_value = mock_df_registry
+            mock_sq_registry_cls.return_value = mock_sq_registry
+
+            # Empty the pipeline to speed up test
+            job_spark.extracts = []
+            job_spark.transforms = []
+            job_spark.loads = []
+
+            job_spark.execute()
+
+            # Verify clear() was called on both registries
+            mock_df_registry.clear.assert_called_once()
+            mock_sq_registry.clear.assert_called_once()

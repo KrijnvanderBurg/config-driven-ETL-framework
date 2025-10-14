@@ -10,14 +10,17 @@ of the appropriate Extract, Transform, and Load components based on the configur
 
 import logging
 import time
+from typing import Self
 
-from pydantic import Field
+from pydantic import Field, model_validator
+from typing_extensions import override
+
 from samara.runtime.jobs.models.model_job import JobBase, JobEngine
 from samara.runtime.jobs.spark.extract import ExtractSparkUnion
 from samara.runtime.jobs.spark.load import LoadSparkUnion
 from samara.runtime.jobs.spark.transform import TransformSparkUnion
+from samara.types import DataFrameRegistry, StreamingQueryRegistry
 from samara.utils.logger import get_logger
-from typing_extensions import override
 
 logger: logging.Logger = get_logger(__name__)
 
@@ -55,6 +58,27 @@ class JobSpark(JobBase):
         ..., description="Collection of Transform components to process the data"
     )
     loads: list[LoadSparkUnion] = Field(..., description="Collection of Load components")
+
+    @model_validator(mode="after")
+    def validate_unique_ids(self) -> Self:
+        """Validate that extract, transform, and load IDs are unique within this job.
+
+        Returns:
+            Self: The validated instance.
+
+        Raises:
+            ValueError: If any duplicate IDs are found within the job.
+        """
+        job_ids = []
+        job_ids.extend(extract.id_ for extract in self.extracts)
+        job_ids.extend(transform.id_ for transform in self.transforms)
+        job_ids.extend(load.id_ for load in self.loads)
+
+        duplicates = {id_ for id_ in job_ids if job_ids.count(id_) > 1}
+        if duplicates:
+            raise ValueError(f"Duplicate IDs found in job '{self.id_}': {', '.join(sorted(duplicates))}")
+
+        return self
 
     @override
     def _execute(self) -> None:
@@ -136,3 +160,17 @@ class JobSpark(JobBase):
 
         phase_time = time.time() - start_time
         logger.info("Load phase completed successfully in %.2f seconds", phase_time)
+
+    @override
+    def _clear(self) -> None:
+        """Clear Spark-specific registries to free memory.
+
+        Clears all DataFrames and streaming queries from the registries after
+        job execution. This ensures memory is freed and prevents data leakage
+        between jobs.
+        """
+        logger.debug("Clearing DataFrameRegistry after job: %s", self.id_)
+        DataFrameRegistry().clear()
+
+        logger.debug("Clearing StreamingQueryRegistry after job: %s", self.id_)
+        StreamingQueryRegistry().clear()

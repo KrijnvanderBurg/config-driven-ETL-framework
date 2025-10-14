@@ -8,7 +8,7 @@ the global configuration state for the framework.
 from pathlib import Path
 from typing import Any, Final, Self
 
-from pydantic import Field, ValidationError, model_validator
+from pydantic import Field, ValidationError
 from pydantic.json_schema import GenerateJsonSchema, JsonSchemaValue
 
 from samara import BaseModel
@@ -60,28 +60,6 @@ class RuntimeController(BaseModel):
     description: str = Field(..., description="Description of the runtime configuration")
     enabled: bool = Field(..., description="Whether this runtime is enabled")
     jobs: list[JobUnion] = Field(..., description="List of jobs to execute in the ETL pipeline")
-
-    @model_validator(mode="after")
-    def validate_unique_ids(self) -> Self:
-        """Validate that all extract, transform, and load IDs are unique across all jobs.
-
-        Returns:
-            Self: The validated instance.
-
-        Raises:
-            ValueError: If any duplicate IDs are found.
-        """
-        all_ids = []
-        for job in self.jobs:
-            all_ids.extend(extract.id_ for extract in job.extracts)
-            all_ids.extend(transform.id_ for transform in job.transforms)
-            all_ids.extend(load.id_ for load in job.loads)
-
-        duplicates = {id_ for id_ in all_ids if all_ids.count(id_) > 1}
-        if duplicates:
-            raise ValueError(f"Duplicate IDs found: {', '.join(sorted(duplicates))}")
-
-        return self
 
     @classmethod
     def from_file(cls, filepath: Path) -> Self:
@@ -144,6 +122,8 @@ class RuntimeController(BaseModel):
         """Execute all jobs in the ETL pipeline.
 
         Executes each job in the ETL instance by calling their execute method.
+        Each job is responsible for clearing its own engine-specific registries
+        after execution completes.
         Raises an exception if any job fails during execution.
         """
         if not self.enabled:
@@ -155,5 +135,7 @@ class RuntimeController(BaseModel):
         for i, job in enumerate(self.jobs):
             logger.info("Executing job %d/%d: %s", i + 1, len(self.jobs), job.id_)
             job.execute()
+
+        logger.info("All jobs in ETL pipeline executed successfully")
 
         logger.info("All jobs in ETL pipeline executed successfully")

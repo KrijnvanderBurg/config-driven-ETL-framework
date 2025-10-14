@@ -12,6 +12,7 @@ from abc import ABC, abstractmethod
 from enum import Enum
 
 from pydantic import Field
+
 from samara import BaseModel
 from samara.exceptions import FlintJobError
 from samara.runtime.jobs.hooks import Hooks
@@ -70,6 +71,10 @@ class JobBase(BaseModel, ABC):
         - onSuccess: When execution completes successfully
         - onFinally: Always executed at the end
 
+        After execution completes (success or failure), clears all DataFrames and
+        streaming queries from registries to free memory and prevent data leakage
+        between jobs.
+
         Raises:
             FlintJobError: Wraps configuration and I/O exceptions with context,
                 preserving the original exception as the cause.
@@ -91,6 +96,7 @@ class JobBase(BaseModel, ABC):
             raise FlintJobError(f"Error occurred during job '{self.id_}' execution") from e
         finally:
             self.hooks.on_finally()
+            self._clear()
 
     @abstractmethod
     def _execute(self) -> None:
@@ -99,4 +105,14 @@ class JobBase(BaseModel, ABC):
         This method must be implemented by each engine-specific job class
         to handle the execution of the ETL pipeline using the appropriate
         execution engine.
+        """
+
+    @abstractmethod
+    def _clear(self) -> None:
+        """Clear engine-specific registries to free memory.
+
+        This method must be implemented by each engine-specific job class
+        to clear all data registries (DataFrames, streaming queries, etc.)
+        after job execution completes. This ensures memory is freed and
+        prevents data leakage between jobs.
         """
