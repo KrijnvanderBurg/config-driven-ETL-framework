@@ -1,0 +1,77 @@
+// https://containers.dev/implementors/json_reference/
+{
+    "dockerComposeFile": "./docker-compose.yml",
+    "service": "devcontainer",
+    "workspaceFolder": "/workspace",
+    // "onCreateCommand": {},
+	// "updateContentCommand": {},
+	// "postCreateCommand": {},
+	// "postStartCommand": {},
+	// "postAttachCommand": {},
+	// "waitFor": "", // default updateContentCommand
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-toolsai.jupyter",
+                "ms-toolsai.datawrangler",
+                "ms-python.python",
+                "ms-python.vscode-pylance"
+            ],
+            "settings": {
+                // Markdown files open in preview mode
+                "workbench.editorAssociations": {   
+                    "*.md": "vscode.markdown.preview.editor"
+                },
+                // Jupyter settings
+                "jupyter.interactiveWindow.textEditor.executeSelection": true,
+                "jupyter.notebookFileRoot": "${workspaceFolder}",
+                "jupyter.kernelSpecConnectionMetadata": [
+                    {
+                        "kernelspec": {
+                            "name": "pyspark",
+                            "display_name": "PySpark"
+                        }
+                    }
+                ],
+                // VSCode Tasks
+                "tasks": {
+                    "version": "2.0.0",
+                    "tasks": [
+                        // Ctrl+Shift+B to run this task
+                        {
+                            "label": "spark-submit current file",
+                            "type": "shell",
+                            "command": "${workspaceFolder}/.devcontainer/spark-cluster/spark-submit.sh ${file}",
+                            "group": {
+                                "kind": "build",
+                                "isDefault": true
+                            },
+                            "presentation": {
+                                "reveal": "always",
+                                "panel": "new"
+                            },
+                            "problemMatcher": []
+                        }
+                    ]
+                }
+            }
+        }
+    }
+}
+//
+// Predefined Variables
+//
+// ${cwd} - the task runner's current working directory on startup
+// ${workspaceFolder} - the path of the folder opened in VS Code
+// ${workspaceRootFolderName} - the name of the folder opened in VS Code without any slashes (/)
+// ${workspaceFolderBasename} - the name of the folder opened in VS Code without any slashes (/)
+// ${file} - the current opened file
+// ${relativeFile} - the current opened file relative to workspaceFolder
+// ${relativeFileDirname} - the current opened file's dirname relative to workspaceFolder
+// ${fileBasename} - the current opened file's basename
+// ${fileBasenameNoExtension} - the current opened file's basename with no file extension
+// ${fileDirname} - the current opened file's dirname
+// ${fileExtname} - the current opened file's extension
+// ${lineNumber} - the current selected line number in the active file
+// ${selectedText} - the current selected text in the active file
+// ${execPath} - the path to the running VS Code executable

@@ -1,0 +1,31 @@
+name: Semgrep Security Scanner
+description: Run Semgrep security scanner on Python code
+inputs:
+  target-path:
+    description: Path to the directory to scan
+    required: false
+  config-file:
+    description: Path to the Semgrep configuration file
+    required: false
+  sarif-output-file:
+    description: Path to the SARIF output file
+    required: false
+    default: semgrep.sarif
+
+runs:
+  using: composite
+  steps:
+    - name: Run Semgrep
+      shell: bash
+      run: |
+        sh ${{ github.workspace }}/.github/scripts/run-semgrep.sh \
+          "${{ inputs.target-path }}" \
+          "${{ inputs.config-file }}" \
+          "${{ inputs.sarif-output-file }}"
+    
+    - name: Upload SARIF to GitHub Security
+      if: always()
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: ${{ inputs.sarif-output-file }}
+        category: semgrep

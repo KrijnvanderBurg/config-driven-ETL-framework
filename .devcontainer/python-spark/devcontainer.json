@@ -1,0 +1,512 @@
+// https://containers.dev/implementors/json_reference/
+{
+	"dockerComposeFile": [
+		"./docker-compose.yml"
+	],
+	"workspaceFolder": "/workspace",
+	"service": "devcontainer",
+	"remoteUser": "vscode",
+	"containerUser": "vscode",
+	//
+	// Features - https://containers.dev/implementors/features.
+	//
+	"features": {
+		"ghcr.io/devcontainers/features/python:1": {
+			"version": "3.13",
+			// Other required packages are installed via onCreateCommand,
+			// since toolsToInstall uses pipx which cannot install libraries
+			"installTools": false,
+			"toolsToInstall": "" // set installTools to true again
+		},
+		"ghcr.io/devcontainers-extra/features/poetry:2": {
+			"version": "latest"
+		},
+		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
+	},
+	//
+	// ContainerEnv
+	//
+	"containerEnv": {
+		"PYTHONFAULTHANDLER": "1",
+		"PYTHONUNBUFFERED": "1",
+		"PYTHONHASHSEED": "42",
+		"PIP_DISABLE_PIP_VERSION_CHECK": "1",
+		"POETRY_VIRTUALENVS_CREATE": "false"
+	},
+	// "onCreateCommand": {},
+	// "updateContentCommand": {},
+	// "postCreateCommand": {},
+	// "postStartCommand": {},
+	// "postAttachCommand": {},
+	// "waitFor": "", // default updateContentCommand
+	"customizations": {  
+		"vscode": {
+			"extensions": [
+				// Python
+				"ms-python.vscode-pylance", // https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance
+				// Linter
+				"charliermarsh.ruff", //https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff
+				"ms-python.pylint", // https://marketplace.visualstudio.com/items?itemName=ms-python.pylint
+				"ms-python.flake8", // https://marketplace.visualstudio.com/items?itemName=ms-python.flake8
+				"ms-python.mypy-type-checker", // https://marketplace.visualstudio.com/items?itemName=ms-python.mypy-type-checker
+				// Coverage
+				"ryanluker.vscode-coverage-gutters",
+				// Scanner
+				"nwgh.bandit", // https://marketplace.visualstudio.com/items?itemName=nwgh.bandit
+				"ms-cst-e.vscode-devskim", // https://marketplace.visualstudio.com/items?itemName=MS-CST-E.vscode-devskim
+				// Tools
+				"ms-azuretools.vscode-docker", // https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker
+				"eamodio.gitlens", // https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens
+				"dvirtz.parquet-viewer", // https://marketplace.visualstudio.com/items?itemName=dvirtz.parquet-viewer
+				"tamasfe.even-better-toml", // https://marketplace.visualstudio.com/items?itemName=tamasfe.even-better-toml
+				"ms-azure-devops.azuredevops", // https://marketplace.visualstudio.com/items?itemName=ms-azure-devops.azuredevops
+				// Copilot
+				"GitHub.copilot", // https://marketplace.visualstudio.com/items?itemName=GitHub.copilot
+				"GitHub.copilot-chat" // https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat
+			],
+			"settings": {
+				"gitlens.hovers.enabled": true, // gitlens disable popup
+				"editor.tabSize": 4,
+				"files.eol": "\n",  // crucial to prevent line ending issues when editing config files on windows
+				//
+				// Add the extension IDs you want to suppress being suggested
+				//
+				"extensions.unwantedRecommendations": [
+					"ms-vscode.makefile-tools"
+				],
+				//
+				// Terminal customisation
+				//
+				"terminal.integrated.enableVisualBell": true,
+				"terminal.integrated.defaultProfile.linux": "zsh",
+				"terminal.integrated.profiles.linux": {
+					"zsh": {
+						"path": "zsh"
+					}
+				},
+				// terminal used in VsCode tasks, make it default to shell to avoid issues with other scripts or other non-posix shells
+				// https://code.visualstudio.com/docs/terminal/profiles#_configuring-the-taskdebug-profile
+				"terminal.integrated.automationProfile.linux": {
+					"path": "/bin/sh"
+				},
+				//
+				// Git - search gitignore in parent monorepo folder
+				//
+				"git.openRepositoryInParentFolders": "always",
+				"search.useIgnoreFiles": true,
+				"search.useParentIgnoreFiles": true,
+				//
+				// Autformatter python
+				//
+				"[python]": {
+					"editor.defaultFormatter": "charliermarsh.ruff",
+					"editor.formatOnSave": true,
+					"editor.codeActionsOnSave": {
+						"source.fixAll": "explicit", // ruff
+						"source.organizeImports": "explicit"
+					}
+				},
+				//
+				// Ruff - https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff
+				//
+				// Ruff Linter might give pop-ups with the error:
+				// `--config` flag must either be a path to a `.toml` configuration file or ...`
+				// It should have been fixed but it still happens for me. 
+				// https://github.com/astral-sh/ruff-vscode/issues/413
+				"ruff.configuration": "${workspaceFolder}/config/ruff.toml",
+				"ruff.organizeImports": true,
+				"ruff.fixAll": true,
+				//
+				// Python/Pytest - https://code.visualstudio.com/docs/python/settings-reference
+				//
+                // "python.defaultInterpreterPath": "",
+				"python.testing.autoTestDiscoverOnSaveEnabled": true,
+				"python.testing.unittestEnabled": false,
+				"python.testing.pytestEnabled": true,
+				"python.testing.pytestArgs": [
+					"-c",
+					"${workspaceFolder}/config/pytest.ini",
+					"-o",
+					"cache_dir=${workspaceFolder}/.pytest_cache",
+					"-s",
+					"--cov=${workspaceFolder}/src/",
+					"--cov-report=xml:${workspaceFolder}/coverage.xml",
+					"--cov-report=term-missing",
+					"--cov-config=${workspaceFolder}/config/.coveragerc",
+					"--junit-xml=${workspaceFolder}/JUNIT-TEST.xml",
+					"--durations=0",
+					"--durations-min=0.01"
+				],
+				"python.languageServer": "Default",
+				//
+				// Pylance - https://marketplace.visualstudio.com/items?itemName=ms-python.vscode-pylance
+				//
+				"python.analysis.typeCheckingMode": "strict", // 'off' (default), 'basic', 'strict'
+				"python.analysis.diagnosticMode": "openFilesOnly", // 'openFilesOnly' (default), 'workspace'
+				"python.analysis.diagnosticSeverityOverrides": {
+					// https://github.com/microsoft/pyright/blob/main/docs/configuration.md#type-check-diagnostics-settings
+					"reportUnknownParameterType": false,
+					"reportUnknownArgumentType": false,
+					"reportUnknownVariableType": false,
+					"reportUnknownMemberType": false,
+					"reportMissingParameterType": false,
+					"reportMissingTypeArgument": false,
+					"reportGeneralTypeIssues": false
+				},
+				"python.analysis.completeFunctionParens": true,
+				"python.analysis.inlayHints.variableType": true,
+				"python.analysis.inlayHints.functionReturnTypes": true,
+				"python.analysis.inlayHints.callArgumentName": true,
+				"python.analysis.inlayHints.pytestParameters": true,
+				//
+				// Pylint - https://marketplace.visualstudio.com/items?itemName=ms-python.pylint
+				//
+				"pylint.args": [
+					"--rcfile",
+					"${workspaceFolder}/config/.pylintrc"
+				],
+				"pylint.path": [
+					"${interpreter}",
+					"-m",
+					"pylint"
+				],
+				"pylint.cwd": "${workspaceFolder}",
+				"pylint.enabled": true,
+				"pylint.showNotification": "onError", // 'off' (default), 'onWarning', 'onError', 'always'
+				"pylint.lintOnChange": false, // keep false, its unusable slow.
+				//
+				// Flake8 - https://marketplace.visualstudio.com/items?itemName=ms-python.flake8
+				//
+				"flake8.args": [
+					"--config",
+					"${containerWorkspaceFolder}/.devcontainer/.dotfiles/python/.flake8" // default "--config=${workspaceFolder}/.flake8"
+				],
+				"flake8.cwd": "${workspaceFolder}", // default ${workspaceFolder}
+				"flake8.showNotification": "onError", // 'off' (default), 'onWarning', 'onError', 'always'
+				"flake8.enabled": true,
+				//
+				// Mypy - https://marketplace.visualstudio.com/items?itemName=ms-python.mypy-type-checker
+				//
+				"mypy-type-checker.args": [
+					"--config-file",
+					"${workspaceFolder}/config/mypy.ini"
+				],
+				"mypy-type-checker.cwd": "${workspaceFolder}",
+				"mypy-type-checker.enabled": true,
+				"mypy-type-checker.showNotifications": "onError", // 'off' (default), 'onWarning', 'onError', 'always'
+				"mypy-type-checker.reportingScope": "file", // 'file' (default), 'workspace'
+				"mypy-type-checker.preferDaemon": false, // set to true if reportingScope is workspace
+				//
+				// Bandit - https://marketplace.visualstudio.com/items?itemName=nwghbandit.ini
+				//
+				"bandit.args": [
+					"-c",
+					"${workspaceFolder}/config/bandit.ini"
+				],
+				"bandit.cwd": "${workspaceFolder}",
+				"bandit.logLevel": "warning", // 'error' (default), 'warning'
+				"bandit.enabled": true,
+				"bandit.showNotification": "onError", // 'off' (default), 'onWarning', 'onError', 'always'
+				//
+				// Auto docstring - https://marketplace.visualstudio.com/items?itemName=njpwerner.autodocstring
+				//
+				"autoDocstring.docstringFormat": "google",
+				"autoDocstring.generateDocstringOnEnter": true,
+				"autoDocstring.includeName": false,
+				"autoDocstring.startOnNewLine": true,
+				"autoDocstring.guessTypes": true,
+				"autoDocstring.quoteStyle": "\"\"\"",
+				//
+				// VsCode Tasks
+				// 
+				// The DevContainer documentation does not refer support for VsCode tasks at all, but it does work quite well except for below issue.
+				//
+				// Tasks start already before postCreateCommand, if a task has a dependency that is installed after, it will fail.
+				// After building a devcontainer some extensions like Github copilot will show a warning once on the tasks terminal
+				// Because it wants to add environment variables to it, but the tasks launched before the extension was finished installing.
+				// The github issue: https://github.com/microsoft/vscode/issues/153903
+				"tasks": {
+					// https://code.visualstudio.com/docs/editor/tasks#vscode
+					"version": "2.0.0",
+					"options": {
+						"env": {}
+					},
+					"tasks": [
+						{
+							"label": "git clean",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/git_clean.sh",
+							"runOptions": {
+								"runOn": "default"
+							},
+							"presentation": {
+								"clear": true,
+								"showReuseMessage": false
+							},
+							"group": "environment",
+							"problemMatcher": []
+						},
+						{
+                            "label": "coverage-gutters watch",
+                            "presentation": {
+                                "reveal": "never"
+                            },
+                            "command": [
+                                "${command:coverage-gutters.watchCoverageAndVisibleEditors}"
+                            ],
+                            "problemMatcher": []
+                        },
+						//
+						// all task groups
+						//
+						{
+							"label": "all",
+							"dependsOn": [
+								"build",
+								"test"
+							],
+							"dependsOrder": "sequence",
+							"runOptions": {
+								"runOn": "folderOpen"
+							},
+							"problemMatcher": []
+						},
+						//
+						// build
+						//
+						{
+							"label": "build",
+							"dependsOn": [
+								"poetry install"
+							],
+							"dependsOrder": "sequence",
+							"problemMatcher": []
+						},
+						{
+							"label": "poetry install",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/poetry-install.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+							"problemMatcher": []
+						},
+						{
+							"label": "build package",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/poetry-build.sh",
+							"args": [],
+							"presentation": {
+								"showReuseMessage": false,
+								"panel": "dedicated",
+								"clear": true
+							},
+							"problemMatcher": []
+						},
+						{
+							"label": "install package",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/install-package.sh",
+							"args": [],
+							"dependsOn": [
+								"build package"
+							],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+							"group": {
+								"kind": "build",
+								"isDefault": true
+							},
+							"problemMatcher": []
+						},
+						{
+							"label": "sphinx build docs",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-sphinx.sh",
+							"args": [
+								"${workspaceFolder}/docs/" // docs dirpath
+							],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+							"group": {
+								"kind": "build",
+								"isDefault": true
+							},
+							"problemMatcher": []
+						},
+						//
+						// test
+						//
+						{
+							"label": "test",
+							"dependsOn": [
+								// test build
+								"build package",
+								"sphinx build docs",
+								// code quality
+								"ruff formatter",
+								"ruff linter",
+								"pylint",
+								"flake8",
+								"mypy",
+								"pyright",
+								//security
+								"trufflehog",
+								"bandit",
+								"vulture",
+								"semgrep",
+								// tests
+								"pytest and coverage"
+							],
+							"problemMatcher": []
+						},
+						{
+							"label": "ruff formatter",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-ruff-formatter.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						},
+						{
+							"label": "ruff linter",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-ruff-linter.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						},
+						{
+							"label": "pylint",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-pylint.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						},
+						{
+							"label": "flake8",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-flake8.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						},
+						{
+							"label": "mypy",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-mypy.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						},
+						{
+							"label": "pyright",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-pyright.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						},
+						{
+							"label": "trufflehog",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-trufflehog.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						},
+						{
+							"label": "bandit",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-bandit.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						},
+						{
+							"label": "semgrep",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-semgrep.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						},
+						{
+							"label": "vulture",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-vulture.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						},
+						{
+							"label": "pytest and coverage",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-pytest.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						}
+					]
+				}
+			}
+		}
+	}
+}
+//
+// Predefined Variables
+//
+// ${cwd} - the task runner's current working directory on startup
+// ${workspaceFolder} - the path of the folder opened in VS Code
+// ${workspaceRootFolderName} - the name of the folder opened in VS Code without any slashes (/)
+// ${workspaceFolderBasename} - the name of the folder opened in VS Code without any slashes (/)
+// ${file} - the current opened file
+// ${relativeFile} - the current opened file relative to workspaceFolder
+// ${relativeFileDirname} - the current opened file's dirname relative to workspaceFolder
+// ${fileBasename} - the current opened file's basename
+// ${fileBasenameNoExtension} - the current opened file's basename with no file extension
+// ${fileDirname} - the current opened file's dirname
+// ${fileExtname} - the current opened file's extension
+// ${lineNumber} - the current selected line number in the active file
+// ${selectedText} - the current selected text in the active file
+// ${execPath} - the path to the running VS Code executable

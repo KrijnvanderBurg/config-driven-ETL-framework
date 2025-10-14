@@ -27,7 +27,7 @@ __all__ = [
     "WithColumnFunction",
 ]
 
-TransformFunctionSparkUnion = Annotated[
+transform_function_spark_union = Annotated[
     CastFunction
     | DropFunction
     | DropDuplicatesFunction

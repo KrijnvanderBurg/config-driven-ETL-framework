@@ -125,10 +125,13 @@ def validate(
     except click.exceptions.Exit:
         # Re-raise Click's Exit exceptions (these are our controlled exits with proper codes)
         raise
+    except KeyboardInterrupt as e:
+        logger.warning("Process interrupted by user")
+        raise click.exceptions.Exit(ExitCode.KEYBOARD_INTERRUPT) from e
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Unexpected exception %s: %s", type(e).__name__, str(e))
         logger.error("Exception details:", exc_info=True)
-        raise click.exceptions.Exit(ExitCode.UNEXPECTED_ERROR)
+        raise click.exceptions.Exit(ExitCode.UNEXPECTED_ERROR) from e
 
 
 @cli.command()
@@ -194,10 +197,13 @@ def run(alert_filepath: Path, runtime_filepath: Path) -> None:
     except click.exceptions.Exit:
         # Re-raise Click's Exit exceptions (these are our controlled exits with proper codes)
         raise
+    except KeyboardInterrupt as e:
+        logger.warning("Process interrupted by user")
+        raise click.exceptions.Exit(ExitCode.KEYBOARD_INTERRUPT) from e
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Unexpected exception %s: %s", type(e).__name__, str(e))
         logger.error("Exception details:", exc_info=True)
-        raise click.exceptions.Exit(ExitCode.UNEXPECTED_ERROR)
+        raise click.exceptions.Exit(ExitCode.UNEXPECTED_ERROR) from e
 
 
 @cli.command("export-schema")
@@ -229,12 +235,15 @@ def export_schema(output_filepath: Path) -> None:
             )
         except OSError as e:
             logger.error("Failed to write schema file: %s", e)
-            raise click.exceptions.Exit(ExitCode.IO_ERROR)
+            raise click.exceptions.Exit(ExitCode.IO_ERROR) from e
 
     except click.exceptions.Exit:
         # Re-raise Click's Exit exceptions (these are our controlled exits with proper codes)
         raise
+    except KeyboardInterrupt as e:
+        logger.warning("Process interrupted by user")
+        raise click.exceptions.Exit(ExitCode.KEYBOARD_INTERRUPT) from e
     except Exception as e:  # pylint: disable=broad-except
         logger.error("Unexpected exception %s: %s", type(e).__name__, str(e))
         logger.error("Exception details:", exc_info=True)
-        raise click.exceptions.Exit(ExitCode.UNEXPECTED_ERROR)
+        raise click.exceptions.Exit(ExitCode.UNEXPECTED_ERROR) from e

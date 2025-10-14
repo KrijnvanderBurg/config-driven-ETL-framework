@@ -1,0 +1,19 @@
+name: Ruff Formatter
+description: Run Ruff formatter on Python code
+inputs:
+  target-path:
+    description: Path to the directory to format 
+    required: false
+  config-file:
+    description: Path to the Ruff configuration file
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Run Ruff formatter
+      shell: bash
+      run: |
+        sh ${{ github.workspace }}/.github/scripts/run-ruff-formatter.sh \
+          "${{ inputs.target-path }}" \
+          "${{ inputs.config-file }}"

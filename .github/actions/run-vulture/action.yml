@@ -1,0 +1,19 @@
+name: Vulture Dead Code Scanner
+description: Run Vulture dead code scanner on Python code
+inputs:
+  target-path:
+    description: Path to the directory to scan
+    required: false
+  config-file:
+    description: Path to the Vulture configuration file
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Run Vulture
+      shell: bash
+      run: |
+        sh ${{ github.workspace }}/.github/scripts/run-vulture.sh \
+          "${{ inputs.target-path }}" \
+          "${{ inputs.config-file }}"
