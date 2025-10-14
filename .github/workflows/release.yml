@@ -35,5 +35,8 @@ jobs:
           VERSION=$(sh ${{ github.workspace }}/.github/scripts/poetry-get-version.sh)
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
       
+      - name: Display version
+        run: echo "Version from pyproject.toml is ${{ steps.get_version.outputs.version }}"
+      
       # Add release steps here
       # Use ${{ steps.get_version.outputs.version }} to access the version
