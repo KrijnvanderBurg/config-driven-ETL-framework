@@ -8,8 +8,3 @@ if ! command -v poetry &> /dev/null; then
     pipx install poetry
 fi
 echo -n "Poetry version: " && poetry --version
-
-# Configure Poetry to not create virtualenvs
-echo "Configuring Poetry..."
-poetry config virtualenvs.create false
-poetry config virtualenvs.in-project false
