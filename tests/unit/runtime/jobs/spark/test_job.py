@@ -224,9 +224,7 @@ class TestJobSparkValidation:
         with pytest.raises(ValidationError):
             JobSpark(**job_config)
 
-    def test_create_job_spark__with_transform_referencing_extract__succeeds(
-        self, job_config: dict[str, Any]
-    ) -> None:
+    def test_create_job_spark__with_transform_referencing_extract__succeeds(self, job_config: dict[str, Any]) -> None:
         """Test JobSpark creation succeeds when transform references an extract ID."""
         # Default config already has transform referencing extract
         job_spark = JobSpark(**job_config)
