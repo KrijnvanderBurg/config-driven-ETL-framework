@@ -9,6 +9,7 @@ from unittest.mock import Mock
 
 import pytest
 from pydantic import ValidationError
+
 from samara.exceptions import FlintIOError, FlintRuntimeConfigurationError
 from samara.runtime.controller import RuntimeController
 

@@ -10,6 +10,7 @@ from typing import Any, Final, Self
 
 from pydantic import Field, ValidationError
 from pydantic.json_schema import GenerateJsonSchema, JsonSchemaValue
+
 from samara import BaseModel
 from samara.exceptions import FlintIOError, FlintRuntimeConfigurationError
 from samara.runtime.jobs import JobUnion
@@ -121,6 +122,8 @@ class RuntimeController(BaseModel):
         """Execute all jobs in the ETL pipeline.
 
         Executes each job in the ETL instance by calling their execute method.
+        Each job is responsible for clearing its own engine-specific registries
+        after execution completes.
         Raises an exception if any job fails during execution.
         """
         if not self.enabled:
@@ -132,5 +135,7 @@ class RuntimeController(BaseModel):
         for i, job in enumerate(self.jobs):
             logger.info("Executing job %d/%d: %s", i + 1, len(self.jobs), job.id_)
             job.execute()
+
+        logger.info("All jobs in ETL pipeline executed successfully")
 
         logger.info("All jobs in ETL pipeline executed successfully")

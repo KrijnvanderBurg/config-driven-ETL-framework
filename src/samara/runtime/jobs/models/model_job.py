@@ -10,14 +10,23 @@ engine types. It includes:
 import logging
 from abc import ABC, abstractmethod
 from enum import Enum
+from typing import Generic, Self, TypeVar
 
-from pydantic import Field
+from pydantic import Field, model_validator
+
 from samara import BaseModel
 from samara.exceptions import FlintJobError
 from samara.runtime.jobs.hooks import Hooks
+from samara.runtime.jobs.models.model_extract import ExtractModel
+from samara.runtime.jobs.models.model_load import LoadModel
+from samara.runtime.jobs.models.model_transform import TransformModel
 from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
+
+ExtractT = TypeVar("ExtractT", bound=ExtractModel)
+TransformT = TypeVar("TransformT", bound=TransformModel)
+LoadT = TypeVar("LoadT", bound=LoadModel)
 
 
 class JobEngine(Enum):
@@ -32,7 +41,7 @@ class JobEngine(Enum):
     # POLARS = "polars"
 
 
-class JobBase(BaseModel, ABC):
+class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
     """Abstract base class for all job types.
 
     Defines the common interface and attributes that all job implementations
@@ -51,13 +60,81 @@ class JobBase(BaseModel, ABC):
         enabled: Whether this job should be executed
         engine_type: The execution engine to use for this job
         hooks: Hooks to execute at various stages of the job lifecycle
+        extracts: Collection of Extract components to obtain data from sources
+        transforms: Collection of Transform components to process the data
+        loads: Collection of Load components to write data to destinations
     """
 
     id_: str = Field(..., alias="id", description="Unique identifier for the job", min_length=1)
     description: str = Field(..., description="Human-readable description of the job's purpose")
     enabled: bool = Field(..., description="Whether this job should be executed")
     engine_type: JobEngine = Field(..., description="The execution engine to use for this job")
+    extracts: list[ExtractT] = Field(..., description="Collection of Extract components")
+    transforms: list[TransformT] = Field(..., description="Collection of Transform components")
+    loads: list[LoadT] = Field(..., description="Collection of Load components")
     hooks: Hooks = Field(..., description="Hooks to execute at various stages of the job lifecycle")
+
+    @model_validator(mode="after")
+    def validate_unique_ids(self) -> Self:
+        """Validate all IDs are unique within the job.
+
+        Ensures that all extract, transform, and load IDs are unique within this job.
+
+        Returns:
+            Self: The validated instance.
+
+        Raises:
+            ValueError: If duplicate IDs are found.
+        """
+        # Collect all IDs as lists (not sets) to detect duplicates
+        extract_ids_list = [extract.id_ for extract in self.extracts]
+        transform_ids_list = [transform.id_ for transform in self.transforms]
+        load_ids_list = [load.id_ for load in self.loads]
+
+        # Validate unique IDs within the job
+        all_ids = extract_ids_list + transform_ids_list + load_ids_list
+        duplicates = {id_ for id_ in all_ids if all_ids.count(id_) > 1}
+        if duplicates:
+            raise ValueError(f"Duplicate IDs found in job '{self.id_}': {', '.join(sorted(duplicates))}")
+
+        return self
+
+    @model_validator(mode="after")
+    def validate_upstream_references(self) -> Self:
+        """Validate all upstream_id references exist.
+
+        Ensures that:
+        - All transform upstream_ids reference existing extract or transform IDs
+        - All load upstream_ids reference existing extract or transform IDs
+
+        Returns:
+            Self: The validated instance.
+
+        Raises:
+            ValueError: If invalid upstream_id references are found.
+        """
+        # Convert to sets for upstream reference validation
+        extract_ids = {extract.id_ for extract in self.extracts}
+        transform_ids = {transform.id_ for transform in self.transforms}
+
+        # Validate transform upstream_ids reference existing extracts or transforms
+        valid_upstream_ids = extract_ids | transform_ids
+        for transform in self.transforms:
+            if transform.upstream_id not in valid_upstream_ids:
+                raise ValueError(
+                    f"Transform '{transform.id_}' references non-existent upstream_id '{transform.upstream_id}' "
+                    f"in job '{self.id_}'. upstream_id must reference an existing extract or transform."
+                )
+
+        # Validate load upstream_ids reference existing extracts or transforms
+        for load in self.loads:
+            if load.upstream_id not in valid_upstream_ids:
+                raise ValueError(
+                    f"Load '{load.id_}' references non-existent upstream_id '{load.upstream_id}' "
+                    f"in job '{self.id_}'. upstream_id must reference an existing extract or transform."
+                )
+
+        return self
 
     def execute(self) -> None:
         """Execute the complete ETL pipeline with comprehensive exception handling.
@@ -69,6 +146,10 @@ class JobBase(BaseModel, ABC):
         - onError: When any exception occurs
         - onSuccess: When execution completes successfully
         - onFinally: Always executed at the end
+
+        After execution completes (success or failure), clears all DataFrames and
+        streaming queries from registries to free memory and prevent data leakage
+        between jobs.
 
         Raises:
             FlintJobError: Wraps configuration and I/O exceptions with context,
@@ -91,6 +172,7 @@ class JobBase(BaseModel, ABC):
             raise FlintJobError(f"Error occurred during job '{self.id_}' execution") from e
         finally:
             self.hooks.on_finally()
+            self._clear()
 
     @abstractmethod
     def _execute(self) -> None:
@@ -99,4 +181,14 @@ class JobBase(BaseModel, ABC):
         This method must be implemented by each engine-specific job class
         to handle the execution of the ETL pipeline using the appropriate
         execution engine.
+        """
+
+    @abstractmethod
+    def _clear(self) -> None:
+        """Clear engine-specific registries to free memory.
+
+        This method must be implemented by each engine-specific job class
+        to clear all data registries (DataFrames, streaming queries, etc.)
+        after job execution completes. This ensures memory is freed and
+        prevents data leakage between jobs.
         """
