@@ -1,0 +1,43 @@
+name: Release Python App
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to release (e.g., 1.0.0)'
+        required: true
+        type: string
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Python
+        uses: ./.github/actions/setup-python
+        with:
+          python-version: 3.13
+      
+      - name: Setup Poetry
+        uses: ./.github/actions/poetry-setup
+      
+      - name: Get version from pyproject.toml
+        id: get_version
+        run: |
+          VERSION=$(.github/scripts/poetry-get-version.sh)
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+      
+      # Add release steps here
+      # Use ${{ steps.get_version.outputs.version }} to access the version
