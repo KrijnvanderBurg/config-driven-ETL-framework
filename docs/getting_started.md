@@ -15,7 +15,7 @@ poetry install
 Start with the included example pipeline:
 
 ```bash
-python -m flint run \
+python -m samara run \
   --alert-filepath="examples/join_select/alert.jsonc" \
   --runtime-filepath="examples/join_select/job.jsonc"
 ```
@@ -108,12 +108,12 @@ For more information on configuration options, see:
 
 ## IDE Support with JSON Schema
 
-Flint can export a JSON schema that enables autocompletion, validation, and inline documentation in your IDE when editing configuration files.
+Samara can export a JSON schema that enables autocompletion, validation, and inline documentation in your IDE when editing configuration files.
 
 **Export the schema:**
 
 ```bash
-python -m flint export-schema --output-filepath="./runtime_schema.json"
+python -m samara export-schema --output-filepath="./runtime_schema.json"
 ```
 
 **Reference it in your configuration:**
@@ -138,13 +138,13 @@ This dramatically improves the configuration authoring experience, catching erro
 The quickest way to start is by running the provided example:
 
 ```bash
-python -m flint run \
+python -m samara run \
   --alert-filepath="examples/join_select/alert.jsonc" \
   --runtime-filepath="examples/join_select/job.jsonc"
 ```
 
 ### 🔍 Example: Customer Order
-Running this command executes a complete pipeline that showcases Flint's key capabilities:
+Running this command executes a complete pipeline that showcases Samara's key capabilities:
 
 - **Multi-format extraction**: Seamlessly reads from both CSV and JSON sources
   - Source options like delimiters and headers are configurable through the configuration file

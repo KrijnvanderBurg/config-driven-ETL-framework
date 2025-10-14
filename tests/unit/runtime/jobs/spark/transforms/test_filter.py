@@ -6,9 +6,8 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
-
-from flint.runtime.jobs.models.transforms.model_filter import FilterArgs
-from flint.runtime.jobs.spark.transforms.filter import FilterFunction
+from samara.runtime.jobs.models.transforms.model_filter import FilterArgs
+from samara.runtime.jobs.spark.transforms.filter import FilterFunction
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

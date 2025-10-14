@@ -1,4 +1,4 @@
-name: flint-CI
+name: samara-CI
 
 on:
   push:

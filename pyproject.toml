@@ -1,10 +1,10 @@
 [tool.poetry]
-name = "flint"
-version = "0.0.1"
+name = "Samara"
+version = "0.1.0"
 description = "Config Driven ETL Framework"
 authors = ["Krijn van der Burg"]
 readme = "README.md"
-packages = [{ include = "flint", from = "src" }]
+packages = [{ include = "samara", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.13"

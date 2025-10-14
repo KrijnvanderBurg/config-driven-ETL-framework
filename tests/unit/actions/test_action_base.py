@@ -3,8 +3,7 @@
 from unittest.mock import patch
 
 import pytest
-
-from flint.actions.base import ActionBase
+from samara.actions.base import ActionBase
 
 
 class MockAction(ActionBase):

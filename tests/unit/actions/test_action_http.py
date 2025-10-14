@@ -2,8 +2,8 @@
 
 from unittest.mock import patch
 
-from flint.actions.http import HttpAction
-from flint.utils.http import Retry
+from samara.actions.http import HttpAction
+from samara.utils.http import Retry
 
 
 class TestHttpAction:

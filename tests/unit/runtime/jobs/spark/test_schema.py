@@ -16,8 +16,7 @@ from pathlib import Path
 
 import pytest
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
-
-from flint.runtime.jobs.spark.schema import SchemaDictHandler, SchemaFilepathHandler, SchemaStringHandler
+from samara.runtime.jobs.spark.schema import SchemaDictHandler, SchemaFilepathHandler, SchemaStringHandler
 
 
 class TestSchemaHandlers:

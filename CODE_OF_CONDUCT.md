@@ -1,7 +1,7 @@
-# Flint Code of Conduct
+# Samara Code of Conduct
 
 ## Our Commitment
-The Flint project prioritizes ethical conduct, technical integrity, and a supportive community environment. This code outlines our expectations for all participants in our community.
+The Samara project prioritizes ethical conduct, technical integrity, and a supportive community environment. This code outlines our expectations for all participants in our community.
 
 ## Ethics and Integrity
 We value:
@@ -23,8 +23,8 @@ We strive to create:
 Violations of this code may be reported to project maintainers. Reports will be reviewed and investigated promptly, resulting in responses deemed appropriate and necessary.
 
 ## Scope
-This Code of Conduct applies within all community spaces and when representing the Flint project in public spaces.
+This Code of Conduct applies within all community spaces and when representing the Samara project in public spaces.
 
 ---
 
-By participating in the Flint community, you agree to abide by these principles and help maintain a respectful, productive environment for everyone.
+By participating in the Samara community, you agree to abide by these principles and help maintain a respectful, productive environment for everyone.

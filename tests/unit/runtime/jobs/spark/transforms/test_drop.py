@@ -6,9 +6,8 @@ from typing import Any
 from unittest.mock import Mock
 
 import pytest
-
-from flint.runtime.jobs.models.transforms.model_drop import DropArgs
-from flint.runtime.jobs.spark.transforms.drop import DropFunction
+from samara.runtime.jobs.models.transforms.model_drop import DropArgs
+from samara.runtime.jobs.spark.transforms.drop import DropFunction
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #

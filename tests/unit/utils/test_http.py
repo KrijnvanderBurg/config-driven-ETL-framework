@@ -10,8 +10,7 @@ from unittest.mock import MagicMock, patch
 import pytest
 import requests
 from pydantic import ValidationError
-
-from flint.utils.http import HttpBase, Retry
+from samara.utils.http import HttpBase, Retry
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #
@@ -190,7 +189,7 @@ class TestHttpBaseRequest:
     def test_make_http_request__with_valid_payload__sends_http_request_successfully(self, http_base: HttpBase) -> None:
         """Test successful HTTP request sending with proper request parameters."""
         # Mock the requests library because we don't want to make real HTTP calls
-        with patch("flint.utils.http.requests.request") as mock_request:
+        with patch("samara.utils.http.requests.request") as mock_request:
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_request.return_value = mock_response
@@ -216,7 +215,7 @@ class TestHttpBaseRequest:
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library because we don't want to make real HTTP calls
-        with patch("flint.utils.http.requests.request") as mock_request:
+        with patch("samara.utils.http.requests.request") as mock_request:
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_request.return_value = mock_response
@@ -238,7 +237,7 @@ class TestHttpBaseRequest:
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library because we don't want to make real HTTP calls
-        with patch("flint.utils.http.requests.request") as mock_request:
+        with patch("samara.utils.http.requests.request") as mock_request:
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_request.return_value = mock_response
@@ -254,7 +253,7 @@ class TestHttpBaseRequest:
     def test_make_http_request__with_special_characters__handles_encoding_correctly(self, http_base: HttpBase) -> None:
         """Test request handling with special characters in payload."""
         # Mock the requests library because we don't want to make real HTTP calls
-        with patch("flint.utils.http.requests.request") as mock_request:
+        with patch("samara.utils.http.requests.request") as mock_request:
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_request.return_value = mock_response
@@ -277,7 +276,7 @@ class TestHttpBaseRequest:
     def test_make_http_request__with_empty_payload__sends_with_empty_data(self, http_base: HttpBase) -> None:
         """Test request sending with empty payload results in empty JSON object."""
         # Mock the requests library because we don't want to make real HTTP calls
-        with patch("flint.utils.http.requests.request") as mock_request:
+        with patch("samara.utils.http.requests.request") as mock_request:
             mock_response = MagicMock()
             mock_response.raise_for_status.return_value = None
             mock_request.return_value = mock_response
@@ -309,8 +308,8 @@ class TestHttpBaseRetry:
 
         # Mock the requests library to fail first, succeed second
         with (
-            patch("flint.utils.http.requests.request") as mock_request,
-            patch("flint.utils.http.time.sleep") as mock_sleep,
+            patch("samara.utils.http.requests.request") as mock_request,
+            patch("samara.utils.http.time.sleep") as mock_sleep,
         ):
             # First call fails, second succeeds
             mock_response_success = MagicMock()
@@ -337,8 +336,8 @@ class TestHttpBaseRetry:
 
         # Mock the requests library to always fail
         with (
-            patch("flint.utils.http.requests.request") as mock_request,
-            patch("flint.utils.http.time.sleep"),
+            patch("samara.utils.http.requests.request") as mock_request,
+            patch("samara.utils.http.time.sleep"),
         ):
             mock_request.side_effect = requests.ConnectionError("Persistent network error")
 
@@ -355,7 +354,7 @@ class TestHttpBaseRetry:
         http_base = HttpBase(**valid_http_config)
 
         # Mock the requests library to fail
-        with patch("flint.utils.http.requests.request") as mock_request:
+        with patch("samara.utils.http.requests.request") as mock_request:
             mock_request.side_effect = requests.ConnectionError("Network error")
 
             # Act - should not raise despite failure
@@ -374,8 +373,8 @@ class TestHttpBaseRetry:
 
         # Mock the requests library to always fail
         with (
-            patch("flint.utils.http.requests.request") as mock_request,
-            patch("flint.utils.http.time.sleep") as mock_sleep,
+            patch("samara.utils.http.requests.request") as mock_request,
+            patch("samara.utils.http.time.sleep") as mock_sleep,
         ):
             mock_request.side_effect = requests.ConnectionError("Network error")
 
@@ -396,8 +395,8 @@ class TestHttpBaseRetry:
 
         # Mock the requests library to always fail
         with (
-            patch("flint.utils.http.requests.request") as mock_request,
-            patch("flint.utils.http.time.sleep"),
+            patch("samara.utils.http.requests.request") as mock_request,
+            patch("samara.utils.http.time.sleep"),
         ):
             mock_request.side_effect = requests.ConnectionError("Network error")
 
