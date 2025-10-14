@@ -3,6 +3,7 @@
 [run]
 branch = true
 parallel = true
+concurrency = multiprocessing
 omit =
     */tests/*
     /build/*

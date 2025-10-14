@@ -16,6 +16,7 @@ cd "$PWD" && pytest "$tests_path" \
     --rootdir="$PWD" \
     -c="$config_filepath_pytest" \
     -o "cache_dir=$PWD/.pytest_cache" \
+    -n 0 \
     --durations=0 \
     --durations-min=0.01 \
     --cov="$coverage_path" \
