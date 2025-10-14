@@ -5,6 +5,7 @@ from typing import Any
 from unittest.mock import MagicMock
 
 import pytest
+
 from samara.types import DataFrameRegistry, RegistryDecorator, RegistryInstance, Singleton, StreamingQueryRegistry
 
 
@@ -214,6 +215,17 @@ class TestRegistryInstance:
         items = list(iter(registry))
         assert mock_item in items
 
+    def test_clear__removes_all_items(self, registry: Any) -> None:
+        """Test clear removes all items from registry."""
+        registry["item1"] = MagicMock()
+        registry["item2"] = MagicMock()
+
+        registry.clear()
+
+        assert len(registry) == 0
+        assert "item1" not in registry
+        assert "item2" not in registry
+
 
 class TestDataFrameRegistry:
     """Tests for DataFrameRegistry class."""
@@ -238,6 +250,31 @@ class TestDataFrameRegistry:
         with pytest.raises(KeyError):
             _ = df_registry["missing_df"]
 
+    def test_clear__unpersists_cached_dataframes(self, df_registry: DataFrameRegistry) -> None:
+        """Test clear unpersists all cached DataFrames before clearing."""
+        mock_df1 = MagicMock()
+        mock_df1.storageLevel.useMemory = True
+        mock_df1.storageLevel.useDisk = False
+
+        mock_df2 = MagicMock()
+        mock_df2.storageLevel.useMemory = False
+        mock_df2.storageLevel.useDisk = True
+
+        mock_df3 = MagicMock()
+        mock_df3.storageLevel.useMemory = False
+        mock_df3.storageLevel.useDisk = False
+
+        df_registry["df1"] = mock_df1
+        df_registry["df2"] = mock_df2
+        df_registry["df3"] = mock_df3
+
+        df_registry.clear()
+
+        mock_df1.unpersist.assert_called_once()
+        mock_df2.unpersist.assert_called_once()
+        mock_df3.unpersist.assert_not_called()
+        assert len(df_registry) == 0
+
 
 class TestStreamingQueryRegistry:
     """Tests for StreamingQueryRegistry class."""
@@ -261,3 +298,20 @@ class TestStreamingQueryRegistry:
 
         with pytest.raises(KeyError):
             _ = sq_registry["missing_stream"]
+
+    def test_clear__stops_active_streaming_queries(self, sq_registry: StreamingQueryRegistry) -> None:
+        """Test clear stops all active streaming queries before clearing."""
+        mock_query1 = MagicMock()
+        mock_query1.isActive = True
+
+        mock_query2 = MagicMock()
+        mock_query2.isActive = False
+
+        sq_registry["stream1"] = mock_query1
+        sq_registry["stream2"] = mock_query2
+
+        sq_registry.clear()
+
+        mock_query1.stop.assert_called_once()
+        mock_query2.stop.assert_not_called()
+        assert len(sq_registry) == 0

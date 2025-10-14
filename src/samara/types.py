@@ -221,6 +221,13 @@ class RegistryInstance(Generic[K, V], metaclass=Singleton):
         """Iterate over the items."""
         return iter(self._items.values())
 
+    def clear(self) -> None:
+        """Clear all items from the registry.
+
+        Removes all tracked items and releases references to enable garbage collection.
+        """
+        self._items.clear()
+
 
 class DataFrameRegistry(RegistryInstance[str, DataFrame]):
     """A registry for DataFrame objects.
@@ -259,6 +266,18 @@ class DataFrameRegistry(RegistryInstance[str, DataFrame]):
             available = list(self._items.keys())
             raise KeyError(f"DataFrame '{name}' not found. Available DataFrames: {available}") from e
 
+    def clear(self) -> None:
+        """Clear all DataFrames from the registry and unpersist cached data.
+
+        Unpersists all cached/persisted DataFrames to free up memory before clearing
+        the registry. This ensures that Spark releases all memory associated with
+        the DataFrames.
+        """
+        for df in self._items.values():
+            if df.storageLevel.useMemory or df.storageLevel.useDisk:
+                df.unpersist()
+        super().clear()
+
 
 class StreamingQueryRegistry(RegistryInstance[str, StreamingQuery]):
     """A registry for StreamingQuery objects.
@@ -295,3 +314,14 @@ class StreamingQueryRegistry(RegistryInstance[str, StreamingQuery]):
         except KeyError as e:
             available = list(self._items.keys())
             raise KeyError(f"StreamingQuery '{name}' not found. Available queries: {available}") from e
+
+    def clear(self) -> None:
+        """Clear all streaming queries from the registry and stop active streams.
+
+        Stops all active streaming queries before clearing the registry. This ensures
+        that all streaming resources are properly released.
+        """
+        for query in self._items.values():
+            if query.isActive:
+                query.stop()
+        super().clear()

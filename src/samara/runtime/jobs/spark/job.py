@@ -11,18 +11,19 @@ of the appropriate Extract, Transform, and Load components based on the configur
 import logging
 import time
 
-from pydantic import Field
+from typing_extensions import override
+
 from samara.runtime.jobs.models.model_job import JobBase, JobEngine
 from samara.runtime.jobs.spark.extract import ExtractSparkUnion
 from samara.runtime.jobs.spark.load import LoadSparkUnion
 from samara.runtime.jobs.spark.transform import TransformSparkUnion
+from samara.types import DataFrameRegistry, StreamingQueryRegistry
 from samara.utils.logger import get_logger
-from typing_extensions import override
 
 logger: logging.Logger = get_logger(__name__)
 
 
-class JobSpark(JobBase):
+class JobSpark(JobBase[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion]):
     """A complete ETL job that orchestrates extract, transform, and load operations.
 
     The Job class is the main entry point for the ingestion framework. It coordinates
@@ -50,11 +51,6 @@ class JobSpark(JobBase):
     """
 
     engine_type: JobEngine = JobEngine.SPARK
-    extracts: list[ExtractSparkUnion] = Field(..., description="Collection of Extract components")
-    transforms: list[TransformSparkUnion] = Field(
-        ..., description="Collection of Transform components to process the data"
-    )
-    loads: list[LoadSparkUnion] = Field(..., description="Collection of Load components")
 
     @override
     def _execute(self) -> None:
@@ -136,3 +132,17 @@ class JobSpark(JobBase):
 
         phase_time = time.time() - start_time
         logger.info("Load phase completed successfully in %.2f seconds", phase_time)
+
+    @override
+    def _clear(self) -> None:
+        """Clear Spark-specific registries to free memory.
+
+        Clears all DataFrames and streaming queries from the registries after
+        job execution. This ensures memory is freed and prevents data leakage
+        between jobs.
+        """
+        logger.debug("Clearing DataFrameRegistry after job: %s", self.id_)
+        DataFrameRegistry().clear()
+
+        logger.debug("Clearing StreamingQueryRegistry after job: %s", self.id_)
+        StreamingQueryRegistry().clear()
