@@ -19,8 +19,7 @@ from typing import Any
 
 import pyjson5 as json
 import yaml
-
-from flint.utils.logger import get_logger
+from samara.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

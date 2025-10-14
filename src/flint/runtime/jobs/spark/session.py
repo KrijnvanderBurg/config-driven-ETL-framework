@@ -15,9 +15,8 @@ import logging
 from typing import Any
 
 from pyspark.sql import SparkSession
-
-from flint.types import Singleton
-from flint.utils.logger import get_logger
+from samara.types import Singleton
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
@@ -39,7 +38,7 @@ class SparkHandler(metaclass=Singleton):
 
     def __init__(
         self,
-        app_name: str = "flint",
+        app_name: str = "samara",
         options: dict[str, str] | None = None,
     ) -> None:
         """Initialize the SparkHandler with app name and configuration options.

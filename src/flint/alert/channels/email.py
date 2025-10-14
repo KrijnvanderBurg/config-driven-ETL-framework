@@ -4,7 +4,7 @@ This module implements the email alert channel that sends alerts
 through SMTP servers. It supports authentication, multiple recipients,
 and configurable failure handling.
 
-The EmailChannel follows the Flint framework patterns for configuration-driven
+The EmailChannel follows the Samara framework patterns for configuration-driven
 initialization and implements the ChannelModel interface.
 """
 
@@ -14,10 +14,9 @@ from email.mime.text import MIMEText
 from typing import Literal
 
 from pydantic import EmailStr, Field, SecretStr, StrictInt, StrictStr
+from samara.alert.channels.base import ChannelModel
+from samara.utils.logger import get_logger
 from typing_extensions import override
-
-from flint.alert.channels.base import ChannelModel
-from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

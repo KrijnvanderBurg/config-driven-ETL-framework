@@ -13,7 +13,7 @@ Example:
 
     ```python
     from pathlib import Path
-    from flint.runtime.etl.spark.job import Job
+    from samara.runtime.etl.spark.job import Job
 
     # Create a job from configuration
     job = Job.from_file(filepath=Path("config.json"))
@@ -35,8 +35,7 @@ __status__ = "Prototype"
 from abc import ABC
 
 from pydantic import BaseModel as PydanticBaseModel
-
-from flint.utils.logger import get_logger
+from samara.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

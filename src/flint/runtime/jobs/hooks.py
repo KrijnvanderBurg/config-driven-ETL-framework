@@ -1,9 +1,8 @@
 """Controller for managing hooks."""
 
 from pydantic import Field
-
-from flint import BaseModel
-from flint.actions import HooksActionsUnion
+from samara import BaseModel
+from samara.actions import HooksActionsUnion
 
 
 class Hooks(BaseModel):

@@ -13,9 +13,8 @@ from configuration files or dictionaries.
 from typing import Literal
 
 from pydantic import Field
-
-from flint import BaseModel
-from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
+from samara import BaseModel
+from samara.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
 
 
 class CastColumn(BaseModel):

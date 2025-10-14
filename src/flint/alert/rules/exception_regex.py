@@ -9,9 +9,8 @@ import re
 from typing import Literal
 
 from pydantic import Field
-
-from flint.alert.rules.base import AlertRule
-from flint.utils.logger import get_logger
+from samara.alert.rules.base import AlertRule
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

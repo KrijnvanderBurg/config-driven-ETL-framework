@@ -10,9 +10,8 @@ the name 'dropduplicates', making it available for use in configuration files.
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame
-
-from flint.runtime.jobs.models.transforms.model_dropduplicates import DropDuplicatesFunctionModel
-from flint.runtime.jobs.spark.function import Function
+from samara.runtime.jobs.models.transforms.model_dropduplicates import DropDuplicatesFunctionModel
+from samara.runtime.jobs.spark.function import Function
 
 
 class DropDuplicatesFunction(DropDuplicatesFunctionModel, Function):

@@ -1,4 +1,4 @@
-name: flint-CD
+name: samara-CD
 
 on:
   workflow_dispatch:

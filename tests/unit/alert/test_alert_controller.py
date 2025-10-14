@@ -8,7 +8,7 @@ are tested in their respective test files.
 from pathlib import Path
 from unittest.mock import patch
 
-from flint.alert.controller import AlertController
+from samara.alert.controller import AlertController
 
 
 class TestAlertControllerOrchestration:

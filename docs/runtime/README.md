@@ -4,7 +4,7 @@ The runtime system orchestrates ETL pipelines through configuration files. Defin
 
 ## Overview
 
-Flint's runtime executes data pipelines defined entirely through configuration. This declarative approach transforms data engineering from a programming task to a configuration exercise, making pipelines more maintainable and accessible.
+Samara's runtime executes data pipelines defined entirely through configuration. This declarative approach transforms data engineering from a programming task to a configuration exercise, making pipelines more maintainable and accessible.
 
 ## How It Works
 
@@ -14,17 +14,17 @@ Flint's runtime executes data pipelines defined entirely through configuration. 
 
 ## Running a Pipeline
 
-Execute a pipeline using the Flint CLI:
+Execute a pipeline using the Samara CLI:
 
 ```bash
-python -m flint run \
+python -m samara run \
     --runtime-filepath="examples/join_select/job.jsonc" \
     --alert-filepath="examples/join_select/alert.jsonc"
 ```
 
 ## Configuration Structure
 
-A Flint pipeline is defined by a JSON configuration file with this structure:
+A Samara pipeline is defined by a JSON configuration file with this structure:
 
 ```jsonc
 {
@@ -63,7 +63,7 @@ Each job defines a complete ETL workflow with its own sources, transformations, 
 
 ## Components
 
-A Flint pipeline consists of three core components:
+A Samara pipeline consists of three core components:
 
 ```
 Pipeline
@@ -149,7 +149,7 @@ Loads write data from upstream components to destinations.
 
 ## Engine Support
 
-Flint currently supports Apache Spark (`"engine_type": "spark"`) as its primary execution engine. The framework is designed for multi-engine support, with additional engines planned for future releases.
+Samara currently supports Apache Spark (`"engine_type": "spark"`) as its primary execution engine. The framework is designed for multi-engine support, with additional engines planned for future releases.
 
 See Spark configuration for engine-specific options.
 

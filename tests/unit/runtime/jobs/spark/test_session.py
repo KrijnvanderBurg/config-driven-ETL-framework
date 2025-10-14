@@ -2,8 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from pyspark.sql import SparkSession
-
-from flint.runtime.jobs.spark.session import SparkHandler
+from samara.runtime.jobs.spark.session import SparkHandler
 
 
 @pytest.fixture(name="spark_handler_obj")
@@ -39,7 +38,7 @@ class TestSparkHandler:
         SparkHandler()
 
         mock_builder.assert_called_once()
-        mock_builder.return_value.appName.assert_called_once_with(name="flint")
+        mock_builder.return_value.appName.assert_called_once_with(name="samara")
         mock_builder.return_value.appName().config.assert_not_called()
 
     @patch.object(SparkSession, "Builder")

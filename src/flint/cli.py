@@ -1,4 +1,4 @@
-"""Flint CLI command definitions using Click library.
+"""Samara CLI command definitions using Click library.
 
 Contains Click command implementations for validate, run, and export-schema operations.
 """
@@ -9,9 +9,8 @@ import os
 from pathlib import Path
 
 import click
-
-from flint.alert import AlertController
-from flint.exceptions import (
+from samara.alert import AlertController
+from samara.exceptions import (
     ExitCode,
     FlintAlertConfigurationError,
     FlintAlertTestError,
@@ -20,14 +19,14 @@ from flint.exceptions import (
     FlintRuntimeConfigurationError,
     FlintValidationError,
 )
-from flint.runtime.controller import RuntimeController
-from flint.utils.logger import get_logger, set_logger
+from samara.runtime.controller import RuntimeController
+from samara.utils.logger import get_logger, set_logger
 
 logger: logging.Logger = get_logger(__name__)
 
 
 @click.group()
-@click.version_option(package_name="flint")
+@click.version_option(package_name="samara")
 @click.option(
     "--log-level",
     default=None,
@@ -35,7 +34,7 @@ logger: logging.Logger = get_logger(__name__)
     help="Set the logging level (default: INFO).",
 )
 def cli(log_level: str | None = None) -> None:
-    """Flint: Configuration-driven PySpark ETL framework."""
+    """Samara: Configuration-driven PySpark ETL framework."""
     set_logger(level=log_level)
 
 

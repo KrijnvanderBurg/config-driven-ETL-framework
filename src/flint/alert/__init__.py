@@ -1,9 +1,9 @@
-"""Alerting module for Flint."""
+"""Alerting module for Samara."""
 
 import logging
 
-from flint.alert.controller import AlertController
-from flint.utils.logger import get_logger
+from samara.alert.controller import AlertController
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

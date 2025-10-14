@@ -4,7 +4,7 @@ This module implements the HTTP alert channel that sends alerts
 through HTTP endpoints like webhooks. It supports custom headers, different
 HTTP methods, and configurable timeouts and failure handling.
 
-The HttpAlertChannel follows the Flint framework patterns for configuration-driven
+The HttpAlertChannel follows the Samara framework patterns for configuration-driven
 initialization and implements the ChannelModel interface.
 """
 
@@ -12,11 +12,10 @@ import logging
 from typing import Literal
 
 from pydantic import Field
+from samara.alert.channels.base import ChannelModel
+from samara.utils.http import HttpBase
+from samara.utils.logger import get_logger
 from typing_extensions import override
-
-from flint.alert.channels.base import ChannelModel
-from flint.utils.http import HttpBase
-from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

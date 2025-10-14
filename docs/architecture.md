@@ -1,7 +1,7 @@
 <!-- filepath: architecture.md -->
 # Architecture
 
-This document explains Flint's architecture and execution flow, helping you understand how configuration files translate into data processing pipelines.
+This document explains Samara's architecture and execution flow, helping you understand how configuration files translate into data processing pipelines.
 
 <!-- filepath: architecture.md -->
 <!-- filepath: architecture.md -->
@@ -34,15 +34,15 @@ The software adheres to these core design principles:
   - Event hooks for custom actions during pipeline execution
 
 ## Pipeline Execution Flow
-The execution of a Flint pipeline follows this sequence:
+The execution of a Samara pipeline follows this sequence:
 
 1. **Parse Configuration** — Convert JSON/YAML configurations into typed models with validation
 2. **Initialize Components** — Set up extract, transform, and load objects based on configuration
 3. **Execute Pipeline** — Process data through the configured workflow in sequence
 
-![Sequence diagram — Flint pipeline execution](./sequence_diagram.png)
+![Sequence diagram — Samara pipeline execution](./sequence_diagram.png)
 
-*Figure: Sequence diagram showing the Flint pipeline execution flow (Extract → Transform → Load).*
+*Figure: Sequence diagram showing the Samara pipeline execution flow (Extract → Transform → Load).*
 
 ## Class Diagram
 ![Class Diagram](./class_diagram.drawio.png)
@@ -57,12 +57,12 @@ The core components work together:
 
 ## Extending with Custom Transforms
 
-Flint's power comes from its extensibility. Create custom transformations to encapsulate your business logic. Here's a real example from Flint's codebase - the select transform:
+Samara's power comes from its extensibility. Create custom transformations to encapsulate your business logic. Here's a real example from Samara's codebase - the select transform:
 
 ### Step 1: Define the configuration model
 
 ```python
-# src/flint/models/transforms/model_select.py
+# src/samara/models/transforms/model_select.py
 
 @dataclass
 class SelectFunctionModel(FunctionModel):
@@ -88,7 +88,7 @@ class SelectFunctionModel(FunctionModel):
 ### Step 2: Create the transform function
 
 ```python
-# src/flint/core/transforms/select.py
+# src/samara/core/transforms/select.py
 
 @TransformFunctionRegistry.register("select")
 class SelectFunction(Function[SelectFunctionModel]):

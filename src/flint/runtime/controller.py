@@ -1,4 +1,4 @@
-"""Runtime configuration module for the Flint ETL framework.
+"""Runtime configuration module for the Samara ETL framework.
 
 This module provides runtime configuration management using Pydantic models
 for type safety and validation. It includes the main Runtime class that holds
@@ -10,12 +10,11 @@ from typing import Any, Final, Self
 
 from pydantic import Field, ValidationError
 from pydantic.json_schema import GenerateJsonSchema, JsonSchemaValue
-
-from flint import BaseModel
-from flint.exceptions import FlintIOError, FlintRuntimeConfigurationError
-from flint.runtime.jobs import JobUnion
-from flint.utils.file import FileHandlerContext
-from flint.utils.logger import get_logger
+from samara import BaseModel
+from samara.exceptions import FlintIOError, FlintRuntimeConfigurationError
+from samara.runtime.jobs import JobUnion
+from samara.utils.file import FileHandlerContext
+from samara.utils.logger import get_logger
 
 logger = get_logger(__name__)
 
@@ -44,7 +43,7 @@ class PreserveFieldOrderJsonSchema(GenerateJsonSchema):
 
 
 class RuntimeController(BaseModel):
-    """Main runtime configuration class for the Flint ETL framework.
+    """Main runtime configuration class for the Samara ETL framework.
 
     This class serves as the central configuration holder for the entire
     framework, providing type-safe access to global settings and components.

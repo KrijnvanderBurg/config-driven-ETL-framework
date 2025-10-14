@@ -12,10 +12,10 @@
 # from abc import ABC, abstractmethod
 # from typing import TYPE_CHECKING, Generic, TypeVar
 
-# from flint.utils.logger import get_logger
+# from samara.utils.logger import get_logger
 
 # if TYPE_CHECKING:
-#     from flint.runtime.jobs.spark.job import Job
+#     from samara.runtime.jobs.spark.job import Job
 
 # logger: logging.Logger = get_logger(__name__)
 

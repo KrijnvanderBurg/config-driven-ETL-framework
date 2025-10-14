@@ -70,6 +70,6 @@ Appends alerts to a local file for logging and auditing.
     "enabled": true,
     "channel_type": "file",
     // file specific fields
-    "file_path": "/var/log/flint/alerts.log"  // Can be relative or absolute
+    "file_path": "/var/log/samara/alerts.log"  // Can be relative or absolute
 }
 ```

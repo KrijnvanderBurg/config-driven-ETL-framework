@@ -18,9 +18,8 @@ from enum import Enum
 from typing import Literal
 
 from pydantic import Field
-
-from flint import BaseModel
-from flint.utils.logger import get_logger
+from samara import BaseModel
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

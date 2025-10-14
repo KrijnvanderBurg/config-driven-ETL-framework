@@ -5,9 +5,9 @@ from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import ClassVar
 
-from flint.runtime.jobs.models.model_transform import FunctionModel
-from flint.types import DataFrameRegistry
-from flint.utils.logger import get_logger
+from samara.runtime.jobs.models.model_transform import FunctionModel
+from samara.types import DataFrameRegistry
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

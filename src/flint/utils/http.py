@@ -1,4 +1,4 @@
-"""HTTP utility classes for the Flint ETL framework.
+"""HTTP utility classes for the Samara ETL framework.
 
 This module provides shared HTTP functionality that can be used by both
 alert channels and actions. It includes retry logic, timeout handling,
@@ -12,8 +12,7 @@ from typing import Any
 
 import requests
 from pydantic import BaseModel, Field, HttpUrl, PositiveInt
-
-from flint.utils.logger import get_logger
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

@@ -44,9 +44,9 @@ class ExitCode(enum.IntEnum):
 
 
 class FlintError(Exception):
-    """Base exception for all Flint-specific exceptions.
+    """Base exception for all Samara-specific exceptions.
 
-    Provides common functionality for all Flint exceptions, including
+    Provides common functionality for all Samara exceptions, including
     association with an exit code. Use with Python's built-in exception
     chaining by raising with the `from` keyword.
 

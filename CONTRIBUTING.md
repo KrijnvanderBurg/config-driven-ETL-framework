@@ -1,5 +1,5 @@
-# Contributing to Flint
-Thank you for your interest in contributing to Flint! This document outlines the process for contributing to our configuration-driven data processing framework.
+# Contributing to Samara
+Thank you for your interest in contributing to Samara! This document outlines the process for contributing to our configuration-driven data processing framework.
 
 ## Getting Started
 Please refer to our [Getting Started Guide](./docs/getting_started.md) for installation instructions and basic concepts.

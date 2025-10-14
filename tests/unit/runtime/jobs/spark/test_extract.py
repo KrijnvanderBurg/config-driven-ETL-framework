@@ -13,9 +13,8 @@ from unittest.mock import Mock, patch
 import pytest
 from pydantic import ValidationError
 from pyspark.sql.types import StringType, StructField, StructType
-
-from flint.runtime.jobs.models.model_extract import ExtractMethod
-from flint.runtime.jobs.spark.extract import ExtractFileSpark
+from samara.runtime.jobs.models.model_extract import ExtractMethod
+from samara.runtime.jobs.spark.extract import ExtractFileSpark
 
 # =========================================================================== #
 # ============================== CONFIG (dict) ============================== #
@@ -236,7 +235,7 @@ class TestExtractFileSparkExtract:
         mock_session = Mock()
         mock_session.read = mock_read
 
-        with patch("flint.runtime.jobs.spark.extract.ExtractSpark.spark") as mock_spark_handler:
+        with patch("samara.runtime.jobs.spark.extract.ExtractSpark.spark") as mock_spark_handler:
             mock_spark_handler.session = mock_session
             mock_spark_handler.add_configs = Mock()
 
@@ -256,7 +255,7 @@ class TestExtractFileSparkExtract:
         mock_session = Mock()
         mock_session.readStream = mock_read_stream
 
-        with patch("flint.runtime.jobs.spark.extract.ExtractSpark.spark") as mock_spark_handler:
+        with patch("samara.runtime.jobs.spark.extract.ExtractSpark.spark") as mock_spark_handler:
             mock_spark_handler.session = mock_session
             mock_spark_handler.add_configs = Mock()
 

@@ -16,12 +16,11 @@ import logging
 from typing import Any, ClassVar
 
 from pydantic import Field
-
-from flint.runtime.jobs.models.model_transform import TransformModel
-from flint.runtime.jobs.spark.session import SparkHandler
-from flint.runtime.jobs.spark.transforms import transform_function_spark_union
-from flint.types import DataFrameRegistry
-from flint.utils.logger import get_logger
+from samara.runtime.jobs.models.model_transform import TransformModel
+from samara.runtime.jobs.spark.session import SparkHandler
+from samara.runtime.jobs.spark.transforms import transform_function_spark_union
+from samara.types import DataFrameRegistry
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

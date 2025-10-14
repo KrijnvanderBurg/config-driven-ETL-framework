@@ -3,9 +3,8 @@
 from abc import abstractmethod
 
 from pydantic import Field
-
-from flint import BaseModel
-from flint.utils.logger import get_logger
+from samara import BaseModel
+from samara.utils.logger import get_logger
 
 logger = get_logger(__name__)
 

@@ -11,10 +11,9 @@ import logging
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame
-
-from flint.runtime.jobs.models.transforms.model_join import JoinFunctionModel
-from flint.runtime.jobs.spark.function import Function
-from flint.utils.logger import get_logger
+from samara.runtime.jobs.models.transforms.model_join import JoinFunctionModel
+from samara.runtime.jobs.spark.function import Function
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

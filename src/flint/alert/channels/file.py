@@ -4,7 +4,7 @@ This module implements the file alert channel that writes alerts
 to log files or other file destinations. It supports configurable file
 paths and failure handling for file system operations.
 
-The FileAlertChannel follows the Flint framework patterns for configuration-driven
+The FileAlertChannel follows the Samara framework patterns for configuration-driven
 initialization and implements the ChannelModel interface.
 """
 
@@ -13,10 +13,9 @@ from pathlib import Path
 from typing import Literal
 
 from pydantic import Field
+from samara.alert.channels.base import ChannelModel
+from samara.utils.logger import get_logger
 from typing_extensions import override
-
-from flint.alert.channels.base import ChannelModel
-from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

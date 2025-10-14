@@ -11,10 +11,9 @@ transform functions.
 import logging
 
 from pydantic import Field
-
-from flint import BaseModel
-from flint.alert.template import AlertTemplate
-from flint.utils.logger import get_logger
+from samara import BaseModel
+from samara.alert.template import AlertTemplate
+from samara.utils.logger import get_logger
 
 from .rules import alert_rule_union
 

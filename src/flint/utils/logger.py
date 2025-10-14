@@ -1,4 +1,4 @@
-"""Structured logging utilities for the Flint framework."""
+"""Structured logging utilities for the Samara framework."""
 
 import logging
 import os

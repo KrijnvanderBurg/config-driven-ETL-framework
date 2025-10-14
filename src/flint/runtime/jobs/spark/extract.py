@@ -17,12 +17,11 @@ from typing import Any, ClassVar, Literal, Self
 from pydantic import Field, model_validator
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
-
-from flint.runtime.jobs.models.model_extract import ExtractFileModel, ExtractMethod, ExtractModel
-from flint.runtime.jobs.spark.schema import SchemaFilepathHandler, SchemaStringHandler
-from flint.runtime.jobs.spark.session import SparkHandler
-from flint.types import DataFrameRegistry
-from flint.utils.logger import get_logger
+from samara.runtime.jobs.models.model_extract import ExtractFileModel, ExtractMethod, ExtractModel
+from samara.runtime.jobs.spark.schema import SchemaFilepathHandler, SchemaStringHandler
+from samara.runtime.jobs.spark.session import SparkHandler
+from samara.types import DataFrameRegistry
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

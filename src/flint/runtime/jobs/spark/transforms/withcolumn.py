@@ -11,9 +11,8 @@ from collections.abc import Callable
 
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
-
-from flint.runtime.jobs.models.transforms.model_withcolumn import WithColumnFunctionModel
-from flint.runtime.jobs.spark.function import Function
+from samara.runtime.jobs.models.transforms.model_withcolumn import WithColumnFunctionModel
+from samara.runtime.jobs.spark.function import Function
 
 
 class WithColumnFunction(WithColumnFunctionModel, Function):

@@ -2,7 +2,7 @@
 
 ## Overview
 
-This framework provides isolated, production-like testing for Flint data processing jobs. Tests execute via CLI commands in temporary directories, ensuring no repository pollution.
+This framework provides isolated, production-like testing for Samara data processing jobs. Tests execute via CLI commands in temporary directories, ensuring no repository pollution.
 
 ## Architecture
 

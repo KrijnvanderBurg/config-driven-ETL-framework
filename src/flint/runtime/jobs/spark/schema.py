@@ -19,9 +19,8 @@ from pathlib import Path
 from typing import Any
 
 from pyspark.sql.types import StructType
-
-from flint.utils.file import FileHandler, FileHandlerContext
-from flint.utils.logger import get_logger
+from samara.utils.file import FileHandler, FileHandlerContext
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

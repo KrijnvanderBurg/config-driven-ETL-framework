@@ -7,8 +7,7 @@ from pathlib import Path
 from pyspark.sql.session import SparkSession
 from pyspark.sql.types import StructType
 from pyspark.testing import assertDataFrameEqual
-
-from flint.runtime.jobs.spark.session import SparkHandler
+from samara.runtime.jobs.spark.session import SparkHandler
 
 logger = logging.getLogger(__name__)
 

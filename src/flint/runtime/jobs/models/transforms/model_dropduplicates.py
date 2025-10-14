@@ -13,8 +13,7 @@ from configuration files or dictionaries.
 from typing import Literal
 
 from pydantic import Field
-
-from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
+from samara.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
 
 
 class DropDuplicatesArgs(ArgsModel):

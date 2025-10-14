@@ -1,4 +1,4 @@
-"""Alert Channels for the Flint ETL framework.
+"""Alert Channels for the Samara ETL framework.
 
 This package provides different alert channels for the alert system,
 including email, HTTP webhooks, and file-based alerts. Each channel
@@ -14,9 +14,8 @@ import logging
 from abc import ABC, abstractmethod
 
 from pydantic import Field
-
-from flint import BaseModel
-from flint.utils.logger import get_logger
+from samara import BaseModel
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

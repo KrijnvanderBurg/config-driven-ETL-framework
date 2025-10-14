@@ -4,7 +4,7 @@ This module implements the HTTP action that allows ETL jobs to make
 HTTP requests as part of their execution flow. It supports custom headers,
 different HTTP methods, and configurable timeouts and failure handling.
 
-The HttpAction follows the Flint framework patterns for configuration-driven
+The HttpAction follows the Samara framework patterns for configuration-driven
 initialization and implements the ActionBase interface.
 """
 
@@ -12,11 +12,10 @@ import logging
 from typing import Any, Literal
 
 from pydantic import Field
+from samara.actions.base import ActionBase
+from samara.utils.http import HttpBase
+from samara.utils.logger import get_logger
 from typing_extensions import override
-
-from flint.actions.base import ActionBase
-from flint.utils.http import HttpBase
-from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

@@ -11,9 +11,8 @@ from collections.abc import Callable
 
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
-
-from flint.runtime.jobs.models.transforms.model_cast import CastFunctionModel
-from flint.runtime.jobs.spark.function import Function
+from samara.runtime.jobs.models.transforms.model_cast import CastFunctionModel
+from samara.runtime.jobs.spark.function import Function
 
 
 class CastFunction(CastFunctionModel, Function):

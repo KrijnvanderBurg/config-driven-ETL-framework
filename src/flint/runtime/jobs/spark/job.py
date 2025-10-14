@@ -12,13 +12,12 @@ import logging
 import time
 
 from pydantic import Field
+from samara.runtime.jobs.models.model_job import JobBase, JobEngine
+from samara.runtime.jobs.spark.extract import ExtractSparkUnion
+from samara.runtime.jobs.spark.load import LoadSparkUnion
+from samara.runtime.jobs.spark.transform import TransformSparkUnion
+from samara.utils.logger import get_logger
 from typing_extensions import override
-
-from flint.runtime.jobs.models.model_job import JobBase, JobEngine
-from flint.runtime.jobs.spark.extract import ExtractSparkUnion
-from flint.runtime.jobs.spark.load import LoadSparkUnion
-from flint.runtime.jobs.spark.transform import TransformSparkUnion
-from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
@@ -40,7 +39,7 @@ class JobSpark(JobBase):
     Example:
         ```python
         from pathlib import Path
-        from flint.runtime.etl.spark.job import Job
+        from samara.runtime.etl.spark.job import Job
 
         # Create from a configuration file
         job = Job.from_file(Path("config.json"))

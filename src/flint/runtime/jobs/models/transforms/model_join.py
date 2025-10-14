@@ -14,9 +14,8 @@ import logging
 from typing import Literal
 
 from pydantic import Field
-
-from flint.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
-from flint.utils.logger import get_logger
+from samara.runtime.jobs.models.model_transform import ArgsModel, FunctionModel
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

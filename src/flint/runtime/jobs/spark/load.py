@@ -20,11 +20,10 @@ from typing import Any, ClassVar, Literal
 
 from pydantic import Field
 from pyspark.sql.streaming.query import StreamingQuery
-
-from flint.runtime.jobs.models.model_load import LoadMethod, LoadModel, LoadModelFile
-from flint.runtime.jobs.spark.session import SparkHandler
-from flint.types import DataFrameRegistry, StreamingQueryRegistry
-from flint.utils.logger import get_logger
+from samara.runtime.jobs.models.model_load import LoadMethod, LoadModel, LoadModelFile
+from samara.runtime.jobs.spark.session import SparkHandler
+from samara.types import DataFrameRegistry, StreamingQueryRegistry
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

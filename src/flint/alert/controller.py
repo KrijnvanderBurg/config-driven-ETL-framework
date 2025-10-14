@@ -5,7 +5,7 @@ processing and trigger based on configuration. It serves as the root object
 for the alert system, managing templates, channels, and trigger rules.
 
 The AlertManager uses the from_dict classmethod pattern consistent with other
-components in the Flint framework to create instances from configuration data.
+components in the Samara framework to create instances from configuration data.
 """
 
 import logging
@@ -13,13 +13,12 @@ from pathlib import Path
 from typing import Any, Final, Self
 
 from pydantic import Field, ValidationError
-
-from flint import BaseModel
-from flint.alert.channels import channel_union
-from flint.alert.trigger import AlertTrigger
-from flint.exceptions import FlintAlertConfigurationError, FlintIOError
-from flint.utils.file import FileHandlerContext
-from flint.utils.logger import get_logger
+from samara import BaseModel
+from samara.alert.channels import channel_union
+from samara.alert.trigger import AlertTrigger
+from samara.exceptions import FlintAlertConfigurationError, FlintIOError
+from samara.utils.file import FileHandlerContext
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 

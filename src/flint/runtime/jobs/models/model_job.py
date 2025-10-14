@@ -1,4 +1,4 @@
-"""Job models for the Flint ETL framework.
+"""Job models for the Samara ETL framework.
 
 This module provides the base job models and discriminated union for different
 engine types. It includes:
@@ -12,11 +12,10 @@ from abc import ABC, abstractmethod
 from enum import Enum
 
 from pydantic import Field
-
-from flint import BaseModel
-from flint.exceptions import FlintJobError
-from flint.runtime.jobs.hooks import Hooks
-from flint.utils.logger import get_logger
+from samara import BaseModel
+from samara.exceptions import FlintJobError
+from samara.runtime.jobs.hooks import Hooks
+from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
