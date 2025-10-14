@@ -1,6 +1,6 @@
 #!/bin/bash
 target_path="${1:-$PWD/src}" && echo "Scanning folder: $target_path"
-config_filepath="${2:-$PWD/config/semgrep.yaml}" && echo "Config file: $config_filepath"
+config_filepath="${2:-$PWD/.github/config/semgrep.yaml}" && echo "Config file: $config_filepath"
 sarif_output="${3:-$PWD/semgrep.sarif}" && echo "SARIF output: $sarif_output"
 
 # Install semgrep if not already installed

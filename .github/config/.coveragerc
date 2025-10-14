@@ -3,12 +3,19 @@
 [run]
 branch = true
 parallel = true
+concurrency = multiprocessing
 omit =
     */tests/*
     /build/*
     */__init__.py
     .devcontainer/*
     .azuredevops/*
+    .github/*
+
+[paths]
+source =
+    src/
+    */site-packages/
 
 [report]
 include_namespace_packages = True

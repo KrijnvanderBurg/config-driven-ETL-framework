@@ -2,7 +2,7 @@
 source-roots=src/
 
 # Files or directories to be skipped. They should be base names, not paths.
-ignore=build,.venv,docs,tests,.devcontainer,.azuredevops
+ignore=build,.venv,docs,tests,.devcontainer,.azuredevops,.github
 
 # Add files or directories matching the regex patterns to the ignore-list. The
 # regex matches against paths and can be in Posix or Windows format.

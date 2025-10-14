@@ -2,6 +2,7 @@
 max-line-length = 120
 extend-ignore = C901
 exclude = 
+    .github,
     .azuredevops,
     .devcontainer,
     .github,
