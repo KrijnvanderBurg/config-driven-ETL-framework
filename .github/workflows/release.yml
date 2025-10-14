@@ -1,13 +1,18 @@
 name: Release Python App
 
 on:
-  push:
-    branches:
-      - main
-  pull_request:
-    branches:
-      - main
   workflow_dispatch:
+    inputs:
+      make_latest:
+        description: 'Mark as latest release'
+        required: false
+        type: boolean
+        default: true
+      prerelease:
+        description: 'Mark as pre-release'
+        required: false
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -41,5 +46,6 @@ jobs:
           name: Release v${{ needs.build-and-test.outputs.version }}
           files: dist/*
           draft: false
-          prerelease: false
+          prerelease: ${{ inputs.prerelease }}
           generate_release_notes: true
+          make_latest: ${{ inputs.make_latest }}
