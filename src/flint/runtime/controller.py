@@ -39,6 +39,7 @@ class PreserveFieldOrderJsonSchema(GenerateJsonSchema):
         Returns:
             The unmodified value, preserving original field order.
         """
+        _ = parent_key
         return value
 
 

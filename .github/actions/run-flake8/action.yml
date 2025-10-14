@@ -1,0 +1,19 @@
+name: Flake8
+description: Run Flake8 linter on Python code
+inputs:
+  target-path:
+    description: Path to the directory to lint
+    required: false
+  config-file:
+    description: Path to configuration file (.flake8 - auto-discovered)
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Run Flake8
+      shell: bash
+      run: |
+        sh ${{ github.workspace }}/.github/scripts/run-flake8.sh \
+          "${{ inputs.target-path }}" \
+          "${{ inputs.config-file }}"

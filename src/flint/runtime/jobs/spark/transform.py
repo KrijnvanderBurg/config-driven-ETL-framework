@@ -19,7 +19,7 @@ from pydantic import Field
 
 from flint.runtime.jobs.models.model_transform import TransformModel
 from flint.runtime.jobs.spark.session import SparkHandler
-from flint.runtime.jobs.spark.transforms import TransformFunctionSparkUnion
+from flint.runtime.jobs.spark.transforms import transform_function_spark_union
 from flint.types import DataFrameRegistry
 from flint.utils.logger import get_logger
 
@@ -34,7 +34,7 @@ class TransformSpark(TransformModel):
     """
 
     spark: ClassVar[SparkHandler] = SparkHandler()
-    functions: list[TransformFunctionSparkUnion]
+    functions: list[transform_function_spark_union]
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     options: dict[str, Any] = Field(..., description="Transformation options as key-value pairs")
 

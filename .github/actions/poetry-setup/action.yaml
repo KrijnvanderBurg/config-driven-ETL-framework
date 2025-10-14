@@ -1,0 +1,9 @@
+name: Poetry Setup
+description: Install and configure Poetry without virtualenv
+
+runs:
+  using: composite
+  steps:
+    - name: Install Poetry
+      shell: bash
+      run: sh ${{ github.workspace }}/.github/scripts/poetry-setup.sh

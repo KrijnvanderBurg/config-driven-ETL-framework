@@ -30,6 +30,7 @@ class ExitCode(enum.IntEnum):
     """
 
     SUCCESS = 0
+    USAGE_ERROR = 2
     INVALID_ARGUMENTS = 10
     IO_ERROR = 20
     CONFIGURATION_ERROR = 30

@@ -1,0 +1,116 @@
+version: '3.4'
+
+# Worker template that will be reused
+x-spark-worker-template: &spark-worker-template
+  image: apache/spark:${SPARK_VERSION}
+  command: "/opt/spark/bin/spark-class org.apache.spark.deploy.worker.Worker spark://spark-master:${SPARK_MASTER_PORT}"
+  environment:
+    - SPARK_PUBLIC_DNS=localhost  # For UI URLs to be accessible from host
+    - SPARK_LOCAL_IP=spark-worker-1  # Will be overridden by specific workers
+  volumes:
+    - spark-logs:/opt/spark/logs
+    - spark-events:/opt/spark/events
+    - ./spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
+    - ../../:/workspace
+  networks:
+    - spark-network
+  depends_on:
+    - spark-master
+  restart: unless-stopped
+
+services:
+  devcontainer:
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+      args:
+        - SPARK_VERSION=${SPARK_VERSION}
+        - HADOOP_VERSION=3
+        - PYTHON_VERSION=${PYTHON_VERSION}
+    volumes:
+      - ../../:/workspace
+    networks:
+      - spark-network
+    ports:
+      - "4040:4040"  # Expose Spark application UI
+    environment:
+      - SPARK_LOCAL_IP=0.0.0.0
+      - SPARK_DRIVER_HOST=devcontainer
+      - SPARK_PUBLIC_DNS=localhost
+      - SPARK_MASTER_URL=spark://spark-master:${SPARK_MASTER_PORT}
+
+  spark-master:
+    image: apache/spark:${SPARK_VERSION}
+    command: "/opt/spark/bin/spark-class org.apache.spark.deploy.master.Master"
+    hostname: spark-master
+    environment:
+      - SPARK_MASTER_HOST=spark-master
+      - SPARK_MASTER_PORT=${SPARK_MASTER_PORT}
+      - SPARK_MASTER_WEBUI_PORT=${SPARK_MASTER_WEBUI_PORT}
+      - SPARK_PUBLIC_DNS=localhost  # For UI URLs to be accessible from host
+      - SPARK_LOCAL_IP=spark-master  # Keep internal hostname for Docker network communication
+    ports:
+      - "${SPARK_MASTER_WEBUI_PORT}:${SPARK_MASTER_WEBUI_PORT}"   # Web UI
+      - "${SPARK_MASTER_PORT}:${SPARK_MASTER_PORT}"   # Spark master port
+    volumes:
+      - spark-logs:/opt/spark/logs
+      - spark-events:/opt/spark/events
+      - ./spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
+      - ../../:/workspace
+    networks:
+      - spark-network
+    depends_on:
+      - devcontainer
+    restart: unless-stopped
+
+  # Worker 1 inherits from template
+  spark-worker-1:
+    <<: *spark-worker-template
+    hostname: spark-worker-1
+    environment:
+      - SPARK_WORKER_CORES=${SPARK_WORKER1_CORES}
+      - SPARK_WORKER_MEMORY=${SPARK_WORKER1_MEMORY}
+      - SPARK_WORKER_WEBUI_PORT=${SPARK_WORKER1_WEBUI_PORT}
+      - SPARK_PUBLIC_DNS=localhost  # For UI URLs to be accessible from host
+      - SPARK_LOCAL_IP=spark-worker-1  # Keep internal hostname for Docker network communication
+    ports:
+      - "${SPARK_WORKER1_WEBUI_PORT}:${SPARK_WORKER1_WEBUI_PORT}"   # Worker 1 UI
+
+  # Worker 2 inherits from template
+  spark-worker-2:
+    <<: *spark-worker-template
+    hostname: spark-worker-2
+    environment:
+      - SPARK_WORKER_CORES=${SPARK_WORKER2_CORES}
+      - SPARK_WORKER_MEMORY=${SPARK_WORKER2_MEMORY}
+      - SPARK_WORKER_WEBUI_PORT=${SPARK_WORKER2_WEBUI_PORT}
+      - SPARK_PUBLIC_DNS=localhost  # For UI URLs to be accessible from host
+      - SPARK_LOCAL_IP=spark-worker-2  # Keep internal hostname for Docker network communication
+    ports:
+      - "${SPARK_WORKER2_WEBUI_PORT}:${SPARK_WORKER2_WEBUI_PORT}"   # Worker 2 UI
+
+  # History server has no dependencies - keeps running independently
+  spark-history-server:
+    image: apache/spark:${SPARK_VERSION}
+    command: "/opt/spark/bin/spark-class org.apache.spark.deploy.history.HistoryServer"
+    hostname: spark-history
+    environment:
+      - SPARK_PUBLIC_DNS=localhost
+      - SPARK_LOCAL_IP=0.0.0.0
+    ports:
+      - "${SPARK_HISTORY_WEBUI_PORT}:${SPARK_HISTORY_WEBUI_PORT}"   # History UI
+    volumes:
+      - spark-logs:/opt/spark/logs
+      - spark-events:/opt/spark/events
+      - ./spark-defaults.conf:/opt/spark/conf/spark-defaults.conf
+    networks:
+      - spark-network
+    restart: unless-stopped
+
+networks:
+  spark-network:
+    driver: bridge
+
+volumes:
+  spark-logs:
+  spark-events:

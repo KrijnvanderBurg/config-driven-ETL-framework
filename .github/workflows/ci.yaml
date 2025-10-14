@@ -1,0 +1,90 @@
+name: flint-CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  formatters-and-linters:
+    name: Formatters & Linters
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Install Python
+        uses: ./.github/actions/setup-python
+        with:
+          python-version: 3.13
+
+      - name: Setup Poetry
+        uses: ./.github/actions/poetry-setup
+
+      - name: Install Dependencies
+        uses: ./.github/actions/poetry-install
+
+      # Formatters
+      - name: Run Ruff Formatter
+        uses: ./.github/actions/run-ruff-formatter
+
+      # Linters
+      - name: Run Ruff Linter
+        uses: ./.github/actions/run-ruff-linter
+
+      - name: Run Flake8
+        uses: ./.github/actions/run-flake8
+
+      - name: Run Pylint
+        uses: ./.github/actions/run-pylint
+
+      # Type Checkers
+      - name: Run Mypy
+        uses: ./.github/actions/run-mypy
+
+      - name: Run Pyright
+        uses: ./.github/actions/run-pyright
+
+      # Dead Code Detector
+      - name: Run Vulture
+        uses: ./.github/actions/run-vulture
+
+  security:
+    name: Security Scans
+    needs: formatters-and-linters
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write  # Required for uploading SARIF to Code Scanning
+      actions: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Full history for secret scanning
+
+      - name: Install Python
+        uses: ./.github/actions/setup-python
+        with:
+          python-version: 3.13
+
+      - name: Setup Poetry
+        uses: ./.github/actions/poetry-setup
+
+      - name: Install Dependencies
+        uses: ./.github/actions/poetry-install
+
+      - name: Run Bandit
+        uses: ./.github/actions/run-bandit
+
+      - name: Run Semgrep
+        uses: ./.github/actions/run-semgrep
+
+      - name: Run Trufflehog
+        uses: ./.github/actions/run-trufflehog
+
+  build-and-test:
+    uses: ./.github/workflows/build-and-test.yml

@@ -20,7 +20,7 @@ __all__ = [
 ]
 
 
-AlertRuleUnion = Annotated[
+alert_rule_union = Annotated[
     EnvVarsMatchesRule | ExceptionRegexRule,
     Discriminator("rule_type"),
 ]

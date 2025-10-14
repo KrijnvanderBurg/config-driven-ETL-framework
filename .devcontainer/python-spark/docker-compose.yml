@@ -1,0 +1,17 @@
+services:
+    devcontainer:
+        platform: linux/amd64
+        build:
+            context: .
+            dockerfile: Dockerfile
+            args:
+                VARIANT: ubuntu-24.04
+            target: base
+        volumes:
+            - ../../:/workspace:cached
+            - devcontainer-bashhistory:/commandhistory
+        command: sleep infinity
+        user: vscode # required only when setting containerUser in devcontainer.json, must be same user value.
+volumes:
+    profile:
+    devcontainer-bashhistory:

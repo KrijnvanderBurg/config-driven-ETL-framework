@@ -16,7 +16,7 @@ from flint import BaseModel
 from flint.alert.template import AlertTemplate
 from flint.utils.logger import get_logger
 
-from .rules import AlertRuleUnion
+from .rules import alert_rule_union
 
 logger: logging.Logger = get_logger(__name__)
 
@@ -43,7 +43,7 @@ class AlertTrigger(BaseModel):
         ..., description="List of channel identifiers that should receive alerts matching this rule"
     )
     template: AlertTemplate = Field(..., description="Template configuration for formatting alert messages")
-    rules: list[AlertRuleUnion] = Field(
+    rules: list[alert_rule_union] = Field(
         ..., description="List of rules that must all evaluate to True for the trigger to fire"
     )
 

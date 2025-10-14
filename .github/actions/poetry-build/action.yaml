@@ -1,0 +1,19 @@
+name: Poetry Build
+description: Build Python package using Poetry
+inputs:
+  workspace-path:
+    description: Path to the workspace directory
+    required: false
+  output-path:
+    description: Path to the output directory for built packages
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Build Package
+      shell: bash
+      run: |
+        sh ${{ github.workspace }}/.github/scripts/poetry-build.sh \
+          "${{ inputs.workspace-path }}" \
+          "${{ inputs.output-path }}"

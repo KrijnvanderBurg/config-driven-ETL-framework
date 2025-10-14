@@ -23,9 +23,9 @@ from flint.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
-__all__ = ["ChannelModel", "ChannelUnion"]
+__all__ = ["ChannelModel", "channel_union"]
 
-ChannelUnion = Annotated[
+channel_union = Annotated[
     EmailChannel | HttpChannel | FileChannel,
     Discriminator("channel_type"),
 ]

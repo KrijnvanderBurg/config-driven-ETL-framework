@@ -1,0 +1,77 @@
+name: Build and Test
+
+on:
+  workflow_call:
+    outputs:
+      version:
+        description: "Package version from pyproject.toml"
+        value: ${{ jobs.build.outputs.version }}
+
+jobs:
+  build:
+    name: Build Package
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: ./.github/actions/setup-python
+        with:
+          python-version: 3.13
+
+      - name: Setup Poetry
+        uses: ./.github/actions/poetry-setup
+
+      - name: Install Dependencies
+        uses: ./.github/actions/poetry-install
+
+      - name: Build Package
+        uses: ./.github/actions/poetry-build
+
+      - name: Get version from pyproject.toml
+        id: get_version
+        run: |
+          VERSION=$(sh ${{ github.workspace }}/.github/scripts/poetry-get-version.sh)
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+          retention-days: 7
+
+  test:
+    name: Run Tests
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Python
+        uses: ./.github/actions/setup-python
+        with:
+          python-version: 3.13
+
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - name: Install Package
+        uses: ./.github/actions/install-package
+
+      - name: Run Unit Tests
+        uses: ./.github/actions/run-pytest
+        with:
+          tests-path: tests/unit
+
+      - name: Run E2E Tests
+        uses: ./.github/actions/run-pytest
+        with:
+          tests-path: tests/e2e

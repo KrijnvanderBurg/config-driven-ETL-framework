@@ -15,7 +15,7 @@ from typing import Any, Final, Self
 from pydantic import Field, ValidationError
 
 from flint import BaseModel
-from flint.alert.channels import ChannelUnion
+from flint.alert.channels import channel_union
 from flint.alert.trigger import AlertTrigger
 from flint.exceptions import FlintAlertConfigurationError, FlintIOError
 from flint.utils.file import FileHandlerContext
@@ -38,7 +38,7 @@ class AlertController(BaseModel):
         triggers: Rules for determining which channels to use for specific alerts
     """
 
-    channels: list[ChannelUnion] = Field(..., description="List of configured channels")
+    channels: list[channel_union] = Field(..., description="List of configured channels")
     triggers: list[AlertTrigger] = Field(..., description="List of alert trigger rules")
 
     @classmethod

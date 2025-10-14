@@ -1,0 +1,19 @@
+name: Pyright
+description: Run Pyright type checker on Python code
+inputs:
+  target-path:
+    description: Path to the directory to type-check
+    required: false
+  config-file:
+    description: Path to the Pyright configuration file
+    required: false
+
+runs:
+  using: composite
+  steps:
+    - name: Run Pyright
+      shell: bash
+      run: |
+        sh ${{ github.workspace }}/.github/scripts/run-pyright.sh \
+          "${{ inputs.target-path }}" \
+          "${{ inputs.config-file }}"
