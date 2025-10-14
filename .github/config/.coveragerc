@@ -10,6 +10,12 @@ omit =
     */__init__.py
     .devcontainer/*
     .azuredevops/*
+    .github/*
+
+[paths]
+source =
+    src/
+    */site-packages/
 
 [report]
 include_namespace_packages = True

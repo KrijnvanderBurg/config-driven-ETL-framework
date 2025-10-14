@@ -1,5 +1,6 @@
 # Exclude a variety of commonly ignored directories.
 exclude = [
+    ".github",
     ".azuredevops",
     ".devcontainer",
     ".bzr",
