@@ -1,4 +1,4 @@
-name: Release Python App
+name: flint-CD
 
 on:
   workflow_dispatch:
