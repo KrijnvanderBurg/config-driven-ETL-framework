@@ -60,6 +60,8 @@
 				"dvirtz.parquet-viewer", // https://marketplace.visualstudio.com/items?itemName=dvirtz.parquet-viewer
 				"tamasfe.even-better-toml", // https://marketplace.visualstudio.com/items?itemName=tamasfe.even-better-toml
 				"ms-azure-devops.azuredevops", // https://marketplace.visualstudio.com/items?itemName=ms-azure-devops.azuredevops
+				//Github
+				"github.vscode-pull-request-github",
 				// Copilot
 				"GitHub.copilot", // https://marketplace.visualstudio.com/items?itemName=GitHub.copilot
 				"GitHub.copilot-chat" // https://marketplace.visualstudio.com/items?itemName=GitHub.copilot-chat
