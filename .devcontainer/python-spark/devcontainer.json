@@ -31,7 +31,9 @@
 		"PYTHONUNBUFFERED": "1",
 		"PYTHONHASHSEED": "42",
 		"PIP_DISABLE_PIP_VERSION_CHECK": "1",
-		"POETRY_VIRTUALENVS_CREATE": "false"
+		"PIP_NO_CACHE_DIR": "0",
+		"POETRY_VIRTUALENVS_CREATE": "false",
+		"POETRY_CACHE_DIR": "/home/vscode/.cache/pypoetry"
 	},
 	// "onCreateCommand": {},
 	// "updateContentCommand": {},

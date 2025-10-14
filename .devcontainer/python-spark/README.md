@@ -46,6 +46,7 @@ This implementation uses Docker Compose for maximum flexibility:
 - **Main Container**: Development environment with all tools pre-installed
 - **Extensible**: Easy to add supporting services (databases, message queues, etc.)
 - **Volume Mounts**: Persistent storage for workspace and configuration
+- **Package Caching**: Docker volumes cache pip and Poetry packages for fast rebuilds.
 - **Platform Independent**: Consistent experience across Windows, macOS, and Linux
 
 ## 🏁 Getting Started
