@@ -20,9 +20,16 @@ cd "$PWD" && pytest "$tests_path" \
     --durations=0 \
     --durations-min=0.01 \
     --cov="$coverage_path" \
-    --cov-report="xml:$output_coverage_filepath" \
     --cov-report="term-missing" \
     --cov-config="$config_filepath_coverage" \
     --junit-xml="$output_junit_filepath"
     # --verbose
+
+# Combine parallel coverage files from E2E subprocess executions
+echo "Combining parallel coverage data files..."
+coverage combine --rcfile="$config_filepath_coverage"
+
+# Generate XML report from combined coverage data
+echo "Generating coverage XML report..."
+coverage xml -o "$output_coverage_filepath" --rcfile="$config_filepath_coverage"
 

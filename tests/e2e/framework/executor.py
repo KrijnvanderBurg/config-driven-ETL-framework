@@ -62,7 +62,7 @@ class JobTestExecutor:
                 "run",
                 "--parallel-mode",
                 "--branch",
-                "--source=src",
+                "--source=samara",
                 "-m",
                 "samara",
                 "run",
