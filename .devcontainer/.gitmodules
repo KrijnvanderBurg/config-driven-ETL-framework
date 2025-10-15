@@ -1,9 +1,0 @@
-# install steps
-# - `git submodule init`
-# - `git submodule update`
-# if that does not work, then add manually via `git submodule add https://github.com/KrijnvanderBurg/.dotfiles.git .dotfiles`
-
-[submodule ".dotfiles"]
-	path = .dotfiles
-	url = https://github.com/KrijnvanderBurg/.dotfiles.git
-    branch = main
