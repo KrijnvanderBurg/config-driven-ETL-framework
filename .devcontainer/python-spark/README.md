@@ -10,12 +10,11 @@ DevContainers provide a fully configured and isolated development environment in
 ### Comprehensive Tool Integration
 This DevContainer includes 20+ carefully curated industry-standard Python development tools:
 
-- **🎨 Code Formatters**: Ruff, Black, isort - Ensure consistent code style across your team
+- **🎨 Code Formatters**: Ruff - Ensure consistent code style across your team
 - **🔍 Linters & Analyzers**: Pylint, Flake8, Ruff Linter - Catch bugs and enforce best practices
-- **🔒 Type Checkers**: Mypy, Pyright, Pyre, Pylance - Prevent type-related errors before runtime
-- **🛡️ Security Scanners**: Bandit, Semgrep, DevSkim - Identify vulnerabilities and security issues
-- **🔐 Secret Detection**: Gitleaks, TruffleHog - Prevent credential leaks in your repository
-- **📦 Dependency Analysis**: OWASP Dependency Check, OSSAudit - Monitor third-party package vulnerabilities
+- **🔒 Type Checkers**: Mypy, Pyright, Pylance - Prevent type-related errors before runtime
+- **🛡️ Security Scanners**: Bandit, Semgrep - Identify vulnerabilities and security issues
+- **🔐 Secret Detection**: TruffleHog - Prevent credential leaks in your repository
 - **🧪 Testing & Coverage**: Pytest with Coverage.py - Ensure code reliability and test completeness
 - **📚 Documentation**: Sphinx - Generate professional documentation automatically
 
@@ -93,10 +92,6 @@ This implementation uses Docker Compose for maximum flexibility:
 
 - **Ruff Formatter** <sup>[Docs](https://docs.astral.sh/ruff/) | [Github](https://github.com/astral-sh/ruff) | [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff)</sup> - Lightning-fast Python formatter written in Rust, combining the functionality of Black, isort, and more. **Primary recommendation** for modern Python development.
 
-- **Black** <sup>[Docs](https://black.readthedocs.io/en/stable/) | [Github](https://github.com/psf/black) | [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ms-python.black-formatter)</sup> - The uncompromising Python code formatter that eliminates debates about code style.
-
-- **isort** <sup>[Docs](https://pycqa.github.io/isort/) | [Github](https://github.com/PyCQA/isort) | [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ms-python.isort)</sup> - Sorts Python imports alphabetically and automatically separates them into sections.
-
 ### Linters & Code Quality
 
 - **Ruff Linter** <sup>[Docs](https://docs.astral.sh/ruff/) | [Github](https://github.com/astral-sh/ruff) | [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=charliermarsh.ruff)</sup> - Extremely fast linter with 800+ rules, replacing Flake8, pylint, and more. **Primary recommendation** for comprehensive code quality checks.
@@ -114,13 +109,10 @@ This implementation uses Docker Compose for maximum flexibility:
 
 - **Pyright** <sup>[Docs](https://microsoft.github.io/pyright) | [Github](https://github.com/microsoft/pyright) | [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ms-pyright.pyright)</sup> - Fast, standards-based static type checker designed for large Python codebases.
 
-- **Pyre** <sup>[Docs](https://pyre-check.org/) | [Github](https://github.com/facebook/pyre-check)</sup> - Facebook's performant type checker that provides incremental analysis for large codebases.
-
 ### Security & Vulnerability Scanners
 
 - **Bandit** <sup>[Docs](https://bandit.readthedocs.io) | [Github](https://github.com/PyCQA/bandit) | [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=nwgh.bandit)</sup> - Scans Python code for common security issues by analyzing AST patterns.
 
-- **Semgrep** <sup>[Docs](https://semgrep.dev/p/python) | [Github](https://github.com/semgrep/semgrep)</sup> - Fast static analysis tool for finding bugs, security vulnerabilities, and enforcing code standards.
 
 - **DevSkim** <sup>[Docs](https://github.com/microsoft/DevSkim/wiki) | [Github](https://github.com/microsoft/DevSkim) | [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=MS-CST-E.vscode-devskim)</sup> - Microsoft's security analysis framework for detecting vulnerabilities as you code.
 
@@ -128,15 +120,9 @@ This implementation uses Docker Compose for maximum flexibility:
 
 - **TruffleHog** <sup>[Github](https://github.com/trufflesecurity/trufflehog)</sup> - Searches through git repositories for high-entropy strings and secrets, detecting passwords, API keys, and tokens.
 
-- **Gitleaks** <sup>[Github](https://github.com/gitleaks/gitleaks)</sup> - SAST tool for detecting and preventing hardcoded secrets in git repositories.
-
 ### Dependency Analysis
 
-- **Ossaudit** <sup>[Github](https://github.com/illikainen/ossaudit) | [Pypi](https://pypi.org/project/ossaudit/)</sup> - Ossaudit uses Sonatype OSS Index to audit Python packages for known vulnerabilities. [Config file](../.dotfiles/python/ossaudit.yaml) | [AzDO pipeline](https://github.com/KrijnvanderBurg/.azuredevops/tree/main/v1/templates/atomic/python/ossaudit.yaml)
-
-- **OWASP dependency-check** <sup>[Docs](https://owasp.org/www-project-dependency-check/) | [Github](https://github.com/jeremylong/DependencyCheck) | [Pypi](https://pypi.org/project/dependency-check/)</sup> - Dependency-Check is a Software Composition Analysis (SCA) tool that attempts to detect publicly disclosed vulnerabilities contained within a project’s dependencies. It does this by determining if there is a Common Platform Enumeration (CPE) identifier for a given dependency. If found, it will generate a report linking to the associated CVE entries. [Config file](../.dotfiles/python/cve_suppressions.xml) | [AzDO pipeline](https://github.com/KrijnvanderBurg/.azuredevops/tree/main/v1/templates/atomic/python/owasp.yaml)
-
-- **Safety** (Paid tool, not implemented) <sup>[Docs](https://docs.safetycli.com/) | [Github](https://github.com/pyupio/safety) | [Pypi](https://pypi.org/project/safety/)</sup> - Safety CLI is a Python dependency vulnerability scanner designed to enhance software supply chain security by detecting packages with known vulnerabilities and malicious packages in local development environments, CI/CD, and production systems. Safety CLI can be deployed in minutes and provides clear, actionable recommendations for remediation of detected vulnerabilities.
+- **Semgrep** <sup>[Docs](https://semgrep.dev/p/python) | [Github](https://github.com/semgrep/semgrep)</sup> - Fast static analysis tool for finding bugs, security vulnerabilities, and enforcing code standards.
 
 ### Testing
 
@@ -148,23 +134,6 @@ This implementation uses Docker Compose for maximum flexibility:
 ### Dependency management
 
 - **Poetry** <sup>[Docs](https://python-poetry.org/) | [Github](https://github.com/python-poetry/poetry) | [Pypi]()</sup> - Poetry helps you declare, manage and install dependencies of Python projects, ensuring you have the right stack everywhere. [AzDO pipeline](https://github.com/KrijnvanderBurg/.azuredevops/tree/main/v1/templates/atomic/python/poetry-install-pyproject.yaml)
-
-- **Pip** <sup>[Docs](https://pip.pypa.io) | [Github](https://github.com/pypa/pip) | [Pypi](https://pypi.org/project/pip/)</sup> - pip is the package installer for Python. You can use pip to install packages from the Python Package Index and other indexes. [AzDO pipeline](https://github.com/KrijnvanderBurg/.azuredevops/tree/main/v1/templates/atomic/python/pip-install-requirements.yaml)
-
-### Packaging
-
-- **Python Build** <sup>[Website](https://packaging.python.org) | [Docs](https://build.pypa.io) | [Pypi](https://pypi.org/project/build/)</sup> - A simple, correct Python packaging build frontend. [AzDO pipeline](https://github.com/KrijnvanderBurg/.azuredevops/tree/main/v1/templates/atomic/python/build_wheel_bdist.yaml)
-
-- **Twine** <sup>[Docs](https://twine.readthedocs.io) | [Github](https://github.com/pypa/twine) | [Pypi](https://pypi.org/project/twine/)</sup> - Twine is a utility for publishing Python packages on PyPI. It provides build system independent uploads of source and binary distribution artifacts for both new and existing projects. [AzDO pipeline](https://github.com/KrijnvanderBurg/.azuredevops/tree/main/v1/templates/atomic/python/twine-upload.yaml)
-
-### Profilers (TODO)
-- **cProfile**: Profiles Python code with cProfile. [cProfile](https://docs.python.org/3/library/profile.html)
-- **py_spy**: Profiles Python code with py-spy. [py-spy](https://github.com/benfred/py-spy)
-- **line_profiler**: Profiles Python code with line_profiler. [line_profiler](https://pypi.org/project/)
-- **memory_profiler**: Profiles memory usage of Python code with memory-profiler. [memory-profiler](https://pypi.org/project/memory-profiler/)
-- **plop**: Profiles Python code with Plop. [Plop](https://pypi.org/project/plop/)
-- **vprof**: Profiles Python code with vprof. [vprof](https://github.com/nvdv/vprof)
-- **yappi**: Profiles Python code with Yappi. [Yappi](https://pypi.org/project/yappi/)
 
 ### Documentation
 
@@ -203,52 +172,6 @@ Modern, fast formatter combining Black, isort, and more. Automatically runs on f
     "ruff.format.args": [
         "--config=${workspaceFolder}/path/to/.ruff.toml"
     ],
-},
-```
-
-##### Black (Alternative Formatter)
-Uncompromising Python code formatter. Runs on file save.
-
-```json
-"extensions": [
-    "ms-python.black-formatter"
-],
-"settings": {
-    "[python]": {
-        "editor.defaultFormatter": "ms-python.black-formatter",
-        "editor.formatOnSave": true,
-    },
-    "black-formatter.args": [
-        "--config",
-        "${workspaceFolder}/path/to/.black"
-    ],
-    "black-formatter.cwd": "${workspaceFolder}",
-    "black-formatter.enabled": true,
-    "black-formatter.showNotification": "onError"
-},
-```
-
-##### Isort (Import Organizer)
-Sorts and organizes Python imports. Runs on file save.
-
-```json
-"extensions": [
-    "ms-python.isort"
-],
-"settings": {
-    "[python]": {
-        "editor.formatOnSave": true,
-        "editor.codeActionsOnSave": {
-            "source.organizeImports": "explicit"
-        }
-    },
-    "isort.args": [
-        "--settings-path",
-        "${workspaceFolder}/path/to/.isort.cfg"
-    ],
-    "isort.serverEnabled": false,
-    "isort.check": false,
-    "isort.showNotification": "onError"
 },
 ```
 
@@ -311,18 +234,6 @@ Security vulnerability scanner. Shows issues in editor and Problems tab.
     "bandit.enabled": true,
     "bandit.showNotification": "onError"
 },
-```
-
-##### DevSkim
-Microsoft's security analysis framework. Shows security issues in editor.
-
-*Note: Limited configuration options available.*
-
-```json
-"extensions": [
-    "ms-cst-e.vscode-devskim"
-],
-"settings": {},
 ```
 
 #### 🔧 Type Checking Extensions
@@ -451,14 +362,11 @@ This DevContainer includes a comprehensive task automation system that mirrors y
 #### ✅ Test Tasks  
 - **sphinx build docs**: Generate documentation
 - **ruff formatter**: Format code with Ruff
-- **black**: Format code with Black
-- **isort**: Sort imports
 - **ruff linter**: Lint with Ruff
 - **pylint**: Lint with Pylint
 - **flake8**: Lint with Flake8
 - **mypy**: Type check with MyPy
 - **pyright**: Type check with Pyright
-- **pyre**: Type check with Pyre
 - **bandit**: Security scan with Bandit
 - **semgrep**: Security scan with Semgrep
 - **trufflehog**: Secret detection
