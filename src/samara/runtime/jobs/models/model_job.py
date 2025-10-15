@@ -108,7 +108,6 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
         - Transforms cannot reference themselves
         - Transforms can only reference transforms that appear before them in the list
         - All load upstream_ids reference existing extract or transform IDs
-        - Join transform other_upstream_ids reference existing extract or previously defined transform IDs
 
         Returns:
             Self: The validated instance.
@@ -137,13 +136,6 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
                     f"in job '{self.id_}' which either does not exist or is defined later in the transforms list. "
                     f"upstream_id must reference an existing extract or a transform that appears before this one."
                 )
-
-            # Re-validate transform with context to trigger join validation
-            # This allows TransformSpark to validate join other_upstream_ids
-            transform.model_validate(
-                transform.model_dump(),
-                context={"valid_upstream_ids": valid_upstream_ids_for_transforms, "job_id": self.id_},
-            )
 
             # Add current transform ID to valid upstream IDs for subsequent transforms
             valid_upstream_ids_for_transforms.add(transform.id_)

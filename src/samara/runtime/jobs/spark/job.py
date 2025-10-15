@@ -11,8 +11,10 @@ of the appropriate Extract, Transform, and Load components based on the configur
 import logging
 import time
 
+from typing import Self
 from typing_extensions import override
 
+from pydantic import model_validator
 from samara.runtime.jobs.models.model_job import JobBase, JobEngine
 from samara.runtime.jobs.spark.extract import ExtractSparkUnion
 from samara.runtime.jobs.spark.load import LoadSparkUnion
@@ -51,6 +53,42 @@ class JobSpark(JobBase[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion]):
     """
 
     engine_type: JobEngine = JobEngine.SPARK
+
+    @model_validator(mode="after")
+    def validate_join_other_upstream_ids(self) -> Self:
+        """Validate join functions' other_upstream_id references.
+
+        This validator triggers the validation in JoinFunctionModel by revalidating
+        join functions with context containing valid upstream IDs.
+
+        Returns:
+            Self: The validated instance.
+
+        Raises:
+            ValueError: If invalid other_upstream_id references are found.
+        """
+        # Build valid upstream IDs progressively as we process transforms
+        extract_ids = {extract.id_ for extract in self.extracts}
+        valid_upstream_ids = extract_ids.copy()
+        
+        for transform in self.transforms:
+            # Revalidate each join function in this transform with context
+            for function in transform.functions:
+                if function.function_type == "join":
+                    # Trigger validation in JoinFunctionModel with proper context
+                    function.model_validate(
+                        function.model_dump(),
+                        context={
+                            "valid_upstream_ids": valid_upstream_ids,
+                            "transform_id": transform.id_,
+                            "job_id": self.id_,
+                        },
+                    )
+            
+            # Add current transform ID to valid upstream IDs
+            valid_upstream_ids.add(transform.id_)
+        
+        return self
 
     @override
     def _execute(self) -> None:
