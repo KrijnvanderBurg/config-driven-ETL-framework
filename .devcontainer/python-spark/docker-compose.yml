@@ -10,12 +10,10 @@ services:
         volumes:
             - ../../:/workspace:cached
             - devcontainer-bashhistory:/commandhistory
-            - pip-cache:/home/vscode/.cache/pip
-            - poetry-cache:/home/vscode/.cache/pypoetry
+            - poetry-cache:/home/vscode/poetry-cache
         command: sleep infinity
         user: vscode # required only when setting containerUser in devcontainer.json, must be same user value.
 volumes:
     profile:
     devcontainer-bashhistory:
-    pip-cache:
     poetry-cache:
