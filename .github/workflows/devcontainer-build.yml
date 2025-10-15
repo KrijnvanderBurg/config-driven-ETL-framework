@@ -45,8 +45,7 @@ jobs:
           devcontainer build \
             --workspace-folder . \
             --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json \
-            --image-name samara-devcontainer-${{ matrix.devcontainer }}:test \
-            --log-level warning
+            --image-name samara-devcontainer-${{ matrix.devcontainer }}:test
         env:
           DOCKER_BUILDKIT: 1
           BUILDKIT_PROGRESS: plain
@@ -62,8 +61,7 @@ jobs:
         run: |
           devcontainer up \
             --workspace-folder . \
-            --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json \
-            --log-level warning
+            --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json
         env:
           BUILDKIT_PROGRESS: plain
           CI: true
@@ -73,5 +71,4 @@ jobs:
           devcontainer exec \
             --workspace-folder . \
             --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json \
-            --log-level warning \
             bash -c "python --version && poetry --version"
