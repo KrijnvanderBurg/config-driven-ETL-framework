@@ -117,7 +117,7 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
         """
         # Convert to sets for upstream reference validation
         extract_ids = {extract.id_ for extract in self.extracts}
-        
+
         # Validate transform upstream_ids reference existing extracts or previously defined transforms
         # Build valid upstream IDs progressively as we process transforms in order
         valid_upstream_ids_for_transforms = extract_ids.copy()
@@ -128,7 +128,7 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
                     f"Transform '{transform.id_}' references itself as upstream_id "
                     f"in job '{self.id_}'. A transform cannot reference its own id."
                 )
-            
+
             # Check if upstream_id exists in extracts or previously defined transforms
             if transform.upstream_id not in valid_upstream_ids_for_transforms:
                 raise ValueError(
@@ -136,7 +136,7 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
                     f"in job '{self.id_}' which either does not exist or is defined later in the transforms list. "
                     f"upstream_id must reference an existing extract or a transform that appears before this one."
                 )
-            
+
             # Add current transform ID to valid upstream IDs for subsequent transforms
             valid_upstream_ids_for_transforms.add(transform.id_)
 
