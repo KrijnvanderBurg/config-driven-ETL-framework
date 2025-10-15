@@ -127,11 +127,6 @@ Transforms apply functions to data from upstream components, creating a processi
 
 **Function Application:** Transformations are applied in sequence, with each function's output feeding into the next.
 
-**Upstream Reference Rules:**
-- The `upstream_id` must reference an extract or a transform that appears **before** this transform in the list
-- A transform cannot reference itself
-- Transforms are processed in the order they appear in the configuration
-
 ### Loads
 
 Loads write data from upstream components to destinations.
