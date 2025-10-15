@@ -48,6 +48,8 @@ jobs:
             --image-name samara-devcontainer-${{ matrix.devcontainer }}:test
         env:
           DOCKER_BUILDKIT: 1
+          BUILDKIT_PROGRESS: plain
+          PROGRESS_NO_TRUNC: 1
 
       - name: Verify DevContainer Build
         run: |
@@ -58,7 +60,9 @@ jobs:
         run: |
           devcontainer up \
             --workspace-folder . \
-            --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json
+            --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json 
+        env:
+          BUILDKIT_PROGRESS: plain
 
       - name: Run Basic Commands in DevContainer
         run: |
