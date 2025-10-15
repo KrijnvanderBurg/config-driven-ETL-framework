@@ -5,8 +5,8 @@
 	],
 	"workspaceFolder": "/workspace",
 	"service": "devcontainer",
-	"remoteUser": "vscode",
-	"containerUser": "vscode",
+	// "remoteUser": "vscode",
+	// "containerUser": "vscode",
 	//
 	// Features - https://containers.dev/implementors/features.
 	//
@@ -31,8 +31,7 @@
 		"PYTHONUNBUFFERED": "1",
 		"PYTHONHASHSEED": "42",
 		"PIP_DISABLE_PIP_VERSION_CHECK": "1",
-		"POETRY_VIRTUALENVS_CREATE": "false",
-		// "POETRY_CACHE_DIR": "/home/vscode/poetry-cache"
+		"POETRY_VIRTUALENVS_CREATE": "false"
 	},
 	// "onCreateCommand": {},
 	// "updateContentCommand": {},
