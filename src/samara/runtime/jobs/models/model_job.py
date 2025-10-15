@@ -139,11 +139,13 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
                 )
 
             # Validate join function other_upstream_id references if transform has functions
-            # Check if the transform model has a functions field
+            # Check if the transform model has a functions field using Pydantic's model_fields
+            # This is the proper way to introspect Pydantic model fields without using hasattr/getattr
             if "functions" in transform.model_fields:
                 functions = transform.functions
                 for function in functions:
-                    # Check if this is a join function by checking for function_type and other_upstream_id
+                    # Check if this is a join function
+                    # function_type is a Literal field, so string comparison is type-safe
                     if function.function_type == "join":
                         other_upstream_id = function.arguments.other_upstream_id
                         
