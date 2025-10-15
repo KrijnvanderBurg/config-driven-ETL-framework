@@ -72,6 +72,78 @@ Pipeline
 └── Loads - Write results to destination systems
 ```
 
+## Validation Rules
+
+### ID Uniqueness
+All component IDs within a job must be unique across extracts, transforms, and loads. Duplicate IDs will cause validation errors.
+
+### Upstream ID References
+
+Both transforms and loads use `upstream_id` to reference their data source. These references must follow strict validation rules:
+
+1. **Must exist**: The `upstream_id` must match the ID of an existing component:
+   - Transforms can reference: extracts or other transforms
+   - Loads can reference: extracts or transforms
+
+2. **Must appear before**: The referenced component must be defined earlier in the configuration. Forward references are not allowed.
+
+3. **Cannot self-reference**: A transform cannot reference its own ID as the `upstream_id`.
+
+4. **Order matters**: Components are processed sequentially. A transform can only reference:
+   - Any extract (all extracts are available)
+   - Any transform that appears before it in the transforms list
+
+**Example of valid references:**
+```jsonc
+{
+    "extracts": [
+        {"id": "extract-a", ...},
+        {"id": "extract-b", ...}
+    ],
+    "transforms": [
+        {"id": "transform-1", "upstream_id": "extract-a", ...},      // ✓ Valid: references extract
+        {"id": "transform-2", "upstream_id": "transform-1", ...},    // ✓ Valid: references previous transform
+        {"id": "transform-3", "upstream_id": "extract-b", ...}       // ✓ Valid: references extract
+    ],
+    "loads": [
+        {"id": "load-1", "upstream_id": "transform-2", ...},         // ✓ Valid: references any transform
+        {"id": "load-2", "upstream_id": "extract-a", ...}            // ✓ Valid: can reference extract directly
+    ]
+}
+```
+
+**Example of invalid references:**
+```jsonc
+{
+    "transforms": [
+        {"id": "transform-1", "upstream_id": "transform-1", ...},    // ✗ Invalid: self-reference
+        {"id": "transform-2", "upstream_id": "transform-3", ...},    // ✗ Invalid: forward reference
+        {"id": "transform-3", "upstream_id": "nonexistent", ...}     // ✗ Invalid: doesn't exist
+    ]
+}
+```
+
+### Special Case: Join Transform
+
+The `join` transform function has an additional `other_upstream_id` parameter in its arguments to specify the second dataframe for the join operation. This parameter follows the same validation rules as `upstream_id` - it must reference an existing extract or transform defined earlier in the configuration.
+
+```jsonc
+{
+    "id": "join-customers-orders",
+    "upstream_id": "extract-customers",           // First dataframe (left side of join)
+    "functions": [
+        {
+            "function_type": "join",
+            "arguments": {
+                "other_upstream_id": "extract-orders",  // Second dataframe (right side of join)
+                "on": ["customer_id"],
+                "how": "inner"
+            }
+        }
+    ]
+}
+```
+
 ### Extracts
 
 Extracts read data into the registry, identified by their unique `id`.
@@ -100,7 +172,7 @@ Transforms apply functions to data from upstream components, creating a processi
 ```jsonc
 {
     "id": "transform-clean",                // Unique identifier
-    "upstream_id": "extract-customers",     // Reference to input data source
+    "upstream_id": "extract-customers",     // Reference to input data source (see Validation Rules)
     "options": {},                          // Optional configuration
     "functions": [                          // List of transformation functions
         {
@@ -134,7 +206,7 @@ Loads write data from upstream components to destinations.
 ```jsonc
 {
     "id": "load-output",                    // Unique identifier
-    "upstream_id": "transform-clean",       // Reference to input data source
+    "upstream_id": "transform-clean",       // Reference to input data source (see Validation Rules)
     "load_type": "file",                    // Destination type
     "method": "batch",                      // batch | streaming
     "data_format": "parquet",               // Output format
