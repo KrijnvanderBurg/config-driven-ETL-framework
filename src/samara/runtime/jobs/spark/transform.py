@@ -13,9 +13,9 @@ for manipulating data between extraction and loading.
 """
 
 import logging
-from typing import Any, ClassVar
+from typing import Any, ClassVar, Self
 
-from pydantic import Field
+from pydantic import Field, ValidationInfo, model_validator
 from samara.runtime.jobs.models.model_transform import TransformModel
 from samara.runtime.jobs.spark.session import SparkHandler
 from samara.runtime.jobs.spark.transforms import transform_function_spark_union
@@ -36,6 +36,57 @@ class TransformSpark(TransformModel):
     functions: list[transform_function_spark_union]
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     options: dict[str, Any] = Field(..., description="Transformation options as key-value pairs")
+
+    @model_validator(mode="after")
+    def validate_join_other_upstream_ids(self, info: ValidationInfo) -> Self:
+        """Validate other_upstream_id references in join functions.
+
+        Ensures that join functions reference valid upstream IDs that exist
+        and are defined before the current transform.
+
+        Args:
+            info: Validation context information.
+
+        Returns:
+            Self: The validated instance.
+
+        Raises:
+            ValueError: If invalid other_upstream_id references are found.
+        """
+        # Get validation context containing valid upstream IDs
+        if info.context is None:
+            # No context provided, skip validation (used in isolated model creation)
+            return self
+        
+        valid_upstream_ids = info.context.get("valid_upstream_ids")
+        job_id = info.context.get("job_id", "unknown")
+        
+        if valid_upstream_ids is None:
+            # Context doesn't have valid IDs, skip validation
+            return self
+        
+        # Validate each join function
+        for function in self.functions:
+            if function.function_type == "join":
+                other_upstream_id = function.arguments.other_upstream_id
+                
+                # Check if other_upstream_id references the transform itself
+                if other_upstream_id == self.id_:
+                    raise ValueError(
+                        f"Join function in transform '{self.id_}' references itself as other_upstream_id "
+                        f"in job '{job_id}'. A join cannot reference its own transform id."
+                    )
+                
+                # Check if other_upstream_id exists in valid upstream IDs
+                if other_upstream_id not in valid_upstream_ids:
+                    raise ValueError(
+                        f"Join function in transform '{self.id_}' references other_upstream_id "
+                        f"'{other_upstream_id}' in job '{job_id}' which either does not exist or is defined "
+                        f"later in the transforms list. other_upstream_id must reference an existing extract or "
+                        f"a transform that appears before this one."
+                    )
+        
+        return self
 
     def transform(self) -> None:
         """
