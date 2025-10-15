@@ -354,6 +354,8 @@
 								"ruff linter",
 								"pylint",
 								"flake8",
+								"mypy",
+								"pyright",
 								//security
 								"trufflehog",
 								"bandit",
@@ -401,6 +403,28 @@
 							"label": "flake8",
 							"type": "shell",
 							"command": "${workspaceFolder}/.github/scripts/run-flake8.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						},
+						{
+							"label": "mypy",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-mypy.sh",
+							"args": [],
+							"presentation": {
+								"panel": "dedicated",
+								"clear": true
+							},
+                            "problemMatcher": []
+						},
+						{
+							"label": "pyright",
+							"type": "shell",
+							"command": "${workspaceFolder}/.github/scripts/run-pyright.sh",
 							"args": [],
 							"presentation": {
 								"panel": "dedicated",

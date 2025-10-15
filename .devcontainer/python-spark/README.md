@@ -438,11 +438,11 @@ This DevContainer includes a comprehensive task automation system that mirrors y
 
 ### Why Use Tasks?
 
-**Repository-Wide Analysis for Linters**: Most linter extensions (Ruff, Pylint, Flake8, Bandit) only analyze open files. Tasks scan your entire codebase for comprehensive validation.  
+**Repository-Wide Analysis**: Unlike live editor feedback (limited to open files for most linters), tasks scan your entire codebase for comprehensive validation.  
 **Pre-Push Confidence**: Catch issues locally using the same tools and configurations as your production CI/CD pipeline.  
 **Parallel Execution**: Independent tasks can run simultaneously for faster feedback.
 
-**Note**: Type checkers (Pylance, Mypy) are configured to analyze the entire workspace via their extensions, so they don't require separate tasks.
+**Note**: While type checkers (Pylance, Mypy) are configured to analyze the entire workspace via their extensions, tasks are still available for CI/CD consistency and manual validation.
 
 !["Run all Code Quality tools as VSCode Tasks"](./docs/run_all_vscode_tasks.gif)
 
@@ -467,12 +467,14 @@ This DevContainer includes a comprehensive task automation system that mirrors y
 - **ruff linter**: Lint with Ruff
 - **pylint**: Lint with Pylint
 - **flake8**: Lint with Flake8
+- **mypy**: Type check with MyPy
+- **pyright**: Type check with Pyright
 - **bandit**: Security scan with Bandit
 - **semgrep**: Security scan with Semgrep
 - **trufflehog**: Secret detection
 - **pytest and coverage**: Run tests with coverage
 
-**Note**: Mypy and Pyright type checking tasks have been removed as these tools are configured to analyze the entire workspace via VS Code extensions (Mypy extension and Pylance, respectively).
+**Note**: Type checkers (Mypy, Pyright) are configured to analyze the entire workspace via VS Code extensions (Mypy extension and Pylance, respectively), providing continuous feedback. Tasks are available for CI/CD pipeline consistency and manual validation.
 
 ### Results & Output
 - **Terminal Panels**: Each task runs in a dedicated terminal
