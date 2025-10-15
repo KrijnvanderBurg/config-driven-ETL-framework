@@ -108,6 +108,7 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
         - Transforms cannot reference themselves
         - Transforms can only reference transforms that appear before them in the list
         - All load upstream_ids reference existing extract or transform IDs
+        - Join transform other_upstream_ids reference existing extract or previously defined transform IDs
 
         Returns:
             Self: The validated instance.
@@ -136,6 +137,31 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
                     f"in job '{self.id_}' which either does not exist or is defined later in the transforms list. "
                     f"upstream_id must reference an existing extract or a transform that appears before this one."
                 )
+
+            # Validate join function other_upstream_id references if transform has functions
+            # Check if the transform model has a functions field
+            if "functions" in transform.model_fields:
+                functions = transform.functions
+                for function in functions:
+                    # Check if this is a join function by checking for function_type and other_upstream_id
+                    if function.function_type == "join":
+                        other_upstream_id = function.arguments.other_upstream_id
+                        
+                        # Check if other_upstream_id references the transform itself
+                        if other_upstream_id == transform.id_:
+                            raise ValueError(
+                                f"Join function in transform '{transform.id_}' references itself as other_upstream_id "
+                                f"in job '{self.id_}'. A join cannot reference its own transform id."
+                            )
+                        
+                        # Check if other_upstream_id exists in extracts or previously defined transforms
+                        if other_upstream_id not in valid_upstream_ids_for_transforms:
+                            raise ValueError(
+                                f"Join function in transform '{transform.id_}' references other_upstream_id "
+                                f"'{other_upstream_id}' in job '{self.id_}' which either does not exist or is defined "
+                                f"later in the transforms list. other_upstream_id must reference an existing extract or "
+                                f"a transform that appears before this one."
+                            )
 
             # Add current transform ID to valid upstream IDs for subsequent transforms
             valid_upstream_ids_for_transforms.add(transform.id_)

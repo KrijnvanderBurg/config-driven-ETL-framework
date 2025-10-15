@@ -337,6 +337,166 @@ class TestJobSparkValidation:
         job_spark = JobSpark(**job_config)
         assert job_spark.loads[0].upstream_id == "tr2"
 
+    def test_create_job_spark__with_join_referencing_nonexistent_other_upstream__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when join references non-existent other_upstream_id."""
+        job_config["transforms"][0]["functions"] = [
+            {
+                "function_type": "join",
+                "arguments": {"other_upstream_id": "nonexistent_id", "on": "id", "how": "inner"},
+            }
+        ]
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_join_referencing_extract__succeeds(
+        self, job_config: dict[str, Any], tmp_path: Path
+    ) -> None:
+        """Test JobSpark creation succeeds when join references an extract ID."""
+        # Add a second extract for join
+        input_file2 = tmp_path / "input2.json"
+        input_file2.write_text("[]", encoding="utf-8")
+        
+        job_config["extracts"].append(
+            {
+                "id": "ex3",
+                "extract_type": "file",
+                "method": "batch",
+                "data_format": "json",
+                "options": {},
+                "location": str(input_file2),
+                "schema": "",
+            }
+        )
+        
+        job_config["transforms"][0]["functions"] = [
+            {
+                "function_type": "join",
+                "arguments": {"other_upstream_id": "ex3", "on": "id", "how": "inner"},
+            }
+        ]
+
+        job_spark = JobSpark(**job_config)
+        assert job_spark is not None
+
+    def test_create_job_spark__with_join_referencing_previous_transform__succeeds(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation succeeds when join references a previous transform ID."""
+        # Add a second transform before the one with join
+        job_config["transforms"].insert(
+            0,
+            {
+                "id": "tr1",
+                "upstream_id": "ex2",
+                "options": {},
+                "functions": [],
+            },
+        )
+        
+        # Update the second transform to reference tr1 and have a join to ex2
+        job_config["transforms"][1]["upstream_id"] = "tr1"
+        job_config["transforms"][1]["functions"] = [
+            {
+                "function_type": "join",
+                "arguments": {"other_upstream_id": "ex2", "on": "id", "how": "inner"},
+            }
+        ]
+
+        job_spark = JobSpark(**job_config)
+        assert job_spark is not None
+
+    def test_create_job_spark__with_join_referencing_itself__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when join references its own transform ID."""
+        job_config["transforms"][0]["functions"] = [
+            {
+                "function_type": "join",
+                "arguments": {"other_upstream_id": "tr2", "on": "id", "how": "inner"},
+            }
+        ]
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_join_referencing_later_transform__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when join references a transform defined later."""
+        # Add transform tr1 that has a join referencing tr2 (which comes later)
+        job_config["transforms"].insert(
+            0,
+            {
+                "id": "tr1",
+                "upstream_id": "ex2",
+                "options": {},
+                "functions": [
+                    {
+                        "function_type": "join",
+                        "arguments": {"other_upstream_id": "tr2", "on": "id", "how": "inner"},
+                    }
+                ],
+            },
+        )
+        
+        # Update tr2's upstream to tr1 to fix the normal upstream validation
+        job_config["transforms"][1]["upstream_id"] = "tr1"
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_multiple_joins_all_valid__succeeds(
+        self, job_config: dict[str, Any], tmp_path: Path
+    ) -> None:
+        """Test JobSpark creation succeeds with multiple joins all referencing valid upstream IDs."""
+        # Add a second extract
+        input_file2 = tmp_path / "input2.json"
+        input_file2.write_text("[]", encoding="utf-8")
+        
+        job_config["extracts"].append(
+            {
+                "id": "ex3",
+                "extract_type": "file",
+                "method": "batch",
+                "data_format": "json",
+                "options": {},
+                "location": str(input_file2),
+                "schema": "",
+            }
+        )
+        
+        # Add multiple transforms with joins
+        job_config["transforms"] = [
+            {
+                "id": "tr1",
+                "upstream_id": "ex2",
+                "options": {},
+                "functions": [
+                    {
+                        "function_type": "join",
+                        "arguments": {"other_upstream_id": "ex3", "on": "id", "how": "inner"},
+                    }
+                ],
+            },
+            {
+                "id": "tr2",
+                "upstream_id": "tr1",
+                "options": {},
+                "functions": [
+                    {
+                        "function_type": "join",
+                        "arguments": {"other_upstream_id": "ex2", "on": "id", "how": "left"},
+                    }
+                ],
+            },
+        ]
+
+        job_spark = JobSpark(**job_config)
+        assert job_spark is not None
+
 
 # =========================================================================== #
 # ============================= MODEL FIXTURE =============================== #
