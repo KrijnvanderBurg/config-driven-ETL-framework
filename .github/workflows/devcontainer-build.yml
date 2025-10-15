@@ -62,9 +62,6 @@ jobs:
           devcontainer up \
             --workspace-folder . \
             --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json
-        env:
-          BUILDKIT_PROGRESS: plain
-          CI: true
 
       - name: Run Basic Commands in DevContainer
         run: |
