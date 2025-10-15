@@ -246,6 +246,58 @@ class TestJobSparkValidation:
         job_spark = JobSpark(**job_config)
         assert job_spark.transforms[1].upstream_id == "tr2"
 
+    def test_create_job_spark__with_transform_referencing_itself__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when transform references its own ID."""
+        job_config["transforms"][0]["upstream_id"] = "tr2"  # Same as its own id
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_transform_referencing_later_transform__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when transform references a transform defined later."""
+        # Add tr3 that will reference tr4 (defined after it)
+        job_config["transforms"].append(
+            {
+                "id": "tr3",
+                "upstream_id": "tr4",  # Reference a transform that comes later
+                "options": {},
+                "functions": [],
+            }
+        )
+        job_config["transforms"].append(
+            {
+                "id": "tr4",
+                "upstream_id": "ex2",
+                "options": {},
+                "functions": [],
+            }
+        )
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_first_transform_referencing_second_transform__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when first transform references second transform."""
+        # Modify first transform to reference second (which doesn't exist yet)
+        job_config["transforms"][0]["upstream_id"] = "tr_second"
+        job_config["transforms"].append(
+            {
+                "id": "tr_second",
+                "upstream_id": "ex2",
+                "options": {},
+                "functions": [],
+            }
+        )
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
     def test_create_job_spark__with_load_referencing_nonexistent_upstream__raises_validation_error(
         self, job_config: dict[str, Any]
     ) -> None:
