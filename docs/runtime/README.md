@@ -75,6 +75,7 @@ Pipeline
 ## Validation Rules
 
 ### ID Uniqueness
+
 All component IDs within a job must be unique across extracts, transforms, and loads. Duplicate IDs will cause validation errors.
 
 ### Upstream ID References
@@ -87,7 +88,7 @@ Both transforms and loads use `upstream_id` to reference their data source. Thes
 
 2. **Must appear before**: The referenced component must be defined earlier in the configuration. Forward references are not allowed.
 
-3. **Cannot self-reference**: A transform cannot reference its own ID as the `upstream_id`.
+3. **Cannot self-reference**: A transform cannot reference itself as the `upstream_id`.
 
 4. **Order matters**: Components are processed sequentially. A transform can only reference:
    - Any extract (all extracts are available)
