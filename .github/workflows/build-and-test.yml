@@ -96,8 +96,10 @@ jobs:
 
       - name: Validate Example Jobs
         run: |
-          for example_dir in ./examples/*/; do
+          find ./examples/ -type f \( -name "job.jsonc" -o -name "job.json" -o -name "job.yaml" \) | while read job_file; do
+            job_dir=$(dirname "$job_file")
             python -m samara --log-level="WARNING" validate \
-              --alert-filepath "${example_dir}alert.jsonc" \
-              --runtime-filepath "${example_dir}job.jsonc"
+              --alert-filepath "$job_dir/alert.jsonc" \
+              --runtime-filepath "$job_file"
+            echo "$(basename "$job_dir") - Exit code: $?"
           done
