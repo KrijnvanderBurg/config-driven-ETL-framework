@@ -39,22 +39,10 @@ class ExtractSpark(ExtractModel, ABC):
         data_registry: Registry for storing extracted DataFrames
     """
 
-    _spark: ClassVar[SparkHandler | None] = None
+    spark: ClassVar[SparkHandler] = SparkHandler()
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     options: dict[str, Any] = Field(..., description="PySpark reader options as key-value pairs")
     _schema_parsed: StructType | None = None
-
-    @property
-    def spark(self) -> SparkHandler:
-        """Lazily initialize and return the SparkHandler singleton.
-
-        Returns:
-            SparkHandler: The singleton SparkHandler instance.
-        """
-        if ExtractSpark._spark is None:
-            logger.debug("Initializing SparkHandler for ExtractSpark")
-            ExtractSpark._spark = SparkHandler()
-        return ExtractSpark._spark  # type: ignore[return-value]
 
     @model_validator(mode="after")
     def parse_schema(self) -> Self:

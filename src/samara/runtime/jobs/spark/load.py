@@ -37,22 +37,10 @@ class LoadSpark(LoadModel, ABC):
     supporting both batch and streaming loads to various destinations.
     """
 
-    _spark: ClassVar[SparkHandler | None] = None
+    spark: ClassVar[SparkHandler] = SparkHandler()
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     streaming_query_registry: ClassVar[StreamingQueryRegistry] = StreamingQueryRegistry()
     options: dict[str, Any] = Field(..., description="Options for the sink input.")
-
-    @property
-    def spark(self) -> SparkHandler:
-        """Lazily initialize and return the SparkHandler singleton.
-
-        Returns:
-            SparkHandler: The singleton SparkHandler instance.
-        """
-        if LoadSpark._spark is None:
-            logger.debug("Initializing SparkHandler for LoadSpark")
-            LoadSpark._spark = SparkHandler()
-        return LoadSpark._spark  # type: ignore[return-value]
 
     @abstractmethod
     def _load_batch(self) -> None:
