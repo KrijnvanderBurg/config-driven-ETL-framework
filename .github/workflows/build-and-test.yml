@@ -93,3 +93,13 @@ jobs:
           name: coverage-report-e2e
           path: coverage-e2e.xml
           retention-days: 7
+
+      - name: Validate ./examples/ jobs
+        run: |
+          find ./examples/ -type f \( -name "job.jsonc" -o -name "job.json" -o -name "job.yaml" \) | while read job_file; do
+            job_dir=$(dirname "$job_file")
+            python -m samara --log-level="WARNING" validate \
+              --alert-filepath "$job_dir/alert.jsonc" \
+              --runtime-filepath "$job_file"
+            echo "$(basename "$job_dir") - Exit code: $?"
+          done

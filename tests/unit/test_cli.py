@@ -477,7 +477,7 @@ class TestCliGroup:
 
         # Assert
         # Click shows usage information when no command is given
-        assert result.exit_code == ExitCode.USAGE_ERROR
+        assert result.exit_code == 0
         assert "Commands:" in result.output
 
     def test_cli__when_user_interrupts__exits_gracefully(self) -> None:

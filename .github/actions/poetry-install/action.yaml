@@ -8,6 +8,16 @@ inputs:
 runs:
   using: composite
   steps:
+    - name: Cache Poetry Dependencies
+      uses: actions/cache@v4
+      with:
+        path: |
+          ~/.cache/pypoetry
+          ~/.virtualenvs
+        key: ${{ runner.os }}-poetry-${{ hashFiles('**/poetry.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-poetry-
+
     - name: Install Dependencies
       shell: bash
       run: |
