@@ -102,7 +102,7 @@ jobs:
             
             if [ -f "$alert_file" ]; then
               echo "Validating: $job_file with $alert_file"
-              python -m samara validate --alert-filepath "$alert_file" --runtime-filepath "$job_file"
+              python -m samara --log-level="WARNING" validate --alert-filepath "$alert_file" --runtime-filepath "$job_file"
             else
               echo "Skipping $job_file (no alert.jsonc found)"
             fi
