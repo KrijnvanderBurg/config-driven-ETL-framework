@@ -17,6 +17,7 @@ from typing import Any, ClassVar, Literal, Self
 from pydantic import Field, model_validator
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
+
 from samara.runtime.jobs.models.model_extract import ExtractFileModel, ExtractMethod, ExtractModel
 from samara.runtime.jobs.spark.schema import SchemaFilepathHandler, SchemaStringHandler
 from samara.runtime.jobs.spark.session import SparkHandler
@@ -38,10 +39,22 @@ class ExtractSpark(ExtractModel, ABC):
         data_registry: Registry for storing extracted DataFrames
     """
 
-    spark: ClassVar[SparkHandler] = SparkHandler()
+    _spark: ClassVar[SparkHandler | None] = None
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     options: dict[str, Any] = Field(..., description="PySpark reader options as key-value pairs")
     _schema_parsed: StructType | None = None
+
+    @property
+    def spark(self) -> SparkHandler:
+        """Lazily initialize and return the SparkHandler singleton.
+
+        Returns:
+            SparkHandler: The singleton SparkHandler instance.
+        """
+        if ExtractSpark._spark is None:
+            logger.debug("Initializing SparkHandler for ExtractSpark")
+            ExtractSpark._spark = SparkHandler()
+        return ExtractSpark._spark  # type: ignore[return-value]
 
     @model_validator(mode="after")
     def parse_schema(self) -> Self:

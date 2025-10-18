@@ -20,6 +20,7 @@ from typing import Any, ClassVar, Literal
 
 from pydantic import Field
 from pyspark.sql.streaming.query import StreamingQuery
+
 from samara.runtime.jobs.models.model_load import LoadMethod, LoadModel, LoadModelFile
 from samara.runtime.jobs.spark.session import SparkHandler
 from samara.types import DataFrameRegistry, StreamingQueryRegistry
@@ -36,10 +37,22 @@ class LoadSpark(LoadModel, ABC):
     supporting both batch and streaming loads to various destinations.
     """
 
-    spark: ClassVar[SparkHandler] = SparkHandler()
+    _spark: ClassVar[SparkHandler | None] = None
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     streaming_query_registry: ClassVar[StreamingQueryRegistry] = StreamingQueryRegistry()
     options: dict[str, Any] = Field(..., description="Options for the sink input.")
+
+    @property
+    def spark(self) -> SparkHandler:
+        """Lazily initialize and return the SparkHandler singleton.
+
+        Returns:
+            SparkHandler: The singleton SparkHandler instance.
+        """
+        if LoadSpark._spark is None:
+            logger.debug("Initializing SparkHandler for LoadSpark")
+            LoadSpark._spark = SparkHandler()
+        return LoadSpark._spark  # type: ignore[return-value]
 
     @abstractmethod
     def _load_batch(self) -> None:

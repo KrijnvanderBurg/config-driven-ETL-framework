@@ -16,6 +16,7 @@ import logging
 from typing import Any, ClassVar
 
 from pydantic import Field
+
 from samara.runtime.jobs.models.model_transform import TransformModel
 from samara.runtime.jobs.spark.session import SparkHandler
 from samara.runtime.jobs.spark.transforms import transform_function_spark_union
@@ -32,10 +33,22 @@ class TransformSpark(TransformModel):
     This class provides functionality for transforming data.
     """
 
-    spark: ClassVar[SparkHandler] = SparkHandler()
+    _spark: ClassVar[SparkHandler | None] = None
     functions: list[transform_function_spark_union]
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     options: dict[str, Any] = Field(..., description="Transformation options as key-value pairs")
+
+    @property
+    def spark(self) -> SparkHandler:
+        """Lazily initialize and return the SparkHandler singleton.
+
+        Returns:
+            SparkHandler: The singleton SparkHandler instance.
+        """
+        if TransformSpark._spark is None:
+            logger.debug("Initializing SparkHandler for TransformSpark")
+            TransformSpark._spark = SparkHandler()
+        return TransformSpark._spark  # type: ignore[return-value]
 
     def transform(self) -> None:
         """
