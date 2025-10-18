@@ -10,7 +10,9 @@ of the appropriate Extract, Transform, and Load components based on the configur
 
 import logging
 import time
+from typing import Self
 
+from pydantic import model_validator
 from typing_extensions import override
 
 from samara.runtime.jobs.models.model_job import JobBase, JobEngine
@@ -51,6 +53,49 @@ class JobSpark(JobBase[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion]):
     """
 
     engine_type: JobEngine = JobEngine.SPARK
+
+    @model_validator(mode="after")
+    def validate_join_upstream_references(self) -> Self:
+        """Validate join transform other_upstream_id references exist and are in correct order.
+
+        Ensures that:
+        - Join transform other_upstream_ids reference existing extract or previously defined transform IDs
+        - Join transforms cannot reference themselves
+        - Join transforms can only reference transforms that appear before them in the list
+
+        Returns:
+            Self: The validated instance.
+
+        Raises:
+            ValueError: If invalid other_upstream_id references are found in join functions.
+        """
+        extract_ids = {extract.id_ for extract in self.extracts}
+        valid_upstream_ids_for_transforms = extract_ids.copy()
+
+        for transform in self.transforms:
+            # Validate join function's other_upstream_id if present
+            for function in transform.functions:
+                if function.function_type == "join":
+                    other_upstream_id = function.arguments.other_upstream_id
+                    # Check if join references the transform itself
+                    if other_upstream_id == transform.id_:
+                        raise ValueError(
+                            f"Transform '{transform.id_}' has join function with other_upstream_id '{other_upstream_id}' "
+                            f"in job '{self.id_}' which references its own id. "
+                            f"A join cannot reference the same transform."
+                        )
+                    # Check if other_upstream_id exists in extracts or previously defined transforms
+                    if other_upstream_id not in valid_upstream_ids_for_transforms:
+                        raise ValueError(
+                            f"Transform '{transform.id_}' has join function with other_upstream_id '{other_upstream_id}' "
+                            f"in job '{self.id_}' which either does not exist or is defined later in the transforms list. "
+                            f"other_upstream_id must reference an existing extract or a transform that appears before this one."
+                        )
+
+            # Add current transform ID to valid upstream IDs for subsequent transforms
+            valid_upstream_ids_for_transforms.add(transform.id_)
+
+        return self
 
     @override
     def _execute(self) -> None:
