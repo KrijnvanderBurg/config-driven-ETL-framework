@@ -11,11 +11,12 @@ from collections.abc import Callable
 
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import expr
+
 from samara.runtime.jobs.models.transforms.model_withcolumn import WithColumnFunctionModel
-from samara.runtime.jobs.spark.function import Function
+from samara.runtime.jobs.spark.transforms.base import FunctionSpark
 
 
-class WithColumnFunction(WithColumnFunctionModel, Function):
+class WithColumnFunction(WithColumnFunctionModel, FunctionSpark):
     """Function that adds or replaces a column in a DataFrame.
 
     This transform function allows for adding a new column or replacing an existing

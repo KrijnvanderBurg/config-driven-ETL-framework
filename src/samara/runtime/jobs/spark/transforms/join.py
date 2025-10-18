@@ -11,14 +11,15 @@ import logging
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame
+
 from samara.runtime.jobs.models.transforms.model_join import JoinFunctionModel
-from samara.runtime.jobs.spark.function import Function
+from samara.runtime.jobs.spark.transforms.base import FunctionSpark
 from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
 
-class JoinFunction(JoinFunctionModel, Function):
+class JoinFunction(JoinFunctionModel, FunctionSpark):
     """Function that joins DataFrames.
 
     This transform function allows for joining the current DataFrame with another

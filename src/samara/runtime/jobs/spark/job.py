@@ -13,7 +13,7 @@ import time
 
 from typing_extensions import override
 
-from samara.runtime.jobs.models.model_job import JobBase, JobEngine
+from samara.runtime.jobs.models.model_job import JobEngine, JobModel
 from samara.runtime.jobs.spark.extract import ExtractSparkUnion
 from samara.runtime.jobs.spark.load import LoadSparkUnion
 from samara.runtime.jobs.spark.transform import TransformSparkUnion
@@ -23,7 +23,7 @@ from samara.utils.logger import get_logger
 logger: logging.Logger = get_logger(__name__)
 
 
-class JobSpark(JobBase[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion]):
+class JobSpark(JobModel[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion]):
     """A complete ETL job that orchestrates extract, transform, and load operations.
 
     The Job class is the main entry point for the ingestion framework. It coordinates

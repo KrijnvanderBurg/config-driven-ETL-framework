@@ -11,11 +11,12 @@ from collections.abc import Callable
 
 from pyspark.sql import DataFrame
 from pyspark.sql.functions import col
+
 from samara.runtime.jobs.models.transforms.model_cast import CastFunctionModel
-from samara.runtime.jobs.spark.function import Function
+from samara.runtime.jobs.spark.transforms.base import FunctionSpark
 
 
-class CastFunction(CastFunctionModel, Function):
+class CastFunction(CastFunctionModel, FunctionSpark):
     """Function that casts columns to specified data types in a DataFrame.
 
     This transform function allows for changing the data type of specific columns

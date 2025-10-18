@@ -26,7 +26,7 @@ from samara.utils.logger import get_logger
 logger: logging.Logger = get_logger(__name__)
 
 
-class TransformSpark(TransformModel):
+class TransformSpark(TransformModel[transform_function_spark_union]):
     """
     Concrete implementation for DataFrame transformation.
 
@@ -34,7 +34,6 @@ class TransformSpark(TransformModel):
     """
 
     spark: ClassVar[SparkHandler] = SparkHandler()
-    functions: list[transform_function_spark_union]
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     options: dict[str, Any] = Field(..., description="Transformation options as key-value pairs")
 

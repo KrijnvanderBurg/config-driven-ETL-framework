@@ -10,11 +10,12 @@ the name 'drop', making it available for use in configuration files.
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame
+
 from samara.runtime.jobs.models.transforms.model_drop import DropFunctionModel
-from samara.runtime.jobs.spark.function import Function
+from samara.runtime.jobs.spark.transforms.base import FunctionSpark
 
 
-class DropFunction(DropFunctionModel, Function):
+class DropFunction(DropFunctionModel, FunctionSpark):
     """Function that drops specified columns from a DataFrame.
 
     This transform function allows for removing unwanted columns from

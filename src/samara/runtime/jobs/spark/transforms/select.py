@@ -11,14 +11,15 @@ import logging
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame
+
 from samara.runtime.jobs.models.transforms.model_select import SelectFunctionModel
-from samara.runtime.jobs.spark.function import Function
+from samara.runtime.jobs.spark.transforms.base import FunctionSpark
 from samara.utils.logger import get_logger
 
 logger: logging.Logger = get_logger(__name__)
 
 
-class SelectFunction(SelectFunctionModel, Function):
+class SelectFunction(SelectFunctionModel, FunctionSpark):
     """Function that selects specified columns from a DataFrame.
 
     This transform function allows for projecting specific columns from

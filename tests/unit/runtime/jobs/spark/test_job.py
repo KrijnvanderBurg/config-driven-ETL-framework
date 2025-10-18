@@ -328,14 +328,72 @@ class TestJobSparkValidation:
             }
         )
 
-        job_spark = JobSpark(**job_config)
-        assert job_spark is not None
+        JobSpark(**job_config)  # Should not raise
 
     def test_create_job_spark__with_load_referencing_transform__succeeds(self, job_config: dict[str, Any]) -> None:
         """Test JobSpark creation succeeds when load references a transform ID."""
         # Default config already has load referencing transform
         job_spark = JobSpark(**job_config)
         assert job_spark.loads[0].upstream_id == "tr2"
+
+    def test_create_job_spark__with_join_referencing_nonexistent_other_upstream_id__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when join function references non-existent other_upstream_id."""
+        job_config["transforms"][0]["functions"] = [
+            {"function_type": "join", "arguments": {"other_upstream_id": "nonexistent", "on": "id", "how": "inner"}}
+        ]
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_join_referencing_later_transform__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when join function references a transform defined later."""
+        job_config["transforms"].append({"id": "tr3", "upstream_id": "ex2", "options": {}, "functions": []})
+        job_config["transforms"][0]["functions"] = [
+            {"function_type": "join", "arguments": {"other_upstream_id": "tr3", "on": "id", "how": "inner"}}
+        ]
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_join_referencing_extract__succeeds(self, job_config: dict[str, Any]) -> None:
+        """Test JobSpark creation succeeds when join function references an extract ID."""
+        job_config["transforms"][0]["functions"] = [
+            {"function_type": "join", "arguments": {"other_upstream_id": "ex2", "on": "id", "how": "inner"}}
+        ]
+
+        JobSpark(**job_config)  # Should not raise
+
+    def test_create_job_spark__with_join_referencing_earlier_transform__succeeds(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation succeeds when join function references a previously defined transform."""
+        job_config["transforms"].append(
+            {
+                "id": "tr3",
+                "upstream_id": "ex2",
+                "options": {},
+                "functions": [
+                    {"function_type": "join", "arguments": {"other_upstream_id": "tr2", "on": "id", "how": "inner"}}
+                ],
+            }
+        )
+
+        JobSpark(**job_config)  # Should not raise
+
+    def test_create_job_spark__with_join_referencing_itself__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when join function references the transform's own ID."""
+        job_config["transforms"][0]["functions"] = [
+            {"function_type": "join", "arguments": {"other_upstream_id": "tr2", "on": "id", "how": "inner"}}
+        ]
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
 
 
 # =========================================================================== #
