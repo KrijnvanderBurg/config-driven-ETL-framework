@@ -93,11 +93,13 @@ jobs:
   build-and-test:
     uses: ./.github/workflows/build-and-test.yml
 
-  generate-job-matrix:
-    name: Generate Job Matrix
+  validate-examples:
+    name: Validate Example Jobs
+    needs: build-and-test
     runs-on: ubuntu-latest
-    outputs:
-      jobs: ${{ steps.set-matrix.outputs.jobs }}
+    strategy:
+      matrix:
+        job: ${{ fromJson(needs.build-and-test.outputs.jobs) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -109,17 +111,6 @@ jobs:
           echo "jobs=${JOBS}" >> $GITHUB_OUTPUT
           echo "Generated matrix:"
           echo "${JOBS}" | jq '.'
-
-  validate-examples:
-    name: Validate Example Jobs
-    needs: [build-and-test, generate-job-matrix]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        job: ${{ fromJSON(needs.generate-job-matrix.outputs.jobs) }}
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
 
       - name: Install Python
         uses: ./.github/actions/setup-python
