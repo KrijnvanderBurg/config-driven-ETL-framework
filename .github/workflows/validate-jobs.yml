@@ -32,7 +32,7 @@ jobs:
           echo "jobs=${JOBS}" >> $GITHUB_OUTPUT
           echo "Generated matrix:"
           echo "${JOBS}" | jq '.'
-    steps:
+
       - name: Checkout code
         uses: actions/checkout@v4
 
