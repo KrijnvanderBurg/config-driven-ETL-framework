@@ -37,12 +37,17 @@ class ExtractSpark(ExtractModel, ABC):
         model_cls: The model class used for configuration
         model: The configuration model for this extraction
         data_registry: Registry for storing extracted DataFrames
+        spark: SparkHandler instance for Spark operations
     """
 
-    spark: ClassVar[SparkHandler] = SparkHandler()
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     options: dict[str, Any] = Field(..., description="PySpark reader options as key-value pairs")
-    _schema_parsed: StructType | None = None
+
+    def __init__(self, **data: Any) -> None:
+        """Initialize the model and SparkHandler."""
+        super().__init__(**data)
+        self.spark: SparkHandler = SparkHandler()
+        self._schema_parsed: StructType | None = None
 
     @model_validator(mode="after")
     def parse_schema(self) -> Self:

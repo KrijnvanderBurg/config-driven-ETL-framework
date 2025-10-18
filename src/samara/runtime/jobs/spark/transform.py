@@ -31,11 +31,18 @@ class TransformSpark(TransformModel[transform_function_spark_union]):
     Concrete implementation for DataFrame transformation.
 
     This class provides functionality for transforming data.
+
+    Attributes:
+        spark: SparkHandler instance for Spark operations
     """
 
-    spark: ClassVar[SparkHandler] = SparkHandler()
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     options: dict[str, Any] = Field(..., description="Transformation options as key-value pairs")
+
+    def __init__(self, **data: Any) -> None:
+        """Initialize the model and SparkHandler."""
+        super().__init__(**data)
+        self.spark: SparkHandler = SparkHandler()
 
     def transform(self) -> None:
         """

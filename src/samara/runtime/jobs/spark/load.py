@@ -35,12 +35,19 @@ class LoadSpark(LoadModel, ABC):
 
     This class defines the interface for all loading implementations,
     supporting both batch and streaming loads to various destinations.
+
+    Attributes:
+        spark: SparkHandler instance for Spark operations
     """
 
-    spark: ClassVar[SparkHandler] = SparkHandler()
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     streaming_query_registry: ClassVar[StreamingQueryRegistry] = StreamingQueryRegistry()
     options: dict[str, Any] = Field(..., description="Options for the sink input.")
+
+    def __init__(self, **data: Any) -> None:
+        """Initialize the model and SparkHandler."""
+        super().__init__(**data)
+        self.spark: SparkHandler = SparkHandler()
 
     @abstractmethod
     def _load_batch(self) -> None:
