@@ -19,7 +19,6 @@ from samara.exceptions import (
     SamaraRuntimeConfigurationError,
     SamaraValidationError,
 )
-from samara.runtime.controller import RuntimeController
 from samara.utils.logger import get_logger, set_logger
 
 logger: logging.Logger = get_logger(__name__)
@@ -70,6 +69,8 @@ def validate(
     test_env_var: tuple[str, ...],
 ) -> None:
     """Validate the ETL pipeline configuration."""
+    from samara.runtime.controller import RuntimeController
+
     try:
         logger.info("Running 'validate' command...")
 
@@ -148,6 +149,8 @@ def validate(
 )
 def run(alert_filepath: Path, runtime_filepath: Path) -> None:
     """Run the ETL pipeline."""
+    from samara.runtime.controller import RuntimeController
+
     try:
         logger.info("Running 'run' command...")
         logger.info("Running ETL pipeline with config: %s", runtime_filepath)
@@ -214,6 +217,8 @@ def run(alert_filepath: Path, runtime_filepath: Path) -> None:
 )
 def export_schema(output_filepath: Path) -> None:
     """Export the runtime configuration JSON schema."""
+    from samara.runtime.controller import RuntimeController
+
     try:
         logger.info("Running 'export-schema' command...")
         logger.info("Exporting runtime configuration schema to: %s", output_filepath)
