@@ -32,10 +32,21 @@ class TransformSpark(TransformModel):
     This class provides functionality for transforming data.
     """
 
-    spark: ClassVar[SparkHandler] = SparkHandler()
+    _spark: ClassVar[SparkHandler | None] = None
     functions: list[transform_function_spark_union]
     data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
     options: dict[str, Any] = Field(..., description="Transformation options as key-value pairs")
+
+    @property
+    def spark(self) -> SparkHandler:
+        """Get or create the SparkHandler instance.
+        
+        Returns:
+            SparkHandler: The singleton SparkHandler instance
+        """
+        if TransformSpark._spark is None:
+            TransformSpark._spark = SparkHandler()
+        return TransformSpark._spark
 
     def transform(self) -> None:
         """
