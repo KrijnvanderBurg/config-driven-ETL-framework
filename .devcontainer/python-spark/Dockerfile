@@ -7,6 +7,10 @@ RUN ZSH_SNIPPET="export HISTFILE=/commandhistory/.zsh_history && export HISTSIZE
     && chown -R ${USER}:${USER} /commandhistory \
     && echo "$ZSH_SNIPPET" >> "/home/${USER}/.zshrc"
 
+# Create Poetry cache directory with correct ownership for vscode user
+RUN mkdir -p /home/vscode/.cache/pypoetry \
+    && chown -R vscode:vscode /home/vscode/.cache
+
 ###  pyspark 
 # Install Java and other dependencies
 RUN apt-get update && \

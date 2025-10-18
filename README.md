@@ -9,16 +9,6 @@
 </p>
 
 <p align="center">
-  <a href="https://pypi.org/project/samara/"><img src="https://img.shields.io/badge/python-3.11-informational" alt="Python Versions"></a>
-  <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/blob/main/LICENSE"><img src="https://img.shields.io/github/license/krijnvanderburg/config-driven-ETL-framework?style=flat-square" alt="License"></a>
-  <a href="https://spark.apache.org/docs/latest/"><img src="https://img.shields.io/badge/spark-3.5.0+-lightgrey" alt="Apache Spark"></a>
-</p>
-
-<p align="center">
-  <b>Built by Krijn van der Burg for the Data Engineering community</b>
-</p>
-
-<p align="center">
   <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/stargazers">⭐ Star this repo</a> •
   <a href="./docs/README.md">📚 Documentation</a> •
   <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/issues">🐛 Report Issues</a> •
@@ -29,6 +19,10 @@
   <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/releases">📥 Releases</a> •
   <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/blob/main/CHANGELOG.md">📝 Changelog (TBD)</a> •
   <a href="https://github.com/krijnvanderburg/config-driven-ETL-framework/blob/main/CONTRIBUTING.md">🤝 Contributing</a>
+</p>
+
+<p align="center">
+  <b>Built by Krijn van der Burg for the Data Engineering community</b>
 </p>
 
 ---
