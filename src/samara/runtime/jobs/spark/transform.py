@@ -16,6 +16,7 @@ import logging
 from typing import Any, ClassVar
 
 from pydantic import Field
+
 from samara.runtime.jobs.models.model_transform import TransformModel
 from samara.runtime.jobs.spark.session import SparkHandler
 from samara.runtime.jobs.spark.transforms import transform_function_spark_union

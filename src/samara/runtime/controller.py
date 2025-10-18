@@ -91,7 +91,9 @@ class RuntimeController(BaseModel):
             logger.info("Successfully created RuntimeManager from configuration file: %s", filepath)
             return runtime
         except KeyError as e:
-            raise SamaraRuntimeConfigurationError(f"Missing 'runtime' section in configuration file '{filepath}'") from e
+            raise SamaraRuntimeConfigurationError(
+                f"Missing 'runtime' section in configuration file '{filepath}'"
+            ) from e
         except ValidationError as e:
             raise SamaraRuntimeConfigurationError(f"Invalid runtime configuration in file '{filepath}': {e}") from e
 

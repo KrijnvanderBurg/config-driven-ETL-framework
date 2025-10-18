@@ -17,6 +17,7 @@ from typing import Any, ClassVar, Literal, Self
 from pydantic import Field, model_validator
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
+
 from samara.runtime.jobs.models.model_extract import ExtractFileModel, ExtractMethod, ExtractModel
 from samara.runtime.jobs.spark.schema import SchemaFilepathHandler, SchemaStringHandler
 from samara.runtime.jobs.spark.session import SparkHandler
