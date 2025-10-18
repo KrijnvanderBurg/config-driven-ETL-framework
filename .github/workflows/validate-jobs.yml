@@ -12,9 +12,13 @@ jobs:
     name: Build Package
     uses: ./.github/workflows/build-and-test.yml
 
-  generate-matrix:
-    name: Generate Job Matrix
+  validate-jobs:
+    name: Validate Job Config
+    needs: build
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        job: ${{ fromJSON(needs.validate-jobs.outputs.jobs) }}
     outputs:
       jobs: ${{ steps.set-matrix.outputs.jobs }}
     steps:
@@ -28,14 +32,6 @@ jobs:
           echo "jobs=${JOBS}" >> $GITHUB_OUTPUT
           echo "Generated matrix:"
           echo "${JOBS}" | jq '.'
-
-  validate-jobs:
-    name: Validate Job Config
-    needs: [build, generate-matrix]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        job: ${{ fromJSON(needs.generate-matrix.outputs.jobs) }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
