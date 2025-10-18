@@ -94,7 +94,7 @@ jobs:
           path: coverage-e2e.xml
           retention-days: 7
 
-      - name: Validate Example Jobs
+      - name: Validate ./examples/ jobs
         run: |
           find ./examples/ -type f \( -name "job.jsonc" -o -name "job.json" -o -name "job.yaml" \) | while read job_file; do
             job_dir=$(dirname "$job_file")
