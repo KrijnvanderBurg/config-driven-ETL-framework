@@ -142,12 +142,21 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
             for function in getattr(transform, "functions", []):
                 if getattr(function, "function_type", None) == "join":
                     other_upstream_id = getattr(function.arguments, "other_upstream_id", None)
-                    if other_upstream_id and other_upstream_id not in valid_upstream_ids_for_transforms:
-                        raise ValueError(
-                            f"Transform '{transform.id_}' has join function with other_upstream_id '{other_upstream_id}' "
-                            f"in job '{self.id_}' which either does not exist or is defined later in the transforms list. "
-                            f"other_upstream_id must reference an existing extract or a transform that appears before this one."
-                        )
+                    if other_upstream_id:
+                        # Check if join references the transform itself
+                        if other_upstream_id == transform.id_:
+                            raise ValueError(
+                                f"Transform '{transform.id_}' has join function with other_upstream_id '{other_upstream_id}' "
+                                f"in job '{self.id_}' which references its own id. "
+                                f"A join cannot reference the same transform."
+                            )
+                        # Check if other_upstream_id exists in extracts or previously defined transforms
+                        if other_upstream_id not in valid_upstream_ids_for_transforms:
+                            raise ValueError(
+                                f"Transform '{transform.id_}' has join function with other_upstream_id '{other_upstream_id}' "
+                                f"in job '{self.id_}' which either does not exist or is defined later in the transforms list. "
+                                f"other_upstream_id must reference an existing extract or a transform that appears before this one."
+                            )
 
             # Add current transform ID to valid upstream IDs for subsequent transforms
             valid_upstream_ids_for_transforms.add(transform.id_)
