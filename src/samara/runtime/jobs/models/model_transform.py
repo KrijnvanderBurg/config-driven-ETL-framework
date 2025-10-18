@@ -68,6 +68,7 @@ class TransformModel(BaseModel):
     Args:
         id: Identifier for this transformation operation
         upstream_id: Identifier(s) of the upstream component(s) providing data
+        functions: List of transformation functions to apply
         options: Transformation options as key-value pairs
 
     Examples:
@@ -82,3 +83,4 @@ class TransformModel(BaseModel):
 
     id_: str = Field(..., alias="id", description="Identifier for this transformation operation", min_length=1)
     upstream_id: str = Field(..., description="Identifier(s) of the upstream component(s) providing data", min_length=1)
+    functions: list = Field(default_factory=list, description="List of transformation functions to apply")
