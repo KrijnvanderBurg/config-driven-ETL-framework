@@ -96,14 +96,8 @@ jobs:
 
       - name: Validate Example Jobs
         run: |
-          find examples -name "job.jsonc" -type f | while read job_file; do
-            job_dir=$(dirname "$job_file")
-            alert_file="$job_dir/alert.jsonc"
-            
-            if [ -f "$alert_file" ]; then
-              echo "Validating: $job_file with $alert_file"
-              python -m samara --log-level="WARNING" validate --alert-filepath "$alert_file" --runtime-filepath "$job_file"
-            else
-              echo "Skipping $job_file (no alert.jsonc found)"
-            fi
+          for example_dir in ./examples/*/; do
+            python -m samara --log-level="WARNING" validate \
+              --alert-filepath "${example_dir}alert.jsonc" \
+              --runtime-filepath "${example_dir}job.jsonc"
           done
