@@ -139,10 +139,10 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
                 )
 
             # Validate join function's other_upstream_id if present
-            for function in getattr(transform, "functions", []):
-                if getattr(function, "function_type", None) == "join":
-                    other_upstream_id = getattr(function.arguments, "other_upstream_id", None)
-                    if other_upstream_id:
+            try:
+                for function in transform.functions:
+                    if function.function_type == "join":
+                        other_upstream_id = function.arguments.other_upstream_id
                         # Check if join references the transform itself
                         if other_upstream_id == transform.id_:
                             raise ValueError(
@@ -157,6 +157,9 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
                                 f"in job '{self.id_}' which either does not exist or is defined later in the transforms list. "
                                 f"other_upstream_id must reference an existing extract or a transform that appears before this one."
                             )
+            except AttributeError:
+                # Transform doesn't have functions attribute, skip validation
+                pass
 
             # Add current transform ID to valid upstream IDs for subsequent transforms
             valid_upstream_ids_for_transforms.add(transform.id_)
