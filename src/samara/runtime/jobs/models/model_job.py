@@ -41,7 +41,7 @@ class JobEngine(Enum):
     # POLARS = "polars"
 
 
-class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
+class JobModel(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
     """Abstract base class for all job types.
 
     Defines the common interface and attributes that all job implementations
@@ -136,6 +136,18 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
                     f"in job '{self.id_}' which either does not exist or is defined later in the transforms list. "
                     f"upstream_id must reference an existing extract or a transform that appears before this one."
                 )
+
+            for function in transform.functions:
+                if function.function_type == "join":
+                    other_upstream_id = function.arguments.other_upstream_id
+                    if other_upstream_id not in valid_upstream_ids_for_transforms:
+                        raise ValueError(
+                            f"Transform '{transform.id_}' with 'join' function references "
+                            f"other_upstream_id '{other_upstream_id}' in job '{self.id_}' which "
+                            f"either does not exist or is defined later in the transforms list. "
+                            f"other_upstream_id must reference an existing extract or a transform "
+                            f"that appears before this one."
+                        )
 
             # Add current transform ID to valid upstream IDs for subsequent transforms
             valid_upstream_ids_for_transforms.add(transform.id_)

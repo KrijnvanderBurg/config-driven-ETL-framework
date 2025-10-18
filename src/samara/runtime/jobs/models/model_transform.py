@@ -13,10 +13,12 @@ and provide a type-safe interface between configuration and implementation.
 """
 
 import logging
-from abc import ABC
+from abc import ABC, abstractmethod
+from collections.abc import Callable
 from typing import Generic, TypeVar
 
 from pydantic import Field
+
 from samara import BaseModel
 from samara.utils.logger import get_logger
 
@@ -54,11 +56,22 @@ class FunctionModel(BaseModel, Generic[ArgsT], ABC):
 
     arguments: ArgsT
 
+    @abstractmethod
+    def transform(self) -> Callable:
+        """Create a callable transformation function based on the model.
+
+        This method should implement the logic to create a function that
+        can be called to transform data according to the model configuration.
+
+        Returns:
+            A callable function that applies the transformation to data.
+        """
+
 
 FunctionModelT = TypeVar("FunctionModelT", bound=FunctionModel)
 
 
-class TransformModel(BaseModel):
+class TransformModel(BaseModel, Generic[FunctionModelT], ABC):
     """
     Model for data transformation operations.
 
@@ -68,6 +81,7 @@ class TransformModel(BaseModel):
     Args:
         id: Identifier for this transformation operation
         upstream_id: Identifier(s) of the upstream component(s) providing data
+        functions: List of transformation functions to apply
         options: Transformation options as key-value pairs
 
     Examples:
@@ -82,3 +96,4 @@ class TransformModel(BaseModel):
 
     id_: str = Field(..., alias="id", description="Identifier for this transformation operation", min_length=1)
     upstream_id: str = Field(..., description="Identifier(s) of the upstream component(s) providing data", min_length=1)
+    functions: list[FunctionModelT] = Field(..., description="List of transformation functions to apply")
