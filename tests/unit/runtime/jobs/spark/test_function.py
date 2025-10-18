@@ -19,7 +19,7 @@ class _DummyArgs(ArgsModel):
 
 class DummyFunction(FunctionSpark):
     """Minimal concrete Function implementation for testing purposes.
-    
+
     This dummy function is used to test the FunctionSpark base class
     without requiring actual Spark transformations.
     """
@@ -29,10 +29,11 @@ class DummyFunction(FunctionSpark):
 
     def transform(self) -> Callable[..., Any | None]:
         """Return a callable that passes through the input unchanged.
-        
+
         Returns:
             A callable function that returns its input as-is
         """
+
         def _f(df: Any = None) -> Any | None:
             return df
 
@@ -45,7 +46,7 @@ class TestFunctionSparkCreation:
     @pytest.fixture
     def function_config(self) -> dict:
         """Provide configuration dictionary for creating a DummyFunction.
-        
+
         Returns:
             Configuration dictionary with function type and arguments
         """
@@ -80,7 +81,7 @@ class TestFunctionSparkTransform:
     @pytest.fixture
     def function_obj(self) -> DummyFunction:
         """Provide a DummyFunction instance for testing.
-        
+
         Returns:
             Configured DummyFunction instance
         """
