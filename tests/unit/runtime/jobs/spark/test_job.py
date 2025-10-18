@@ -371,7 +371,9 @@ class TestJobSparkExecute:
 
         job_spark.execute()  # Should not raise, just return
 
-    def test_execute__with_exception__triggers_on_error_and_wraps_in_samara_job_error(self, job_spark: JobSpark) -> None:
+    def test_execute__with_exception__triggers_on_error_and_wraps_in_samara_job_error(
+        self, job_spark: JobSpark
+    ) -> None:
         """Test execute triggers onError hook and wraps exceptions in SamaraJobError."""
         mock_error_action = Mock()
         job_spark.hooks.onError = [mock_error_action]
