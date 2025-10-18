@@ -9,7 +9,7 @@ from unittest.mock import Mock, patch
 import pytest
 from pydantic import ValidationError
 
-from samara.exceptions import FlintJobError
+from samara.exceptions import SamaraJobError
 from samara.runtime.jobs.spark.job import JobSpark
 
 # =========================================================================== #
@@ -371,8 +371,8 @@ class TestJobSparkExecute:
 
         job_spark.execute()  # Should not raise, just return
 
-    def test_execute__with_exception__triggers_on_error_and_wraps_in_flint_job_error(self, job_spark: JobSpark) -> None:
-        """Test execute triggers onError hook and wraps exceptions in FlintJobError."""
+    def test_execute__with_exception__triggers_on_error_and_wraps_in_samara_job_error(self, job_spark: JobSpark) -> None:
+        """Test execute triggers onError hook and wraps exceptions in SamaraJobError."""
         mock_error_action = Mock()
         job_spark.hooks.onError = [mock_error_action]
         mock_extract = Mock()
@@ -380,13 +380,13 @@ class TestJobSparkExecute:
         mock_extract.extract.side_effect = ValueError("Extract failed")
         job_spark.extracts = [mock_extract]
 
-        with pytest.raises(FlintJobError):
+        with pytest.raises(SamaraJobError):
             job_spark.execute()
 
         mock_error_action.execute.assert_called_once()
 
-    def test_execute__with_os_error__wraps_in_flint_job_error(self, job_spark: JobSpark) -> None:
-        """Test execute wraps OSError (and subclasses like FileNotFoundError, PermissionError) in FlintJobError."""
+    def test_execute__with_os_error__wraps_in_samara_job_error(self, job_spark: JobSpark) -> None:
+        """Test execute wraps OSError (and subclasses like FileNotFoundError, PermissionError) in SamaraJobError."""
         mock_load = Mock()
         mock_load.id = "load_io_error"
         mock_load.load.side_effect = OSError("Disk full")
@@ -394,11 +394,11 @@ class TestJobSparkExecute:
         job_spark.transforms = []
         job_spark.loads = [mock_load]
 
-        with pytest.raises(FlintJobError):
+        with pytest.raises(SamaraJobError):
             job_spark.execute()
 
-    def test_execute__with_key_error__wraps_in_flint_job_error(self, job_spark: JobSpark) -> None:
-        """Test execute wraps KeyError in FlintJobError."""
+    def test_execute__with_key_error__wraps_in_samara_job_error(self, job_spark: JobSpark) -> None:
+        """Test execute wraps KeyError in SamaraJobError."""
         mock_transform = Mock()
         mock_transform.id = "transform_missing_upstream"
         mock_transform.transform.side_effect = KeyError("upstream_name")
@@ -406,7 +406,7 @@ class TestJobSparkExecute:
         job_spark.transforms = [mock_transform]
         job_spark.loads = []
 
-        with pytest.raises(FlintJobError):
+        with pytest.raises(SamaraJobError):
             job_spark.execute()
 
 

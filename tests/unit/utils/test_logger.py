@@ -25,7 +25,7 @@ class TestSetLogger:
         assert logger is not None
         logger.debug("debug message")
 
-    def test_respects_flint_log_level_env_variable(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_respects_samara_log_level_env_variable(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that set_logger uses FLINT_LOG_LEVEL environment variable."""
         # Arrange
         monkeypatch.setenv("FLINT_LOG_LEVEL", "DEBUG")
@@ -51,7 +51,7 @@ class TestSetLogger:
         assert logger is not None
         logger.warning("warning message")
 
-    def test_flint_log_level_takes_precedence_over_log_level(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    def test_samara_log_level_takes_precedence_over_log_level(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Test that FLINT_LOG_LEVEL takes precedence over LOG_LEVEL."""
         # Arrange
         monkeypatch.setenv("FLINT_LOG_LEVEL", "WARNING")

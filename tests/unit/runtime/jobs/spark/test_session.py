@@ -9,7 +9,7 @@ from samara.runtime.jobs.spark.session import SparkHandler
 def fixture_spark_handler_obj() -> SparkHandler:
     """Programmatic SparkHandler fixture."""
     # Simple construction using default args; tests should mock internals
-    return SparkHandler(app_name="pytest_flint", options={})
+    return SparkHandler(app_name="pytest_samara", options={})
 
 
 @pytest.fixture(name="spark_handler_dict")
@@ -19,7 +19,7 @@ def fixture_spark_handler_dict() -> SparkHandler:
     Although SparkHandler is not a Pydantic model, it accepts constructor
     kwargs and this fixture demonstrates creating it from a mapping.
     """
-    params = {"app_name": "dict_flint", "options": {}}
+    params = {"app_name": "dict_samara", "options": {}}
     return SparkHandler(**params)
 
 

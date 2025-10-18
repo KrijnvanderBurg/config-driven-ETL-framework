@@ -12,7 +12,7 @@ from pydantic import Field, ValidationError
 from pydantic.json_schema import GenerateJsonSchema, JsonSchemaValue
 
 from samara import BaseModel
-from samara.exceptions import FlintIOError, FlintRuntimeConfigurationError
+from samara.exceptions import SamaraIOError, SamaraRuntimeConfigurationError
 from samara.runtime.jobs import JobUnion
 from samara.utils.file import FileHandlerContext
 from samara.utils.logger import get_logger
@@ -74,8 +74,8 @@ class RuntimeController(BaseModel):
             A fully configured RuntimeManager instance.
 
         Raises:
-            FlintIOError: If there are file I/O related issues (file not found, permission denied, etc.)
-            FlintRuntimeConfigurationError: If there are configuration parsing or validation issues
+            SamaraIOError: If there are file I/O related issues (file not found, permission denied, etc.)
+            SamaraRuntimeConfigurationError: If there are configuration parsing or validation issues
         """
         logger.info("Creating RuntimeManager from file: %s", filepath)
 
@@ -84,16 +84,16 @@ class RuntimeController(BaseModel):
             dict_: dict[str, Any] = handler.read()
         except (OSError, ValueError) as e:
             logger.error("Failed to read runtime configuration file: %s", e)
-            raise FlintIOError(f"Cannot load runtime configuration from '{filepath}': {e}") from e
+            raise SamaraIOError(f"Cannot load runtime configuration from '{filepath}': {e}") from e
 
         try:
             runtime = cls(**dict_[RUNTIME])
             logger.info("Successfully created RuntimeManager from configuration file: %s", filepath)
             return runtime
         except KeyError as e:
-            raise FlintRuntimeConfigurationError(f"Missing 'runtime' section in configuration file '{filepath}'") from e
+            raise SamaraRuntimeConfigurationError(f"Missing 'runtime' section in configuration file '{filepath}'") from e
         except ValidationError as e:
-            raise FlintRuntimeConfigurationError(f"Invalid runtime configuration in file '{filepath}': {e}") from e
+            raise SamaraRuntimeConfigurationError(f"Invalid runtime configuration in file '{filepath}': {e}") from e
 
     @classmethod
     def export_schema(cls) -> dict[str, Any]:
