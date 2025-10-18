@@ -1,11 +1,11 @@
 <p align="center">
-  <img src="docs/logo.svg" width="250"/>
+  <img src="docs/logo2.svg"/>
 </p>
 
 <h1 align="center">Samara</h1>
 
 <p align="center">
-  <b>A lightweight, extensible framework for configuration-driven data pipelines</b>
+  <b>An extensible framework for configuration-driven data pipelines</b>
 </p>
 
 <p align="center">
