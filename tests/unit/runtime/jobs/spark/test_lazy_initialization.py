@@ -1,7 +1,6 @@
 """Unit tests for lazy SparkHandler initialization."""
 
 import sys
-from unittest.mock import MagicMock, patch
 
 
 class TestLazySparkHandlerInitialization:
