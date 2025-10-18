@@ -43,7 +43,7 @@ class ExitCode(enum.IntEnum):
     UNEXPECTED_ERROR = 99
 
 
-class FlintError(Exception):
+class SamaraError(Exception):
     """Base exception for all Samara-specific exceptions.
 
     Provides common functionality for all Samara exceptions, including
@@ -72,7 +72,7 @@ class FlintError(Exception):
     """
 
     def __init__(self, message: str, exit_code: ExitCode) -> None:
-        """Initialize FlintException.
+        """Initialize SamaraException.
 
         Args:
             message: The exception message
@@ -82,7 +82,7 @@ class FlintError(Exception):
         super().__init__(message)
 
 
-class FlintIOError(FlintError):
+class SamaraIOError(SamaraError):
     """Exception raised for I/O errors."""
 
     def __init__(self, message: str) -> None:
@@ -94,7 +94,7 @@ class FlintIOError(FlintError):
         super().__init__(message=message, exit_code=ExitCode.IO_ERROR)
 
 
-class FlintAlertConfigurationError(FlintError):
+class SamaraAlertConfigurationError(SamaraError):
     """Exception raised for configuration-related errors."""
 
     def __init__(self, message: str) -> None:
@@ -106,7 +106,7 @@ class FlintAlertConfigurationError(FlintError):
         super().__init__(message=message, exit_code=ExitCode.CONFIGURATION_ERROR)
 
 
-class FlintRuntimeConfigurationError(FlintError):
+class SamaraRuntimeConfigurationError(SamaraError):
     """Exception raised for configuration-related errors."""
 
     def __init__(self, message: str) -> None:
@@ -118,7 +118,7 @@ class FlintRuntimeConfigurationError(FlintError):
         super().__init__(message=message, exit_code=ExitCode.CONFIGURATION_ERROR)
 
 
-class FlintValidationError(FlintError):
+class SamaraValidationError(SamaraError):
     """Exception raised for validation failures."""
 
     def __init__(self, message: str) -> None:
@@ -130,7 +130,7 @@ class FlintValidationError(FlintError):
         super().__init__(message=message, exit_code=ExitCode.VALIDATION_ERROR)
 
 
-class FlintAlertTestError(FlintError):
+class SamaraAlertTestError(SamaraError):
     """Exception raised for validation failures."""
 
     def __init__(self, message: str) -> None:
@@ -142,7 +142,7 @@ class FlintAlertTestError(FlintError):
         super().__init__(message=message, exit_code=ExitCode.ALERT_TEST_ERROR)
 
 
-class FlintJobError(FlintError):
+class SamaraJobError(SamaraError):
     """Exception raised for errors related to the ETL process."""
 
     def __init__(self, message: str) -> None:
