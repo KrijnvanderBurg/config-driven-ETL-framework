@@ -3,15 +3,9 @@ name: Validate Job Configurations
 on:
   workflow_call:
   pull_request:
-    paths:
-      - "examples/**"
-      - ".github/workflows/validate-jobs.yml"
   push:
     branches:
       - main
-    paths:
-      - "examples/**"
-      - ".github/workflows/validate-jobs.yml"
 
 jobs:
   build:
