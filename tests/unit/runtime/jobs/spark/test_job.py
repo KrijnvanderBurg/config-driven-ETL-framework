@@ -337,6 +337,117 @@ class TestJobSparkValidation:
         job_spark = JobSpark(**job_config)
         assert job_spark.loads[0].upstream_id == "tr2"
 
+    def test_create_job_spark__with_join_referencing_nonexistent_other_upstream_id__raises_validation_error(
+        self, job_config: dict[str, Any], tmp_path: Path
+    ) -> None:
+        """Test JobSpark creation fails when join references non-existent other_upstream_id."""
+        # Add second extract for join reference
+        input_file = tmp_path / "input2.json"
+        input_file.write_text("[]", encoding="utf-8")
+        job_config["extracts"].append(
+            {
+                "id": "ex3",
+                "extract_type": "file",
+                "method": "batch",
+                "data_format": "json",
+                "options": {},
+                "location": str(input_file),
+                "schema": "",
+            }
+        )
+
+        # Add join function with non-existent other_upstream_id
+        job_config["transforms"][0]["functions"] = [
+            {
+                "function_type": "join",
+                "arguments": {"other_upstream_id": "nonexistent_id", "on": "id", "how": "inner"},
+            }
+        ]
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
+    def test_create_job_spark__with_join_referencing_extract_other_upstream_id__succeeds(
+        self, job_config: dict[str, Any], tmp_path: Path
+    ) -> None:
+        """Test JobSpark creation succeeds when join references an extract as other_upstream_id."""
+        # Add second extract for join reference
+        input_file = tmp_path / "input2.json"
+        input_file.write_text("[]", encoding="utf-8")
+        job_config["extracts"].append(
+            {
+                "id": "ex3",
+                "extract_type": "file",
+                "method": "batch",
+                "data_format": "json",
+                "options": {},
+                "location": str(input_file),
+                "schema": "",
+            }
+        )
+
+        # Add join function with valid extract other_upstream_id
+        job_config["transforms"][0]["functions"] = [
+            {
+                "function_type": "join",
+                "arguments": {"other_upstream_id": "ex3", "on": "id", "how": "inner"},
+            }
+        ]
+
+        job_spark = JobSpark(**job_config)
+        assert job_spark is not None
+
+    def test_create_job_spark__with_join_referencing_transform_other_upstream_id__succeeds(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation succeeds when join references a transform as other_upstream_id."""
+        # Add another transform that will be referenced by join
+        job_config["transforms"].insert(
+            0,
+            {
+                "id": "tr1",
+                "upstream_id": "ex2",
+                "options": {},
+                "functions": [],
+            },
+        )
+
+        # Add join function to second transform (tr2) that references the first transform (tr1)
+        job_config["transforms"][1]["functions"] = [
+            {
+                "function_type": "join",
+                "arguments": {"other_upstream_id": "tr1", "on": "id", "how": "inner"},
+            }
+        ]
+
+        job_spark = JobSpark(**job_config)
+        assert job_spark is not None
+
+    def test_create_job_spark__with_join_referencing_later_transform_other_upstream_id__raises_validation_error(
+        self, job_config: dict[str, Any]
+    ) -> None:
+        """Test JobSpark creation fails when join references a transform defined later as other_upstream_id."""
+        # Add a transform that will be referenced (defined after tr2)
+        job_config["transforms"].append(
+            {
+                "id": "tr3",
+                "upstream_id": "ex2",
+                "options": {},
+                "functions": [],
+            }
+        )
+
+        # Add join function to first transform that references tr3 (defined later)
+        job_config["transforms"][0]["functions"] = [
+            {
+                "function_type": "join",
+                "arguments": {"other_upstream_id": "tr3", "on": "id", "how": "inner"},
+            }
+        ]
+
+        with pytest.raises(ValidationError):
+            JobSpark(**job_config)
+
 
 # =========================================================================== #
 # ============================= MODEL FIXTURE =============================== #
