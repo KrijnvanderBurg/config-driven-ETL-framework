@@ -11,11 +11,11 @@ from samara.alert import AlertController
 from samara.cli import cli
 from samara.exceptions import (
     ExitCode,
-    FlintAlertConfigurationError,
-    FlintIOError,
-    FlintJobError,
-    FlintRuntimeConfigurationError,
-    FlintValidationError,
+    SamaraAlertConfigurationError,
+    SamaraIOError,
+    SamaraJobError,
+    SamaraRuntimeConfigurationError,
+    SamaraValidationError,
 )
 from samara.runtime.controller import RuntimeController
 
@@ -51,7 +51,7 @@ class TestValidateCommand:
 
         # Act
         # Mock alert configuration failure
-        with patch.object(AlertController, "from_file", side_effect=FlintIOError("test")):
+        with patch.object(AlertController, "from_file", side_effect=SamaraIOError("test")):
             result = runner.invoke(
                 cli,
                 ["validate", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"],
@@ -67,7 +67,7 @@ class TestValidateCommand:
 
         # Act
         # Mock invalid alert configuration
-        with patch.object(AlertController, "from_file", side_effect=FlintAlertConfigurationError("test")):
+        with patch.object(AlertController, "from_file", side_effect=SamaraAlertConfigurationError("test")):
             result = runner.invoke(
                 cli,
                 ["validate", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"],
@@ -86,7 +86,7 @@ class TestValidateCommand:
         # Mock invalid runtime configuration
         with (
             patch.object(AlertController, "from_file", return_value=mock_alert),
-            patch.object(RuntimeController, "from_file", side_effect=FlintRuntimeConfigurationError("test")),
+            patch.object(RuntimeController, "from_file", side_effect=SamaraRuntimeConfigurationError("test")),
         ):
             result = runner.invoke(
                 cli,
@@ -107,7 +107,7 @@ class TestValidateCommand:
         # Mock runtime file access failure
         with (
             patch.object(AlertController, "from_file", return_value=mock_alert),
-            patch.object(RuntimeController, "from_file", side_effect=FlintIOError("test")),
+            patch.object(RuntimeController, "from_file", side_effect=SamaraIOError("test")),
         ):
             result = runner.invoke(
                 cli,
@@ -128,7 +128,7 @@ class TestValidateCommand:
         # Mock runtime configuration failure
         with (
             patch.object(AlertController, "from_file", return_value=mock_alert),
-            patch.object(RuntimeController, "from_file", side_effect=FlintValidationError("test")),
+            patch.object(RuntimeController, "from_file", side_effect=SamaraValidationError("test")),
         ):
             result = runner.invoke(
                 cli,
@@ -220,7 +220,7 @@ class TestRunCommand:
 
         # Act
         # Mock alert configuration failure
-        with patch.object(AlertController, "from_file", side_effect=FlintIOError("test")):
+        with patch.object(AlertController, "from_file", side_effect=SamaraIOError("test")):
             result = runner.invoke(
                 cli, ["run", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
             )
@@ -235,7 +235,7 @@ class TestRunCommand:
 
         # Act
         # Mock invalid alert configuration
-        with patch.object(AlertController, "from_file", side_effect=FlintAlertConfigurationError("test")):
+        with patch.object(AlertController, "from_file", side_effect=SamaraAlertConfigurationError("test")):
             result = runner.invoke(
                 cli, ["run", "--alert-filepath", "/test/alert.json", "--runtime-filepath", "/test/runtime.json"]
             )
@@ -246,10 +246,10 @@ class TestRunCommand:
     @pytest.mark.parametrize(
         "exception_class,expected_exit_code",
         [
-            (FlintIOError, ExitCode.IO_ERROR),
-            (FlintRuntimeConfigurationError, ExitCode.CONFIGURATION_ERROR),
-            (FlintValidationError, ExitCode.VALIDATION_ERROR),
-            (FlintJobError, ExitCode.JOB_ERROR),
+            (SamaraIOError, ExitCode.IO_ERROR),
+            (SamaraRuntimeConfigurationError, ExitCode.CONFIGURATION_ERROR),
+            (SamaraValidationError, ExitCode.VALIDATION_ERROR),
+            (SamaraJobError, ExitCode.JOB_ERROR),
         ],
     )
     def test_run__when_runtime_error_occurs__triggers_alert_and_exits_with_correct_code(
@@ -276,14 +276,14 @@ class TestRunCommand:
         mock_alert.evaluate_trigger_and_alert.assert_called_once()
 
     def test_run__when_job_execution_fails__triggers_alert_and_exits_with_job_error(self) -> None:
-        """Test run command triggers alert and returns job error code when execute_all() raises FlintJobError."""
+        """Test run command triggers alert and returns job error code when execute_all() raises SamaraJobError."""
         # Arrange
         runner = CliRunner()
         # Mock alert controller to test alerting behavior
         mock_alert = Mock()
         mock_runtime = Mock()
-        # Configure execute_all to raise FlintJobError
-        mock_runtime.execute_all.side_effect = FlintJobError("Job execution failed")
+        # Configure execute_all to raise SamaraJobError
+        mock_runtime.execute_all.side_effect = SamaraJobError("Job execution failed")
 
         # Act
         with (

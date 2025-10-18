@@ -10,7 +10,7 @@ from unittest.mock import Mock
 import pytest
 from pydantic import ValidationError
 
-from samara.exceptions import FlintIOError, FlintRuntimeConfigurationError
+from samara.exceptions import SamaraIOError, SamaraRuntimeConfigurationError
 from samara.runtime.controller import RuntimeController
 
 # =========================================================================== #
@@ -198,11 +198,11 @@ class TestRuntimeControllerFromFile:
         assert isinstance(controller, RuntimeController)
         assert len(controller.jobs) == 1
 
-    def test_from_file__with_nonexistent_file__raises_flint_io_error(self, tmp_path: Path) -> None:
-        """Test from_file raises FlintIOError when file does not exist."""
+    def test_from_file__with_nonexistent_file__raises_samara_io_error(self, tmp_path: Path) -> None:
+        """Test from_file raises SamaraIOError when file does not exist."""
         nonexistent_file = tmp_path / "nonexistent.json"
 
-        with pytest.raises(FlintIOError):
+        with pytest.raises(SamaraIOError):
             RuntimeController.from_file(nonexistent_file)
 
     def test_from_file__with_missing_runtime_section__raises_configuration_error(
@@ -212,7 +212,7 @@ class TestRuntimeControllerFromFile:
         config_file = tmp_path / "invalid_config.json"
         config_file.write_text(json.dumps(runtime_config), encoding="utf-8")
 
-        with pytest.raises(FlintRuntimeConfigurationError):
+        with pytest.raises(SamaraRuntimeConfigurationError):
             RuntimeController.from_file(config_file)
 
 

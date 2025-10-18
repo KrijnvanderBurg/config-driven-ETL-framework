@@ -16,7 +16,7 @@ from pydantic import Field, ValidationError
 from samara import BaseModel
 from samara.alert.channels import channel_union
 from samara.alert.trigger import AlertTrigger
-from samara.exceptions import FlintAlertConfigurationError, FlintIOError
+from samara.exceptions import SamaraAlertConfigurationError, SamaraIOError
 from samara.utils.file import FileHandlerContext
 from samara.utils.logger import get_logger
 
@@ -53,8 +53,8 @@ class AlertController(BaseModel):
             A fully configured AlertManager instance.
 
         Raises:
-            FlintIOError: If there are file I/O related issues (file not found, permission denied, etc.)
-            FlintAlertConfigurationError: If there are configuration parsing or validation issues
+            SamaraIOError: If there are file I/O related issues (file not found, permission denied, etc.)
+            SamaraAlertConfigurationError: If there are configuration parsing or validation issues
         """
         logger.info("Creating AlertManager from file: %s", filepath)
 
@@ -63,16 +63,16 @@ class AlertController(BaseModel):
             dict_: dict[str, Any] = handler.read()
         except (OSError, ValueError) as e:
             logger.error("Failed to read alert configuration file: %s", e)
-            raise FlintIOError(f"Cannot load alert configuration from '{filepath}': {e}") from e
+            raise SamaraIOError(f"Cannot load alert configuration from '{filepath}': {e}") from e
 
         try:
             alert = cls(**dict_[ALERT])
             logger.info("Successfully created AlertManager from configuration file: %s", filepath)
             return alert
         except KeyError as e:
-            raise FlintAlertConfigurationError(f"Missing 'alert' section in configuration file '{filepath}'") from e
+            raise SamaraAlertConfigurationError(f"Missing 'alert' section in configuration file '{filepath}'") from e
         except ValidationError as e:
-            raise FlintAlertConfigurationError(f"Invalid alert configuration in file '{filepath}': {e}") from e
+            raise SamaraAlertConfigurationError(f"Invalid alert configuration in file '{filepath}': {e}") from e
 
     def evaluate_trigger_and_alert(self, title: str, body: str, exception: Exception) -> None:
         """Process and send an alert to all channels as defined by enabled trigger rules.

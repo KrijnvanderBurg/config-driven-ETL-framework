@@ -12,12 +12,12 @@ import click
 from samara.alert import AlertController
 from samara.exceptions import (
     ExitCode,
-    FlintAlertConfigurationError,
-    FlintAlertTestError,
-    FlintIOError,
-    FlintJobError,
-    FlintRuntimeConfigurationError,
-    FlintValidationError,
+    SamaraAlertConfigurationError,
+    SamaraAlertTestError,
+    SamaraIOError,
+    SamaraJobError,
+    SamaraRuntimeConfigurationError,
+    SamaraValidationError,
 )
 from samara.runtime.controller import RuntimeController
 from samara.utils.logger import get_logger, set_logger
@@ -88,10 +88,10 @@ def validate(
 
         try:
             alert = AlertController.from_file(filepath=alert_filepath)
-        except FlintIOError as e:
+        except SamaraIOError as e:
             logger.error("Cannot access alert configuration file: %s", e)
             raise click.exceptions.Exit(e.exit_code)
-        except FlintAlertConfigurationError as e:
+        except SamaraAlertConfigurationError as e:
             logger.error("Alert configuration is invalid: %s", e)
             raise click.exceptions.Exit(e.exit_code)
 
@@ -99,13 +99,13 @@ def validate(
             _ = RuntimeController.from_file(filepath=runtime_filepath)
             # Not alerting on exceptions as a validate command is often run locally or from CICD
             # and thus an alert would be drowning out real alerts
-        except FlintIOError as e:
+        except SamaraIOError as e:
             logger.error("Cannot access runtime configuration file: %s", e)
             raise click.exceptions.Exit(e.exit_code)
-        except FlintRuntimeConfigurationError as e:
+        except SamaraRuntimeConfigurationError as e:
             logger.error("Runtime configuration is invalid: %s", e)
             raise click.exceptions.Exit(e.exit_code)
-        except FlintValidationError as e:
+        except SamaraValidationError as e:
             logger.error("Validation failed: %s", e)
             raise click.exceptions.Exit(e.exit_code)
 
@@ -113,8 +113,8 @@ def validate(
         if test_exception or test_env_vars:
             try:
                 message = test_exception or "Test alert triggered"
-                raise FlintAlertTestError(message)
-            except FlintAlertTestError as e:
+                raise SamaraAlertTestError(message)
+            except SamaraAlertTestError as e:
                 alert.evaluate_trigger_and_alert(title="Test Alert", body="Test alert", exception=e)
                 raise click.exceptions.Exit(e.exit_code)
 
@@ -154,10 +154,10 @@ def run(alert_filepath: Path, runtime_filepath: Path) -> None:
 
         try:
             alert = AlertController.from_file(filepath=alert_filepath)
-        except FlintIOError as e:
+        except SamaraIOError as e:
             logger.error("Cannot access alert configuration file: %s", e)
             raise click.exceptions.Exit(e.exit_code)
-        except FlintAlertConfigurationError as e:
+        except SamaraAlertConfigurationError as e:
             logger.error("Alert configuration is invalid: %s", e)
             raise click.exceptions.Exit(e.exit_code)
 
@@ -168,25 +168,25 @@ def run(alert_filepath: Path, runtime_filepath: Path) -> None:
             logger.info(
                 "Command executed successfully with exit code %d (%s).", ExitCode.SUCCESS, ExitCode.SUCCESS.name
             )
-        except FlintIOError as e:
+        except SamaraIOError as e:
             logger.error("Cannot access runtime configuration file: %s", e)
             alert.evaluate_trigger_and_alert(
                 title="ETL Configuration File Error", body="Failed to read runtime configuration file", exception=e
             )
             raise click.exceptions.Exit(e.exit_code)
-        except FlintRuntimeConfigurationError as e:
+        except SamaraRuntimeConfigurationError as e:
             logger.error("Runtime configuration is invalid: %s", e)
             alert.evaluate_trigger_and_alert(
                 title="ETL Configuration Error", body="Invalid runtime configuration", exception=e
             )
             raise click.exceptions.Exit(e.exit_code)
-        except FlintValidationError as e:
+        except SamaraValidationError as e:
             logger.error("Configuration validation failed: %s", e)
             alert.evaluate_trigger_and_alert(
                 title="ETL Validation Error", body="Configuration validation failed", exception=e
             )
             raise click.exceptions.Exit(e.exit_code)
-        except FlintJobError as e:
+        except SamaraJobError as e:
             logger.error("ETL job failed: %s", e)
             alert.evaluate_trigger_and_alert(
                 title="ETL Execution Error", body="Runtime error during ETL execution", exception=e

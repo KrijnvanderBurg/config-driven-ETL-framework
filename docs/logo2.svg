@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="10 35 180 100" width="200" height="120">
+  <defs>
+    <linearGradient id="wingGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2E7D32;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#66BB6A;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="seedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#1B5E20;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#388E3C;stop-opacity:1" />
+    </linearGradient>
+    <filter id="shadow">
+      <feDropShadow dx="0" dy="2" stdDeviation="2" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+  
+  <!-- Main samara wing -->
+  <path d="M 100 115 Q 95 95, 85 80 Q 75 65, 60 55 Q 50 50, 40 50 Q 30 50, 25 55 Q 22 60, 25 67 Q 30 75, 40 83 Q 55 95, 75 107 Q 90 115, 100 115 Z" 
+        fill="url(#wingGradient)" 
+        filter="url(#shadow)"
+        opacity="0.9">
+  </path>
+  
+  <!-- Wing texture lines (veins) -->
+  <path d="M 100 115 Q 92 93, 80 75 Q 72 67, 65 60" 
+        stroke="#1B5E20" 
+        stroke-width="1" 
+        fill="none" 
+        opacity="0.4"
+        stroke-linecap="round"/>
+  <path d="M 100 115 Q 88 97, 70 83 Q 62 77, 55 71" 
+        stroke="#1B5E20" 
+        stroke-width="1" 
+        fill="none" 
+        opacity="0.4"
+        stroke-linecap="round"/>
+  <path d="M 100 115 Q 85 103, 60 93 Q 50 89, 42 85" 
+        stroke="#1B5E20" 
+        stroke-width="1" 
+        fill="none" 
+        opacity="0.4"
+        stroke-linecap="round"/>
+  
+  <!-- Second wing (creating the helicopter effect) -->
+  <path d="M 100 115 Q 105 95, 115 80 Q 125 65, 140 55 Q 150 50, 160 50 Q 170 50, 175 55 Q 178 60, 175 67 Q 170 75, 160 83 Q 145 95, 125 107 Q 110 115, 100 115 Z" 
+        fill="url(#wingGradient)" 
+        filter="url(#shadow)"
+        opacity="0.85">
+  </path>
+  
+  <!-- Second wing texture lines -->
+  <path d="M 100 115 Q 108 93, 120 75 Q 128 67, 135 60" 
+        stroke="#1B5E20" 
+        stroke-width="1" 
+        fill="none" 
+        opacity="0.4"
+        stroke-linecap="round"/>
+  <path d="M 100 115 Q 112 97, 130 83 Q 138 77, 145 71" 
+        stroke="#1B5E20" 
+        stroke-width="1" 
+        fill="none" 
+        opacity="0.4"
+        stroke-linecap="round"/>
+  <path d="M 100 115 Q 115 103, 140 93 Q 150 89, 158 85" 
+        stroke="#1B5E20" 
+        stroke-width="1" 
+        fill="none" 
+        opacity="0.4"
+        stroke-linecap="round"/>
+  
+  <!-- Central seed pod -->
+  <ellipse cx="100" cy="115" rx="12" ry="18" 
+           fill="url(#seedGradient)" 
+           filter="url(#shadow)"/>
+  
+  <!-- Seed pod details -->
+  <ellipse cx="100" cy="115" rx="8" ry="14" 
+           fill="#1B5E20" 
+           opacity="0.3"/>
+  
+  <!-- Data flow dots (representing ETL pipeline) -->
+  <circle cx="70" cy="90" r="2.5" fill="#1976D2" opacity="0.8">
+  </circle>
+  <circle cx="85" cy="100" r="2" fill="#1976D2" opacity="0.7">
+  </circle>
+  <circle cx="130" cy="90" r="2.5" fill="#1976D2" opacity="0.8">
+  </circle>
+  <circle cx="115" cy="100" r="2" fill="#1976D2" opacity="0.7">
+  </circle>
+  
+</svg>

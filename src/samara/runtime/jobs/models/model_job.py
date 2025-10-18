@@ -15,7 +15,7 @@ from typing import Generic, Self, TypeVar
 from pydantic import Field, model_validator
 
 from samara import BaseModel
-from samara.exceptions import FlintJobError
+from samara.exceptions import SamaraJobError
 from samara.runtime.jobs.hooks import Hooks
 from samara.runtime.jobs.models.model_extract import ExtractModel
 from samara.runtime.jobs.models.model_load import LoadModel
@@ -50,7 +50,7 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
     This class handles:
     - Job enabled/disabled state checking
     - Hook execution at appropriate lifecycle points (onStart, onError, onSuccess, onFinally)
-    - Exception handling and wrapping in FlintJobError
+    - Exception handling and wrapping in SamaraJobError
 
     Subclasses only need to implement the _execute() method with engine-specific logic.
 
@@ -168,7 +168,7 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
         between jobs.
 
         Raises:
-            FlintJobError: Wraps configuration and I/O exceptions with context,
+            SamaraJobError: Wraps configuration and I/O exceptions with context,
                 preserving the original exception as the cause.
         """
         if not self.enabled:
@@ -185,7 +185,7 @@ class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
         except (ValueError, KeyError, OSError) as e:
             logger.error("Job '%s' failed: %s", self.id_, e)
             self.hooks.on_error()
-            raise FlintJobError(f"Error occurred during job '{self.id_}' execution") from e
+            raise SamaraJobError(f"Error occurred during job '{self.id_}' execution") from e
         finally:
             self.hooks.on_finally()
             self._clear()
