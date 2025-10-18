@@ -5,8 +5,6 @@
 	],
 	"workspaceFolder": "/workspace",
 	"service": "devcontainer",
-	// "remoteUser": "vscode",
-	// "containerUser": "vscode",
 	//
 	// Features - https://containers.dev/implementors/features.
 	//
