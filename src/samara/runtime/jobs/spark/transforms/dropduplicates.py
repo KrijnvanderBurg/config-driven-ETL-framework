@@ -10,11 +10,14 @@ the name 'dropduplicates', making it available for use in configuration files.
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame
-from samara.runtime.jobs.models.transforms.model_dropduplicates import DropDuplicatesFunctionModel
-from samara.runtime.jobs.spark.function import Function
+
+from samara.runtime.jobs.models.transforms.model_dropduplicates import (
+    DropDuplicatesFunctionModel,
+)
+from samara.runtime.jobs.spark.transforms.base import FunctionSpark
 
 
-class DropDuplicatesFunction(DropDuplicatesFunctionModel, Function):
+class DropDuplicatesFunction(DropDuplicatesFunctionModel, FunctionSpark):
     """Function that removes duplicate rows from a DataFrame.
 
     This transform function allows for removing duplicate rows based on all columns

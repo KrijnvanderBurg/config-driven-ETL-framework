@@ -41,7 +41,7 @@ class JobEngine(Enum):
     # POLARS = "polars"
 
 
-class JobBase(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
+class JobModel(BaseModel, ABC, Generic[ExtractT, TransformT, LoadT]):
     """Abstract base class for all job types.
 
     Defines the common interface and attributes that all job implementations
