@@ -10,7 +10,6 @@ a common configuration schema, allowing pipeline authors to swap notification
 targets without modifying pipeline definitions.
 """
 
-import logging
 from typing import Annotated
 
 from pydantic import Discriminator

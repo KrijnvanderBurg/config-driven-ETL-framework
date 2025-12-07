@@ -7,8 +7,6 @@ delivery, allowing alerts to be sent via email, HTTP webhooks, or files
 when pipeline events (success, failure, start, end) occur.
 """
 
-import logging
-
 from samara.alert.controller import AlertController
 from samara.utils.logger import get_logger
 
