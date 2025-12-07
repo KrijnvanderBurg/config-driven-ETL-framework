@@ -28,7 +28,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "{service_name=\"samara\"} | json | severity_text=~\"$log_level\" | resource_service_instance_id=~\"$run_id\"",
+          "expr": "{service_name=\"samara\"} | json | severity_text=~\"$log_level\"",
           "queryType": "range",
           "editorMode": "code"
         }
@@ -42,130 +42,6 @@
         "enableLogDetails": true,
         "dedupStrategy": "none",
         "sortOrder": "Descending"
-      }
-    },
-    {
-      "id": 2,
-      "type": "logs",
-      "title": "Error Logs",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 12
-      },
-      "datasource": {
-        "type": "loki",
-        "uid": "Loki"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "{service_name=\"samara\"} | json | severity_text=~\"$log_level\" | resource_service_instance_id=~\"$run_id\" | line_format \"{{.Line}}\" |~ \"(?i)(error|exception|failed)\"",
-          "queryType": "range",
-          "editorMode": "code"
-        }
-      ],
-      "options": {
-        "showTime": true,
-        "showLabels": true,
-        "wrapLogMessage": true,
-        "enableLogDetails": true,
-        "sortOrder": "Descending"
-      }
-    },
-    {
-      "id": 3,
-      "type": "stat",
-      "title": "Log Volume by Level",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 12
-      },
-      "datasource": {
-        "type": "loki",
-        "uid": "Loki"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "sum by (severity) (count_over_time({service_name=\"samara\"} | json | severity_text=~\"$log_level\" | resource_service_instance_id=~\"$run_id\" [$__interval]))",
-          "queryType": "range",
-          "legendFormat": "{{severity}}",
-          "editorMode": "code"
-        }
-      ],
-      "options": {
-        "graphMode": "area",
-        "colorMode": "value",
-        "orientation": "auto",
-        "textMode": "auto",
-        "reduceOptions": {
-          "values": false,
-          "calcs": ["lastNotNull"]
-        }
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          }
-        }
-      }
-    },
-    {
-      "id": 4,
-      "type": "table",
-      "title": "Recent Log Entries",
-      "gridPos": {
-        "h": 8,
-        "w": 24,
-        "x": 0,
-        "y": 20
-      },
-      "datasource": {
-        "type": "loki",
-        "uid": "Loki"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "{service_name=\"samara\"} | json | severity_text=~\"$log_level\" | resource_service_instance_id=~\"$run_id\"",
-          "queryType": "instant",
-          "editorMode": "code"
-        }
-      ],
-      "transformations": [
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {},
-            "indexByName": {},
-            "renameByName": {
-              "Time": "Timestamp",
-              "Line": "Message",
-              "severity": "Level"
-            }
-          }
-        }
-      ],
-      "options": {
-        "showHeader": true,
-        "footer": {
-          "show": false
-        }
       }
     }
   ],
@@ -208,33 +84,6 @@
           }
         ],
         "query": "DEBUG : DEBUG|INFO|WARNING|ERROR|CRITICAL, INFO : INFO|WARNING|ERROR|CRITICAL, WARNING : WARNING|ERROR|CRITICAL, ERROR : ERROR|CRITICAL, CRITICAL : CRITICAL",
-        "hide": 0
-      },
-      {
-        "name": "run_id",
-        "label": "Run ID",
-        "type": "query",
-        "datasource": {
-          "type": "loki",
-          "uid": "Loki"
-        },
-        "current": {
-          "selected": true,
-          "text": "All",
-          "value": ".*"
-        },
-        "query": {
-          "label": "resource_service_instance_id",
-          "refId": "LokiVariableQueryEditor-VariableQuery",
-          "stream": "{service_name=\"samara\"}",
-          "type": 1
-        },
-        "refresh": 1,
-        "regex": "",
-        "sort": 2,
-        "multi": false,
-        "includeAll": true,
-        "allValue": ".*",
         "hide": 0
       }
     ]
