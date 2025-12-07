@@ -5,7 +5,6 @@ alert notifications to one or more recipients through configured email servers
 with full authentication and failure handling support.
 """
 
-import logging
 import smtplib
 from email.mime.text import MIMEText
 from typing import Literal
@@ -17,7 +16,7 @@ from samara.alert.channels.base import ChannelModel
 from samara.telemetry import trace_span
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class EmailChannel(ChannelModel):

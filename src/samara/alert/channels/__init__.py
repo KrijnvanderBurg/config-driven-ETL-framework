@@ -10,7 +10,6 @@ a common configuration schema, allowing pipeline authors to swap notification
 targets without modifying pipeline definitions.
 """
 
-import logging
 from typing import Annotated
 
 from pydantic import Discriminator
@@ -21,7 +20,7 @@ from samara.alert.channels.file import FileChannel
 from samara.alert.channels.http import HttpChannel
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 __all__ = ["ChannelModel", "ChannelUnion"]
 

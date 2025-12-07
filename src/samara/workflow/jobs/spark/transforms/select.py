@@ -6,7 +6,6 @@ It focuses on configuration-driven column filtering, making pipeline logic
 accessible without code modifications.
 """
 
-import logging
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame
@@ -15,7 +14,7 @@ from samara.utils.logger import get_logger
 from samara.workflow.jobs.models.transforms.model_select import SelectFunctionModel
 from samara.workflow.jobs.spark.transforms.base import FunctionSpark
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class SelectFunction(SelectFunctionModel, FunctionSpark):

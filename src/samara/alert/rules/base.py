@@ -5,13 +5,12 @@ enabling pipeline authors to define conditions that determine when alerts are
 triggered. It includes abstract base classes that define the contract for
 implementing custom alert rules."""
 
-import logging
 from abc import ABC, abstractmethod
 
 from samara import BaseModel
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class AlertRule(BaseModel, ABC):

@@ -6,7 +6,6 @@ driven pipelines in sequence, managing data flow from sources through transforma
 to destinations with automatic component instantiation.
 """
 
-import logging
 import time
 
 from typing_extensions import override
@@ -19,7 +18,7 @@ from samara.workflow.jobs.spark.extract import ExtractSparkUnion
 from samara.workflow.jobs.spark.load import LoadSparkUnion
 from samara.workflow.jobs.spark.transform import TransformSparkUnion
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class JobSpark(JobModel[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion]):

@@ -6,7 +6,6 @@ onFailure, onFinally). It supports configurable HTTP methods, custom headers,
 payloads, timeouts, and retry logic for robust external integrations.
 """
 
-import logging
 from typing import Any, Literal
 
 from pydantic import Field
@@ -17,7 +16,7 @@ from samara.utils.http import HttpBase
 from samara.utils.logger import get_logger
 from samara.workflow.actions.base import ActionBase
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class HttpAction(HttpBase, ActionBase):

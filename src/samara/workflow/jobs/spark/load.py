@@ -6,7 +6,6 @@ loading to multiple output formats with batch and streaming support, flexible
 write modes, and optional schema export capabilities."""
 
 import json
-import logging
 from abc import ABC, abstractmethod
 from typing import Any, Literal
 
@@ -19,7 +18,7 @@ from samara.utils.logger import get_logger
 from samara.workflow.jobs.models.model_load import LoadMethod, LoadModel, LoadModelFile
 from samara.workflow.jobs.spark.session import SparkHandler
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class LoadSpark(LoadModel, ABC):
@@ -151,12 +150,12 @@ class LoadSpark(LoadModel, ABC):
                 Parent directories must exist or be creatable by the Spark
                 application with appropriate permissions.
         """
-        logger.debug("Exporting schema for %s to: %s", self.id_, schema_path)
+        logger.debug("Exporting schema for %s to: %s", self.id_, str(schema_path))
 
         with open(schema_path, mode="w", encoding="utf-8") as f:
             f.write(schema_json)
 
-        logger.info("Schema exported successfully for %s to: %s", self.id_, schema_path)
+        logger.info("Schema exported successfully for %s to: %s", self.id_, str(schema_path))
 
     @trace_span("load_spark.load")
     def load(self) -> None:

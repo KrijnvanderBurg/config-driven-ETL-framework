@@ -5,14 +5,12 @@ message content. Templates enable consistent formatting of alert titles and
 bodies across all alert channels through simple JSON/YAML configuration.
 """
 
-import logging
-
 from pydantic import Field
 
 from samara import BaseModel
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class AlertTemplate(BaseModel):

@@ -4,7 +4,6 @@ This module provides file-based alert delivery enabling users to persist
 alerts to log files or other file destinations. It supports configurable
 file paths and handles file system operations with appropriate error reporting."""
 
-import logging
 from pathlib import Path
 from typing import Literal
 
@@ -15,7 +14,7 @@ from samara.alert.channels.base import ChannelModel
 from samara.telemetry import trace_span
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class FileChannel(ChannelModel):
@@ -96,7 +95,7 @@ class FileChannel(ChannelModel):
         try:
             with open(self.file_path, "a", encoding="utf-8") as file:
                 file.write(f"{title}: {body}\n")
-            logger.info("Alert written to file: %s", self.file_path)
+            logger.info("Alert written to file: %s", str(self.file_path))
         except OSError as e:
-            logger.error("Failed to write alert to file %s: %s", self.file_path, e)
+            logger.error("Failed to write alert to file %s: %s", str(self.file_path), e)
             raise

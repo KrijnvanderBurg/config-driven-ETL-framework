@@ -6,7 +6,6 @@ both batch and streaming extraction modes from file-based sources, with automati
 schema parsing and PySpark configuration management.
 """
 
-import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Literal, Self
@@ -22,7 +21,7 @@ from samara.workflow.jobs.models.model_extract import ExtractFileModel, ExtractM
 from samara.workflow.jobs.spark.schema import SchemaFilepathHandler, SchemaStringHandler
 from samara.workflow.jobs.spark.session import SparkHandler
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class ExtractSpark(ExtractModel, ABC):

@@ -6,7 +6,6 @@ that enables different notification systems (email, HTTP webhooks, files)
 to work consistently within the alert framework.
 """
 
-import logging
 from abc import ABC, abstractmethod
 
 from pydantic import Field
@@ -15,7 +14,7 @@ from samara import BaseModel
 from samara.telemetry import trace_span
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class ChannelModel(BaseModel, ABC):

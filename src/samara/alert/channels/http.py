@@ -6,7 +6,6 @@ alerting without requiring code changes to support different webhook targets,
 custom headers, or retry strategies.
 """
 
-import logging
 from typing import Literal
 
 from pydantic import Field
@@ -17,7 +16,7 @@ from samara.telemetry import trace_span
 from samara.utils.http import HttpBase
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class HttpChannel(HttpBase, ChannelModel):

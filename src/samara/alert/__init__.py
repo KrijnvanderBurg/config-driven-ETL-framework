@@ -7,12 +7,10 @@ delivery, allowing alerts to be sent via email, HTTP webhooks, or files
 when pipeline events (success, failure, start, end) occur.
 """
 
-import logging
-
 from samara.alert.controller import AlertController
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 __all__ = ["AlertController"]
