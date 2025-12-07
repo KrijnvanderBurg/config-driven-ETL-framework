@@ -105,31 +105,22 @@
       },
       "id": 4,
       "options": {
-        "spanFilters": {
-          "criticalPathOnly": false,
-          "matchesOnly": false,
-          "serviceNameOperator": "=",
-          "spanNameOperator": "=",
-          "tags": [
-            {
-              "id": "9b235287-f97",
-              "operator": "="
-            }
-          ]
-        }
+        "query": "",
+        "queryType": "traceql",
+        "serviceName": "samara",
+        "spanName": "",
+        "search": ""
       },
       "pluginVersion": "12.3.0",
       "targets": [
         {
+          "datasource": {
+            "type": "tempo",
+            "uid": "P214B5B846CF3925F"
+          },
           "filters": [
             {
-              "id": "8ff70257",
-              "operator": "=",
-              "scope": "span"
-            },
-            {
               "id": "service-name",
-              "isCustomValue": false,
               "operator": "=",
               "scope": "resource",
               "tag": "service.name",
@@ -140,15 +131,13 @@
             }
           ],
           "limit": 20,
-          "metricsQueryType": "range",
           "queryType": "traceqlSearch",
           "refId": "A",
-          "serviceMapUseNativeHistograms": false,
           "tableType": "traces"
         }
       ],
       "title": "Tracing",
-      "type": "traces"
+      "type": "table"
     }
   ],
   "preload": false,
