@@ -108,9 +108,9 @@ def setup_telemetry(
     resource = Resource.create(
         {
             "service.name": service_name,
-            "service.instance.id": get_run_id(),
-            "service.instance.datetime": str(get_run_datetime()),
             "service.environment": str(settings.environment),
+            "run.instance.id": get_run_id(),
+            "run.instance.datetime": str(get_run_datetime()),
             "host.name": platform.node(),
             "host.arch": platform.machine(),
             "process.pid": str(getpid()),

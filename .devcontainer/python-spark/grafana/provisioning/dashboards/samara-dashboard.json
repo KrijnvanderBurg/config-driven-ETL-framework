@@ -28,7 +28,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "{service_name=\"samara\"} | json | severity_text=~\"$log_level\"",
+          "expr": "{service_name=\"samara\"} | json | severity_text=~\"$log_level\" | resource_service_instance_id=~\"$run_id\"",
           "queryType": "range",
           "editorMode": "code"
         }
@@ -61,7 +61,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "{service_name=\"samara\"} | json | severity_text=~\"$log_level\" | line_format \"{{.Line}}\" |~ \"(?i)(error|exception|failed)\"",
+          "expr": "{service_name=\"samara\"} | json | severity_text=~\"$log_level\" | resource_service_instance_id=~\"$run_id\" | line_format \"{{.Line}}\" |~ \"(?i)(error|exception|failed)\"",
           "queryType": "range",
           "editorMode": "code"
         }
@@ -91,7 +91,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "sum by (severity) (count_over_time({service_name=\"samara\"} | json | severity_text=~\"$log_level\" [$__interval]))",
+          "expr": "sum by (severity) (count_over_time({service_name=\"samara\"} | json | severity_text=~\"$log_level\" | resource_service_instance_id=~\"$run_id\" [$__interval]))",
           "queryType": "range",
           "legendFormat": "{{severity}}",
           "editorMode": "code"
@@ -142,7 +142,7 @@
       "targets": [
         {
           "refId": "A",
-          "expr": "{service_name=\"samara\"} | json | severity_text=~\"$log_level\"",
+          "expr": "{service_name=\"samara\"} | json | severity_text=~\"$log_level\" | resource_service_instance_id=~\"$run_id\"",
           "queryType": "instant",
           "editorMode": "code"
         }
@@ -208,6 +208,33 @@
           }
         ],
         "query": "DEBUG : DEBUG|INFO|WARNING|ERROR|CRITICAL, INFO : INFO|WARNING|ERROR|CRITICAL, WARNING : WARNING|ERROR|CRITICAL, ERROR : ERROR|CRITICAL, CRITICAL : CRITICAL",
+        "hide": 0
+      },
+      {
+        "name": "run_id",
+        "label": "Run ID",
+        "type": "query",
+        "datasource": {
+          "type": "loki",
+          "uid": "Loki"
+        },
+        "current": {
+          "selected": true,
+          "text": "All",
+          "value": ".*"
+        },
+        "query": {
+          "label": "resource_service_instance_id",
+          "refId": "LokiVariableQueryEditor-VariableQuery",
+          "stream": "{service_name=\"samara\"}",
+          "type": 1
+        },
+        "refresh": 1,
+        "regex": "",
+        "sort": 2,
+        "multi": false,
+        "includeAll": true,
+        "allValue": ".*",
         "hide": 0
       }
     ]
