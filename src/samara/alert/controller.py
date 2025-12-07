@@ -7,7 +7,6 @@ pipeline authors define channels, rules, and conditions through JSON or YAML
 configuration files rather than code.
 """
 
-import logging
 from pathlib import Path
 from typing import Any, Final, Self
 
@@ -21,7 +20,7 @@ from samara.telemetry import trace_span
 from samara.utils.file import FileHandlerContext
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 ALERT: Final = "alert"
 

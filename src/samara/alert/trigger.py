@@ -5,8 +5,6 @@ notification channels based on flexible rule conditions. Triggers enable
 sophisticated alert logic by evaluating exception properties and environment
 context to determine which channels should receive notifications."""
 
-import logging
-
 from pydantic import Field
 
 from samara import BaseModel
@@ -16,7 +14,7 @@ from samara.utils.logger import get_logger
 
 from .rules import AlertRuleUnion
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class AlertTrigger(BaseModel):

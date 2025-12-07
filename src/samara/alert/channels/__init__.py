@@ -21,7 +21,7 @@ from samara.alert.channels.file import FileChannel
 from samara.alert.channels.http import HttpChannel
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 __all__ = ["ChannelModel", "ChannelUnion"]
 

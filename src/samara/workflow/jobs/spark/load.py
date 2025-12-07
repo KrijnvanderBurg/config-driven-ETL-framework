@@ -6,7 +6,6 @@ loading to multiple output formats with batch and streaming support, flexible
 write modes, and optional schema export capabilities."""
 
 import json
-import logging
 from abc import ABC, abstractmethod
 from typing import Any, Literal
 
@@ -19,7 +18,7 @@ from samara.utils.logger import get_logger
 from samara.workflow.jobs.models.model_load import LoadMethod, LoadModel, LoadModelFile
 from samara.workflow.jobs.spark.session import SparkHandler
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class LoadSpark(LoadModel, ABC):

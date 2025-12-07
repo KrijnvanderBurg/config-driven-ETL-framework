@@ -5,7 +5,6 @@ It enables users to configure complete ETL pipelines through job definitions
 that specify data extraction, transformation, and loading operations.
 """
 
-import logging
 from abc import ABC, abstractmethod
 from enum import Enum
 from typing import Generic, Self, TypeVar
@@ -21,7 +20,7 @@ from samara.workflow.jobs.models.model_extract import ExtractModel
 from samara.workflow.jobs.models.model_load import LoadModel
 from samara.workflow.jobs.models.model_transform import TransformModel
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 ExtractT = TypeVar("ExtractT", bound=ExtractModel)
 TransformT = TypeVar("TransformT", bound=TransformModel)

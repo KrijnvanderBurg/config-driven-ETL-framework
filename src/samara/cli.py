@@ -10,7 +10,6 @@ CI/CD integration and operational monitoring.
 """
 
 import json
-import logging
 import os
 from pathlib import Path
 
@@ -31,7 +30,7 @@ from samara.telemetry import get_tracer, setup_telemetry, trace_span
 from samara.utils.logger import get_logger, set_logger
 from samara.workflow.controller import WorkflowController
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 tracer = get_tracer()
 
 

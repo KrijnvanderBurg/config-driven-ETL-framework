@@ -5,7 +5,6 @@ in the configuration-driven pipeline, enabling users to combine
 datasets from different sources through declarative configuration.
 """
 
-import logging
 from typing import Literal
 
 from pydantic import Field
@@ -13,7 +12,7 @@ from pydantic import Field
 from samara.utils.logger import get_logger
 from samara.workflow.jobs.models.model_transform import ArgsModel, FunctionModel
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class JoinArgs(ArgsModel):

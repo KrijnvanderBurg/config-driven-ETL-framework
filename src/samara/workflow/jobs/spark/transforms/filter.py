@@ -4,7 +4,6 @@ This module provides row filtering capabilities for data pipelines, enabling
 users to retain only rows matching specified conditions through configuration-
 driven filtering."""
 
-import logging
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame
@@ -13,7 +12,7 @@ from samara.utils.logger import get_logger
 from samara.workflow.jobs.models.transforms.model_filter import FilterFunctionModel
 from samara.workflow.jobs.spark.transforms.base import FunctionSpark
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class FilterFunction(FilterFunctionModel, FunctionSpark):

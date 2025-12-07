@@ -8,7 +8,6 @@ operations.
 """
 
 import json
-import logging
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
@@ -18,7 +17,7 @@ from pyspark.sql.types import StructType
 from samara.utils.file import FileHandler, FileHandlerContext
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class SchemaHandler(ABC):

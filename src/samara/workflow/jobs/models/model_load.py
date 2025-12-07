@@ -5,7 +5,6 @@ in data pipelines. It defines type-safe structures that enable users to specify
 where and how to write processed data to destinations through configuration files.
 """
 
-import logging
 from abc import ABC
 from enum import Enum
 from typing import Literal
@@ -15,7 +14,7 @@ from pydantic import Field
 from samara import BaseModel
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class LoadMethod(Enum):

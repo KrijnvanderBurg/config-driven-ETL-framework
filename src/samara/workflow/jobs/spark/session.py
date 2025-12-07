@@ -14,7 +14,6 @@ The SparkHandler singleton ensures efficient resource usage across the entire
 pipeline lifecycle, whether running locally for testing or on distributed clusters.
 """
 
-import logging
 from typing import Any
 
 from pyspark.sql import SparkSession
@@ -22,7 +21,7 @@ from pyspark.sql import SparkSession
 from samara.types import Singleton
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class SparkHandler(metaclass=Singleton):

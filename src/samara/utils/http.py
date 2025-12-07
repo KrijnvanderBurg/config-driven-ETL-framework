@@ -8,7 +8,6 @@ rather than code.
 """
 
 import json
-import logging
 import time
 from typing import Any
 
@@ -18,7 +17,7 @@ from pydantic import BaseModel, Field, HttpUrl, PositiveInt
 from samara.telemetry import trace_span
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class Retry(BaseModel):

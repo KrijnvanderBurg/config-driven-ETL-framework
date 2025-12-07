@@ -5,7 +5,6 @@ within data pipelines. It focuses on the configuration-driven approach,
 enabling pipeline authors to define transformation functions and their
 parameters through structured configuration rather than code."""
 
-import logging
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import Generic, TypeVar
@@ -15,7 +14,7 @@ from pydantic import Field
 from samara import BaseModel
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class ArgsModel(BaseModel, ABC):
