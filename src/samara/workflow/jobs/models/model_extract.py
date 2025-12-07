@@ -5,7 +5,6 @@ operations in configuration files. It enables users to declaratively specify
 how data should be read from various sources with type validation.
 """
 
-import logging
 from enum import Enum
 from typing import Literal
 
@@ -14,7 +13,7 @@ from pydantic import Field, FilePath
 from samara import BaseModel
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class ExtractMethod(Enum):

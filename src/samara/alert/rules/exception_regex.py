@@ -5,7 +5,6 @@ testing their messages against configurable regular expression patterns,
 enabling flexible exception-based alert triggering in data pipelines.
 """
 
-import logging
 import re
 from typing import Literal
 
@@ -14,7 +13,7 @@ from pydantic import Field
 from samara.alert.rules.base import AlertRule
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class ExceptionRegexRule(AlertRule):

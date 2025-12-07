@@ -6,7 +6,6 @@ transformations enabling pipeline authors to define complex data manipulation se
 through structured configuration rather than code.
 """
 
-import logging
 from typing import Any
 
 from pydantic import Field
@@ -18,7 +17,7 @@ from samara.workflow.jobs.models.model_transform import TransformModel
 from samara.workflow.jobs.spark.session import SparkHandler
 from samara.workflow.jobs.spark.transforms import TransformFunctionSparkUnion
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class TransformSpark(TransformModel[TransformFunctionSparkUnion]):

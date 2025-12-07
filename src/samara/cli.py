@@ -10,7 +10,6 @@ CI/CD integration and operational monitoring.
 """
 
 import json
-import logging
 import os
 from pathlib import Path
 
@@ -31,7 +30,7 @@ from samara.telemetry import get_tracer, setup_telemetry, trace_span
 from samara.utils.logger import get_logger, set_logger
 from samara.workflow.controller import WorkflowController
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 tracer = get_tracer()
 
 
@@ -179,9 +178,9 @@ def validate(
         execution with alert integration, use the 'run' command.
     """
     try:
-        logger.info("Starting validation command")
-        logger.info("Workflow config: %s", workflow_filepath)
-        logger.info("Alert config: %s", alert_filepath)
+        logger.info("Starting `validate` command")
+        logger.info("Workflow config: %s", str(workflow_filepath))
+        logger.info("Alert config: %s", str(alert_filepath))
 
         # Parse test env vars
         test_env_vars = None
@@ -287,9 +286,9 @@ def run(
         workflow failures and automating incident response workflows.
     """
     try:
-        logger.info("Starting workflow execution command")
-        logger.info("Workflow config: %s", workflow_filepath)
-        logger.info("Alert config: %s", alert_filepath)
+        logger.info("Starting `run` command")
+        logger.info("Workflow config: %s", str(workflow_filepath))
+        logger.info("Alert config: %s", str(alert_filepath))
 
         try:
             alert = AlertController.from_file(filepath=alert_filepath)
@@ -382,8 +381,8 @@ def export_schema(output_filepath: Path) -> None:
         development workflow.
     """
     try:
-        logger.info("Running 'export-schema' command...")
-        logger.info("Exporting workflow configuration schema to: %s", output_filepath)
+        logger.info("Starting `export-schema` command")
+        logger.info("Exporting workflow configuration schema to: %s", str(output_filepath))
 
         try:
             schema = WorkflowController.export_schema()
@@ -395,7 +394,7 @@ def export_schema(output_filepath: Path) -> None:
             with open(output_filepath, "w", encoding="utf-8") as f:
                 json.dump(schema, f, indent=4, ensure_ascii=False)
 
-            logger.info("Workflow configuration schema exported successfully to: %s", output_filepath)
+            logger.info("Workflow configuration schema exported successfully to: %s", str(output_filepath))
             logger.info(
                 "Command executed successfully with exit code %d (%s).", ExitCode.SUCCESS, ExitCode.SUCCESS.name
             )

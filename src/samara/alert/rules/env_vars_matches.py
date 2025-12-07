@@ -5,7 +5,6 @@ against configured expected values, enabling conditional alert triggering
 based on workflow environment conditions.
 """
 
-import logging
 import os
 from typing import Literal
 
@@ -14,7 +13,7 @@ from pydantic import Field
 from samara.alert.rules.base import AlertRule
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class EnvVarsMatchesRule(AlertRule):

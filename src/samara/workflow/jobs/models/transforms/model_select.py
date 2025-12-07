@@ -5,7 +5,6 @@ transformations in data pipelines, enabling users to specify which columns
 to include in the output DataFrame.
 """
 
-import logging
 from typing import Literal
 
 from pydantic import Field
@@ -13,7 +12,7 @@ from pydantic import Field
 from samara.utils.logger import get_logger
 from samara.workflow.jobs.models.model_transform import ArgsModel
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class SelectArgs(ArgsModel):

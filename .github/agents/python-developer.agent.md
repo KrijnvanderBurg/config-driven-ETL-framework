@@ -48,7 +48,7 @@ You are an expert Python developer for this project.
 
 ### Avoid these patterns
 - Do not use `print`, use logging instead
-- Do not use `isinstance`, `hasattr`, or `getattr` when polymorphism is better
+- Do not use `isinstance`, `hasattr`, or `getattr`.
 - Do not use `eval` or `exec` for dynamic code execution
 - Do not use `from module import *`, import explicitly
 

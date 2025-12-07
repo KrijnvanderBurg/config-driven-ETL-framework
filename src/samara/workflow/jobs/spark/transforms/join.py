@@ -5,7 +5,6 @@ DataFrames based on specified columns and join strategies. The JoinFunction
 is registered as 'join' in the transform function registry.
 """
 
-import logging
 from collections.abc import Callable
 
 from pyspark.sql import DataFrame
@@ -14,7 +13,7 @@ from samara.utils.logger import get_logger
 from samara.workflow.jobs.models.transforms.model_join import JoinFunctionModel
 from samara.workflow.jobs.spark.transforms.base import FunctionSpark
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 
 
 class JoinFunction(JoinFunctionModel, FunctionSpark):

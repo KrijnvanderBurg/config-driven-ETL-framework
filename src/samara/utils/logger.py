@@ -1,8 +1,8 @@
 """Logging utilities for the Samara framework.
 
 This module provides a centralized logging configuration for the Samara framework,
-building on Python's standard logging library. It integrates seamlessly with
-OpenTelemetry for distributed tracing and observability.
+using structlog for structured logging. It integrates seamlessly with OpenTelemetry
+for distributed tracing and observability.
 
 When an OTLP (OpenTelemetry Protocol) logs endpoint is configured via environment
 variables or settings, all logs are automatically exported with full structured
@@ -10,32 +10,37 @@ attributes, enabling powerful querying and analysis in backends like Loki/Grafan
 Datadog, or any OpenTelemetry-compatible observability platform.
 
 Key Features:
-    - Centralized logging configuration with consistent formatting
+    - Centralized structured logging with structlog
     - Automatic OpenTelemetry integration for distributed tracing
-    - Structured logging attributes for enhanced observability
-    - Standard Python logging interface for familiarity
+    - Rich structured logging attributes for enhanced observability
+    - Familiar logging interface with structured context support
 
 Typical Usage:
     >>> from samara.utils.logger import set_logger, get_logger
     >>> set_logger(level="INFO")
     >>> logger = get_logger(__name__)
-    >>> logger.info("Application started", extra={"version": "1.0.0"})
+    >>> logger.info("Application started", version="1.0.0")
 """
 
 import logging
 
+import structlog
+
 
 def set_logger(level: str = "INFO") -> None:
-    """Configure Python's standard logging system for the application.
+    """Configure structlog with standard library integration.
 
-    This function initializes the root logger with a consistent format and logging
-    level that applies to all loggers in the application. It should be called once
-    at application startup, before any logging operations are performed.
+    This function initializes structlog with processors that provide structured
+    logging with consistent formatting. It integrates with Python's standard
+    logging library to ensure third-party libraries and OpenTelemetry handlers
+    continue to work correctly.
 
-    The logging format includes timestamp, logger name, log level, and message,
-    providing essential context for debugging and monitoring. The configuration
-    uses `force=True` to allow reconfiguration even if logging was previously
-    initialized, which is useful for testing or dynamic configuration changes.
+    The configuration includes:
+    - Context variables merging for request-scoped logging
+    - Automatic log level and logger name addition
+    - ISO-formatted timestamps
+    - Stack trace and exception formatting
+    - Integration with Python's logging module for OTLP export
 
     Args:
         level: The logging level threshold as a string. Valid values are:
@@ -47,12 +52,10 @@ def set_logger(level: str = "INFO") -> None:
             Defaults to "INFO" if not specified.
 
     Note:
-        - This function configures the root logger, affecting all loggers in the
-          application unless they have explicitly set handlers or levels.
+        - This configures both structlog and the root Python logger.
         - When OpenTelemetry is configured, all logs will automatically include
           trace context (trace_id, span_id) for correlation with distributed traces.
-        - The `force=True` parameter ensures the configuration is applied even if
-          logging has been previously configured elsewhere.
+        - The configuration can be called multiple times for reconfiguration.
 
     Examples:
         Basic usage with INFO level:
@@ -64,7 +67,7 @@ def set_logger(level: str = "INFO") -> None:
         Enable debug logging for development:
             >>> set_logger(level="DEBUG")
             >>> logger = get_logger(__name__)
-            >>> logger.debug("Detailed variable state: x=%s", x)
+            >>> logger.debug("Detailed variable state", x=x)
 
         Configure from environment variable:
             >>> import os
@@ -74,19 +77,37 @@ def set_logger(level: str = "INFO") -> None:
     See Also:
         get_logger: Create logger instances for specific modules
     """
+    # Configure standard logging for third-party libraries and OTLP handler
     logging.basicConfig(
-        format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+        format="%(message)s",
         level=level,
-        force=True,  # Reconfigure even if already configured
+        force=True,
+    )
+
+    # Configure structlog
+    structlog.configure(
+        processors=[
+            structlog.contextvars.merge_contextvars,
+            structlog.stdlib.add_log_level,
+            structlog.stdlib.add_logger_name,
+            structlog.processors.TimeStamper(fmt="iso"),
+            structlog.processors.StackInfoRenderer(),
+            structlog.processors.format_exc_info,
+            structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
+        ],
+        wrapper_class=structlog.stdlib.BoundLogger,
+        context_class=dict,
+        logger_factory=structlog.stdlib.LoggerFactory(),
+        cache_logger_on_first_use=True,
     )
 
 
-def get_logger(name: str) -> logging.Logger:
-    """Create and return a logger instance for the specified module or component.
+def get_logger(name: str) -> structlog.stdlib.BoundLogger:
+    """Create and return a structlog logger instance for the specified module or component.
 
-    This function creates a standard Python logger with the given name, following
+    This function creates a structlog BoundLogger with the given name, following
     Python's hierarchical logging convention. The logger inherits configuration
-    from the root logger set by `set_logger()`, including log level and formatting.
+    from `set_logger()`, including log level and processors.
 
     When OpenTelemetry is properly configured with an OTLP logs endpoint, all logs
     emitted through this logger are automatically enriched with trace context and
@@ -100,19 +121,20 @@ def get_logger(name: str) -> logging.Logger:
             This enables fine-grained control over logging configuration by module.
 
     Returns:
-        logging.Logger: A configured Python Logger instance that:
-            - Inherits the log level and format from the root logger
+        structlog.stdlib.BoundLogger: A configured structlog logger instance that:
+            - Inherits the log level from the root logger
             - Automatically includes OpenTelemetry trace context when available
             - Supports all standard logging methods (debug, info, warning, error, critical)
+            - Provides structured logging with keyword arguments
             - Exports logs to OTLP endpoint when configured
 
     Note:
         - Always call `set_logger()` before using `get_logger()` to ensure proper
-          configuration of log formatting and levels.
+          configuration of structlog processors and levels.
         - Logger names are hierarchical: "samara.workflow" is the parent of
           "samara.workflow.controller", allowing granular level control.
-        - The returned logger is cached by Python's logging system, so multiple
-          calls with the same name return the same logger instance.
+        - The returned logger is cached by structlog, so multiple calls with the
+          same name return the same logger instance.
         - When OpenTelemetry tracing is active, logs automatically include
           trace_id and span_id fields for correlation with distributed traces.
 
@@ -124,24 +146,26 @@ def get_logger(name: str) -> logging.Logger:
 
         Using different log levels:
             >>> logger = get_logger(__name__)
-            >>> logger.debug("Variable state: count=%d", count)
+            >>> logger.debug("Variable state", count=count)
             >>> logger.info("Operation completed successfully")
             >>> logger.warning("Deprecated feature used")
             >>> logger.error("Failed to process record", exc_info=True)
 
-        Adding structured context with extra fields:
+        Adding structured context as keyword arguments:
             >>> logger = get_logger(__name__)
             >>> logger.info(
             ...     "User action performed",
-            ...     extra={"user_id": 123, "action": "login", "ip": "192.168.1.1"}
+            ...     user_id=123,
+            ...     action="login",
+            ...     ip="192.168.1.1"
             ... )
 
         Creating logger for specific component:
             >>> logger = get_logger("samara.workflow.spark_executor")
-            >>> logger.info("Spark job submitted", extra={"job_id": "job-001"})
+            >>> logger.info("Spark job submitted", job_id="job-001")
 
     See Also:
-        set_logger: Configure the root logger before creating loggers
-        logging.Logger: Python's standard Logger class documentation
+        set_logger: Configure structlog before creating loggers
+        structlog.stdlib.BoundLogger: Structlog's BoundLogger documentation
     """
-    return logging.getLogger(name)
+    return structlog.get_logger(name)
