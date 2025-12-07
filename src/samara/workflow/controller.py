@@ -142,7 +142,7 @@ class WorkflowController(BaseModel):
             with all required WorkflowController fields (id, description,
             enabled, jobs).
         """
-        logger.info("Creating WorkflowManager from file: %s", filepath)
+        logger.info("Creating WorkflowManager from file: %s", str(filepath))
 
         try:
             handler = FileHandlerContext.from_filepath(filepath=filepath)
@@ -153,7 +153,7 @@ class WorkflowController(BaseModel):
 
         try:
             workflow = cls(**dict_[WORKFLOW])
-            logger.info("Successfully created WorkflowManager from configuration file: %s", filepath)
+            logger.info("Successfully created WorkflowManager from configuration file: %s", str(filepath))
             return workflow
         except KeyError as e:
             raise SamaraWorkflowConfigurationError(

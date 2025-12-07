@@ -151,12 +151,12 @@ class LoadSpark(LoadModel, ABC):
                 Parent directories must exist or be creatable by the Spark
                 application with appropriate permissions.
         """
-        logger.debug("Exporting schema for %s to: %s", self.id_, schema_path)
+        logger.debug("Exporting schema for %s to: %s", self.id_, str(schema_path))
 
         with open(schema_path, mode="w", encoding="utf-8") as f:
             f.write(schema_json)
 
-        logger.info("Schema exported successfully for %s to: %s", self.id_, schema_path)
+        logger.info("Schema exported successfully for %s to: %s", self.id_, str(schema_path))
 
     @trace_span("load_spark.load")
     def load(self) -> None:

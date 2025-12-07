@@ -209,10 +209,10 @@ class SchemaFilepathHandler(SchemaHandler):
             NotImplementedError: If the file format is not supported by any
                 available file handler.
         """
-        logger.info("Parsing schema from file: %s", schema)
+        logger.info("Parsing schema from file: %s", str(schema))
 
         try:
-            logger.debug("Creating file handler for schema file: %s", schema)
+            logger.debug("Creating file handler for schema file: %s", str(schema))
             file_handler: FileHandler = FileHandlerContext.from_filepath(filepath=schema)
 
             logger.debug("Reading schema file content")
@@ -221,9 +221,9 @@ class SchemaFilepathHandler(SchemaHandler):
             logger.debug("Converting file content to schema")
             result = SchemaDictHandler.parse(schema=file_content)
 
-            logger.info("Successfully parsed schema from file: %s", schema)
+            logger.info("Successfully parsed schema from file: %s", str(schema))
             return result
 
         except (FileNotFoundError, PermissionError, NotImplementedError) as e:
-            logger.error("File access error reading schema file %s: %s", schema, str(e))
+            logger.error("File access error reading schema file %s: %s", str(schema), str(e))
             raise e

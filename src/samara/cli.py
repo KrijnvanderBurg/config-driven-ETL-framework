@@ -180,8 +180,8 @@ def validate(
     """
     try:
         logger.info("Starting `validate` command")
-        logger.info("Workflow config: %s", workflow_filepath)
-        logger.info("Alert config: %s", alert_filepath)
+        logger.info("Workflow config: %s", str(workflow_filepath))
+        logger.info("Alert config: %s", str(alert_filepath))
 
         # Parse test env vars
         test_env_vars = None
@@ -288,8 +288,8 @@ def run(
     """
     try:
         logger.info("Starting `run` command")
-        logger.info("Workflow config: %s", workflow_filepath)
-        logger.info("Alert config: %s", alert_filepath)
+        logger.info("Workflow config: %s", str(workflow_filepath))
+        logger.info("Alert config: %s", str(alert_filepath))
 
         try:
             alert = AlertController.from_file(filepath=alert_filepath)
@@ -383,7 +383,7 @@ def export_schema(output_filepath: Path) -> None:
     """
     try:
         logger.info("Starting `export-schema` command")
-        logger.info("Exporting workflow configuration schema to: %s", output_filepath)
+        logger.info("Exporting workflow configuration schema to: %s", str(output_filepath))
 
         try:
             schema = WorkflowController.export_schema()
@@ -395,7 +395,7 @@ def export_schema(output_filepath: Path) -> None:
             with open(output_filepath, "w", encoding="utf-8") as f:
                 json.dump(schema, f, indent=4, ensure_ascii=False)
 
-            logger.info("Workflow configuration schema exported successfully to: %s", output_filepath)
+            logger.info("Workflow configuration schema exported successfully to: %s", str(output_filepath))
             logger.info(
                 "Command executed successfully with exit code %d (%s).", ExitCode.SUCCESS, ExitCode.SUCCESS.name
             )

@@ -96,7 +96,7 @@ class FileChannel(ChannelModel):
         try:
             with open(self.file_path, "a", encoding="utf-8") as file:
                 file.write(f"{title}: {body}\n")
-            logger.info("Alert written to file: %s", self.file_path)
+            logger.info("Alert written to file: %s", str(self.file_path))
         except OSError as e:
-            logger.error("Failed to write alert to file %s: %s", self.file_path, e)
+            logger.error("Failed to write alert to file %s: %s", str(self.file_path), e)
             raise

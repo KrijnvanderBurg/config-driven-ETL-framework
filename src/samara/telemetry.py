@@ -31,7 +31,7 @@ from opentelemetry.trace.propagation.tracecontext import TraceContextTextMapProp
 from samara.settings import AppSettings, get_settings
 from samara.utils.logger import get_logger
 
-logger: logging.Logger = get_logger(__name__)
+logger = get_logger(__name__)
 settings: AppSettings = get_settings()
 
 # Type variables enable generic decorator that preserves function signatures
@@ -135,9 +135,9 @@ def setup_telemetry(
         log_provider.add_log_record_processor(BatchLogRecordProcessor(log_exporter))
         set_logger_provider(log_provider)
 
-        # Attach OTLP handler to root logger to export all Python logs
+        # Attach OTLP handler to stdlib root logger to export all logs (including structlog)
         handler = LoggingHandler(level=logging.NOTSET, logger_provider=log_provider)
-        logger.addHandler(handler)
+        logging.getLogger().addHandler(handler)
 
         logger.info("Logs telemetry initialized with OTLP endpoint: %s", otlp_logs_endpoint)
     else:

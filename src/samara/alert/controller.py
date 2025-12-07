@@ -147,7 +147,7 @@ class AlertController(BaseModel):
             ...     exception=SamaraWorkflowError("Transform failed")
             ... )
         """
-        logger.info("Creating AlertManager from file: %s", filepath)
+        logger.info("Creating AlertManager from file: %s", str(filepath))
 
         try:
             handler = FileHandlerContext.from_filepath(filepath=filepath)
@@ -158,7 +158,7 @@ class AlertController(BaseModel):
 
         try:
             alert = cls(**dict_[ALERT])
-            logger.info("Successfully created AlertManager from configuration file: %s", filepath)
+            logger.info("Successfully created AlertManager from configuration file: %s", str(filepath))
             return alert
         except KeyError as e:
             raise SamaraAlertConfigurationError(f"Missing 'alert' section in configuration file '{filepath}'") from e
