@@ -1,61 +1,171 @@
 {
-  "title": "Samara Dashboard",
-  "uid": "samara",
-  "tags": ["samara"],
-  "timezone": "browser",
-  "schemaVersion": 38,
-  "version": 1,
-  "refresh": "30s",
-  "time": {
-    "from": "now-6h",
-    "to": "now"
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
   },
+  "editable": true,
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 1,
+  "links": [],
   "panels": [
     {
-      "id": 1,
-      "type": "logs",
-      "title": "Samara Application Logs",
+      "collapsed": false,
       "gridPos": {
-        "h": 12,
+        "h": 1,
         "w": 24,
         "x": 0,
         "y": 0
       },
+      "id": 2,
+      "panels": [],
+      "repeat": "log_level",
+      "title": "Logs",
+      "type": "row"
+    },
+    {
       "datasource": {
         "type": "loki",
         "uid": "Loki"
       },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 12,
+        "w": 24,
+        "x": 0,
+        "y": 1
+      },
+      "id": 1,
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": false,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showControls": false,
+        "showLabels": true,
+        "showTime": true,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "pluginVersion": "12.3.0",
       "targets": [
         {
-          "refId": "A",
+          "editorMode": "code",
           "expr": "{service_name=\"samara\"} | json | severity_text=~\"$log_level\"",
           "queryType": "range",
-          "editorMode": "code"
+          "refId": "A"
         }
       ],
+      "title": "Samara Application Logs",
+      "type": "logs"
+    },
+    {
+      "collapsed": false,
+      "gridPos": {
+        "h": 1,
+        "w": 24,
+        "x": 0,
+        "y": 13
+      },
+      "id": 3,
+      "panels": [],
+      "title": "Tracing",
+      "type": "row"
+    },
+    {
+      "datasource": {
+        "type": "tempo",
+        "uid": "P214B5B846CF3925F"
+      },
+      "fieldConfig": {
+        "defaults": {},
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 11,
+        "w": 24,
+        "x": 0,
+        "y": 14
+      },
+      "id": 4,
       "options": {
-        "showTime": true,
-        "showLabels": true,
-        "showCommonLabels": false,
-        "wrapLogMessage": true,
-        "prettifyLogMessage": false,
-        "enableLogDetails": true,
-        "dedupStrategy": "none",
-        "sortOrder": "Descending"
-      }
+        "spanFilters": {
+          "criticalPathOnly": false,
+          "matchesOnly": false,
+          "serviceNameOperator": "=",
+          "spanNameOperator": "=",
+          "tags": [
+            {
+              "id": "9b235287-f97",
+              "operator": "="
+            }
+          ]
+        }
+      },
+      "pluginVersion": "12.3.0",
+      "targets": [
+        {
+          "filters": [
+            {
+              "id": "8ff70257",
+              "operator": "=",
+              "scope": "span"
+            },
+            {
+              "id": "service-name",
+              "isCustomValue": false,
+              "operator": "=",
+              "scope": "resource",
+              "tag": "service.name",
+              "value": [
+                "samara"
+              ],
+              "valueType": "string"
+            }
+          ],
+          "limit": 20,
+          "metricsQueryType": "range",
+          "queryType": "traceqlSearch",
+          "refId": "A",
+          "serviceMapUseNativeHistograms": false,
+          "tableType": "traces"
+        }
+      ],
+      "title": "Tracing",
+      "type": "traces"
     }
+  ],
+  "preload": false,
+  "refresh": "30s",
+  "schemaVersion": 42,
+  "tags": [
+    "samara"
   ],
   "templating": {
     "list": [
       {
-        "name": "log_level",
-        "label": "Log Level",
-        "type": "custom",
         "current": {
-          "selected": false,
           "text": "INFO",
           "value": "INFO|WARNING|ERROR|CRITICAL"
         },
+        "label": "Log Level",
+        "name": "log_level",
         "options": [
           {
             "selected": false,
@@ -84,8 +194,17 @@
           }
         ],
         "query": "DEBUG : DEBUG|INFO|WARNING|ERROR|CRITICAL, INFO : INFO|WARNING|ERROR|CRITICAL, WARNING : WARNING|ERROR|CRITICAL, ERROR : ERROR|CRITICAL, CRITICAL : CRITICAL",
-        "hide": 0
+        "type": "custom"
       }
     ]
-  }
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "timepicker": {},
+  "timezone": "browser",
+  "title": "Samara Dashboard",
+  "uid": "samara",
+  "version": 12
 }
