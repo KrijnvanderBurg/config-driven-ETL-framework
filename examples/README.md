@@ -226,4 +226,3 @@ For more examples and detailed documentation, see:
 - [Getting Started Guide](../docs/getting_started.md)
 - [Workflow Configuration Reference](../docs/workflow/README.md)
 - [Transform Functions Reference](../docs/workflow/spark.md)
-

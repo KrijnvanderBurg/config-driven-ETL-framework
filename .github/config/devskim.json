@@ -1,39 +1,39 @@
 {
-    "LanguageRuleIgnoreMap": {},
-    "OutputFile": "",
-    "Rules": [],
-    "RuleIds": [],
-    "IgnoreRuleIds": [],
-    "LanguagesPath": "",
-    "CommentsPath": "",
-    "OutputTextFormat": "",
-    "OutputFileFormat": "",
-    "Severities": [
-        "Critical",
-        "Important",
-        "Moderate",
-        "BestPractice",
-        "ManualReview"
-    ],
-    "Confidences": [
-        "High",
-        "Medium"
-    ],
-    "Globs": [
-        "**/.git/**",
-        "**/bin/**"
-    ],
-    "DisableSuppression": false,
-    "DisableParallel": false,
-    "IgnoreDefaultRules": false,
-    "CrawlArchives": false,
-    "ExitCodeIsNumIssues": false,
-    "BasePath": "",
-    "AbsolutePaths": false,
-    "RespectGitIgnore": false,
-    "SkipExcerpts": false,
-    "ConsoleVerbosityLevel": "Information",
-    "DisableConsoleOutput": false,
-    "LogFileLevel": "Error",
-    "LogFilePath": null
+  "AbsolutePaths": false,
+  "BasePath": "",
+  "CommentsPath": "",
+  "Confidences": [
+    "High",
+    "Medium"
+  ],
+  "ConsoleVerbosityLevel": "Information",
+  "CrawlArchives": false,
+  "DisableConsoleOutput": false,
+  "DisableParallel": false,
+  "DisableSuppression": false,
+  "ExitCodeIsNumIssues": false,
+  "Globs": [
+    "**/.git/**",
+    "**/bin/**"
+  ],
+  "IgnoreDefaultRules": false,
+  "IgnoreRuleIds": [],
+  "LanguageRuleIgnoreMap": {},
+  "LanguagesPath": "",
+  "LogFileLevel": "Error",
+  "LogFilePath": null,
+  "OutputFile": "",
+  "OutputFileFormat": "",
+  "OutputTextFormat": "",
+  "RespectGitIgnore": false,
+  "RuleIds": [],
+  "Rules": [],
+  "Severities": [
+    "Critical",
+    "Important",
+    "Moderate",
+    "BestPractice",
+    "ManualReview"
+  ],
+  "SkipExcerpts": false
 }

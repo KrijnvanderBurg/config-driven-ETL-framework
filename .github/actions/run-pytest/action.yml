@@ -29,7 +29,7 @@ runs:
       shell: bash
       run: |
         pip install pytest pytest-cov pytest-xdist --quiet
-    
+
     - name: Run Pytest with Coverage
       shell: bash
       run: |

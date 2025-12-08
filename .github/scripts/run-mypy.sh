@@ -12,4 +12,4 @@ echo -n "mypy version: " && mypy --version
 mypy "$target_path" \
   --config-file "$config_filepath" \
   --non-interactive \
-  --install-types 
+  --install-types

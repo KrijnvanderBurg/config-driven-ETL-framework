@@ -1,47 +1,47 @@
 {
-    "type": "struct",
-    "fields": [
-        {
-            "name": "product_id",
-            "type": "integer",
-            "nullable": false,
-            "metadata": {}
-        },
-        {
-            "name": "product_name",
-            "type": "string",
-            "nullable": false,
-            "metadata": {}
-        },
-        {
-            "name": "category",
-            "type": "string",
-            "nullable": false,
-            "metadata": {}
-        },
-        {
-            "name": "price",
-            "type": "string",
-            "nullable": false,
-            "metadata": {}
-        },
-        {
-            "name": "stock_quantity",
-            "type": "string",
-            "nullable": false,
-            "metadata": {}
-        },
-        {
-            "name": "is_available",
-            "type": "string",
-            "nullable": false,
-            "metadata": {}
-        },
-        {
-            "name": "last_updated",
-            "type": "string",
-            "nullable": false,
-            "metadata": {}
-        }
-    ]
+  "fields": [
+    {
+      "metadata": {},
+      "name": "product_id",
+      "nullable": false,
+      "type": "integer"
+    },
+    {
+      "metadata": {},
+      "name": "product_name",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "category",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "price",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "stock_quantity",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "is_available",
+      "nullable": false,
+      "type": "string"
+    },
+    {
+      "metadata": {},
+      "name": "last_updated",
+      "nullable": false,
+      "type": "string"
+    }
+  ],
+  "type": "struct"
 }

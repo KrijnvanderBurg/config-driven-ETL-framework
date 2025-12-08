@@ -11,7 +11,7 @@ RUN ZSH_SNIPPET="export HISTFILE=/commandhistory/.zsh_history && export HISTSIZE
 RUN mkdir -p /home/vscode/.cache/pypoetry \
     && chown -R vscode:vscode /home/vscode/.cache
 
-###  pyspark 
+###  pyspark
 # Install Java and other dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \

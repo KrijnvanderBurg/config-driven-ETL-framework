@@ -1,5 +1,5 @@
 #!/bin/bash
-target_path="${1:-$PWD/src}" && echo "Scanning folder: $target_path" 
+target_path="${1:-$PWD/src}" && echo "Scanning folder: $target_path"
 config_filepath="${2:-$PWD/.github/config/bandit.ini}" && echo "Config file: $config_filepath"
 
 # Install bandit if not already installed

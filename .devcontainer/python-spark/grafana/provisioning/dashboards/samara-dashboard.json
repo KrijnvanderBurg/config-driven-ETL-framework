@@ -107,9 +107,9 @@
       "options": {
         "query": "",
         "queryType": "traceql",
+        "search": "",
         "serviceName": "samara",
-        "spanName": "",
-        "search": ""
+        "spanName": ""
       },
       "pluginVersion": "12.3.0",
       "targets": [
