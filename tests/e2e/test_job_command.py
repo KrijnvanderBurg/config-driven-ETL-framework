@@ -32,11 +32,11 @@ def test_job_command__execute_and_verify__matches_expected_output(tmp_path: Path
         spark: Spark session fixture
         job_path: Path to job.json configuration file
     """
-    job_path = Path(job_path)
-    job_dir = job_path.parent
+    job_file = Path(job_path)
+    job_dir = job_file.parent
     
     # Load and modify config to redirect outputs to tmp
-    with open(job_path, encoding="utf-8") as f:
+    with open(job_file, encoding="utf-8") as f:
         config = json.load(f)
     
     for job in config["workflow"]["jobs"]:
