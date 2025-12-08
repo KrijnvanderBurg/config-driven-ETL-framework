@@ -142,4 +142,4 @@ jobs:
           devcontainer exec \
             --workspace-folder . \
             --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json \
-            bash -c "python --version && poetry --version"
+            bash -c "python --version"
