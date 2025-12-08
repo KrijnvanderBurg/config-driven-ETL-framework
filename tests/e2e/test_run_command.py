@@ -18,7 +18,7 @@ def spark():
     return SparkHandler().session
 
 
-@pytest.mark.parametrize("job_path", glob.glob("tests/e2e/job/**/job.json", recursive=True))
+@pytest.mark.parametrize("job_path", glob.glob("tests/e2e/workflow/**/job.json", recursive=True))
 def test_job_command__execute_and_verify__matches_expected_output(tmp_path: Path, spark, job_path: str) -> None:
     """Test job execution produces expected outputs.
 
