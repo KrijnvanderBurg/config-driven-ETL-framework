@@ -1,7 +1,7 @@
 @startuml sequence_diagram
 title FLINT ETL Processing Framework - Sequence Diagram
 
-!define EXTRACT_COLOR #6B8EB5 
+!define EXTRACT_COLOR #6B8EB5
 !define TRANSFORM_COLOR #7BB07E
 !define LOAD_COLOR #C17878
 
@@ -40,7 +40,7 @@ loop for each extract
     activate Extract EXTRACT_COLOR
     Extract -> Spark: configure Spark
     activate Spark EXTRACT_COLOR
-    
+
     alt ExtractMethod.BATCH
         Extract -> Extract: _extract_batch()
         Extract -> Spark: read data files
@@ -50,7 +50,7 @@ loop for each extract
         Extract -> Spark: read streaming data
         Spark --> Extract: Streaming DataFrame
     end
-    
+
     deactivate Spark
     Extract -> Registry: store DataFrame [extract.name]
     activate Registry EXTRACT_COLOR
@@ -69,14 +69,14 @@ loop for each transform
     Transform -> Registry: get upstream DataFrame
     activate Registry TRANSFORM_COLOR
     deactivate Registry
-    
+
     loop for each function
         Transform -> Transform: apply function with arguments
         activate Transform TRANSFORM_COLOR
         Transform --> Transform: transformed DataFrame
         deactivate Transform
     end
-    
+
     Transform -> Registry: store DataFrame [transform.name]
     activate Registry TRANSFORM_COLOR
     deactivate Registry
@@ -94,7 +94,7 @@ loop for each load
     Load -> Registry: get upstream DataFrame
     activate Registry LOAD_COLOR
     deactivate Registry
-    
+
     alt LoadMethod.BATCH
         Load -> Load: _load_batch()
         Load -> Spark: write data to destination
@@ -110,7 +110,7 @@ loop for each load
         activate Registry LOAD_COLOR
         deactivate Registry
     end
-    
+
     Load --> Job: completed
     deactivate Load
 end

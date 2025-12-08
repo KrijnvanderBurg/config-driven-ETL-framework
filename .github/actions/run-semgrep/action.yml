@@ -22,7 +22,7 @@ runs:
           "${{ inputs.target-path }}" \
           "${{ inputs.config-file }}" \
           "${{ inputs.sarif-output-file }}"
-    
+
     - name: Upload SARIF to GitHub Security
       if: always()
       uses: github/codeql-action/upload-sarif@v3

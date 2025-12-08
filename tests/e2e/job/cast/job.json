@@ -34,9 +34,9 @@
                         "upstream_id": "extract-test",
                         "options": {},
                         "functions": [
-                            { 
-                                "function_type": "cast", 
-                                "arguments": { 
+                            {
+                                "function_type": "cast",
+                                "arguments": {
                                     "columns": [
                                         {"column_name": "byte_to_str", "cast_type": "string"},
                                         {"column_name": "short_to_int", "cast_type": "integer"},

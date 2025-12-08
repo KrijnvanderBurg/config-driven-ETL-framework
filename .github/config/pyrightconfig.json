@@ -1,8 +1,12 @@
 {
-  "include": [
-    "./"
-  ],
-  "exclude": [
+  "defineConstant": {
+    "DEBUG": false
+  },
+  "exclude": [],
+  "executionEnvironments": [
+    {
+      "root": "./"
+    }
   ],
   "ignore": [
     "**/node_modules",
@@ -11,14 +15,9 @@
     "**/.devcontainer/**",
     "**/.devcontainer/**"
   ],
-  "executionEnvironments": [
-    {
-      "root": "./"
-    }
+  "include": [
+    "./"
   ],
-  "defineConstant": {
-    "DEBUG": false
-  },
   "reportMissingImports": false,
   "reportMissingTypeStubs": false
 }

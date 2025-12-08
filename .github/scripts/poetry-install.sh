@@ -1,6 +1,12 @@
 #!/bin/bash
 target_path="${1:-$PWD}" && echo "Target path: $target_path"
 
+# Run poetry-setup.sh if it exists
+if [ -f ".github/scripts/poetry-setup.sh" ]; then
+    echo "Running poetry-setup.sh..."
+    bash .github/scripts/poetry-setup.sh
+fi
+
 # Configure Poetry to not create virtualenvs
 echo "Configuring Poetry..."
 poetry config virtualenvs.create false

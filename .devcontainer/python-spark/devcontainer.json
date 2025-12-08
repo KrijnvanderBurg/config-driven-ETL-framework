@@ -10,14 +10,7 @@
 	//
 	"features": {
 		"ghcr.io/devcontainers/features/python:1": {
-			"version": "3.13",
-			// Other required packages are installed via onCreateCommand,
-			// since toolsToInstall uses pipx which cannot install libraries
-			"installTools": false,
-			"toolsToInstall": "" // set installTools to true again
-		},
-		"ghcr.io/devcontainers-extra/features/poetry:2": {
-			"version": "latest"
+			"version": "3.13"
 		},
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
 	},
@@ -66,7 +59,7 @@
 	// "postStartCommand": {},
 	// "postAttachCommand": {},
 	// "waitFor": "", // default updateContentCommand
-	"customizations": {  
+	"customizations": {
 		"vscode": {
 			"extensions": [
 				// Python
@@ -140,7 +133,7 @@
 				//
 				// Ruff Linter might give pop-ups with the error:
 				// `--config` flag must either be a path to a `.toml` configuration file or ...`
-				// It should have been fixed but it still happens for me. 
+				// It should have been fixed but it still happens for me.
 				// https://github.com/astral-sh/ruff-vscode/issues/413
 				"ruff.configuration": "${workspaceFolder}/.github/config/ruff.toml",
 				"ruff.organizeImports": true,
@@ -247,7 +240,7 @@
 				"autoDocstring.quoteStyle": "\"\"\"",
 				//
 				// VsCode Tasks
-				// 
+				//
 				// The DevContainer documentation does not refer support for VsCode tasks at all, but it does work quite well except for below issue.
 				//
 				// Tasks start already before postCreateCommand, if a task has a dependency that is installed after, it will fail.
