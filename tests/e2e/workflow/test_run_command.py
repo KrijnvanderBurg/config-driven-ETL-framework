@@ -10,14 +10,6 @@ from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType
 from pyspark.testing import assertDataFrameEqual
 
-from samara.workflow.jobs.spark.session import SparkHandler
-
-
-@pytest.fixture
-def spark():
-    """Provide Spark session for verification."""
-    return SparkHandler().session
-
 
 @pytest.mark.parametrize("job_path", glob.glob("tests/e2e/workflow/**/job.json", recursive=True))
 def test_job_command__execute_and_verify__matches_expected_output(
