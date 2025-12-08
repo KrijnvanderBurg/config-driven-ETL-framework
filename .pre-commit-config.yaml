@@ -1,0 +1,154 @@
+# Pre-commit hooks configuration
+#
+# This is an OPTIONAL tool for developers who prefer pre-commit over VSCode tasks.
+# It reuses the same shell scripts and configurations used by the devcontainer.
+#
+# Installation (optional):
+#   pip install pre-commit
+#   pre-commit install
+#
+# Usage:
+#   pre-commit run --all-files    # Run all hooks manually
+#   pre-commit run ruff-format    # Run specific hook
+#   git commit                    # Hooks run automatically if installed
+#
+# To skip hooks temporarily:
+#   git commit --no-verify
+
+# Configuration
+default_install_hook_types: [pre-commit, pre-push]
+default_stages: [pre-commit]
+fail_fast: false
+minimum_pre_commit_version: '3.0.0'
+
+# Global exclude patterns
+exclude: &json-exclude ^(tests/|.devcontainer/|examples/json_join_select/orders/)
+
+repos:
+  # Local hooks that use existing shell scripts
+  - repo: local
+    hooks:
+      # Code formatting
+      - id: ruff-format
+        name: Ruff Formatter
+        entry: .github/scripts/run-ruff-formatter.sh
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: ruff-lint
+        name: Ruff Linter
+        entry: .github/scripts/run-ruff-linter.sh
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      # Type checking
+      - id: mypy
+        name: MyPy Type Checker
+        entry: .github/scripts/run-mypy.sh
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: pyright
+        name: Pyright Type Checker
+        entry: .github/scripts/run-pyright.sh
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      # Linters
+      - id: flake8
+        name: Flake8 Linter
+        entry: .github/scripts/run-flake8.sh
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: pylint
+        name: Pylint
+        entry: .github/scripts/run-pylint.sh
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      # Security scanning
+      - id: bandit
+        name: Bandit Security Scanner
+        entry: .github/scripts/run-bandit.sh
+        language: system
+        types: [python]
+        pass_filenames: false
+
+      - id: semgrep
+        name: Semgrep Security Scanner
+        entry: .github/scripts/run-semgrep.sh
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [manual]  # Only run when explicitly called
+
+      - id: trufflehog
+        name: TruffleHog Secret Scanner
+        entry: .github/scripts/run-trufflehog.sh
+        language: system
+        pass_filenames: false
+        stages: [manual]  # Only run when explicitly called
+
+      # Dead code detection
+      - id: vulture
+        name: Vulture Dead Code Detector
+        entry: .github/scripts/run-vulture.sh
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [manual]  # Only run when explicitly called
+
+  # Standard pre-commit hooks (optional - comment out if not desired)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+        exclude: ^(.*\.md|.*\.patch)$
+
+      - id: end-of-file-fixer
+        exclude: ^(.*\.patch)$
+
+      - id: check-yaml
+
+      - id: check-toml
+
+      - id: check-json
+        exclude: *json-exclude
+
+      - id: check-added-large-files
+        args: ['--maxkb=1000']
+
+      - id: check-case-conflict
+
+      - id: check-merge-conflict
+
+      - id: detect-private-key
+        exclude: ^(tests/|examples/)
+
+      - id: check-ast
+
+      - id: check-builtin-literals
+
+      - id: check-executables-have-shebangs
+
+      - id: check-shebang-scripts-are-executable
+
+      - id: debug-statements
+
+      - id: mixed-line-ending
+
+        args: ['--fix=auto']
+
+      - id: name-tests-test
+        args: ['--pytest-test-first']
+
+      - id: pretty-format-json
+        args: ['--autofix', '--indent=2']
+        exclude: *json-exclude
