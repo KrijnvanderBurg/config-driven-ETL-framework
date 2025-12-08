@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
       - name: Install Python
         uses: ./.github/actions/setup-python
         with:
@@ -103,7 +103,7 @@ jobs:
           - python-spark
           # Add more devcontainers here as needed
           # - spark-cluster
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4

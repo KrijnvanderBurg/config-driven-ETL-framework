@@ -29,7 +29,7 @@ alert:
       retry:
         max_attempts: 3
         delay_in_seconds: 30
-  
+
   # Triggers that determine when alerts are sent
   triggers:
     - id: production-external-errors

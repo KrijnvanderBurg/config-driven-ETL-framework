@@ -1,29 +1,29 @@
 {
-  "type": "struct",
   "fields": [
     {
+      "metadata": {},
       "name": "order_id",
-      "type": "integer",
       "nullable": false,
-      "metadata": {}
+      "type": "integer"
     },
     {
+      "metadata": {},
       "name": "customer_id",
-      "type": "integer", 
       "nullable": false,
-      "metadata": {}
+      "type": "integer"
     },
     {
+      "metadata": {},
       "name": "order_date",
-      "type": "date",
       "nullable": true,
-      "metadata": {}
+      "type": "date"
     },
     {
+      "metadata": {},
       "name": "amount",
-      "type": "double",
       "nullable": true,
-      "metadata": {}
+      "type": "double"
     }
-  ]
+  ],
+  "type": "struct"
 }

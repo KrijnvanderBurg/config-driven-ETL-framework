@@ -1,5 +1,9 @@
 #!/bin/bash
 
+# Set pipx to use user-writable directories
+export PIPX_HOME="${HOME}/.local/pipx"
+export PIPX_BIN_DIR="${HOME}/.local/bin"
+
 # Install Poetry via pipx if not already installed
 if ! command -v poetry &> /dev/null; then
     echo "Installing Poetry via pipx..."

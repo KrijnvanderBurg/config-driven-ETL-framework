@@ -32,4 +32,3 @@ coverage combine --rcfile="$config_filepath_coverage"
 # Generate XML report from combined coverage data
 echo "Generating coverage XML report..."
 coverage xml -o "$output_coverage_filepath" --rcfile="$config_filepath_coverage"
-

@@ -223,4 +223,3 @@ For complete options, see [Spark Data Sources documentation](https://spark.apach
 }
 
 ```
-

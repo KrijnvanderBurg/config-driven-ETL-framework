@@ -30,7 +30,7 @@
                 "retry": {
                     "max_attempts": 3,
                     "delay_in_seconds": 30
-                }       
+                }
             }
         ],
         "triggers": [
@@ -48,7 +48,7 @@
                 "rules": [
                     {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production"]},
                 ]
-            },  
+            },
             {
                 "id": "dev-warnings",
                 "description": "",

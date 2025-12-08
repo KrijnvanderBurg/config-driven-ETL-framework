@@ -26,6 +26,7 @@ opentelemetry-sdk = "^1.37.0"
 opentelemetry-exporter-otlp = "^1.37.0"
 
 [tool.poetry.group.test.dependencies]
+pre_commit = "*"
 pytest = ">=8.3.0"
 pytest-cov = ">=2.0.0"
 pytest-xdist = ">=3.6.1"

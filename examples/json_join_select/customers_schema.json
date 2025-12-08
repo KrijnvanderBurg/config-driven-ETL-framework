@@ -1,29 +1,29 @@
 {
-  "type": "struct",
   "fields": [
     {
+      "metadata": {},
       "name": "customer_id",
-      "type": "integer",
       "nullable": false,
-      "metadata": {}
+      "type": "integer"
     },
     {
+      "metadata": {},
       "name": "name",
-      "type": "string",
       "nullable": false,
-      "metadata": {}
+      "type": "string"
     },
     {
+      "metadata": {},
       "name": "email",
-      "type": "string",
       "nullable": true,
-      "metadata": {}
+      "type": "string"
     },
     {
+      "metadata": {},
       "name": "signup_date",
-      "type": "date",
       "nullable": true,
-      "metadata": {}
+      "type": "date"
     }
-  ]
+  ],
+  "type": "struct"
 }
