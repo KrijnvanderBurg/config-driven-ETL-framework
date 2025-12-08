@@ -6,19 +6,18 @@ This framework provides isolated, production-like testing for Samara data proces
 
 ## Architecture
 
-All e2e test code is consolidated in a single file: `tests/e2e/test_job_command.py`
+All e2e test code is in a single file: `tests/e2e/test_job_command.py` (99 lines)
 
 This file contains:
-- **`PathRedirector`** - Redirects output paths to tmp directories
-- **`JobTestExecutor`** - Executes jobs via CLI exactly as in production
-- **`ResultVerifier`** - Verifies both schemas and data using PySpark
-- **`TestJobExecution`** - Single parametrized test that discovers all job.json files
+- **One parametrized test function** that discovers and tests all job.json files
+- **One simple fixture** (`spark`) that provides a Spark session for verification
+- **Inline logic** for path redirection, CLI execution, and result verification
 
 ## Test Structure
 
 ```
 tests/e2e/
-├── test_job_command.py          # All e2e test code in one file
+├── test_job_command.py          # Single test file (99 lines)
 └── job/
     └── <test_name>/
         ├── job.json                 # Job configuration
@@ -34,7 +33,7 @@ tests/e2e/
 ✅ **Complete Isolation** - All execution happens in pytest tmp_path
 ✅ **Production-like** - Uses actual CLI commands, not test shortcuts  
 ✅ **Git Safe** - No writes to repository directories
-✅ **Simple** - All code in a single file for easy understanding and maintenance
+✅ **Ultra Simple** - Single test function with inline logic (99 lines total)
 
 ## Adding New Tests
 
