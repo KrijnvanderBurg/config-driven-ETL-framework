@@ -6,6 +6,7 @@ import subprocess
 from pathlib import Path
 
 import pytest
+from pyspark.sql import SparkSession
 from pyspark.sql.types import StructType
 from pyspark.testing import assertDataFrameEqual
 
@@ -19,7 +20,9 @@ def spark():
 
 
 @pytest.mark.parametrize("job_path", glob.glob("tests/e2e/workflow/**/job.json", recursive=True))
-def test_job_command__execute_and_verify__matches_expected_output(tmp_path: Path, spark, job_path: str) -> None:
+def test_job_command__execute_and_verify__matches_expected_output(
+    tmp_path: Path, spark: SparkSession, job_path: str
+) -> None:
     """Test job execution produces expected outputs.
 
     This test:
