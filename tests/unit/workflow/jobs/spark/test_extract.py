@@ -246,14 +246,14 @@ class TestExtractFileSparkExtract:
         mock_read.load.return_value = mock_dataframe
         mock_session = Mock()
         mock_session.read = mock_read
-        extract_file_spark.spark.session = mock_session
+        extract_file_spark._spark.session = mock_session
 
         # Act
         extract_file_spark.extract()
 
         # Assert - verify load was called and real DataFrame was stored
         mock_read.load.assert_called_once()
-        result_df = extract_file_spark.data_registry[extract_file_spark.id_]
+        result_df = extract_file_spark._data_registry[extract_file_spark.id_]
         assertDataFrameEqual(result_df, mock_dataframe)
 
     def test_extract__with_streaming_method__creates_streaming_query(
@@ -279,14 +279,14 @@ class TestExtractFileSparkExtract:
         mock_read_stream.load.return_value = mock_dataframe
         mock_session = Mock()
         mock_session.readStream = mock_read_stream
-        extract_streaming.spark.session = mock_session
+        extract_streaming._spark.session = mock_session
 
         # Act
         extract_streaming.extract()
 
         # Assert
         mock_read_stream.load.assert_called_once()
-        result_df = extract_streaming.data_registry[extract_streaming.id_]
+        result_df = extract_streaming._data_registry[extract_streaming.id_]
         assertDataFrameEqual(result_df, mock_dataframe)
 
     def test_extract__with_invalid_method__raises_value_error(self, extract_file_spark: ExtractFileSpark) -> None:

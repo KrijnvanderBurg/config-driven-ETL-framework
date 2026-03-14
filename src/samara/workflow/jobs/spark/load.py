@@ -9,7 +9,7 @@ import json
 from abc import ABC, abstractmethod
 from typing import Any, Literal
 
-from pydantic import Field
+from pydantic import Field, PrivateAttr
 from pyspark.sql.streaming.query import StreamingQuery
 
 from samara.telemetry import trace_span
@@ -89,29 +89,13 @@ class LoadSpark(LoadModel, ABC):
         Spark application.
     """
 
-    model_config = {"arbitrary_types_allowed": True, "extra": "allow"}
+    model_config = {"arbitrary_types_allowed": True, "extra": "forbid"}
+
+    _data_registry: DataFrameRegistry = PrivateAttr(default_factory=DataFrameRegistry)
+    _streaming_query_registry: StreamingQueryRegistry = PrivateAttr(default_factory=StreamingQueryRegistry)
+    _spark: SparkHandler = PrivateAttr(default_factory=SparkHandler)
 
     options: dict[str, Any] = Field(..., description="Options for the sink input.")
-
-    def __init__(self, **data: Any) -> None:
-        """Initialize the load component from pipeline configuration.
-
-        Creates a Pydantic model instance from provided configuration and
-        initializes workflow registries and Spark handler. Establishes the
-        component's ability to manage DataFrames, streaming queries, and
-        Spark session settings during the load operation.
-
-        Args:
-            **data: Configuration fields from pipeline definition. Expected
-                fields include: id_, upstream_id, method, location,
-                data_format, mode, options, and optionally schema_export.
-                See class Example for full configuration structure.
-        """
-        super().__init__(**data)
-        # Set up non-Pydantic attributes that shouldn't be in schema
-        self.data_registry: DataFrameRegistry = DataFrameRegistry()
-        self.streaming_query_registry: StreamingQueryRegistry = StreamingQueryRegistry()
-        self.spark: SparkHandler = SparkHandler()
 
     @abstractmethod
     def _load_batch(self) -> None:
@@ -182,10 +166,10 @@ class LoadSpark(LoadModel, ABC):
         )
 
         logger.debug("Adding Spark configurations: %s", self.options)
-        self.spark.add_configs(options=self.options)
+        self._spark.add_configs(options=self.options)
 
         logger.debug("Copying dataframe from %s to %s", self.upstream_id, self.id_)
-        self.data_registry[self.id_] = self.data_registry[self.upstream_id]
+        self._data_registry[self.id_] = self._data_registry[self.upstream_id]
 
         if self.method == LoadMethod.BATCH:
             logger.debug("Performing batch load for: %s", self.id_)
@@ -193,14 +177,14 @@ class LoadSpark(LoadModel, ABC):
             logger.info("Batch load completed successfully for: %s", self.id_)
         elif self.method == LoadMethod.STREAMING:
             logger.debug("Performing streaming load for: %s", self.id_)
-            self.streaming_query_registry[self.id_] = self._load_streaming()
+            self._streaming_query_registry[self.id_] = self._load_streaming()
             logger.info("Streaming load started successfully for: %s", self.id_)
         else:
             raise ValueError(f"Loading method {self.method} is not supported for PySpark")
 
         # Export schema if location is specified
         if self.schema_export:
-            schema_json = json.dumps(self.data_registry[self.id_].schema.jsonValue())
+            schema_json = json.dumps(self._data_registry[self.id_].schema.jsonValue())
             self._export_schema(schema_json, self.schema_export)
 
         logger.info("Load operation completed successfully for: %s", self.id_)
@@ -289,7 +273,7 @@ class LoadFileSpark(LoadSpark, LoadModelFile):
             self.mode,
         )
 
-        self.data_registry[self.id_].write.save(
+        self._data_registry[self.id_].write.save(
             path=self.location,
             format=self.data_format,
             mode=self.mode,
@@ -317,7 +301,7 @@ class LoadFileSpark(LoadSpark, LoadModelFile):
             self.mode,
         )
 
-        streaming_query = self.data_registry[self.id_].writeStream.start(
+        streaming_query = self._data_registry[self.id_].writeStream.start(
             path=self.location,
             format=self.data_format,
             outputMode=self.mode,

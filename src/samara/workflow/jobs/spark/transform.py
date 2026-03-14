@@ -8,7 +8,7 @@ through structured configuration rather than code.
 
 from typing import Any
 
-from pydantic import Field
+from pydantic import Field, PrivateAttr
 
 from samara.telemetry import trace_span
 from samara.types import DataFrameRegistry
@@ -89,28 +89,12 @@ class TransformSpark(TransformModel[TransformFunctionSparkUnion]):
         function modifies the dataframe in place within the registry, so order matters.
     """
 
-    model_config = {"arbitrary_types_allowed": True, "extra": "allow"}
+    model_config = {"arbitrary_types_allowed": True, "extra": "forbid"}
+
+    _data_registry: DataFrameRegistry = PrivateAttr(default_factory=DataFrameRegistry)
+    _spark: SparkHandler = PrivateAttr(default_factory=SparkHandler)
 
     options: dict[str, Any] = Field(..., description="Transformation options as key-value pairs")
-
-    def __init__(self, **data: Any) -> None:
-        """Initialize TransformSpark with configuration data.
-
-        Creates a Pydantic model instance from the provided configuration data and then
-        initializes workflow attributes for managing dataframes and Spark sessions. This
-        two-stage initialization separates Pydantic model validation from workflow setup.
-
-        Args:
-            **data: Configuration data for initializing the Pydantic model. Should include
-                `id_`, `upstream_id`, `functions`, and `options` keys at minimum.
-
-        Returns:
-            None
-        """
-        super().__init__(**data)
-        # Set up non-Pydantic attributes that shouldn't be in schema
-        self.data_registry: DataFrameRegistry = DataFrameRegistry()
-        self.spark: SparkHandler = SparkHandler()
 
     @trace_span("transform_spark.transform")
     def transform(self) -> None:
@@ -134,11 +118,11 @@ class TransformSpark(TransformModel[TransformFunctionSparkUnion]):
         logger.info("Starting transformation for: %s from upstream: %s", self.id_, self.upstream_id)
 
         logger.debug("Adding Spark configurations: %s", self.options)
-        self.spark.add_configs(options=self.options)
+        self._spark.add_configs(options=self.options)
 
         # Copy the dataframe from upstream to current id
         logger.debug("Copying dataframe from %s to %s", self.upstream_id, self.id_)
-        self.data_registry[self.id_] = self.data_registry[self.upstream_id]
+        self._data_registry[self.id_] = self._data_registry[self.upstream_id]
 
         # Apply transformations
         logger.debug("Applying %d transformation functions", len(self.functions))
@@ -146,7 +130,7 @@ class TransformSpark(TransformModel[TransformFunctionSparkUnion]):
             logger.debug("Applying function %d/%d: %s", i, len(self.functions), function.function_type)
 
             callable_ = function.transform()
-            self.data_registry[self.id_] = callable_(df=self.data_registry[self.id_])
+            self._data_registry[self.id_] = callable_(df=self._data_registry[self.id_])
 
             logger.info("Function %s applied successfully", function.function_type)
 

@@ -100,7 +100,7 @@ class JoinFunction(JoinFunctionModel, FunctionSpark):
             logger.debug("Applying join transform")
 
             # Get the right DataFrame from the registry
-            right_df = self.data_registry[self.arguments.other_upstream_id]
+            right_df = self._data_registry[self.arguments.other_upstream_id]
             logger.debug(
                 "Retrieved right DataFrame: %s (columns: %s)",
                 self.arguments.other_upstream_id,

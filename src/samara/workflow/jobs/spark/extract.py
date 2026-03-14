@@ -10,7 +10,7 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any, Literal, Self
 
-from pydantic import Field, model_validator
+from pydantic import Field, PrivateAttr, model_validator
 from pyspark.sql import DataFrame
 from pyspark.sql.types import StructType
 
@@ -67,26 +67,13 @@ class ExtractSpark(ExtractModel, ABC):
         extraction mode based on the configured method.
     """
 
-    model_config = {"arbitrary_types_allowed": True, "extra": "allow"}
+    model_config = {"arbitrary_types_allowed": True, "extra": "forbid"}
+
+    _data_registry: DataFrameRegistry = PrivateAttr(default_factory=DataFrameRegistry)
+    _spark: SparkHandler = PrivateAttr(default_factory=SparkHandler)
 
     _schema_parsed: StructType
     options: dict[str, Any] = Field(..., description="PySpark reader options as key-value pairs")
-
-    def __init__(self, **data: Any) -> None:
-        """Initialize the extractor with configuration data and workflow components.
-
-        Sets up the Pydantic model with provided configuration data and initializes
-        workflow components (DataFrameRegistry for storing extracted data and
-        SparkHandler for managing the Spark session).
-
-        Args:
-            **data: Configuration data for model initialization. Should include
-                required fields like id_, method, schema_, and extract-specific fields.
-        """
-        super().__init__(**data)
-        # Set up non-Pydantic attributes that shouldn't be in schema
-        self.data_registry: DataFrameRegistry = DataFrameRegistry()
-        self.spark: SparkHandler = SparkHandler()
 
     @model_validator(mode="after")
     @trace_span("extract_spark.parse_schema")
@@ -140,15 +127,15 @@ class ExtractSpark(ExtractModel, ABC):
         logger.info("Starting extraction for source: %s using method: %s", self.id_, self.method.value)
 
         logger.debug("Adding Spark configurations: %s", self.options)
-        self.spark.add_configs(options=self.options)
+        self._spark.add_configs(options=self.options)
 
         if self.method == ExtractMethod.BATCH:
             logger.debug("Performing batch extraction for: %s", self.id_)
-            self.data_registry[self.id_] = self._extract_batch()
+            self._data_registry[self.id_] = self._extract_batch()
             logger.info("Batch extraction completed successfully for: %s", self.id_)
         elif self.method == ExtractMethod.STREAMING:
             logger.debug("Performing streaming extraction for: %s", self.id_)
-            self.data_registry[self.id_] = self._extract_streaming()
+            self._data_registry[self.id_] = self._extract_streaming()
             logger.info("Streaming extraction completed successfully for: %s", self.id_)
         else:
             raise ValueError(f"Extraction method {self.method} is not supported for PySpark")
@@ -245,7 +232,7 @@ class ExtractFileSpark(ExtractSpark, ExtractFileModel):
         """
         logger.debug("Reading files in batch mode - path: %s, format: %s", self.location, self.data_format)
 
-        dataframe = self.spark.session.read.load(
+        dataframe = self._spark.session.read.load(
             path=self.location,
             format=self.data_format,
             schema=self._schema_parsed,
@@ -271,7 +258,7 @@ class ExtractFileSpark(ExtractSpark, ExtractFileModel):
         """
         logger.debug("Reading files in streaming mode - path: %s, format: %s", self.location, self.data_format)
 
-        dataframe = self.spark.session.readStream.load(
+        dataframe = self._spark.session.readStream.load(
             path=self.location,
             format=self.data_format,
             schema=self._schema_parsed,
