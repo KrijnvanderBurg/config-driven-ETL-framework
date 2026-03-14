@@ -251,8 +251,7 @@ class ExtractFileSpark(ExtractSpark, ExtractFileModel):
             schema=self._schema_parsed,
             **self.options,
         )
-        row_count = dataframe.count()
-        logger.info("Batch extraction successful - loaded %d rows from %s", row_count, self.location)
+        logger.info("Batch extraction successful - loaded data from %s", self.location)
         return dataframe
 
     @trace_span("extract_file_spark._extract_streaming")

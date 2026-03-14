@@ -112,14 +112,12 @@ class JoinFunction(JoinFunctionModel, FunctionSpark):
             # Get the join columns
             join_on = self.arguments.on
 
-            logger.debug("Performing join - left: %d rows, right: %d rows", df.count(), right_df.count())
             logger.debug("Join parameters - on: %s, how: %s", join_on, join_type)
 
             # Perform the join operation
             result_df = df.join(right_df, on=join_on, how=join_type)
-            result_count = result_df.count()
 
-            logger.info("Join transform completed - result: %d rows, join type: %s", result_count, join_type)
+            logger.info("Join transform completed - join type: %s", join_type)
 
             return result_df
 

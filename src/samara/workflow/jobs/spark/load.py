@@ -289,9 +289,6 @@ class LoadFileSpark(LoadSpark, LoadModelFile):
             self.mode,
         )
 
-        row_count = self.data_registry[self.id_].count()
-        logger.debug("Writing %d rows to %s", row_count, self.location)
-
         self.data_registry[self.id_].write.save(
             path=self.location,
             format=self.data_format,
@@ -299,7 +296,7 @@ class LoadFileSpark(LoadSpark, LoadModelFile):
             **self.options,
         )
 
-        logger.info("Batch write successful - wrote %d rows to %s", row_count, self.location)
+        logger.info("Batch write successful - wrote data to %s", self.location)
 
     @trace_span("load_file_spark._load_streaming")
     def _load_streaming(self) -> StreamingQuery:

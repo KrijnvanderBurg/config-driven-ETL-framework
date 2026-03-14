@@ -145,15 +145,10 @@ class TransformSpark(TransformModel[TransformFunctionSparkUnion]):
         for i, function in enumerate(self.functions):
             logger.debug("Applying function %d/%d: %s", i, len(self.functions), function.function_type)
 
-            original_count = self.data_registry[self.id_].count()
             callable_ = function.transform()
             self.data_registry[self.id_] = callable_(df=self.data_registry[self.id_])
 
-            new_count = self.data_registry[self.id_].count()
-
-            logger.info(
-                "Function %s applied - rows changed from %d to %d", function.function_type, original_count, new_count
-            )
+            logger.info("Function %s applied successfully", function.function_type)
 
         logger.info("Transformation completed successfully for: %s", self.id_)
 
