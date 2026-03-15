@@ -119,11 +119,12 @@ jobs:
           devcontainer build \
             --workspace-folder . \
             --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json \
-            --image-name samara-devcontainer-${{ matrix.devcontainer }}:test
+            --image-name samara-devcontainer-${{ matrix.devcontainer }}:test \
+            --log-level warning \
+            --log-format text
         env:
           DOCKER_BUILDKIT: 1
-          BUILDKIT_PROGRESS: plain
-          PROGRESS_NO_TRUNC: 1
+          BUILDKIT_PROGRESS: quiet
           CI: true
 
       - name: Verify DevContainer Build
@@ -135,11 +136,18 @@ jobs:
         run: |
           devcontainer up \
             --workspace-folder . \
-            --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json
+            --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json \
+            --log-level error \
+            --log-format text
+        env:
+          DOCKER_BUILDKIT: 1
+          BUILDKIT_PROGRESS: quiet
 
       - name: Run Basic Commands in DevContainer
         run: |
           devcontainer exec \
             --workspace-folder . \
             --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json \
+            --log-level error \
+            --log-format text \
             bash -c "python --version"
