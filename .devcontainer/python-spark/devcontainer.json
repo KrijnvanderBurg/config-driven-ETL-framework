@@ -56,6 +56,7 @@
 	},
     "onCreateCommand": {
         "pre-commit-install": "pipx install pre-commit && pre-commit install",
+		"poetry-install": "/workspace/.github/scripts/poetry-install.sh"
 	},
 	// "updateContentCommand": {},
 	// "postCreateCommand": {},
@@ -257,20 +258,6 @@
 					},
 					"tasks": [
 						{
-							"label": "git clean",
-							"type": "shell",
-							"command": "${workspaceFolder}/.github/scripts/git_clean.sh",
-							"runOptions": {
-								"runOn": "default"
-							},
-							"presentation": {
-								"clear": true,
-								"showReuseMessage": false
-							},
-							"group": "environment",
-							"problemMatcher": []
-						},
-						{
 							"label": "poetry install",
 							"type": "shell",
 							"command": "${workspaceFolder}/.github/scripts/poetry-install.sh",
@@ -451,7 +438,6 @@
                             "type": "shell",
                             "command": "pre-commit run --all-files",
                             "args": [],
-                            "group": "test",
                             "presentation": {
                                 "reveal": "always",
                                 "panel": "shared"
