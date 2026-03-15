@@ -10,7 +10,8 @@
 	//
 	"features": {
 		"ghcr.io/devcontainers/features/python:1": {
-			"version": "3.13"
+			"version": "3.13",
+            "toolsToInstall": "pipx"
 		},
 		"ghcr.io/devcontainers/features/docker-outside-of-docker:1": {}
 	},
@@ -53,7 +54,9 @@
 			"onAutoForward": "silent"
 		}
 	},
-	// "onCreateCommand": {},
+    "onCreateCommand": {
+        "pre-commit-install": "pipx install pre-commit && pre-commit install",
+	},
 	// "updateContentCommand": {},
 	// "postCreateCommand": {},
 	// "postStartCommand": {},
@@ -268,42 +271,6 @@
 							"problemMatcher": []
 						},
 						{
-                            "label": "coverage-gutters watch",
-                            "presentation": {
-                                "reveal": "never"
-                            },
-                            "command": [
-                                "${command:coverage-gutters.watchCoverageAndVisibleEditors}"
-                            ],
-                            "problemMatcher": []
-                        },
-						//
-						// all task groups
-						//
-						{
-							"label": "all",
-							"dependsOn": [
-								"build",
-								"test"
-							],
-							"dependsOrder": "sequence",
-							"runOptions": {
-								"runOn": "folderOpen"
-							},
-							"problemMatcher": []
-						},
-						//
-						// build
-						//
-						{
-							"label": "build",
-							"dependsOn": [
-								"poetry install"
-							],
-							"dependsOrder": "sequence",
-							"problemMatcher": []
-						},
-						{
 							"label": "poetry install",
 							"type": "shell",
 							"command": "${workspaceFolder}/.github/scripts/poetry-install.sh",
@@ -356,32 +323,6 @@
 								"kind": "build",
 								"isDefault": true
 							},
-							"problemMatcher": []
-						},
-						//
-						// test
-						//
-						{
-							"label": "test",
-							"dependsOn": [
-								// test build
-								"build package",
-								"sphinx build docs",
-								// code quality
-								"ruff formatter",
-								"ruff linter",
-								"pylint",
-								"flake8",
-								"mypy",
-								"pyright",
-								//security
-								"trufflehog",
-								"bandit",
-								"vulture",
-								"semgrep",
-								// tests
-								"pytest and coverage"
-							],
 							"problemMatcher": []
 						},
 						{
@@ -504,7 +445,19 @@
 								"clear": true
 							},
                             "problemMatcher": []
-						}
+						},
+						{
+                            "label": "pre-commit run",
+                            "type": "shell",
+                            "command": "pre-commit run --all-files",
+                            "args": [],
+                            "group": "test",
+                            "presentation": {
+                                "reveal": "always",
+                                "panel": "shared"
+                            },
+                            "problemMatcher": []
+                        }
 					]
 				}
 			}
