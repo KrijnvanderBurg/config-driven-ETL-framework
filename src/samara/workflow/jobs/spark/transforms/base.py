@@ -4,7 +4,7 @@ This module provides the base class for all Spark-specific transformation functi
 enabling shared access to the DataFrame registry across transformation operations.
 """
 
-from typing import ClassVar
+from pydantic import PrivateAttr
 
 from samara.types import DataFrameRegistry
 from samara.workflow.jobs.models.model_transform import ArgsT, FunctionModel
@@ -20,14 +20,14 @@ class FunctionSpark(FunctionModel[ArgsT]):
     registry access throughout the transformation execution.
 
     Attributes:
-        data_registry: Shared class-level registry for accessing processed
-            DataFrames by their identifier within the pipeline execution context.
+        _data_registry: Shared registry for accessing processed DataFrames by
+            their identifier within the pipeline execution context.
 
     Note:
-        The data_registry is a class-level attribute shared across all instances
-        within a pipeline execution, enabling cross-reference between DataFrames
-        created by different transformation steps. This is essential for operations
-        that operate on multiple DataFrames such as joins and unions.
+        The _data_registry is a private attribute initialized per-instance via
+        Pydantic's PrivateAttr. Since DataFrameRegistry is a singleton, all
+        instances share the same underlying registry, enabling cross-reference
+        between DataFrames created by different transformation steps.
     """
 
-    data_registry: ClassVar[DataFrameRegistry] = DataFrameRegistry()
+    _data_registry: DataFrameRegistry = PrivateAttr(default_factory=DataFrameRegistry)

@@ -53,6 +53,24 @@ class SchemaHandler(ABC):
             NotImplementedError: If not implemented by a subclass.
         """
 
+    @staticmethod
+    def parse_schema_string(schema: str) -> StructType:
+        """Parse a schema string, auto-detecting whether it is inline JSON or a file path.
+
+        A PySpark schema definition is always a JSON object starting with '{'.
+        Anything else is treated as a file path.
+
+        Args:
+            schema: A schema string that is either a JSON object defining an
+                inline schema or a file path pointing to a schema definition file.
+
+        Returns:
+            StructType: A fully configured PySpark StructType schema.
+        """
+        if schema.startswith("{"):
+            return SchemaStringHandler.parse(schema=schema)
+        return SchemaFilepathHandler.parse(schema=Path(schema))
+
 
 class SchemaDictHandler(SchemaHandler):
     """Convert dictionary schemas to PySpark StructType.
@@ -101,9 +119,7 @@ class SchemaDictHandler(SchemaHandler):
 
         try:
             struct_type = StructType.fromJson(json=schema)
-            field_count = len(struct_type.fields)
-            logger.info("Successfully parsed schema from dictionary - %d fields", field_count)
-            logger.debug("Schema fields: %s", [f.name for f in struct_type.fields])
+            logger.info("Successfully parsed schema from dictionary - %d fields", len(struct_type.fields))
             return struct_type
         except (ValueError, TypeError, KeyError) as e:
             raise ValueError(f"Failed to convert dictionary to schema: {e}") from e
@@ -151,15 +167,9 @@ class SchemaStringHandler(SchemaHandler):
                 valid schema structure.
             json.JSONDecodeError: If the string is not valid JSON.
         """
-        logger.debug("Parsing schema from JSON string (length: %d)", len(schema))
-
         try:
-            logger.debug("Parsing JSON string to dictionary")
             parsed_json = json.loads(s=schema)
-            logger.debug("Successfully parsed JSON string")
-
             result = SchemaDictHandler.parse(schema=parsed_json)
-            logger.info("Successfully parsed schema from JSON string")
             return result
 
         except json.JSONDecodeError as e:
@@ -211,13 +221,8 @@ class SchemaFilepathHandler(SchemaHandler):
         logger.info("Parsing schema from file: %s", str(schema))
 
         try:
-            logger.debug("Creating file handler for schema file: %s", str(schema))
             file_handler: FileHandler = FileHandlerContext.from_filepath(filepath=schema)
-
-            logger.debug("Reading schema file content")
             file_content = file_handler.read()
-
-            logger.debug("Converting file content to schema")
             result = SchemaDictHandler.parse(schema=file_content)
 
             logger.info("Successfully parsed schema from file: %s", str(schema))

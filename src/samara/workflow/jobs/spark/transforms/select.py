@@ -102,17 +102,12 @@ class SelectFunction(SelectFunctionModel, FunctionSpark):
 
             The output contains only the projected columns in the order specified.
         """
-        logger.debug("Creating select transform for columns: %s", self.arguments.columns)
 
         def __f(df: DataFrame) -> DataFrame:
-            logger.debug("Applying select transform - input columns: %s", df.columns)
-            logger.debug("Selecting columns: %s", self.arguments.columns)
-
             result_df = df.select(*self.arguments.columns)
             logger.info(
                 "Select transform completed - selected %d columns from %d", len(result_df.columns), len(df.columns)
             )
-            logger.debug("Selected columns: %s", result_df.columns)
             return result_df
 
         return __f

@@ -8,12 +8,15 @@ Key features:
 - Lazy initialization of Spark sessions (only created when needed)
 - Automatic resource cleanup and management
 - Centralized configuration handling for Spark parameters
+- Stage-scoped configuration to prevent config leaking between pipeline stages
 - Seamless integration with Samara's configuration-driven pipeline model
 
 The SparkHandler singleton ensures efficient resource usage across the entire
 pipeline lifecycle, whether running locally for testing or on distributed clusters.
 """
 
+from collections.abc import Iterator
+from contextlib import contextmanager
 from typing import Any
 
 from pyspark.sql import SparkSession
@@ -67,7 +70,6 @@ class SparkHandler(metaclass=Singleton):
             options: Spark configuration from your pipeline definition as key-value
                 pairs (e.g., {"spark.executor.memory": "4g"}). Optional.
         """
-        logger.debug("Configuring SparkHandler with app_name: %s (lazy initialization)", app_name)
         self._session = None
         self._app_name = app_name
         self._init_options = options or {}
@@ -84,7 +86,7 @@ class SparkHandler(metaclass=Singleton):
             The Spark session ready to execute your transformations
         """
         if self._session is None:
-            logger.debug("Creating SparkSession on first access - app_name: %s", self._app_name)
+            logger.debug("Creating SparkSession - app_name: %s", self._app_name)
 
             builder = SparkSession.Builder().appName(name=self._app_name)
 
@@ -93,11 +95,9 @@ class SparkHandler(metaclass=Singleton):
                     logger.debug("Setting Spark config: %s = %s", key, value)
                     builder = builder.config(key=key, value=value)
 
-            logger.debug("Creating/retrieving SparkSession")
             self._session = builder.getOrCreate()
-            logger.info("SparkHandler initialized successfully with app: %s", self._app_name)
+            logger.info("SparkSession initialized with app: %s", self._app_name)
 
-        logger.debug("Accessing SparkSession instance")
         return self._session
 
     @session.setter
@@ -126,6 +126,14 @@ class SparkHandler(metaclass=Singleton):
         Use this to manually clean up if you need to restart Spark during a
         pipeline's lifecycle.
         """
+        self.stop_session()
+
+    def stop_session(self) -> None:
+        """Stop the active Spark session and release all associated resources.
+
+        Safely shuts down the Spark session if one is active. Idempotent:
+        calling on an already-stopped or never-started session is a no-op.
+        """
         if self._session is not None:
             logger.info("Stopping SparkSession: %s", self._session.sparkContext.appName)
             self._session.stop()
@@ -149,6 +157,10 @@ class SparkHandler(metaclass=Singleton):
             Some Spark settings cannot be changed after initialization. For
             pre-execution configuration, define settings in your pipeline's
             engine configuration instead.
+
+            Configs applied here persist for the lifetime of the SparkSession.
+            For stage-scoped configs that automatically revert, use
+            scoped_configs() instead.
         """
         logger.debug("Adding %d configuration options to SparkSession", len(options))
 
@@ -157,3 +169,40 @@ class SparkHandler(metaclass=Singleton):
             self.session.conf.set(key=key, value=value)
 
         logger.info("Successfully applied %d configuration options", len(options))
+
+    @contextmanager
+    def scoped_configs(self, options: dict[str, Any]) -> Iterator[None]:
+        """Apply Spark settings for the duration of a pipeline stage, then restore previous values.
+
+        Context manager that temporarily applies Spark configuration options and
+        automatically reverts them when the stage completes. This prevents configs
+        set by one stage from leaking into subsequent stages.
+
+        Args:
+            options: Configuration settings as key-value pairs to apply
+                temporarily (e.g., {"spark.sql.shuffle.partitions": "200"})
+
+        Yields:
+            None: Control returns to the caller with configs applied.
+        """
+        if not options:
+            yield
+            return
+
+        logger.debug("Applying %d scoped configuration options", len(options))
+
+        previous_values: dict[str, str | None] = {}
+        for key in options:
+            previous_values[key] = self.session.conf.get(key, default=None)
+
+        self.add_configs(options)
+
+        try:
+            yield
+        finally:
+            logger.debug("Restoring %d configuration options to previous values", len(previous_values))
+            for key, old_value in previous_values.items():
+                if old_value is None:
+                    self.session.conf.unset(key)
+                else:
+                    self.session.conf.set(key=key, value=old_value)

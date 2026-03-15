@@ -16,6 +16,7 @@ from samara.utils.logger import get_logger
 from samara.workflow.jobs.models.model_job import JobEngine, JobModel
 from samara.workflow.jobs.spark.extract import ExtractSparkUnion
 from samara.workflow.jobs.spark.load import LoadSparkUnion
+from samara.workflow.jobs.spark.session import SparkHandler
 from samara.workflow.jobs.spark.transform import TransformSparkUnion
 
 logger = get_logger(__name__)
@@ -159,7 +160,7 @@ class JobSpark(JobModel[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion])
         logger.info("Starting extract phase with %d extractors", len(self.extracts))
         start_time = time.time()
 
-        for i, extract in enumerate(self.extracts):
+        for i, extract in enumerate(self.extracts, 1):
             extract_start_time = time.time()
             logger.debug("Running extractor %d/%d: %s", i, len(self.extracts), extract.id_)
             extract.extract()
@@ -189,7 +190,7 @@ class JobSpark(JobModel[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion])
         logger.info("Starting transform phase with %d transformers", len(self.transforms))
         start_time = time.time()
 
-        for i, transform in enumerate(self.transforms):
+        for i, transform in enumerate(self.transforms, 1):
             transform_start_time = time.time()
             logger.debug("Running transformer %d/%d: %s", i, len(self.transforms), transform.id_)
             transform.transform()
@@ -220,7 +221,7 @@ class JobSpark(JobModel[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion])
         logger.info("Starting load phase with %d loaders", len(self.loads))
         start_time = time.time()
 
-        for i, load in enumerate(self.loads):
+        for i, load in enumerate(self.loads, 1):
             load_start_time = time.time()
             logger.debug("Running loader %d/%d: %s", i, len(self.loads), load.id_)
             load.load()
@@ -232,15 +233,13 @@ class JobSpark(JobModel[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion])
 
     @override
     def _clear(self) -> None:
-        """Free resources by clearing Spark-specific registries.
+        """Free resources by clearing Spark-specific registries and stopping the session.
 
         Clears the DataFrameRegistry and StreamingQueryRegistry after job execution
-        completes. This prevents memory leaks and ensures clean state for subsequent
-        jobs, particularly important in long-running processes or batch environments
-        where multiple jobs execute sequentially.
+        completes, then stops the SparkSession to release JVM resources. This prevents
+        memory leaks and ensures clean state for subsequent jobs, particularly important
+        in long-running processes or containerized environments.
         """
-        logger.debug("Clearing DataFrameRegistry after job: %s", self.id_)
         DataFrameRegistry().clear()
-
-        logger.debug("Clearing StreamingQueryRegistry after job: %s", self.id_)
         StreamingQueryRegistry().clear()
+        SparkHandler().stop_session()

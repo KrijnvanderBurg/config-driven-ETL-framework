@@ -7,7 +7,6 @@ engines and extensible components.
 
 Key capabilities:
     - Define pipelines via configuration (sources, transforms, destinations)
-    - Multi-engine architecture (Pandas, Polars, and more)
     - Configurable alert system with multiple notification channels
     - Event-triggered custom actions at pipeline stages
     - Engine-agnostic configuration supporting different backends

@@ -18,10 +18,10 @@
                         "id": "extract-sales",
                         "extract_type": "file",
                         "data_format": "parquet",
-                        "location": "tests/e2e/job/groupby/extract-sales/sales_data.parquet",
+                        "location": "tests/e2e/workflow/groupby/extract-sales/sales_data.parquet",
                         "method": "batch",
                         "options": {},
-                        "schema": "tests/e2e/job/groupby/extract-sales/input_schema.json"
+                        "schema": "tests/e2e/workflow/groupby/extract-sales/input_schema.json"
                     }
                 ],
                 "transforms": [
@@ -72,11 +72,11 @@
                         "upstream_id": "transform-groupby-test",
                         "data_format": "json",
                         "load_type": "file",
-                        "location": "tests/e2e/job/groupby/load-aggregated",
+                        "location": "tests/e2e/workflow/groupby/load-aggregated",
                         "method": "batch",
                         "mode": "overwrite",
                         "options": {},
-                        "schema_export": "tests/e2e/job/groupby/schema_export.json"
+                        "schema_export": "tests/e2e/workflow/groupby/schema_export.json"
                     }
                 ],
                 "hooks": {

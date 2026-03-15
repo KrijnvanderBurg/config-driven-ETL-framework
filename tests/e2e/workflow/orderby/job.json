@@ -18,14 +18,14 @@
                         "id": "extract-employee-data",
                         "extract_type": "file",
                         "data_format": "csv",
-                        "location": "tests/e2e/job/orderby/extract-test/employees.csv",
+                        "location": "tests/e2e/workflow/orderby/extract-test/employees.csv",
                         "method": "batch",
                         "options": {
                             "delimiter": ",",
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema": "tests/e2e/job/orderby/extract-test/employees_schema.json"
+                        "schema": "tests/e2e/workflow/orderby/extract-test/employees_schema.json"
                     }
                 ],
                 "transforms": [
@@ -62,11 +62,11 @@
                         "upstream_id": "transform-order-employees",
                         "load_type": "file",
                         "data_format": "json",
-                        "location": "tests/e2e/job/orderby/load-test/",
+                        "location": "tests/e2e/workflow/orderby/load-test/",
                         "method": "batch",
                         "mode": "overwrite",
                         "options": {},
-                        "schema_export": "tests/e2e/job/orderby/schema_export.json"
+                        "schema_export": "tests/e2e/workflow/orderby/schema_export.json"
                     }
                 ],
                 "hooks": {

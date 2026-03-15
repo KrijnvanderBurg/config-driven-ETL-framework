@@ -188,7 +188,6 @@ class WorkflowController(BaseModel):
             validating external configuration sources, or providing IDE hints
             for configuration files.
         """
-        logger.debug("Exporting WorkflowController JSON schema")
         return cls.model_json_schema(schema_generator=PreserveFieldOrderJsonSchema)
 
     @trace_span("workflow_controller.execute_all")

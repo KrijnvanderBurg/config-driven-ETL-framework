@@ -54,10 +54,6 @@ def test_job_command__execute_and_verify__matches_expected_output(
             "--source=samara",
             "-m",
             "samara",
-            "--otlp-traces-endpoint",
-            "http://otel-collector:4318/v1/traces",
-            "--otlp-logs-endpoint",
-            "http://otel-collector:4318/v1/logs",
             "run",
             "--workflow-filepath",
             str(isolated_config_path),
@@ -67,6 +63,7 @@ def test_job_command__execute_and_verify__matches_expected_output(
         capture_output=True,
         text=True,
         check=True,
+        timeout=120,
     )
 
     # Verify all outputs match expected results

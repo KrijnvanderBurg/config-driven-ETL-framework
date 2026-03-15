@@ -115,7 +115,7 @@ class TestJoinFunctionTransform:
         join_func = JoinFunction(**config)
 
         # Set up registry with real DataFrame
-        join_func.data_registry["orders"] = orders_df
+        join_func._data_registry["orders"] = orders_df
 
         # Expected result - only matching rows
         expected_data = [
@@ -141,7 +141,7 @@ class TestJoinFunctionTransform:
         assertDataFrameEqual(result_df, expected_df, checkRowOrder=False)
 
         # Clean up
-        join_func.data_registry.clear()
+        join_func._data_registry.clear()
 
     def test_transform__left_join(self, spark: SparkSession, users_df: DataFrame, orders_df: DataFrame) -> None:
         """Test left join includes all users even without orders."""
@@ -151,7 +151,7 @@ class TestJoinFunctionTransform:
             "arguments": {"other_upstream_id": "orders", "on": "user_id", "how": "left"},
         }
         join_func = JoinFunction(**config)
-        join_func.data_registry["orders"] = orders_df
+        join_func._data_registry["orders"] = orders_df
 
         # Act
         transform_fn = join_func.transform()
@@ -167,7 +167,7 @@ class TestJoinFunctionTransform:
             assert row["amount"] is None
 
         # Clean up
-        join_func.data_registry.clear()
+        join_func._data_registry.clear()
 
     def test_transform__right_join(self, spark: SparkSession, users_df: DataFrame, orders_df: DataFrame) -> None:
         """Test right join includes all orders even for non-existent users."""
@@ -177,7 +177,7 @@ class TestJoinFunctionTransform:
             "arguments": {"other_upstream_id": "orders", "on": "user_id", "how": "right"},
         }
         join_func = JoinFunction(**config)
-        join_func.data_registry["orders"] = orders_df
+        join_func._data_registry["orders"] = orders_df
 
         # Act
         transform_fn = join_func.transform()
@@ -191,7 +191,7 @@ class TestJoinFunctionTransform:
         assert orphan_order[0]["name"] is None
 
         # Clean up
-        join_func.data_registry.clear()
+        join_func._data_registry.clear()
 
     def test_transform__outer_join(self, spark: SparkSession, users_df: DataFrame, orders_df: DataFrame) -> None:
         """Test outer join includes all users and all orders."""
@@ -201,7 +201,7 @@ class TestJoinFunctionTransform:
             "arguments": {"other_upstream_id": "orders", "on": "user_id", "how": "outer"},
         }
         join_func = JoinFunction(**config)
-        join_func.data_registry["orders"] = orders_df
+        join_func._data_registry["orders"] = orders_df
 
         # Act
         transform_fn = join_func.transform()
@@ -211,4 +211,4 @@ class TestJoinFunctionTransform:
         assert result_df.count() == 6  # Alice(2 orders) + Bob + Charlie + Diana + orphan order(104)
 
         # Clean up
-        join_func.data_registry.clear()
+        join_func._data_registry.clear()

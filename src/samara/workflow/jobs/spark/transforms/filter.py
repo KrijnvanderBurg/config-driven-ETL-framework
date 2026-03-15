@@ -121,15 +121,9 @@ class FilterFunction(FilterFunctionModel, FunctionSpark):
         """
 
         def __f(df: DataFrame) -> DataFrame:
-            logger.debug("Applying filter transform with condition: %s", self.arguments.condition)
-            original_count = df.count()
-            logger.debug("Input DataFrame has %d rows", original_count)
-
             result_df = df.filter(self.arguments.condition)
-            filtered_count = result_df.count()
-            filtered_out = original_count - filtered_count
 
-            logger.info("Filter transform completed - kept %d rows, filtered out %d rows", filtered_count, filtered_out)
+            logger.info("Filter transform completed - condition: %s", self.arguments.condition)
             return result_df
 
         return __f

@@ -210,13 +210,13 @@ class TestTransformSparkTransform:
     ) -> None:
         """Test transform method completes successfully with no transformation functions."""
         # Arrange - add real DataFrame to registry
-        transform_spark.data_registry[transform_spark.upstream_id] = sample_df
+        transform_spark._data_registry[transform_spark.upstream_id] = sample_df
 
         # Act
         transform_spark.transform()
 
         # Assert - dataframe should be copied to transform name
-        result_df = transform_spark.data_registry[transform_spark.id_]
+        result_df = transform_spark._data_registry[transform_spark.id_]
         assertDataFrameEqual(result_df, sample_df)
 
     def test_transform__with_single_function__applies_transformation(
@@ -228,7 +228,7 @@ class TestTransformSparkTransform:
             {"function_type": "select", "arguments": {"columns": ["id", "name"]}},
         ]
         transform = TransformSpark(**transform_config)
-        transform.data_registry[transform.upstream_id] = sample_df
+        transform._data_registry[transform.upstream_id] = sample_df
 
         # Expected result after selecting only id and name
         expected_data = [
@@ -249,7 +249,7 @@ class TestTransformSparkTransform:
         transform.transform()
 
         # Assert
-        result_df = transform.data_registry[transform.id_]
+        result_df = transform._data_registry[transform.id_]
         assertDataFrameEqual(result_df, expected_df)
 
     def test_transform__with_multiple_functions__applies_in_sequence(
@@ -262,7 +262,7 @@ class TestTransformSparkTransform:
             {"function_type": "filter", "arguments": {"condition": "age > 27"}},
         ]
         transform = TransformSpark(**transform_config)
-        transform.data_registry[transform.upstream_id] = sample_df
+        transform._data_registry[transform.upstream_id] = sample_df
 
         # Expected result after select (all columns) then filter (age > 27)
         expected_data = [
@@ -283,5 +283,5 @@ class TestTransformSparkTransform:
         transform.transform()
 
         # Assert - final result should have filtered rows
-        result_df = transform.data_registry[transform.id_]
+        result_df = transform._data_registry[transform.id_]
         assertDataFrameEqual(result_df, expected_df, checkRowOrder=False)

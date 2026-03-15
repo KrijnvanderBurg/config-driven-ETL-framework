@@ -18,14 +18,14 @@
                         "id": "extract-test",
                         "extract_type": "file",
                         "data_format": "csv",
-                        "location": "tests/e2e/job/cast/extract-test/input_data.csv",
+                        "location": "tests/e2e/workflow/cast/extract-test/input_data.csv",
                         "method": "batch",
                         "options": {
                             "delimiter": ",",
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema": "tests/e2e/job/cast/extract-test/input_schema.json"
+                        "schema": "tests/e2e/workflow/cast/extract-test/input_schema.json"
                     }
                 ],
                 "transforms": [
@@ -61,13 +61,13 @@
                         "upstream_id": "transform-test",
                         "data_format": "csv",
                         "load_type": "file",
-                        "location": "tests/e2e/job/cast/load-test",
+                        "location": "tests/e2e/workflow/cast/load-test",
                         "method": "batch",
                         "mode": "overwrite",
                         "options": {
                             "header": true
                         },
-                        "schema_export": "tests/e2e/job/cast/schema_export.json"
+                        "schema_export": "tests/e2e/workflow/cast/schema_export.json"
                     }
                 ],
                 "hooks": {

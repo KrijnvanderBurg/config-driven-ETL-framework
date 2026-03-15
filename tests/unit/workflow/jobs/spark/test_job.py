@@ -543,3 +543,18 @@ class TestJobSparkClearRegistries:
             # Verify clear() was called on both registries
             mock_df_registry.clear.assert_called_once()
             mock_sq_registry.clear.assert_called_once()
+
+    def test_execute__stops_spark_session_on_cleanup(self, job_spark: JobSpark) -> None:
+        """Test execute stops the SparkSession during cleanup to prevent resource leaks."""
+        with patch("samara.workflow.jobs.spark.job.SparkHandler") as mock_spark_handler_cls:
+            mock_spark_handler = Mock()
+            mock_spark_handler_cls.return_value = mock_spark_handler
+
+            # Empty the pipeline to speed up test
+            job_spark.extracts = []
+            job_spark.transforms = []
+            job_spark.loads = []
+
+            job_spark.execute()
+
+            mock_spark_handler.stop_session.assert_called_once()

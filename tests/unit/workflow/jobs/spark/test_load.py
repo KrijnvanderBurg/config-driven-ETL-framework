@@ -236,14 +236,14 @@ class TestLoadFileSparkLoad:
         mock_write = Mock()
         mock_write.save = Mock()
 
-        load_file_spark.data_registry[load_file_spark.upstream_id] = test_df
+        load_file_spark._data_registry[load_file_spark.upstream_id] = test_df
 
         # Act - patch the write property
         with patch.object(type(test_df), "write", mock_write):
             load_file_spark.load()
 
         # Assert - verify the dataframe was copied to the load step
-        result_df = load_file_spark.data_registry[load_file_spark.id_]
+        result_df = load_file_spark._data_registry[load_file_spark.id_]
         assertDataFrameEqual(result_df, test_df)
         mock_write.save.assert_called_once()
 
@@ -270,14 +270,14 @@ class TestLoadFileSparkLoad:
         mock_write_stream = Mock()
         mock_write_stream.start.return_value = mock_streaming_query
 
-        load_streaming.data_registry[load_streaming.upstream_id] = test_df
+        load_streaming._data_registry[load_streaming.upstream_id] = test_df
 
         # Act - patch the writeStream property
         with patch.object(type(test_df), "writeStream", mock_write_stream):
             load_streaming.load()
 
         # Assert - verify the streaming query was registered
-        assert load_streaming.streaming_query_registry[load_streaming.id_] == mock_streaming_query
+        assert load_streaming._streaming_query_registry[load_streaming.id_] == mock_streaming_query
         mock_write_stream.start.assert_called_once()
 
     def test_load__with_invalid_method__raises_value_error(
@@ -292,7 +292,7 @@ class TestLoadFileSparkLoad:
         test_schema = StructType([StructField("id", IntegerType(), True), StructField("name", StringType(), True)])
         test_df = spark.createDataFrame(test_data, test_schema)
 
-        load_file_spark.data_registry[load_file_spark.upstream_id] = test_df
+        load_file_spark._data_registry[load_file_spark.upstream_id] = test_df
 
         with patch.object(load_file_spark, "method", mock_method):
             # Assert
@@ -321,7 +321,7 @@ class TestLoadFileSparkLoad:
         mock_write = Mock()
         mock_write.save = Mock()
 
-        load_file_spark.data_registry[load_file_spark.upstream_id] = test_df
+        load_file_spark._data_registry[load_file_spark.upstream_id] = test_df
 
         # Act - should complete without exception
         with patch.object(type(test_df), "write", mock_write):
@@ -352,7 +352,7 @@ class TestLoadFileSparkLoad:
         mock_write = Mock()
         mock_write.save = Mock()
 
-        load_file_spark.data_registry[load_file_spark.upstream_id] = test_df
+        load_file_spark._data_registry[load_file_spark.upstream_id] = test_df
 
         # Act
         with patch.object(type(test_df), "write", mock_write):

@@ -34,7 +34,6 @@ class ArgsModel(BaseModel, ABC):
 
 
 ArgsT = TypeVar("ArgsT", bound=ArgsModel)
-FunctionNameT = TypeVar("FunctionNameT", bound=str)
 
 
 class FunctionModel(BaseModel, Generic[ArgsT], ABC):

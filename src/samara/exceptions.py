@@ -14,9 +14,6 @@ meaningful error states to the operating system.
 """
 
 import enum
-from typing import TypeVar
-
-K = TypeVar("K")  # Key type
 
 
 class ExitCode(enum.IntEnum):

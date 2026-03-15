@@ -90,36 +90,17 @@ class JoinFunction(JoinFunctionModel, FunctionSpark):
             may require appropriate cluster resources and shuffle operations.
         """
         logger.debug(
-            "Creating join transform - other: %s, on: %s, how: %s",
+            "Configuring join - other: %s, on: %s, how: %s",
             self.arguments.other_upstream_id,
             self.arguments.on,
             self.arguments.how,
         )
 
         def __f(df: DataFrame) -> DataFrame:
-            logger.debug("Applying join transform")
+            right_df = self._data_registry[self.arguments.other_upstream_id]
+            result_df = df.join(right_df, on=self.arguments.on, how=self.arguments.how)
 
-            # Get the right DataFrame from the registry
-            right_df = self.data_registry[self.arguments.other_upstream_id]
-            logger.debug(
-                "Retrieved right DataFrame: %s (columns: %s)",
-                self.arguments.other_upstream_id,
-                right_df.columns,
-            )
-
-            # Get the join type
-            join_type = self.arguments.how
-            # Get the join columns
-            join_on = self.arguments.on
-
-            logger.debug("Performing join - left: %d rows, right: %d rows", df.count(), right_df.count())
-            logger.debug("Join parameters - on: %s, how: %s", join_on, join_type)
-
-            # Perform the join operation
-            result_df = df.join(right_df, on=join_on, how=join_type)
-            result_count = result_df.count()
-
-            logger.info("Join transform completed - result: %d rows, join type: %s", result_count, join_type)
+            logger.info("Join transform completed - type: %s", self.arguments.how)
 
             return result_df
 
