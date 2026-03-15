@@ -25,6 +25,7 @@ Typical Usage:
 import logging
 
 import structlog
+from rich.logging import RichHandler
 
 
 def set_logger(level: str = "INFO") -> None:
@@ -77,22 +78,33 @@ def set_logger(level: str = "INFO") -> None:
     See Also:
         get_logger: Create logger instances for specific modules
     """
-    # Configure standard logging for third-party libraries and OTLP handler
-    logging.basicConfig(
-        format="%(message)s",
-        level=level,
-        force=True,
+    # Configure standard logging for pretty console output
+    root_logger = logging.getLogger()
+    root_logger.setLevel(level)
+
+    # Remove existing handlers to avoid duplicates on reconfiguration
+    root_logger.handlers.clear()
+
+    # Use Rich for pretty console output with structlog formatting
+    console_handler = RichHandler(rich_tracebacks=True, tracebacks_show_locals=True, markup=True)
+    console_handler.setLevel(level)
+    console_handler.setFormatter(
+        structlog.stdlib.ProcessorFormatter(
+            processors=[
+                structlog.stdlib.ProcessorFormatter.remove_processors_meta,
+                structlog.dev.ConsoleRenderer(colors=False),
+            ],
+        ),
     )
+    root_logger.addHandler(console_handler)
 
     # Configure structlog
     structlog.configure(
         processors=[
             structlog.contextvars.merge_contextvars,
             structlog.stdlib.add_log_level,
-            structlog.stdlib.add_logger_name,
-            structlog.processors.TimeStamper(fmt="iso"),
+            structlog.stdlib.PositionalArgumentsFormatter(),
             structlog.processors.StackInfoRenderer(),
-            structlog.processors.format_exc_info,
             structlog.stdlib.ProcessorFormatter.wrap_for_formatter,
         ],
         wrapper_class=structlog.stdlib.BoundLogger,
