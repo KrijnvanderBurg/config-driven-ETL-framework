@@ -1,5 +1,3 @@
-# Alerting
-
 # Alert System
 
 The alert system enables automated notifications when pipeline errors occur. Configure channels (where alerts go) and triggers (when alerts are sent) through YAML or JSON configuration files.
@@ -60,7 +58,7 @@ Channels are reusable notification endpoints. Define once, reference from any tr
     "alert": {
         "channels": [
             {
-                "name": "ops-email",
+                "id": "ops-email",
                 "description": "Production operations team alerts",
                 "enabled": true,
                 "channel_type": "email",
@@ -94,7 +92,7 @@ Triggers determine when to send alerts and to which channels. All rules within a
     "alert": {
         "channels": [
             {
-                "name": "network-ops-email",
+                "id": "network-ops-email",
                 "description": "Network operations team alerts",
                 "enabled": true,
                 "channel_type": "email",
@@ -120,8 +118,8 @@ Triggers determine when to send alerts and to which channels. All rules within a
                     "append_body": ""
                 },
                 "rules": [
-                    {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["acceptance", "production"]},
-                    {"rule": "exception_regex", "pattern": ".*network.*|.*connection.*|.*timeout.*"}
+                    {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["acceptance", "production"]},
+                    {"rule_type": "exception_regex", "pattern": ".*network.*|.*connection.*|.*timeout.*"}
                 ]
             }
             // ... Add more triggers 
@@ -161,7 +159,7 @@ This routing strategy ensures that each team receives only the alerts relevant t
     "alert": {
         "channels": [
             {
-                "name": "pagerduty-oncall",
+                "id": "pagerduty-oncall",
                 "description": "PagerDuty webhook for critical production issues",
                 "enabled": true,
                 "channel_type": "http",
@@ -175,19 +173,19 @@ This routing strategy ensures that each team receives only the alerts relevant t
                 }
             },
             {
-                "name": "ops-email",
+                "id": "ops-email",
                 "description": "Operations team email alerts",
                 "enabled": true,
                 "channel_type": "email",
                 "smtp_server": "smtp.company.com",
                 "smtp_port": 587,
                 "username": "alerts@company.com",
-                "password": "${SMTP_PASSWORD}",  // Use environment variables for credentials
+                "password": "${SMTP_PASSWORD}",
                 "from_email": "alerts@company.com",
                 "to_emails": ["ops@company.com", "oncall@company.com"]
             },
             {
-                "name": "slack-dev",
+                "id": "slack-dev",
                 "description": "Development team Slack channel",
                 "enabled": true,
                 "channel_type": "http",
@@ -203,7 +201,7 @@ This routing strategy ensures that each team receives only the alerts relevant t
         ],
         "triggers": [
             {
-                "name": "prod-critical-errors",
+                "id": "prod-critical-errors",
                 "description": "Route production errors to PagerDuty for immediate response",
                 "enabled": true,
                 "channel_ids": ["pagerduty-oncall"],
@@ -214,11 +212,11 @@ This routing strategy ensures that each team receives only the alerts relevant t
                     "append_body": "\n\nImmediate action required."
                 },
                 "rules": [
-                    {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "prod"]}
+                    {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "prod"]}
                 ]
             },
             {
-                "name": "dev-errors",
+                "id": "dev-errors",
                 "description": "Development environment errors to Slack",
                 "enabled": true,
                 "channel_ids": ["slack-dev"],
@@ -229,11 +227,11 @@ This routing strategy ensures that each team receives only the alerts relevant t
                     "append_body": ""
                 },
                 "rules": [
-                    {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["development", "dev"]}
+                    {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["development", "dev"]}
                 ]
             },
             {
-                "name": "database-errors",
+                "id": "database-errors",
                 "description": "Database-related issues to operations email",
                 "enabled": true,
                 "channel_ids": ["ops-email"],
@@ -244,8 +242,8 @@ This routing strategy ensures that each team receives only the alerts relevant t
                     "append_body": ""
                 },
                 "rules": [
-                    {"rule": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "prod"]}
-                    {"rule": "exception_regex", "pattern": ".*database.*|.*sql.*|.*connection pool.*"}
+                    {"rule_type": "env_vars_matches", "env_var_name": "ENVIRONMENT", "env_var_values": ["production", "prod"]},
+                    {"rule_type": "exception_regex", "pattern": ".*database.*|.*sql.*|.*connection pool.*"}
                 ]
             }
         ]

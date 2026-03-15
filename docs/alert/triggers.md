@@ -1,5 +1,3 @@
-
-
 # Alert Triggers
 
 Configuration reference for triggers and rules.

@@ -27,7 +27,7 @@ The workflow system orchestrates ETL pipelines through configuration files:
 - **Extracts**: Configure data sources (CSV, JSON, databases)
 - **Transforms**: Chain operations through configuration
 - **Loads**: Define outputs with formats and parameters
- 
+
 ETL engines and specific configurations:
 - **[Spark Engine](./workflow/spark.md)**: Spark-specific configuration options
 - **Polars Engine**: Under development.
