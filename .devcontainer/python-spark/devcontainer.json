@@ -73,7 +73,6 @@
 				"ryanluker.vscode-coverage-gutters",
 				// Scanner
 				"nwgh.bandit", // https://marketplace.visualstudio.com/items?itemName=nwgh.bandit
-				"ms-cst-e.vscode-devskim", // https://marketplace.visualstudio.com/items?itemName=MS-CST-E.vscode-devskim
 				// Tools
 				"ms-azuretools.vscode-docker", // https://marketplace.visualstudio.com/items?itemName=ms-azuretools.vscode-docker
 				"eamodio.gitlens", // https://marketplace.visualstudio.com/items?itemName=eamodio.gitlens
