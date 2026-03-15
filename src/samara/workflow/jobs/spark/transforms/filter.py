@@ -121,8 +121,6 @@ class FilterFunction(FilterFunctionModel, FunctionSpark):
         """
 
         def __f(df: DataFrame) -> DataFrame:
-            logger.debug("Applying filter transform with condition: %s", self.arguments.condition)
-
             result_df = df.filter(self.arguments.condition)
 
             logger.info("Filter transform completed - condition: %s", self.arguments.condition)

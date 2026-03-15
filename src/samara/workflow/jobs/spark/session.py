@@ -70,7 +70,6 @@ class SparkHandler(metaclass=Singleton):
             options: Spark configuration from your pipeline definition as key-value
                 pairs (e.g., {"spark.executor.memory": "4g"}). Optional.
         """
-        logger.debug("Configuring SparkHandler with app_name: %s (lazy initialization)", app_name)
         self._session = None
         self._app_name = app_name
         self._init_options = options or {}
@@ -87,7 +86,7 @@ class SparkHandler(metaclass=Singleton):
             The Spark session ready to execute your transformations
         """
         if self._session is None:
-            logger.debug("Creating SparkSession on first access - app_name: %s", self._app_name)
+            logger.debug("Creating SparkSession - app_name: %s", self._app_name)
 
             builder = SparkSession.Builder().appName(name=self._app_name)
 
@@ -96,11 +95,9 @@ class SparkHandler(metaclass=Singleton):
                     logger.debug("Setting Spark config: %s = %s", key, value)
                     builder = builder.config(key=key, value=value)
 
-            logger.debug("Creating/retrieving SparkSession")
             self._session = builder.getOrCreate()
-            logger.info("SparkHandler initialized successfully with app: %s", self._app_name)
+            logger.info("SparkSession initialized with app: %s", self._app_name)
 
-        logger.debug("Accessing SparkSession instance")
         return self._session
 
     @session.setter
@@ -206,8 +203,6 @@ class SparkHandler(metaclass=Singleton):
             logger.debug("Restoring %d configuration options to previous values", len(previous_values))
             for key, old_value in previous_values.items():
                 if old_value is None:
-                    logger.debug("Unsetting scoped config: %s", key)
                     self.session.conf.unset(key)
                 else:
-                    logger.debug("Restoring config: %s = %s", key, old_value)
                     self.session.conf.set(key=key, value=old_value)

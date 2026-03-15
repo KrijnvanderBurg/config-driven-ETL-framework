@@ -117,16 +117,13 @@ class ExtractSpark(ExtractModel, ABC):
         """
         logger.info("Starting extraction for source: %s using method: %s", self.id_, self.method.value)
 
-        logger.debug("Applying scoped Spark configurations: %s", self.options)
         with self._spark.scoped_configs(options=self.options):
             if self.method == ExtractMethod.BATCH:
-                logger.debug("Performing batch extraction for: %s", self.id_)
                 self._data_registry[self.id_] = self._extract_batch()
-                logger.info("Batch extraction completed successfully for: %s", self.id_)
+                logger.info("Batch extraction completed for: %s", self.id_)
             elif self.method == ExtractMethod.STREAMING:
-                logger.debug("Performing streaming extraction for: %s", self.id_)
                 self._data_registry[self.id_] = self._extract_streaming()
-                logger.info("Streaming extraction completed successfully for: %s", self.id_)
+                logger.info("Streaming extraction completed for: %s", self.id_)
             else:
                 raise ValueError(f"Extraction method {self.method} is not supported for PySpark")
 

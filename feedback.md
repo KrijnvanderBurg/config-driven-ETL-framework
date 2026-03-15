@@ -11,50 +11,6 @@ limit the project's scalability. Below is every issue I found, grouped by severi
 
 ---
 
-
----
-
-## High: Architecture & Design
-
-### 8. Singleton registries create tight coupling and testing friction
-**File:** `src/samara/types.py`
-
-Every pipeline component (extract, transform, load, job) accesses `DataFrameRegistry()`
-and `StreamingQueryRegistry()` as singletons. This means:
-- No two pipelines can run concurrently in the same process
-- Every test must explicitly clear registries to avoid cross-test contamination
-- Components cannot be tested in isolation without the global state
-- Tests run with `-n 1` (serial) likely because of this shared state
-
-**Fix:** Use dependency injection. Pass the registry into components via constructor or
-a pipeline context object. The singletons can remain as a default, but components should
-not hardcode their dependency on the global instance.
-
-
----
-
-## Medium: Code Quality
-
-### 14. Duplicated error handling boilerplate in CLI
-**File:** `src/samara/cli.py`
-
-All three commands (`validate`, `run`, `export_schema`) repeat the same outer try/except:
-
-```python
-except click.exceptions.Exit:
-    raise
-except KeyboardInterrupt as e:
-    logger.warning("Process interrupted by user")
-    raise click.exceptions.Exit(ExitCode.KEYBOARD_INTERRUPT) from e
-except Exception as e:
-    logger.error(...)
-    raise click.exceptions.Exit(ExitCode.UNEXPECTED_ERROR) from e
-```
-
-This is 10 lines duplicated 3 times. Extract into a decorator or context manager.
-
-
-
 ## Low: Suggestions & Enhancements
 
 ### 20. No DAG-based execution for transforms

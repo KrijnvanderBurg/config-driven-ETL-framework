@@ -117,15 +117,10 @@ class TransformSpark(TransformModel[TransformFunctionSparkUnion]):
         """
         logger.info("Starting transformation for: %s from upstream: %s", self.id_, self.upstream_id)
 
-        logger.debug("Applying scoped Spark configurations: %s", self.options)
         with self._spark.scoped_configs(options=self.options):
-            # Copy the dataframe from upstream to current id
-            logger.debug("Copying dataframe from %s to %s", self.upstream_id, self.id_)
             self._data_registry[self.id_] = self._data_registry[self.upstream_id]
 
-            # Apply transformations
-            logger.debug("Applying %d transformation functions", len(self.functions))
-            for i, function in enumerate(self.functions):
+            for i, function in enumerate(self.functions, 1):
                 logger.debug("Applying function %d/%d: %s", i, len(self.functions), function.function_type)
 
                 callable_ = function.transform()

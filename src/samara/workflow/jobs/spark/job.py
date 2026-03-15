@@ -240,11 +240,6 @@ class JobSpark(JobModel[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion])
         memory leaks and ensures clean state for subsequent jobs, particularly important
         in long-running processes or containerized environments.
         """
-        logger.debug("Clearing DataFrameRegistry after job: %s", self.id_)
         DataFrameRegistry().clear()
-
-        logger.debug("Clearing StreamingQueryRegistry after job: %s", self.id_)
         StreamingQueryRegistry().clear()
-
-        logger.debug("Stopping SparkSession after job: %s", self.id_)
         SparkHandler().stop_session()
