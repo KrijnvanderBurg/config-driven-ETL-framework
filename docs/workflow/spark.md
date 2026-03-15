@@ -96,6 +96,88 @@ Empty `columns: []` deduplicates on all columns.
 
 Expression uses Spark SQL syntax with all built-in functions.
 
+### Distinct
+
+```jsonc
+{"function_type": "distinct", "arguments": {}}
+```
+
+Removes all duplicate rows from the DataFrame.
+
+### Drop NA
+
+```jsonc
+{
+    "function_type": "dropna",
+    "arguments": {
+        "how": "any",                       // "any" = drop if any null, "all" = drop only if all null
+        "thresh": null,                     // Minimum non-null values to keep row (overrides "how" when set)
+        "subset": ["email", "phone"]        // Columns to check (null = all columns)
+    }
+}
+```
+
+### Order By
+
+```jsonc
+{
+    "function_type": "orderby",
+    "arguments": {
+        "columns": [
+            {"column_name": "signup_date", "ascending": false},
+            {"column_name": "name", "ascending": true}
+        ]
+    }
+}
+```
+
+### Group By
+
+```jsonc
+{
+    "function_type": "groupby",
+    "arguments": {
+        "group_columns": ["department"],
+        "aggregations": [
+            {"function": "sum", "input_column": "salary", "output_column": "total_salary"},
+            {"function": "count", "input_column": null, "output_column": "employee_count"},
+            {"function": "avg", "input_column": "age", "output_column": "avg_age"}
+        ]
+    }
+}
+```
+
+Supported functions: `sum`, `avg`, `mean`, `min`, `max`, `count`, `first`, `last`, `stddev`, `variance`. For `count`, `input_column` must be `null`.
+
+### Aggregate
+
+```jsonc
+{
+    "function_type": "aggregate",
+    "arguments": {
+        "group_by_columns": ["category"],   // null for global aggregation
+        "aggregate_columns": [
+            {"column_name": "price", "function": "avg", "alias": "avg_price"},
+            {"column_name": "quantity", "function": "sum", "alias": "total_quantity"}
+        ]
+    }
+}
+```
+
+### Pivot
+
+```jsonc
+{
+    "function_type": "pivot",
+    "arguments": {
+        "group_by": ["region"],
+        "pivot_column": "quarter",
+        "values_column": "revenue",
+        "agg_func": "sum"                   // sum | avg | max | min | count | first
+    }
+}
+```
+
 ## Load
 
 ### File Load

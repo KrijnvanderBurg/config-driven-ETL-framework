@@ -1,4 +1,3 @@
-
 # Samara Examples
 
 This directory contains complete, ready-to-run examples demonstrating Samara's configuration-driven approach to data pipelines.
@@ -130,7 +129,7 @@ Running this pipeline demonstrates multi-source data integration using JSON conf
   - Output mode (overwrite/append) controlled by a simple parameter
   - Output to multiple formats or locations by creating another load entry
 
-### Configuration: [`examples/join_select/job.jsonc`](./join_select/job.jsonc)
+### Configuration: [`examples/json_join_select/job.jsonc`](./json_join_select/job.jsonc)
 ```jsonc
 {
     "workflow": {
@@ -148,26 +147,26 @@ Running this pipeline demonstrates multi-source data integration using JSON conf
                         "id": "extract-customers",
                         "extract_type": "file", // Read from file system
                         "data_format": "csv", // CSV input format
-                        "location": "examples/join_select/customers/", // Source directory
+                        "location": "examples/json_join_select/customers/", // Source directory
                         "method": "batch", // Process all files at once
                         "options": {
                             "delimiter": ",", // CSV delimiter character
                             "header": true, // First row contains column names
                             "inferSchema": false // Use provided schema instead of inferring
                         },
-                        "schema": "examples/join_select/customers_schema.json" // Path to schema definition
+                        "schema": "examples/json_join_select/customers_schema.json" // Path to schema definition
                     },
                     {
                         "id": "extract-orders",
                         "extract_type": "file",
                         "data_format": "json", // JSON input format
-                        "location": "examples/join_select/orders/",
+                        "location": "examples/json_join_select/orders/",
                         "method": "batch",
                         "options": {
                             "multiLine": true, // Each JSON object may span multiple lines
                             "inferSchema": false // Use provided schema instead of inferring
                         },
-                        "schema": "examples/join_select/orders_schema.json"
+                        "schema": "examples/json_join_select/orders_schema.json"
                     }
                 ],
                 "transforms": [
@@ -199,7 +198,7 @@ Running this pipeline demonstrates multi-source data integration using JSON conf
                         "upstream_id": "transform-join-orders", // Input dataset for this load
                         "load_type": "file", // Write to file system
                         "data_format": "csv", // Output as CSV
-                        "location": "examples/join_select/output", // Output directory
+                        "location": "examples/json_join_select/output", // Output directory
                         "method": "batch", // Write all data at once
                         "mode": "overwrite", // Replace existing files if any
                         "options": {

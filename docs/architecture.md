@@ -1,12 +1,9 @@
-<!-- filepath: architecture.md -->
 # Architecture
 
 This document explains Samara's architecture and execution flow, helping you understand how configuration files translate into data processing pipelines.
 
-<!-- filepath: architecture.md -->
-<!-- filepath: architecture.md -->
 ## Design Principles
-The software adheres to these core design principles:
+Samara adheres to these core design principles:
 
 - **Type Safety** — Configurations are validated against strongly-typed models
   - Configuration errors are caught before execution
@@ -57,69 +54,63 @@ The core components work together:
 
 ## Extending with Custom Transforms
 
-Samara's power comes from its extensibility. Create custom transformations to encapsulate your business logic. Here's a real example from Samara's codebase - the select transform:
+Samara's power comes from its extensibility. Create custom transformations to encapsulate your business logic. Here's a walkthrough using the select transform from Samara's codebase:
 
 ### Step 1: Define the configuration model
 
+Define a Pydantic model that validates the configuration for your transform:
+
 ```python
-# src/samara/models/transforms/model_select.py
+# src/samara/workflow/jobs/models/transforms/model_select.py
 
-@dataclass
-class SelectFunctionModel(FunctionModel):
-    function: str  # Name of the function
-    arguments: "SelectFunctionModel.Args"  # Arguments for the function
+from typing import Literal
+from pydantic import Field
+from samara.workflow.jobs.models.model_transform import ArgsModel
 
-    @dataclass
-    class Args:
-        columns: list[Column]  # List of columns to select
+class SelectArgs(ArgsModel):
+    """Arguments for column selection."""
+    columns: list[str] = Field(..., description="Columns to select", min_length=1)
 
-    @classmethod
-    def from_dict(cls, dict_: dict[str, Any]) -> Self:
-        """Convert JSON configuration to typed model."""
-        function_name = dict_[FUNCTION]
-        arguments_dict = dict_[ARGUMENTS]
-        
-        columns = arguments_dict["columns"]
-        arguments = cls.Args(columns=columns)
-        
-        return cls(function=function_name, arguments=arguments)
+class SelectFunctionModel:
+    """Configuration model for column selection."""
+    function_type: Literal["select"] = "select"
+    arguments: SelectArgs = Field(..., description="Column selection parameters")
 ```
 
 ### Step 2: Create the transform function
 
-```python
-# src/samara/core/transforms/select.py
+Implement the transform by inheriting from both the model and the engine-specific base class:
 
-@TransformFunctionRegistry.register("select")
-class SelectFunction(Function[SelectFunctionModel]):
-    """Selects specified columns from a DataFrame."""
+```python
+# src/samara/workflow/jobs/spark/transforms/select.py
+
+from collections.abc import Callable
+from pyspark.sql import DataFrame
+from samara.workflow.jobs.models.transforms.model_select import SelectFunctionModel
+from samara.workflow.jobs.spark.transforms.base import FunctionSpark
+
+class SelectFunction(SelectFunctionModel, FunctionSpark):
+    """Project specific columns from a DataFrame."""
 
     def transform(self) -> Callable:
         """Returns a function that projects columns from a DataFrame."""
         def __f(df: DataFrame) -> DataFrame:
-            return df.select(*self.model.arguments.columns)
-
+            return df.select(*self.arguments.columns)
         return __f
 ```
 
 ### Step 3: Use in your pipeline configuration
 
-```json
+```jsonc
 {
-  "extracts": [
-    // ...
-  ],
   "transforms": [
     {
-      "name": "transform-user-data",
-      "upstream_name": "extract-users",
+      "id": "transform-user-data",
+      "upstream_id": "extract-users",
       "functions": [
-        { "function": "select", "arguments": { "columns": ["user_id", "email", "signup_date"] } }
+        { "function_type": "select", "arguments": { "columns": ["user_id", "email", "signup_date"] } }
       ]
     }
-  ],
-  "loads": [
-    // ...
   ]
 }
 ```

@@ -11,13 +11,13 @@ cd Samara
 poetry install
 ```
 
-### Running the Example Pipeline
+### Run the Example Pipeline
 Start with the included example pipeline:
 
 ```bash
 python -m samara run \
-  --alert-filepath="examples/join_select/alert.jsonc" \
-  --workflow-filepath="examples/join_select/job.jsonc"
+  --alert-filepath="examples/yaml_products_cleanup/alert.yaml" \
+  --workflow-filepath="examples/yaml_products_cleanup/job.yaml"
 ```
 
 ## Configuration Formats
@@ -44,7 +44,7 @@ workflow:
 All examples in this documentation use JSON/JSONC, but you can convert any configuration to YAML format. The framework automatically detects the format based on the file extension (`.yaml`/`.yml` or `.json`/`.jsonc`).
 
 ## Creating Your Own Pipeline
-The structure is as follows, all of the following fields are required
+A pipeline configuration requires the following structure:
 
 ```jsonc
 {
@@ -74,14 +74,15 @@ The extract section defines your data sources:
 "extracts": [
     {
         "id": "extract-customers", // Unique identifier for this extract
-        "extract_type": "file", // Source type: file, database, etc.
+        "extract_type": "file", // Source type: file
+        "method": "batch", // Extraction method: batch or streaming
         "data_format": "csv", // Format: csv, json, parquet, etc.
-        "location": "examples/join_select/customers/", // Source path
+        "location": "data/customers/", // Source path
         "options": {
             "delimiter": ",", // Format-specific options
             "header": true // First row contains column names
         },
-        "schema": "examples/join_select/customers_schema.json" // Optional schema definition
+        "schema": "schemas/customers_schema.json" // Optional schema definition
     }
 ]
 ```
@@ -117,17 +118,19 @@ The load section specifies where results are written:
         "id": "load-customer-orders", // Unique identifier for this load
         "upstream_id": "transform-join-orders", // Input dataset
         "load_type": "file", // Destination type
+        "method": "batch", // Load method: batch or streaming
         "data_format": "csv", // Output format
-        "location": "examples/join_select/output", // Destination path
-        "mode": "overwrite" // Write mode: overwrite or append
+        "location": "output/", // Destination path
+        "mode": "overwrite", // Write mode: overwrite, append, ignore, error
+        "options": {
+            "header": true // Format-specific options
+        },
+        "schema_export": "" // Path to export schema, or empty to skip
     }
 ]
 ```
 
-For more information on configuration options, see:
-- Extract Options
-- Transform Functions
-- Load Options
+For more information on configuration options, see the [Spark configuration reference](../docs/workflow/spark.md).
 
 ## IDE Support with JSON Schema
 
@@ -157,33 +160,22 @@ python -m samara export-schema --output-filepath="./workflow_schema.json"
 
 This dramatically improves the configuration authoring experience, catching errors before execution and providing guidance through inline documentation.
 
-## Running the Example Pipeline
-The quickest way to start is by running the provided example:
+## Example: Customer Order Pipeline
+The example below executes a complete pipeline that showcases Samara's key capabilities:
 
-```bash
-python -m samara run \
-  --alert-filepath="examples/join_select/alert.jsonc" \
-  --workflow-filepath="examples/join_select/job.jsonc"
-```
+- **Multi-format extraction**: Reads from both CSV and JSON sources
+  - Source options like delimiters and headers are configurable
+  - Schema validation ensures data type safety and consistency
 
-### 🔍 Example: Customer Order
-Running this command executes a complete pipeline that showcases Samara's key capabilities:
-
-- **Multi-format extraction**: Seamlessly reads from both CSV and JSON sources
-  - Source options like delimiters and headers are configurable through the configuration file
-  - Schema validation ensures data type safety and consistency across all sources
-
-- **Flexible transformation chain**: Performed in order as given
-  - First a `join` to combine both datasets on `customer_id`
-  - Then applies a `select` transform to project only needed columns
-  - Each transform function can be easily customized through its arguments
+- **Transformation chain**: Functions are applied in order
+  - A `join` combines both datasets on `customer_id`
+  - A `select` projects only the needed columns
 
 - **Configurable loading**: Writes results as CSV with customizable settings
-  - Easily change to Parquet, Delta, or other formats by modifying `data_format`
-  - Output mode (overwrite/append) controlled by a simple parameter
-  - Output to multiple formats or locations by creating another load entry
+  - Change to Parquet, Delta, or other formats by modifying `data_format`
+  - Output mode (overwrite/append) controlled by the `mode` parameter
 
-#### Configuration: examples/join_select/job.jsonc
+#### Configuration: examples/json_join_select/job.jsonc
 ```jsonc
 {
     "workflow": {
@@ -201,26 +193,26 @@ Running this command executes a complete pipeline that showcases Samara's key ca
                         "id": "extract-customers",
                         "extract_type": "file", // Read from file system
                         "data_format": "csv", // CSV input format
-                        "location": "examples/join_select/customers/", // Source directory
+                        "location": "examples/json_join_select/customers/", // Source directory
                         "method": "batch", // Process all files at once
                         "options": {
                             "delimiter": ",", // CSV delimiter character
                             "header": true, // First row contains column names
                             "inferSchema": false // Use provided schema instead of inferring
                         },
-                        "schema": "examples/join_select/customers_schema.json" // Path to schema definition
+                        "schema": "examples/json_join_select/customers_schema.json" // Path to schema definition
                     },
                     {
                         "id": "extract-orders",
                         "extract_type": "file",
                         "data_format": "json", // JSON input format
-                        "location": "examples/join_select/orders/",
+                        "location": "examples/json_join_select/orders/",
                         "method": "batch",
                         "options": {
                             "multiLine": true, // Each JSON object may span multiple lines
                             "inferSchema": false // Use provided schema instead of inferring
                         },
-                        "schema": "examples/join_select/orders_schema.json"
+                        "schema": "examples/json_join_select/orders_schema.json"
                     }
                 ],
                 "transforms": [
@@ -252,7 +244,7 @@ Running this command executes a complete pipeline that showcases Samara's key ca
                         "upstream_id": "transform-join-orders", // Input dataset for this load
                         "load_type": "file", // Write to file system
                         "data_format": "csv", // Output as CSV
-                        "location": "examples/join_select/output", // Output directory
+                        "location": "examples/json_join_select/output", // Output directory
                         "method": "batch", // Write all data at once
                         "mode": "overwrite", // Replace existing files if any
                         "options": {
