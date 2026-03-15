@@ -16,7 +16,7 @@
                 "extracts": [
                     {
                         "data_format": "csv",
-                        "location": "tests/e2e/job/join/extract-left/left_data.csv",
+                        "location": "tests/e2e/workflow/join/extract-left/left_data.csv",
                         "method": "batch",
                         "id": "extract-left",
                         "extract_type": "file",
@@ -25,11 +25,11 @@
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema": "tests/e2e/job/join/extract-left/left_schema.json"
+                        "schema": "tests/e2e/workflow/join/extract-left/left_schema.json"
                     },
                     {
                         "data_format": "csv",
-                        "location": "tests/e2e/job/join/extract-right/right_data.csv",
+                        "location": "tests/e2e/workflow/join/extract-right/right_data.csv",
                         "method": "batch",
                         "id": "extract-right",
                         "extract_type": "file",
@@ -38,7 +38,7 @@
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema": "tests/e2e/job/join/extract-right/right_schema.json"
+                        "schema": "tests/e2e/workflow/join/extract-right/right_schema.json"
                     }
                 ],
                 "transforms": [
@@ -72,11 +72,11 @@
                 "loads": [
                     {
                         "data_format": "csv",
-                        "location": "tests/e2e/job/join/load-test",
+                        "location": "tests/e2e/workflow/join/load-test",
                         "load_type": "file",
                         "id": "load-test",
                         "upstream_id": "transform-join",
-                        "schema_export": "tests/e2e/job/join/schema_export.json",
+                        "schema_export": "tests/e2e/workflow/join/schema_export.json",
                         "method": "batch",
                         "mode": "overwrite",
                         "options": {

@@ -18,14 +18,14 @@
                         "id": "extract-drop-test",
                         "extract_type": "file",
                         "data_format": "csv",
-                        "location": "tests/e2e/job/drop/extract-drop-test/input_data.csv",
+                        "location": "tests/e2e/workflow/drop/extract-drop-test/input_data.csv",
                         "method": "batch",
                         "options": {
                             "delimiter": ",",
                             "header": true,
                             "inferSchema": false
                         },
-                        "schema": "tests/e2e/job/drop/extract-drop-test/input_schema.json"
+                        "schema": "tests/e2e/workflow/drop/extract-drop-test/input_schema.json"
                     }
                 ],
                 "transforms": [
@@ -53,13 +53,13 @@
                         "upstream_id": "transform-drop-test",
                         "load_type": "file",
                         "data_format": "csv",
-                        "location": "tests/e2e/job/drop/load-test",
+                        "location": "tests/e2e/workflow/drop/load-test",
                         "method": "batch",
                         "mode": "overwrite",
                         "options": {
                             "header": true
                         },
-                        "schema_export": "tests/e2e/job/drop/schema_export.json"
+                        "schema_export": "tests/e2e/workflow/drop/schema_export.json"
                     }
                 ],
                 "hooks": {

@@ -18,12 +18,12 @@
                         "id": "extract-test",
                         "extract_type": "file",
                         "data_format": "json",
-                        "location": "tests/e2e/job/aggregate/extract-test/input_data.json",
+                        "location": "tests/e2e/workflow/aggregate/extract-test/input_data.json",
                         "method": "batch",
                         "options": {
                             "multiLine": true
                         },
-                        "schema": "tests/e2e/job/aggregate/extract-test/input_schema.json"
+                        "schema": "tests/e2e/workflow/aggregate/extract-test/input_schema.json"
                     }
                 ],
                 "transforms": [
@@ -74,13 +74,13 @@
                         "upstream_id": "transform-aggregate",
                         "data_format": "csv",
                         "load_type": "file",
-                        "location": "tests/e2e/job/aggregate/load-test",
+                        "location": "tests/e2e/workflow/aggregate/load-test",
                         "method": "batch",
                         "mode": "overwrite",
                         "options": {
                             "header": true
                         },
-                        "schema_export": "tests/e2e/job/aggregate/schema_export.json"
+                        "schema_export": "tests/e2e/workflow/aggregate/schema_export.json"
                     }
                 ],
                 "hooks": {
