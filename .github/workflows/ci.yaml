@@ -120,7 +120,7 @@ jobs:
             --workspace-folder . \
             --config .devcontainer/${{ matrix.devcontainer }}/devcontainer.json \
             --image-name samara-devcontainer-${{ matrix.devcontainer }}:test \
-            --log-level warning \
+            --log-level info \
             --log-format text
         env:
           DOCKER_BUILDKIT: 1
