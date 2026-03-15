@@ -8,7 +8,7 @@ how data should be read from various sources with type validation.
 from enum import Enum
 from typing import Literal
 
-from pydantic import Field, FilePath
+from pydantic import Field
 
 from samara import BaseModel
 from samara.utils.logger import get_logger
@@ -74,7 +74,7 @@ class ExtractModel(BaseModel):
     id_: str = Field(..., alias="id", description="Identifier for this extraction operation", min_length=1)
     method: ExtractMethod = Field(..., description="Method of extraction (batch or streaming)")
     data_format: str = Field(..., description="Format of the data to extract (parquet, json, csv, etc.)")
-    schema_: str | FilePath = Field(..., alias="schema", description="Schema definition - can be a file path or string")
+    schema_: str = Field(..., alias="schema", description="Schema definition - file path or inline JSON string")
 
 
 class ExtractFileModel(ExtractModel):

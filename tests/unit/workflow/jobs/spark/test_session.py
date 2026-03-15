@@ -2,6 +2,7 @@ from unittest.mock import Mock, patch
 
 import pytest
 from pyspark.sql import SparkSession
+
 from samara.workflow.jobs.spark.session import SparkHandler
 
 
@@ -100,3 +101,87 @@ class TestSparkHandler:
 
         for key, value in configs.items():
             mock_session.return_value.conf.set.assert_any_call(key=key, value=value)
+
+    @patch("pyspark.sql.SparkSession")
+    def test_scoped_configs__restores_previous_values(self, mock_session: Mock) -> None:
+        """Test that scoped_configs restores original values after exiting the context."""
+        spark_handler = SparkHandler()
+        spark_handler._session = mock_session.return_value  # type: ignore
+
+        mock_session.return_value.conf.get.return_value = "original_value"
+
+        with spark_handler.scoped_configs({"spark.sql.shuffle.partitions": "10"}):
+            mock_session.return_value.conf.set.assert_called_with(key="spark.sql.shuffle.partitions", value="10")
+
+        # After exiting, the original value should be restored
+        mock_session.return_value.conf.set.assert_called_with(
+            key="spark.sql.shuffle.partitions", value="original_value"
+        )
+
+    @patch("pyspark.sql.SparkSession")
+    def test_scoped_configs__unsets_previously_absent_keys(self, mock_session: Mock) -> None:
+        """Test that scoped_configs unsets keys that didn't exist before."""
+        spark_handler = SparkHandler()
+        spark_handler._session = mock_session.return_value  # type: ignore
+
+        # Simulate key not existing (conf.get returns None when default=None)
+        mock_session.return_value.conf.get.return_value = None
+
+        with spark_handler.scoped_configs({"spark.custom.new.key": "temp_value"}):
+            mock_session.return_value.conf.set.assert_called_with(key="spark.custom.new.key", value="temp_value")
+
+        mock_session.return_value.conf.unset.assert_called_with("spark.custom.new.key")
+
+    @patch("pyspark.sql.SparkSession")
+    def test_scoped_configs__restores_on_exception(self, mock_session: Mock) -> None:
+        """Test that scoped_configs restores configs even when an exception is raised."""
+        spark_handler = SparkHandler()
+        spark_handler._session = mock_session.return_value  # type: ignore
+
+        mock_session.return_value.conf.get.return_value = "200"
+
+        with pytest.raises(RuntimeError, match="stage failed"):
+            with spark_handler.scoped_configs({"spark.sql.shuffle.partitions": "10"}):
+                raise RuntimeError("stage failed")
+
+        # Configs should still be restored despite the exception
+        mock_session.return_value.conf.set.assert_called_with(key="spark.sql.shuffle.partitions", value="200")
+
+    @patch("pyspark.sql.SparkSession")
+    def test_scoped_configs__with_empty_options__is_noop(self, mock_session: Mock) -> None:
+        """Test that scoped_configs with empty options does nothing."""
+        spark_handler = SparkHandler()
+        spark_handler._session = mock_session.return_value  # type: ignore
+
+        with spark_handler.scoped_configs({}):
+            pass
+
+        mock_session.return_value.conf.get.assert_not_called()
+        mock_session.return_value.conf.set.assert_not_called()
+
+    @patch("pyspark.sql.SparkSession")
+    def test_scoped_configs__restores_multiple_keys(self, mock_session: Mock) -> None:
+        """Test that scoped_configs correctly restores multiple keys."""
+        spark_handler = SparkHandler()
+        spark_handler._session = mock_session.return_value  # type: ignore
+
+        # First key exists, second key does not
+        def get_side_effect(key: str, default: str | None = None) -> str | None:
+            if key == "spark.sql.shuffle.partitions":
+                return "200"
+            return default
+
+        mock_session.return_value.conf.get.side_effect = get_side_effect
+
+        options = {
+            "spark.sql.shuffle.partitions": "10",
+            "spark.custom.new.key": "temp",
+        }
+
+        with spark_handler.scoped_configs(options):
+            pass
+
+        # Existing key should be restored
+        mock_session.return_value.conf.set.assert_any_call(key="spark.sql.shuffle.partitions", value="200")
+        # Non-existing key should be unset
+        mock_session.return_value.conf.unset.assert_called_with("spark.custom.new.key")

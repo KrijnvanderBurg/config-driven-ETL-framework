@@ -15,6 +15,7 @@ from pydantic import ValidationError
 from pyspark.sql import SparkSession
 from pyspark.sql.types import IntegerType, StringType, StructField, StructType
 from pyspark.testing import assertDataFrameEqual
+
 from samara.workflow.jobs.models.model_extract import ExtractMethod
 from samara.workflow.jobs.spark.extract import ExtractFileSpark
 

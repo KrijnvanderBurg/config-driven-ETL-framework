@@ -165,29 +165,28 @@ class LoadSpark(LoadModel, ABC):
             self.method.value,
         )
 
-        logger.debug("Adding Spark configurations: %s", self.options)
-        self._spark.add_configs(options=self.options)
+        logger.debug("Applying scoped Spark configurations: %s", self.options)
+        with self._spark.scoped_configs(options=self.options):
+            logger.debug("Copying dataframe from %s to %s", self.upstream_id, self.id_)
+            self._data_registry[self.id_] = self._data_registry[self.upstream_id]
 
-        logger.debug("Copying dataframe from %s to %s", self.upstream_id, self.id_)
-        self._data_registry[self.id_] = self._data_registry[self.upstream_id]
+            if self.method == LoadMethod.BATCH:
+                logger.debug("Performing batch load for: %s", self.id_)
+                self._load_batch()
+                logger.info("Batch load completed successfully for: %s", self.id_)
+            elif self.method == LoadMethod.STREAMING:
+                logger.debug("Performing streaming load for: %s", self.id_)
+                self._streaming_query_registry[self.id_] = self._load_streaming()
+                logger.info("Streaming load started successfully for: %s", self.id_)
+            else:
+                raise ValueError(f"Loading method {self.method} is not supported for PySpark")
 
-        if self.method == LoadMethod.BATCH:
-            logger.debug("Performing batch load for: %s", self.id_)
-            self._load_batch()
-            logger.info("Batch load completed successfully for: %s", self.id_)
-        elif self.method == LoadMethod.STREAMING:
-            logger.debug("Performing streaming load for: %s", self.id_)
-            self._streaming_query_registry[self.id_] = self._load_streaming()
-            logger.info("Streaming load started successfully for: %s", self.id_)
-        else:
-            raise ValueError(f"Loading method {self.method} is not supported for PySpark")
+            # Export schema if location is specified
+            if self.schema_export:
+                schema_json = json.dumps(self._data_registry[self.id_].schema.jsonValue())
+                self._export_schema(schema_json, self.schema_export)
 
-        # Export schema if location is specified
-        if self.schema_export:
-            schema_json = json.dumps(self._data_registry[self.id_].schema.jsonValue())
-            self._export_schema(schema_json, self.schema_export)
-
-        logger.info("Load operation completed successfully for: %s", self.id_)
+            logger.info("Load operation completed successfully for: %s", self.id_)
 
 
 class LoadFileSpark(LoadSpark, LoadModelFile):

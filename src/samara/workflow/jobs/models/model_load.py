@@ -109,9 +109,11 @@ class LoadModel(BaseModel, ABC):
     upstream_id: str = Field(..., description="Identifier of the upstream component providing data", min_length=1)
     method: LoadMethod = Field(..., description="Loading method (batch or streaming)")
     location: str = Field(
-        ..., description="URI that identifies where to load data in the modelified format.", min_length=1
+        ..., description="URI that identifies where to load data in the specified format.", min_length=1
     )
-    schema_export: str = Field(..., description="URI that identifies where to load schema.")
+    schema_export: str = Field(
+        ..., description="URI where the schema is exported. Use an empty string to skip schema export."
+    )
 
 
 class LoadModelFile(LoadModel):

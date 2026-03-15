@@ -16,6 +16,7 @@ from samara.utils.logger import get_logger
 from samara.workflow.jobs.models.model_job import JobEngine, JobModel
 from samara.workflow.jobs.spark.extract import ExtractSparkUnion
 from samara.workflow.jobs.spark.load import LoadSparkUnion
+from samara.workflow.jobs.spark.session import SparkHandler
 from samara.workflow.jobs.spark.transform import TransformSparkUnion
 
 logger = get_logger(__name__)
@@ -232,15 +233,18 @@ class JobSpark(JobModel[ExtractSparkUnion, TransformSparkUnion, LoadSparkUnion])
 
     @override
     def _clear(self) -> None:
-        """Free resources by clearing Spark-specific registries.
+        """Free resources by clearing Spark-specific registries and stopping the session.
 
         Clears the DataFrameRegistry and StreamingQueryRegistry after job execution
-        completes. This prevents memory leaks and ensures clean state for subsequent
-        jobs, particularly important in long-running processes or batch environments
-        where multiple jobs execute sequentially.
+        completes, then stops the SparkSession to release JVM resources. This prevents
+        memory leaks and ensures clean state for subsequent jobs, particularly important
+        in long-running processes or containerized environments.
         """
         logger.debug("Clearing DataFrameRegistry after job: %s", self.id_)
         DataFrameRegistry().clear()
 
         logger.debug("Clearing StreamingQueryRegistry after job: %s", self.id_)
         StreamingQueryRegistry().clear()
+
+        logger.debug("Stopping SparkSession after job: %s", self.id_)
+        SparkHandler().stop_session()

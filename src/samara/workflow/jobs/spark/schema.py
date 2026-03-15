@@ -53,6 +53,24 @@ class SchemaHandler(ABC):
             NotImplementedError: If not implemented by a subclass.
         """
 
+    @staticmethod
+    def parse_schema_string(schema: str) -> StructType:
+        """Parse a schema string, auto-detecting whether it is inline JSON or a file path.
+
+        A PySpark schema definition is always a JSON object starting with '{'.
+        Anything else is treated as a file path.
+
+        Args:
+            schema: A schema string that is either a JSON object defining an
+                inline schema or a file path pointing to a schema definition file.
+
+        Returns:
+            StructType: A fully configured PySpark StructType schema.
+        """
+        if schema.startswith("{"):
+            return SchemaStringHandler.parse(schema=schema)
+        return SchemaFilepathHandler.parse(schema=Path(schema))
+
 
 class SchemaDictHandler(SchemaHandler):
     """Convert dictionary schemas to PySpark StructType.
